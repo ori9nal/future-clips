@@ -35,7 +35,10 @@
         "pool": [
           "stand-slump",
           "sit-edge",
-          "sit-phone"
+          "sit-phone",
+          "rings",
+          "stage-bar",
+          "dial-91"
         ],
         "rotate": false,
         "grade": "duotone",
@@ -130,7 +133,8 @@
           "bed",
           "rings",
           "stage-bar",
-          "hypnogram-flat"
+          "dial-38",
+          "dial-91"
         ],
         "grade": "none",
         "heightPct": 0.19,
@@ -306,7 +310,10 @@
         "pool": [
           "dial-38",
           "dial-62",
-          "dial-91"
+          "dial-91",
+          "rings",
+          "stage-bar",
+          "moon"
         ],
         "rotate": false,
         "grade": "none",

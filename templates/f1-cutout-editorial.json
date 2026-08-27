@@ -35,7 +35,10 @@
         "pool": [
           "sit-edge",
           "stand-slump",
-          "curl-side"
+          "curl-side",
+          "rings",
+          "stage-bar",
+          "dial-91"
         ],
         "grade": "silhouette",
         "color": "ink",
@@ -131,7 +134,8 @@
           "dial-62",
           "bed",
           "rings",
-          "stage-bar"
+          "stage-bar",
+          "dial-91"
         ],
         "grade": "none",
         "heightPct": 0.2,
@@ -257,7 +261,10 @@
       },
       "subject": {
         "pool": [
-          "moon"
+          "moon",
+          "rings",
+          "stage-bar",
+          "dial-91"
         ],
         "grade": "none",
         "heightPct": 0.115,
@@ -339,7 +346,8 @@
           "rings",
           "stage-bar",
           "hypnogram-flat",
-          "dial-38"
+          "dial-38",
+          "moon"
         ],
         "grade": "none",
         "heightPct": 0.26,

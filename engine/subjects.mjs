@@ -103,6 +103,15 @@ export const PROCEDURAL = {
   rings: (p) => rings(p),
 };
 
+/** Silhouette class, used to keep consecutive interiors visually distinct. */
+export const SHAPE_CLASS = {
+  'dial-62': 'ring', 'dial-91': 'ring', 'dial-38': 'ring', rings: 'ring',
+  hypnogram: 'trace', 'hypnogram-flat': 'trace',
+  moon: 'mass', 'moon-light': 'mass', bed: 'mass',
+  'stage-bar': 'bar',
+};
+export const shapeClassOf = (id) => SHAPE_CLASS[id] || id;
+
 export const isProcedural = (id) => Object.hasOwn(PROCEDURAL, id);
 
 /** @returns {Buffer} transparent PNG rendered in the carousel's own palette */

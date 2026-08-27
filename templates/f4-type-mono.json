@@ -101,7 +101,7 @@
           "content": "eyebrow",
           "box": {
             "x": "safe.left",
-            "y": 380,
+            "y": 300,
             "w": "safe.width",
             "h": 60
           },
@@ -278,7 +278,8 @@
           "dial-62",
           "rings",
           "stage-bar",
-          "hypnogram-flat"
+          "dial-38",
+          "dial-91"
         ],
         "grade": "none",
         "heightPct": 0.2,

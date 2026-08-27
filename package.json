@@ -19,11 +19,9 @@
     "satori": "^0.33.4"
   },
   "devDependencies": {
-    "@tailwindcss/postcss": "^4.1.13",
     "@types/node": "^22.15.0",
     "@types/react": "^19.1.9",
     "@types/react-dom": "^19.1.7",
-    "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2"
   }
 }

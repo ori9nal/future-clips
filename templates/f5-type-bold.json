@@ -62,7 +62,7 @@
           "content": "kicker",
           "box": {
             "x": "safe.left",
-            "y": 500,
+            "y": 402,
             "w": "safe.width",
             "h": 58
           },
@@ -89,14 +89,14 @@
             "x": "safe.left",
             "y": {
               "after": "eyebrow",
-              "gap": 44
+              "gap": 52
             },
             "w": "safe.width",
-            "h": 400
+            "h": 520
           },
           "size": [
-            58,
-            128
+            64,
+            152
           ],
           "font": {
             "role": "display-block",
@@ -117,13 +117,19 @@
     },
     "body": {
       "background": {
-        "type": "gradient",
-        "angle": 168,
+        "type": "glow",
+        "cx": 0.24,
+        "cy": 0.78,
+        "r": 1.0,
         "grain": 0.035,
         "stops": [
           {
             "at": 0,
-            "color": "#121826"
+            "color": "#161E32"
+          },
+          {
+            "at": 0.62,
+            "color": "#0D1220"
           },
           {
             "at": 1,
@@ -131,7 +137,23 @@
           }
         ]
       },
-      "subject": null,
+      "subject": {
+        "pool": [
+          "moon",
+          "rings",
+          "hypnogram",
+          "dial-62",
+          "stage-bar",
+          "dial-91"
+        ],
+        "grade": "none",
+        "heightPct": 0.24,
+        "anchor": "bottom-right",
+        "dx": -70,
+        "dy": -178,
+        "opacity": 0.5,
+        "maxWidthPct": 0.6
+      },
       "type": [
         {
           "id": "eyebrow",
@@ -285,7 +307,10 @@
       },
       "subject": {
         "pool": [
-          "moon"
+          "moon",
+          "rings",
+          "stage-bar",
+          "dial-91"
         ],
         "grade": "silhouette",
         "color": "#2A3350",
@@ -387,7 +412,8 @@
           "dial-62",
           "hypnogram",
           "stage-bar",
-          "dial-38"
+          "dial-38",
+          "dial-91"
         ],
         "grade": "none",
         "heightPct": 0.3,

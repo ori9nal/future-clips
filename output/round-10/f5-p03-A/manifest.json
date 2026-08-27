@@ -1,0 +1,672 @@
+{
+  "id": "f5-p03-A",
+  "dir": "output\\round-10\\f5-p03-A",
+  "files": [
+    "output\\round-10\\f5-p03-A\\01.png",
+    "output\\round-10\\f5-p03-A\\02.png",
+    "output\\round-10\\f5-p03-A\\03.png",
+    "output\\round-10\\f5-p03-A\\04.png",
+    "output\\round-10\\f5-p03-A\\05.png",
+    "output\\round-10\\f5-p03-A\\06.png",
+    "output\\round-10\\f5-p03-A\\07.png"
+  ],
+  "accountId": "drift",
+  "campaignId": "why-not-what-r10",
+  "postIndex": 3,
+  "seed": 1418187160,
+  "family": "f5-type-bold",
+  "familyName": "TYPE-BOLD",
+  "displayCap": 66.64,
+  "accentKey": "accent-A",
+  "accent": "#FFB020",
+  "hookType": "contrarian-negation",
+  "slides": [
+    {
+      "role": "cover",
+      "headline": "it is not your mattress",
+      "kicker": "and never the melatonin",
+      "accentWord": "not",
+      "eyebrow": "DRIFT · sleep, explained",
+      "wordCount": 13,
+      "stack2": "it is not your\nmattress",
+      "stack3": "it is not\nyour mattress",
+      "stackCaps3": "IT IS NOT\nYOUR MATTRESS",
+      "stackCaps2": "IT IS NOT YOUR\nMATTRESS",
+      "headlineCaps": "IT IS NOT YOUR MATTRESS",
+      "kickerCaps": "AND NEVER THE MELATONIN"
+    },
+    {
+      "role": "body",
+      "index": "01",
+      "indexPlain": "1",
+      "title": "the second wind",
+      "headline": "the second wind",
+      "claim": "Push past the window and it closes.",
+      "body": "Your body opens a door around the same time every night. Miss it and you get a second wind that costs ninety minutes.\n\nDRIFT learns where your door is.",
+      "stat": "-8 pts",
+      "accentWord": "wind",
+      "eyebrow": "01 · wind-down",
+      "wordCount": 44,
+      "stack2": "the second\nwind",
+      "stack3": "the\nsecond\nwind",
+      "stackCaps3": "THE\nSECOND\nWIND",
+      "stackCaps2": "THE SECOND\nWIND",
+      "headlineCaps": "THE SECOND WIND",
+      "kickerCaps": "",
+      "indexDot": "1."
+    },
+    {
+      "role": "body",
+      "index": "02",
+      "indexPlain": "2",
+      "title": "the quiet room",
+      "headline": "the quiet room",
+      "claim": "Steady noise beats silence.",
+      "body": "A silent room makes every small sound an event.\n\nDRIFT counts the micro-wakes you never remember and shows them next to the noise floor.",
+      "stat": "+5 pts",
+      "accentWord": "room",
+      "eyebrow": "02 · environment",
+      "wordCount": 36,
+      "stack2": "the quiet\nroom",
+      "stack3": "the\nquiet\nroom",
+      "stackCaps3": "THE\nQUIET\nROOM",
+      "stackCaps2": "THE QUIET\nROOM",
+      "headlineCaps": "THE QUIET ROOM",
+      "kickerCaps": "",
+      "indexDot": "2."
+    },
+    {
+      "role": "body",
+      "index": "03",
+      "indexPlain": "3",
+      "title": "the weekend drift",
+      "headline": "the weekend drift",
+      "claim": "Two late nights reset your clock backwards.",
+      "body": "Sleeping in on Saturday feels like repayment. Your body reads it as a time-zone change.",
+      "stat": "-14 pts",
+      "accentWord": "drift",
+      "eyebrow": "03 · timing",
+      "wordCount": 30,
+      "stack2": "the weekend\ndrift",
+      "stack3": "the weekend\ndrift",
+      "stackCaps3": "THE WEEKEND\nDRIFT",
+      "stackCaps2": "THE WEEKEND\nDRIFT",
+      "headlineCaps": "THE WEEKEND DRIFT",
+      "kickerCaps": "",
+      "indexDot": "3."
+    },
+    {
+      "role": "body",
+      "index": "04",
+      "indexPlain": "4",
+      "title": "the late meal",
+      "headline": "the late meal",
+      "claim": "Digesting and going deep are competing jobs.",
+      "body": "Eat close to bed and the first cycle gets spent on the wrong task.",
+      "stat": "-7 pts",
+      "accentWord": "meal",
+      "eyebrow": "04 · intake",
+      "wordCount": 29,
+      "stack2": "the late\nmeal",
+      "stack3": "the\nlate\nmeal",
+      "stackCaps3": "THE\nLATE\nMEAL",
+      "stackCaps2": "THE LATE\nMEAL",
+      "headlineCaps": "THE LATE MEAL",
+      "kickerCaps": "",
+      "indexDot": "4."
+    },
+    {
+      "role": "body",
+      "index": "05",
+      "indexPlain": "5",
+      "title": "the dark morning",
+      "headline": "the dark morning",
+      "claim": "Tonight is set by this morning.",
+      "body": "Light in the first hour after waking is the strongest signal your clock gets all day.",
+      "stat": "+12 pts",
+      "accentWord": "morning",
+      "eyebrow": "05 · light",
+      "wordCount": 30,
+      "stack2": "the dark\nmorning",
+      "stack3": "the\ndark\nmorning",
+      "stackCaps3": "THE\nDARK\nMORNING",
+      "stackCaps2": "THE DARK\nMORNING",
+      "headlineCaps": "THE DARK MORNING",
+      "kickerCaps": "",
+      "indexDot": "5."
+    },
+    {
+      "role": "closer",
+      "headline": "follow for the why",
+      "kicker": "other trackers hand you a number",
+      "accentWord": "why",
+      "cta": "follow",
+      "eyebrow": "DRIFT",
+      "wordCount": 11,
+      "stack2": "follow for the\nwhy",
+      "stack3": "follow\nfor the\nwhy",
+      "stackCaps3": "FOLLOW\nFOR THE\nWHY",
+      "stackCaps2": "FOLLOW FOR THE\nWHY",
+      "headlineCaps": "FOLLOW FOR THE WHY",
+      "kickerCaps": "OTHER TRACKERS HAND YOU A NUMBER"
+    }
+  ],
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "furnitureByRole": {
+    "cover": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "arrow",
+        "anchor": "bottom-right",
+        "gap": 18,
+        "size": 40,
+        "glyph": "→",
+        "font": {
+          "role": "body",
+          "weight": 400
+        },
+        "color": "#E4E2DE",
+        "on": [
+          "cover"
+        ]
+      }
+    ],
+    "body": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "index",
+        "anchor": "bottom-right",
+        "gap": 32,
+        "size": 23,
+        "tracking": 0.16,
+        "format": "{i}/{n}",
+        "font": {
+          "role": "mono",
+          "weight": 500
+        },
+        "color": "#7B8399",
+        "on": [
+          "body"
+        ]
+      }
+    ],
+    "closer": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ],
+    "body-figure": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ]
+  },
+  "cropStrategy": "contain",
+  "copyAttempts": 0,
+  "slideMeta": [
+    {
+      "index": 0,
+      "role": "cover",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\01.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 309.84000000000003,
+          "y": 408.33,
+          "w": 460.32,
+          "h": 22.049999999999997
+        },
+        {
+          "id": "headline",
+          "x": 87.82799999999997,
+          "y": 492.572,
+          "w": 904.344,
+          "h": 161.89599999999996
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 89,
+        "y": 408,
+        "w": 900,
+        "h": 247
+      },
+      "variant": "cover",
+      "renderedWords": 9,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 30,
+        "headline": 98
+      }
+    },
+    {
+      "index": 1,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\02.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 291.2,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 204.744,
+          "w": 676.17,
+          "h": 46.992
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 336.824,
+          "w": 778.56,
+          "h": 43.008
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 433.55,
+          "w": 765.168,
+          "h": 262.39
+        }
+      ],
+      "subjectRect": {
+        "x": 664,
+        "y": 916,
+        "w": 346,
+        "h": 346
+      },
+      "subjectId": "dial-62",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 775,
+        "h": 564
+      },
+      "variant": "body",
+      "renderedWords": 42,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 66,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 2,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\03.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 332.8,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 220.414,
+          "w": 658.68,
+          "h": 114.64200000000001
+        },
+        {
+          "id": "stat",
+          "x": 86,
+          "y": 405.176,
+          "w": 179.52,
+          "h": 40.04
+        },
+        {
+          "id": "title",
+          "x": 86,
+          "y": 479.546,
+          "w": 218.76000000000002,
+          "h": 26.88
+        }
+      ],
+      "subjectRect": {
+        "x": 588,
+        "y": 818,
+        "w": 432,
+        "h": 432
+      },
+      "subjectId": "dial-38",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 659,
+        "h": 375
+      },
+      "variant": "body-figure",
+      "renderedWords": 12,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "claim": 66,
+        "stat": 44,
+        "title": 30
+      }
+    },
+    {
+      "index": 3,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\04.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 25.012
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 209.956,
+          "w": 756.822,
+          "h": 45.407999999999994
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 340.452,
+          "w": 689.376,
+          "h": 94.79999999999998
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 488.66599999999994,
+          "w": 749.018,
+          "h": 91.694
+        }
+      ],
+      "subjectRect": {
+        "x": 664,
+        "y": 916,
+        "w": 346,
+        "h": 346
+      },
+      "subjectId": "dial-91",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 757,
+        "h": 448
+      },
+      "variant": "body",
+      "renderedWords": 28,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 66,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 4,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\05.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 205.536,
+          "w": 565.3559999999999,
+          "h": 45.407999999999994
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 336.032,
+          "w": 640.176,
+          "h": 102.95999999999998
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 492.40599999999995,
+          "w": 750.652,
+          "h": 91.694
+        }
+      ],
+      "subjectRect": {
+        "x": 691,
+        "y": 916,
+        "w": 319,
+        "h": 346
+      },
+      "subjectId": "moon",
+      "typeInk": {
+        "x": 87,
+        "y": 132,
+        "w": 749,
+        "h": 452
+      },
+      "variant": "body",
+      "renderedWords": 27,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 66,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 5,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\06.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 208,
+          "h": 25.012
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 224.834,
+          "w": 717.42,
+          "h": 127.71
+        },
+        {
+          "id": "stat",
+          "x": 86,
+          "y": 422.224,
+          "w": 209.44000000000003,
+          "h": 40.480000000000004
+        },
+        {
+          "id": "title",
+          "x": 86,
+          "y": 497.034,
+          "w": 255.57000000000002,
+          "h": 27.149999999999995
+        }
+      ],
+      "subjectRect": {
+        "x": 588,
+        "y": 818,
+        "w": 432,
+        "h": 432
+      },
+      "subjectId": "dial-62",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 723,
+        "h": 393
+      },
+      "variant": "body-figure",
+      "renderedWords": 14,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "claim": 66,
+        "stat": 44,
+        "title": 30
+      }
+    },
+    {
+      "index": 6,
+      "role": "closer",
+      "ok": true,
+      "file": "output\\round-10\\f5-p03-A\\07.png",
+      "rects": [
+        {
+          "id": "headline",
+          "x": 225.906,
+          "y": 550.804,
+          "w": 628.188,
+          "h": 109.56
+        },
+        {
+          "id": "kicker",
+          "x": 289.505,
+          "y": 706.258,
+          "w": 500.99,
+          "h": 30.770000000000003
+        }
+      ],
+      "subjectRect": {
+        "x": 394,
+        "y": 738,
+        "w": 292,
+        "h": 317
+      },
+      "subjectId": "moon",
+      "typeInk": {
+        "x": 230,
+        "y": 550,
+        "w": 622,
+        "h": 187
+      },
+      "variant": "closer",
+      "renderedWords": 10,
+      "furnitureCount": 2,
+      "fittedSizes": {
+        "headline": 66,
+        "kicker": 34
+      }
+    }
+  ],
+  "fingerprint": {
+    "key": "f5-type-bold|7|contrarian-negation|accent-A",
+    "hash": "c7c6c4fa3fea"
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  }
+}

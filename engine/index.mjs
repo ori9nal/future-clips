@@ -13,7 +13,7 @@ import { layoutSlide, layoutFurniture, safeBox, coverage } from './layout.mjs';
 import { renderVectorLayer } from './render-type.mjs';
 import { renderBackground, prepareSubject, composeSlide, assertAssetAllowed } from './compose.mjs';
 import { validateCarousel } from './validate.mjs';
-import { isProcedural, renderProcedural } from './subjects.mjs';
+import { isProcedural, renderProcedural, shapeClassOf } from './subjects.mjs';
 import sharp from 'sharp';
 
 /** Real painted extent of an RGBA layer — used to verify fitText against pixels. */
@@ -78,10 +78,18 @@ function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, ro
   if (!s) return null;
   // Rotating the pool by slide index guarantees no two consecutive slides reuse
   // the same object; random picks from a 5-item pool collide roughly 1 slide in 5.
-  const id = s.pool
-    ? (s.rotate === false ? s.pool[rng.int(s.pool.length)]
-       : s.pool[(rotateOffset + slideIndex) % s.pool.length])
-    : s.id;
+  // Rotate through silhouette CLASSES, then through members of the class, so a
+  // ring is never followed by another ring even when the pool is ring-heavy.
+  let id = s.id;
+  if (s.pool) {
+    if (s.rotate === false) id = s.pool[rng.int(s.pool.length)];
+    else {
+      const classes = [...new Set(s.pool.map(shapeClassOf))];
+      const cls = classes[(rotateOffset + slideIndex) % classes.length];
+      const members = s.pool.filter((m) => shapeClassOf(m) === cls);
+      id = members[Math.floor((rotateOffset + slideIndex) / classes.length) % members.length];
+    }
+  }
   if (!id) return null;
   if (isProcedural(id)) return { ...s, id, proceduralId: id, fit: cropStrategy, heightPct: s.heightPct ?? 0.5 };
   const file = path.join(SUBJECT_DIR, `${id}.png`);

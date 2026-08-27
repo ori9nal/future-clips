@@ -1,0 +1,593 @@
+{
+  "id": "f5-p08-B",
+  "dir": "output\\round-10\\f5-p08-B",
+  "files": [
+    "output\\round-10\\f5-p08-B\\01.png",
+    "output\\round-10\\f5-p08-B\\02.png",
+    "output\\round-10\\f5-p08-B\\03.png",
+    "output\\round-10\\f5-p08-B\\04.png",
+    "output\\round-10\\f5-p08-B\\05.png",
+    "output\\round-10\\f5-p08-B\\06.png"
+  ],
+  "accountId": "drift",
+  "campaignId": "why-not-what-r10",
+  "postIndex": 8,
+  "seed": 1334299065,
+  "family": "f5-type-bold",
+  "familyName": "TYPE-BOLD",
+  "displayCap": 103.36000000000001,
+  "accentKey": "accent-B",
+  "accent": "#5B7FFF",
+  "hookType": "contrarian-negation",
+  "slides": [
+    {
+      "role": "cover",
+      "headline": "you are not tired",
+      "kicker": "in a way you cannot feel",
+      "accentWord": "not",
+      "eyebrow": "DRIFT · sleep, explained",
+      "wordCount": 14,
+      "stack2": "you are\nnot tired",
+      "stack3": "you are\nnot tired",
+      "stackCaps3": "YOU ARE\nNOT TIRED",
+      "stackCaps2": "YOU ARE\nNOT TIRED",
+      "headlineCaps": "YOU ARE NOT TIRED",
+      "kickerCaps": "IN A WAY YOU CANNOT FEEL"
+    },
+    {
+      "role": "body",
+      "index": "01",
+      "indexPlain": "1",
+      "title": "the sunday reset",
+      "headline": "the sunday reset",
+      "claim": "You cannot bank sleep in advance.",
+      "body": "An early Sunday night before a hard week does almost nothing.\n\nConsistency compounds. Deposits do not.",
+      "stat": "-3 pts",
+      "accentWord": "reset",
+      "eyebrow": "01 · timing",
+      "wordCount": 30,
+      "stack2": "the sunday\nreset",
+      "stack3": "the\nsunday\nreset",
+      "stackCaps3": "THE\nSUNDAY\nRESET",
+      "stackCaps2": "THE SUNDAY\nRESET",
+      "headlineCaps": "THE SUNDAY RESET",
+      "kickerCaps": "",
+      "indexDot": "1."
+    },
+    {
+      "role": "body",
+      "index": "02",
+      "indexPlain": "2",
+      "title": "the hard workout",
+      "headline": "the hard workout",
+      "claim": "A late session borrows from the first cycle.",
+      "body": "Training raises your core temperature for hours.\n\nSame workout at 6pm instead of 9pm, and the deep block comes back.",
+      "stat": "-5 pts",
+      "accentWord": "workout",
+      "eyebrow": "02 · activity",
+      "wordCount": 36,
+      "stack2": "the hard\nworkout",
+      "stack3": "the\nhard\nworkout",
+      "stackCaps3": "THE\nHARD\nWORKOUT",
+      "stackCaps2": "THE HARD\nWORKOUT",
+      "headlineCaps": "THE HARD WORKOUT",
+      "kickerCaps": "",
+      "indexDot": "2."
+    },
+    {
+      "role": "body",
+      "index": "03",
+      "indexPlain": "3",
+      "title": "the phone in bed",
+      "headline": "the phone in bed",
+      "claim": "It is not the blue light. It is the arousal.",
+      "body": "Fifteen minutes of scrolling is fifteen minutes of decisions, notifications and small alarms.",
+      "stat": "-9 pts",
+      "accentWord": "bed",
+      "eyebrow": "03 · wind-down",
+      "wordCount": 32,
+      "stack2": "the phone in\nbed",
+      "stack3": "the phone\nin\nbed",
+      "stackCaps3": "THE PHONE\nIN\nBED",
+      "stackCaps2": "THE PHONE IN\nBED",
+      "headlineCaps": "THE PHONE IN BED",
+      "kickerCaps": "",
+      "indexDot": "3."
+    },
+    {
+      "role": "body",
+      "index": "04",
+      "indexPlain": "4",
+      "title": "the moving alarm",
+      "headline": "the moving alarm",
+      "claim": "A wake time that shifts by an hour costs more than a late night.",
+      "body": "Your clock anchors to when you get up, not when you lie down.",
+      "stat": "-10 pts",
+      "accentWord": "alarm",
+      "eyebrow": "04 · timing",
+      "wordCount": 35,
+      "stack2": "the moving\nalarm",
+      "stack3": "the\nmoving\nalarm",
+      "stackCaps3": "THE\nMOVING\nALARM",
+      "stackCaps2": "THE MOVING\nALARM",
+      "headlineCaps": "THE MOVING ALARM",
+      "kickerCaps": "",
+      "indexDot": "4."
+    },
+    {
+      "role": "closer",
+      "headline": "save it, then sleep on it",
+      "kicker": "tomorrow you will want this list back",
+      "accentWord": "sleep",
+      "cta": "save",
+      "eyebrow": "DRIFT",
+      "wordCount": 14,
+      "stack2": "save it, then\nsleep on it",
+      "stack3": "save it,\nthen sleep\non it",
+      "stackCaps3": "SAVE IT,\nTHEN SLEEP\nON IT",
+      "stackCaps2": "SAVE IT, THEN\nSLEEP ON IT",
+      "headlineCaps": "SAVE IT, THEN SLEEP ON IT",
+      "kickerCaps": "TOMORROW YOU WILL WANT THIS LIST BACK"
+    }
+  ],
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "furnitureByRole": {
+    "cover": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "arrow",
+        "anchor": "bottom-right",
+        "gap": 18,
+        "size": 40,
+        "glyph": "→",
+        "font": {
+          "role": "body",
+          "weight": 400
+        },
+        "color": "#E4E2DE",
+        "on": [
+          "cover"
+        ]
+      }
+    ],
+    "body": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "index",
+        "anchor": "bottom-right",
+        "gap": 32,
+        "size": 23,
+        "tracking": 0.16,
+        "format": "{i}/{n}",
+        "font": {
+          "role": "mono",
+          "weight": 500
+        },
+        "color": "#7B8399",
+        "on": [
+          "body"
+        ]
+      }
+    ],
+    "closer": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ],
+    "body-figure": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ]
+  },
+  "cropStrategy": "contain",
+  "copyAttempts": 0,
+  "slideMeta": [
+    {
+      "index": 0,
+      "role": "cover",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\01.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 308.94,
+          "y": 408.09,
+          "w": 462.12,
+          "h": 27.389999999999997
+        },
+        {
+          "id": "headline",
+          "x": 92.512,
+          "y": 503.28799999999995,
+          "w": 894.976,
+          "h": 251.10399999999998
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 104,
+        "y": 408,
+        "w": 877,
+        "h": 346
+      },
+      "variant": "cover",
+      "renderedWords": 10,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 30,
+        "headline": 152
+      }
+    },
+    {
+      "index": 1,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\02.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 25.012
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 213.382,
+          "w": 718.9399999999999,
+          "h": 172.21599999999995
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 470.686,
+          "w": 755.952,
+          "h": 43.008
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 567.108,
+          "w": 780.862,
+          "h": 205.69400000000002
+        }
+      ],
+      "subjectRect": {
+        "x": 664,
+        "y": 916,
+        "w": 346,
+        "h": 346
+      },
+      "subjectId": "dial-62",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 780,
+        "h": 641
+      },
+      "variant": "body",
+      "renderedWords": 28,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 103,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 2,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\03.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 270.40000000000003,
+          "h": 25.012
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 228.10399999999998,
+          "w": 721.536,
+          "h": 281.76000000000005
+        },
+        {
+          "id": "stat",
+          "x": 86,
+          "y": 579.984,
+          "w": 179.52,
+          "h": 40.04
+        },
+        {
+          "id": "title",
+          "x": 86,
+          "y": 654.354,
+          "w": 253.83,
+          "h": 22.049999999999997
+        }
+      ],
+      "subjectRect": {
+        "x": 588,
+        "y": 818,
+        "w": 432,
+        "h": 432
+      },
+      "subjectId": "dial-38",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 716,
+        "h": 545
+      },
+      "variant": "body-figure",
+      "renderedWords": 16,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "claim": 96,
+        "stat": 44,
+        "title": 30
+      }
+    },
+    {
+      "index": 3,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\04.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 291.2,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 208.962,
+          "w": 806.284,
+          "h": 170.97999999999996
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 465.03,
+          "w": 816.528,
+          "h": 43.440000000000005
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 561.884,
+          "w": 781.166,
+          "h": 90.364
+        }
+      ],
+      "subjectRect": {
+        "x": 664,
+        "y": 916,
+        "w": 346,
+        "h": 346
+      },
+      "subjectId": "dial-91",
+      "typeInk": {
+        "x": 87,
+        "y": 132,
+        "w": 812,
+        "h": 520
+      },
+      "variant": "body",
+      "renderedWords": 30,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 103,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 4,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\05.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 25.012
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 213.382,
+          "w": 716.159,
+          "h": 170.97999999999996
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 469.066,
+          "w": 728.16,
+          "h": 103.344
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 626.1279999999999,
+          "w": 711.436,
+          "h": 91.39
+        }
+      ],
+      "subjectRect": {
+        "x": 691,
+        "y": 916,
+        "w": 319,
+        "h": 346
+      },
+      "subjectId": "moon",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 728,
+        "h": 585
+      },
+      "variant": "body",
+      "renderedWords": 33,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 103,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 5,
+      "role": "closer",
+      "ok": true,
+      "file": "output\\round-10\\f5-p08-B\\06.png",
+      "rects": [
+        {
+          "id": "headline",
+          "x": 142.88349999999997,
+          "y": 483.982,
+          "w": 794.2330000000001,
+          "h": 172.21599999999995
+        },
+        {
+          "id": "kicker",
+          "x": 274.171,
+          "y": 702.092,
+          "w": 531.658,
+          "h": 30.770000000000003
+        }
+      ],
+      "subjectRect": {
+        "x": 382,
+        "y": 738,
+        "w": 317,
+        "h": 317
+      },
+      "subjectId": "dial-91",
+      "typeInk": {
+        "x": 145,
+        "y": 484,
+        "w": 786,
+        "h": 249
+      },
+      "variant": "closer",
+      "renderedWords": 13,
+      "furnitureCount": 2,
+      "fittedSizes": {
+        "headline": 103,
+        "kicker": 34
+      }
+    }
+  ],
+  "fingerprint": {
+    "key": "f5-type-bold|6|contrarian-negation|accent-B",
+    "hash": "d377a6a93b3c"
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  }
+}
