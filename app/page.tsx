@@ -1,263 +1,281 @@
-import { Topbar } from "@/components/Topbar";
-import { GridOverlay } from "@/components/GridOverlay";
-import { HeroCarousel } from "@/components/HeroCarousel";
-import { CountUp } from "@/components/CountUp";
-import { Rule } from "@/components/Rule";
+import Image from "next/image";
+import { Reel } from "@/components/Reel";
 import { SignupForm } from "@/components/SignupForm";
-import { Faq } from "@/components/Faq";
-import { Copy, Label, Index } from "@/components/type";
-import { CampaignPicker, AssetDrop, ThumbGrid } from "@/components/mocks";
-import { MiniTile, ACCENTS } from "@/components/MiniTile";
-
-/* ── Section 3 data ───────────────────────────────────────────────── */
-
-const STATS = [
-  {
-    value: 0.39,
-    decimals: 2,
-    prefix: "$",
-    unit: "",
-    label: "Real blended CPM — not the $1.25 advertised",
-    acid: false,
-  },
-  {
-    value: 25,
-    decimals: 0,
-    prefix: "",
-    unit: "min",
-    label: "To edit one video clip",
-    acid: false,
-  },
-  {
-    value: 2,
-    decimals: 0,
-    prefix: "",
-    unit: "min",
-    label: "To ship one carousel",
-    acid: true,
-  },
-  {
-    value: 2.9,
-    decimals: 1,
-    prefix: "",
-    unit: "x",
-    label: "More comments than video (IG carousels)",
-    acid: false,
-  },
-];
-
-// Static strings so Tailwind's scanner resolves them: 2-up on mobile, 4-up above md.
-const STAT_BORDERS = [
-  "",
-  "border-l border-line",
-  "border-t border-line md:border-t-0 md:border-l",
-  "border-t border-l border-line md:border-t-0",
-];
-
-/* ── Section 4 data ───────────────────────────────────────────────── */
-
-const ARGUMENTS = [
-  {
-    n: "01",
-    title: "Budgets go unspent.",
-    body: "Brands are running campaigns nobody can supply. The cash is allocated, the roster is already maxed, and the quarter closes anyway.",
-  },
-  {
-    n: "02",
-    title: "Video is the bottleneck.",
-    body: "25 minutes an edit caps what one person can post. Every clipper in every campaign hits the same wall in the same place.",
-  },
-  {
-    n: "03",
-    title: "Carousels are the arbitrage.",
-    body: "Same CPM. Same campaign. Ten times the output, off the same source footage you already downloaded.",
-  },
-];
-
-/* ── Section 5 data ───────────────────────────────────────────────── */
+import { SHOTS, CAMPAIGNS, byId, src } from "@/lib/carousels";
 
 const STEPS = [
   {
     n: "01",
     title: "Pick a campaign",
-    body: "Live campaigns we have partnered with, showing the real rate and what is left of the budget.",
-    mock: <CampaignPicker />,
+    body: "Browse live campaigns with the real pay rate and remaining budget. We flag which ones allow carousels.",
   },
   {
     n: "02",
     title: "Drop your assets",
-    body: "We read the brand kit and lock the rules: fonts, colours, safe areas, banned claims.",
-    mock: <AssetDrop />,
+    body: "Add your clip and the brand kit. We read the fonts, colours and campaign rules, then lock them in.",
   },
   {
     n: "03",
-    title: "Ship 30 today",
-    body: "Every output is structurally different. Space them across the week or dump them all this afternoon.",
-    mock: <ThumbGrid />,
+    title: "Post and cash out",
+    body: "Export thirty unique carousels and post them across the week. Get paid per verified view, same as video.",
   },
 ];
 
-/* ── Section 7 data ───────────────────────────────────────────────── */
+const FEATURES = [
+  { title: "Hook library", body: "Proven opening lines by niche, so slide one stops the scroll." },
+  { title: "Rules engine", body: "Every campaign's banned claims and safe areas, checked before export." },
+  { title: "Zero-Gen mode", body: "Uses only your source frames. Nothing generated, for campaigns that ban AI." },
+  { title: "Unique every time", body: "Layout, crop and palette are seeded to your account, so no two clippers collide." },
+];
 
-const PLANS = [
+const STATUS = [
+  { ok: false, title: "No brand partners signed yet", body: "Campaign niches above are market rates, not deals we hold." },
+  { ok: false, title: "Nothing is being charged", body: "There's no checkout here. You're joining a list." },
+  { ok: false, title: "The examples aren't ours", body: "They're real creator posts, used with permission, to show the format we build." },
+  { ok: true, title: "Two free, no card", body: "You'll know if it's worth $20 before we ask for $20." },
+];
+
+const TIERS = [
   {
     name: "Free",
     price: "$0",
     period: "",
+    was: "",
+    best: false,
     features: ["2 carousels total", "All templates", "No card required"],
-    featured: false,
-    wrap: "py-8 lg:py-10 lg:pr-8",
     cta: "Start free",
+    note: "",
   },
   {
     name: "Clipper",
     price: "$20",
     period: "/mo",
-    features: [
-      "40 carousels a month",
-      "All templates",
-      "Campaign rules engine",
-      "Zero-Gen mode",
-    ],
-    featured: true,
-    wrap: "border-y border-acid py-8 lg:border lg:border-acid lg:p-8",
-    cta: "Get Clipper",
+    was: "$29",
+    best: true,
+    features: ["40 carousels a month", "Hook library", "Campaign rules engine", "Zero-Gen mode"],
+    cta: "Claim founding price",
+    note: "Locked for as long as you stay subscribed. Goes to $29 at launch.",
   },
   {
     name: "Pro",
     price: "$39",
     period: "/mo",
-    features: [
-      "150 carousels a month",
-      "AI imagery",
-      "Priority render",
-      "Brand kits",
-    ],
-    featured: false,
-    wrap: "py-8 lg:py-10 lg:pl-8",
+    was: "",
+    best: false,
+    features: ["150 carousels a month", "AI imagery", "Priority render", "Brand kits"],
     cta: "Get Pro",
+    note: "",
   },
 ];
 
-/* ── Page ─────────────────────────────────────────────────────────── */
+const FAQ = [
+  {
+    q: "Do carousels actually pay?",
+    a: "TikTok's Creator Rewards doesn't pay for photo mode, but brand campaigns do — per verified view, on whatever format the campaign allows. We show you which campaigns allow carousels before you start.",
+  },
+  {
+    q: "Are the examples on this page your output?",
+    a: "No. Those are real posts by creators in each niche, shown with their permission, so you can see the format that's already earning. Our own output goes up the moment the first campaigns run.",
+  },
+  {
+    q: "Where do the hooks come from?",
+    a: "A library of opening lines grouped by niche, built from what's already working in clip campaigns. Edit any of them, or write your own and we'll lay it out.",
+  },
+  {
+    q: "Is this AI slop?",
+    a: "We assemble. Layout, typography and your footage are deterministic. AI touches at most one element, and you can switch it off entirely.",
+  },
+  {
+    q: "What does the founding price mean?",
+    a: "$20/mo instead of $29, and it doesn't rise while you stay subscribed. No card now, nothing charged until launch.",
+  },
+];
+
+const FOOTER = [
+  { heading: "Product", links: [["How it works", "#how"], ["Format", "#work"], ["Pricing", "#pricing"], ["Zero-Gen mode", "#faq"]] },
+  { heading: "Clippers", links: [["Rates", "#campaigns"], ["Campaign rules", "#faq"], ["Status", "#status"], ["Discord", "#start"]] },
+  { heading: "Agencies", links: [["Revenue share", "#pricing"], ["Contact", "#start"]] },
+];
 
 export default function Home() {
   return (
     <>
-      <GridOverlay />
-      <Topbar />
+      <header className="nav">
+        <div className="wrap nav-in">
+          {/* LOGO SLOT */}
+          <a href="#top" className="mark">
+            <i>F</i>Future Clips
+          </a>
+          <nav className="nav-mid">
+            <a href="#how">How it works</a>
+            <a href="#campaigns">Campaigns</a>
+            <a href="#work">Format</a>
+            <a href="#pricing">Pricing</a>
+          </nav>
+          <div className="nav-end">
+            <a href="#start" className="lg">Log in</a>
+            <a href="#start" className="btn btn-dark btn-sm">Start free</a>
+          </div>
+        </div>
+      </header>
 
-      <main id="top" className="relative z-10">
-        {/* ── 2 · HERO ───────────────────────────────────────────── */}
-        <section className="shell pt-12 pb-16 lg:pt-20 lg:pb-28">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
-            <div className="order-2 lg:order-1 lg:col-span-7 lg:pr-10">
-              <Label className="text-acid">
-                2,250 carousels/hour · 1.6s each
-              </Label>
-
-              <h1 className="mt-6 text-[clamp(3rem,9vw,7.5rem)]">
-                Stop editing.
-                <br />
-                Start shipping volume.
-              </h1>
-
-              <p className="mt-7 max-w-[46ch] text-[17px] text-muted">
-                <Copy>
-                  Campaign-ready carousels in the time it takes to read this
-                  sentence. Pick a live campaign, drop your assets, post 30
-                  today.
-                </Copy>
-              </p>
-
-              <div className="mt-9 flex flex-wrap items-center gap-3">
-                <a
-                  href="#start"
-                  className="bg-acid px-6 py-3.5 text-bg transition-opacity hover:opacity-85"
-                >
-                  <Label>Make 2 free</Label>
-                </a>
-                <a
-                  href="#how"
-                  className="border border-line px-6 py-3.5 text-fg transition-colors hover:border-acid hover:text-acid"
-                >
-                  <Label>See it run →</Label>
-                </a>
-              </div>
-
-              <p className="mt-6 font-mono text-[12px] tracking-[0.04em] text-muted">
-                No card. 2 free carousels. Then $20/mo.
-              </p>
+      <main id="top">
+        <section className="hero">
+          <div className="wrap">
+            <span className="chip">
+              <b>Pre-launch</b> Founding price locked at $20/mo
+            </span>
+            <h1 className="h1">Turn one clip into thirty posts.</h1>
+            <p className="lede">
+              Future Clips builds campaign-ready carousels in about two minutes.
+              Same campaigns, same pay rate, ten times the output.
+            </p>
+            <div className="hero-btns">
+              <a href="#start" className="btn btn-ac">Start clipping free</a>
+              <a href="#how" className="btn btn-soft">See how it works</a>
             </div>
+            <p className="tiny">No card required · 2 free carousels</p>
+          </div>
+          <div className="wrap showcase">
+            <Reel />
+          </div>
+        </section>
 
-            <div className="order-1 lg:order-2 lg:col-span-5">
-              <HeroCarousel />
+        <section className="sec" id="how">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">How it works</span>
+              <h2 className="h2">Post more. Get paid more.</h2>
+              <p>The easiest way to fill a campaign without touching a timeline.</p>
+            </div>
+            <div className="grid3">
+              {STEPS.map((s) => (
+                <div className="card" key={s.n}>
+                  <span className="step-n">{s.n}</span>
+                  <h3>{s.title}</h3>
+                  <p>{s.body}</p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── 3 · NUMBERS BAR ────────────────────────────────────── */}
-        <section
-          aria-label="Market numbers"
-          className="border-y border-line bg-surface"
-        >
-          <div className="shell grid grid-cols-2 md:grid-cols-4">
-            {STATS.map((s, i) => (
-              <div
-                key={s.label}
-                className={`px-4 py-10 md:px-7 lg:py-14 ${STAT_BORDERS[i]}`}
-              >
-                <p
-                  className={`font-mono text-[clamp(2.25rem,7vw,3.5rem)] leading-none font-medium tracking-[-0.03em] tabular-nums ${
-                    s.acid ? "text-acid" : "text-fg"
-                  }`}
-                >
-                  <CountUp
-                    value={s.value}
-                    decimals={s.decimals}
-                    prefix={s.prefix}
-                  />
-                  {s.unit ? (
-                    <span className="ml-1.5 text-[0.42em] tracking-normal">
-                      {s.unit}
-                    </span>
-                  ) : null}
-                </p>
-                <p className="mt-4 max-w-[22ch]">
-                  <Label className="text-muted">{s.label}</Label>
-                </p>
-              </div>
-            ))}
+        <section className="sec sec-tight">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">Features</span>
+              <h2 className="h2">From campaign to cash out.</h2>
+            </div>
+            <div className="grid4">
+              {FEATURES.map((f) => (
+                <div className="card card-flat" key={f.title}>
+                  <h3>{f.title}</h3>
+                  <p>{f.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
         </section>
 
-        {/* ── 4 · THE MARKET HAS A HOLE IN IT ────────────────────── */}
-        <section className="shell mt-24 lg:mt-40">
-          <div className="grid grid-cols-1 gap-10 lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-5">
-              <div className="lg:sticky lg:top-28">
-                <Label className="text-acid">The market has a hole in it</Label>
-                <h2 className="mt-6 text-[clamp(2rem,4.4vw,3.5rem)]">
-                  There are more campaigns than there are clippers to fill them.
-                </h2>
-              </div>
+        <section className="sec sec-tight" id="campaigns">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">Campaign types</span>
+              <h2 className="h2">Where carousels already pay.</h2>
+              <p>Typical rates in the niches running clip campaigns right now.</p>
             </div>
+            <div className="camps">
+              {CAMPAIGNS.map((c) => {
+                const cover = byId(c.cover);
+                const dot = byId(c.dot);
+                return (
+                  <div className="camp" key={c.name}>
+                    <figure className="shot">
+                      <Image
+                        src={src(cover)}
+                        alt={cover.alt}
+                        width={cover.w}
+                        height={cover.h}
+                        sizes="(max-width: 700px) 90vw, (max-width: 1020px) 45vw, 400px"
+                      />
+                    </figure>
+                    <div className="camp-top">
+                      <span className="camp-dot">
+                        <Image src={src(dot)} alt="" width={68} height={68} />
+                      </span>
+                      <span className="camp-meta">
+                        <b>{c.name}</b>Typical rate · Per view
+                      </span>
+                    </div>
+                    <div className="camp-tags">
+                      <span className="tag tag-ok">Carousels allowed</span>
+                      <span className="tag">Per view</span>
+                    </div>
+                    <div className="camp-pay">
+                      <b>{c.rate}</b>
+                      <span>Per 1M views</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <p className="tiny" style={{ textAlign: "center", marginTop: 22 }}>
+              Niche categories and typical market rates, not signed partners. See{" "}
+              <a href="#status" style={{ color: "var(--ac-ink)", fontWeight: 500 }}>
+                where we are
+              </a>
+              .
+            </p>
+          </div>
+        </section>
 
-            <div className="lg:col-span-6 lg:col-start-7">
-              {ARGUMENTS.map((a, i) => (
-                <div key={a.n}>
-                  {i > 0 ? <Rule /> : null}
-                  <div className={i === 0 ? "pb-9" : "py-9"}>
-                    <Index>{a.n}</Index>
-                    <p
-                      className="mt-4 text-[21px] font-bold text-fg lg:text-[24px]"
-                      style={{ fontStretch: "110%", letterSpacing: "-0.025em" }}
-                    >
-                      {a.title}
-                    </p>
-                    <p className="mt-3 max-w-[54ch] text-muted">
-                      <Copy>{a.body}</Copy>
-                    </p>
+        <section className="sec sec-tight" id="work">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">The format</span>
+              <h2 className="h2">This is what already works.</h2>
+              <p>
+                Real carousels pulling real views in the niches running clip
+                campaigns. This is the format Future Clips builds, at thirty a
+                day instead of one.
+              </p>
+            </div>
+            <div className="gal">
+              {SHOTS.map((s) => (
+                <figure key={s.id}>
+                  <span className="shot" style={{ display: "block" }}>
+                    <Image
+                      src={src(s)}
+                      alt={s.alt}
+                      width={s.w}
+                      height={s.h}
+                      sizes="(max-width: 620px) 47vw, (max-width: 1000px) 31vw, 230px"
+                    />
+                  </span>
+                  <figcaption>{s.niche ?? " "}</figcaption>
+                </figure>
+              ))}
+            </div>
+            <p className="credit">
+              Posts by their respective creators, shown with permission. Not
+              produced by Future Clips.
+            </p>
+          </div>
+        </section>
+
+        <section className="sec sec-tight" id="status">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">No pitch here</span>
+              <h2 className="h2">Exactly where we are.</h2>
+            </div>
+            <div className="status">
+              {STATUS.map((s) => (
+                <div className="srow" key={s.title}>
+                  <i className={s.ok ? "y" : "n"}>{s.ok ? "✓" : "✕"}</i>
+                  <div>
+                    <b>{s.title}</b>
+                    <p>{s.body}</p>
                   </div>
                 </div>
               ))}
@@ -265,274 +283,131 @@ export default function Home() {
           </div>
         </section>
 
-        {/* ── 5 · HOW IT WORKS ───────────────────────────────────── */}
-        <section id="how" className="shell mt-24 lg:mt-40">
-          <Label className="text-acid">How it works</Label>
-          <h2 className="mt-6 max-w-[18ch] text-[clamp(2rem,4.4vw,3.5rem)]">
-            Three screens. Two minutes.
-          </h2>
-
-          {/* Scroll-snap strip on mobile, 3-up on desktop. The negative gutter
-              lets the strip bleed to the screen edge without page overflow. */}
-          <div className="-mx-5 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-4 lg:mx-0 lg:grid lg:grid-cols-3 lg:gap-8 lg:overflow-visible lg:px-0 lg:pb-0">
-            {STEPS.map((s) => (
-              <div
-                key={s.n}
-                className="w-[82vw] shrink-0 snap-start sm:w-[400px] lg:w-auto lg:shrink"
-              >
-                <div className="flex items-baseline gap-3">
-                  <Index>{s.n}</Index>
-                  <h3 className="text-[22px] lg:text-[24px]">
-                    <Copy>{s.title}</Copy>
-                  </h3>
-                </div>
-                <p className="mt-3 min-h-[3.5rem] max-w-[38ch] text-[15px] text-muted">
-                  <Copy>{s.body}</Copy>
-                </p>
-                <div className="mt-5">{s.mock}</div>
-              </div>
-            ))}
-          </div>
-
-          <p className="mt-8 font-mono text-[13px] tracking-[0.02em] text-acid">
-            No two clippers get the same layout. Ever.
-          </p>
-        </section>
-
-        {/* ── 6 · UNIQUENESS ─────────────────────────────────────── */}
-        <section className="shell mt-24 lg:mt-40">
-          <div className="grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-5">
-              <Label className="text-acid">The moat</Label>
-              <h2 className="mt-6 text-[clamp(2rem,4.4vw,3.5rem)]">
-                Sixty clippers. Sixty different posts.
-              </h2>
-              <p className="mt-7 max-w-[46ch] text-muted">
-                <Copy>
-                  Post the same layout as everyone else in your campaign and the
-                  algorithm buries all of you. Every carousel we make is seeded
-                  to your account — different template, crop, palette, hook
-                  structure, slide count.
-                </Copy>
-              </p>
+        <section className="sec sec-tight" id="pricing">
+          <div className="wrap">
+            <div className="head">
+              <span className="eyebrow">Pricing</span>
+              <h2 className="h2">Two free. Then pick a lane.</h2>
             </div>
-
-            <div className="lg:col-span-6 lg:col-start-7">
-              <div
-                role="img"
-                aria-label="Twenty-four structurally distinct carousel outputs"
-                className="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-2.5"
-              >
-                {Array.from({ length: 24 }, (_, i) => (
-                  <div key={i} className="aspect-[4/5] w-full">
-                    <MiniTile
-                      layout={i % 8}
-                      accent={ACCENTS[Math.floor(i / 8) % 3]}
-                    />
+            <div className="tiers">
+              {TIERS.map((t) => (
+                <div className={t.best ? "tier tier-best" : "tier"} key={t.name}>
+                  <div className="tier-h">
+                    <h3>{t.name}</h3>
+                    {t.best && <span className="tag tag-ok">Founding price</span>}
                   </div>
-                ))}
-              </div>
-
-              <Rule className="mt-8" />
-              <p className="mt-4 font-mono text-[11px] leading-relaxed font-medium tracking-[0.14em] text-acid uppercase">
-                Collision check: 0 structural matches across 24 outputs
-              </p>
+                  <p className="cost">
+                    <b>{t.price}</b>
+                    {t.period && <s>{t.period}</s>}
+                    {t.was && <del>{t.was}</del>}
+                  </p>
+                  <ul>
+                    {t.features.map((f) => (
+                      <li key={f}>
+                        <i>✓</i>
+                        {f}
+                      </li>
+                    ))}
+                  </ul>
+                  <a
+                    href="#start"
+                    className={t.best ? "btn btn-ac" : "btn btn-soft"}
+                  >
+                    {t.cta}
+                  </a>
+                  {t.note && <p className="note">{t.note}</p>}
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* ── 7 · PRICING ────────────────────────────────────────── */}
-        <section id="pricing" className="shell mt-24 lg:mt-40">
-          <Label className="text-acid">Pricing</Label>
-          <h2 className="mt-6 max-w-[16ch] text-[clamp(2rem,4.4vw,3.5rem)]">
-            Two free. Then pick a lane.
-          </h2>
-
-          <div className="mt-12 grid grid-cols-1 border-y border-line lg:grid-cols-3">
-            {PLANS.map((p) => (
-              <div key={p.name} className={p.wrap}>
-                <Label className={p.featured ? "text-acid" : "text-muted"}>
-                  {p.name}
-                </Label>
-
-                <p className="mt-5 flex items-baseline gap-1">
-                  <span className="font-mono text-[44px] leading-none font-medium tracking-[-0.03em] text-fg tabular-nums">
-                    {p.price}
-                  </span>
-                  {p.period ? (
-                    <span className="font-mono text-[15px] text-muted">
-                      {p.period}
-                    </span>
-                  ) : null}
+        <section className="sec sec-tight">
+          <div className="wrap">
+            <div className="brands">
+              <div>
+                <h2>Running an agency?</h2>
+                <p>
+                  Put us in your campaign brief. Your roster ships ten times the
+                  content and you take up to half of every subscription it
+                  brings in.
                 </p>
-
-                <ul className="mt-7">
-                  {p.features.map((f, idx) => (
-                    <li
-                      key={f}
-                      className={`py-2.5 text-[14px] text-muted ${
-                        idx > 0 ? "border-t border-line" : ""
-                      }`}
-                    >
-                      <Copy>{f}</Copy>
-                    </li>
-                  ))}
-                </ul>
-
-                <a
-                  href="#start"
-                  className={`mt-7 inline-block px-5 py-3 transition-colors ${
-                    p.featured
-                      ? "bg-acid text-bg hover:opacity-85"
-                      : "border border-line text-fg hover:border-acid hover:text-acid"
-                  }`}
-                >
-                  <Label>{p.cta}</Label>
-                </a>
               </div>
-            ))}
-          </div>
-
-          <p className="mt-6 font-mono text-[13px] tracking-[0.02em] text-muted">
-            $149/yr on Clipper. That&rsquo;s 38% off if you&rsquo;re actually
-            grinding.
-          </p>
-        </section>
-
-        {/* ── 8 · AGENCY STRIP ───────────────────────────────────── */}
-        <section className="mt-24 border-y border-line bg-surface py-16 lg:mt-40 lg:py-24">
-          <div className="shell grid grid-cols-1 gap-12 lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-5">
-              <h2 className="text-[clamp(2rem,4.4vw,3.25rem)]">
-                Run an agency?
-              </h2>
-              <p className="mt-10 font-mono text-[clamp(3.5rem,9vw,5.5rem)] leading-none font-medium tracking-[-0.04em] text-acid tabular-nums">
-                50%
-              </p>
-              <p className="mt-4">
-                <Label className="text-muted">Revenue share at scale</Label>
-              </p>
-            </div>
-
-            <div className="lg:col-span-6 lg:col-start-7 lg:pt-2">
-              <p className="max-w-[52ch] text-[17px] text-muted">
-                <Copy>
-                  Put us in your campaign brief. Your roster ships 10x the
-                  content and you take up to 50% of every subscription that
-                  comes from it, for as long as they stay.
-                </Copy>
-              </p>
-              <a
-                href="#start"
-                className="mt-8 inline-block border border-line px-6 py-3.5 text-fg transition-colors hover:border-acid hover:text-acid"
-              >
-                <Label>Partner with us</Label>
-              </a>
+              <div className="brands-cta">
+                <span className="big">50%</span>
+                <a href="#start" className="btn btn-ac">Partner with us</a>
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ── 9 · FAQ ────────────────────────────────────────────── */}
-        <Faq />
+        <section className="sec sec-tight" id="faq">
+          <div className="wrap">
+            <div className="head">
+              <h2 className="h2">Frequently asked</h2>
+            </div>
+            <div className="faq">
+              {FAQ.map((f) => (
+                <details key={f.q}>
+                  <summary>
+                    {f.q}
+                    <span className="pm">+</span>
+                  </summary>
+                  <p className="ans">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {/* ── START · waitlist ───────────────────────────────────── */}
-        <section id="start" className="shell mt-24 lg:mt-40">
-          <Rule />
-          <div className="grid grid-cols-1 gap-10 pt-14 lg:grid-cols-12 lg:gap-8">
-            <div className="lg:col-span-5">
-              <h2 className="text-[clamp(2rem,4.4vw,3.5rem)]">
-                Make two, then decide.
-              </h2>
+        <section className="sec sec-tight final" id="start">
+          <div className="wrap">
+            <div className="head">
+              <h2 className="h2">Make two, then decide.</h2>
+              <p>Two carousels, no card, no call.</p>
             </div>
-            <div className="lg:col-span-6 lg:col-start-7">
-              <SignupForm />
-            </div>
+            <SignupForm />
           </div>
         </section>
       </main>
 
-      <Footer />
-    </>
-  );
-}
-
-/* ── 10 · FOOTER ──────────────────────────────────────────────────── */
-
-const FOOTER_LINKS = [
-  {
-    heading: "Product",
-    links: ["How it works", "Pricing", "Zero-Gen mode", "Templates"],
-  },
-  {
-    heading: "Clippers",
-    links: ["Live campaigns", "Campaign rules", "Payout tracking", "Discord"],
-  },
-  {
-    heading: "Agencies",
-    links: ["Revenue share", "Roster tools", "Brand kits", "Contact"],
-  },
-];
-
-function Footer() {
-  return (
-    <footer className="relative z-10 mt-24 border-t border-line lg:mt-40">
-      <div className="shell">
-        <a
-          href="#start"
-          className="flex flex-wrap items-baseline gap-x-3 gap-y-1 border-b border-line py-10 text-acid transition-opacity hover:opacity-80"
-        >
-          <span
-            className="text-[clamp(1.75rem,5vw,3rem)] font-extrabold tracking-[-0.03em]"
-            style={{ fontStretch: "125%" }}
-          >
-            <Copy>2 free carousels. No card.</Copy>
-          </span>
-          <span className="text-[clamp(1.75rem,5vw,3rem)] leading-none font-extrabold">
-            →
-          </span>
-        </a>
-
-        <div className="grid grid-cols-2 gap-8 py-12 sm:grid-cols-4">
-          <div className="col-span-2 sm:col-span-1">
-            <span
-              className="text-[19px] font-extrabold tracking-[-0.045em] text-fg lowercase"
-              style={{ fontStretch: "125%" }}
-            >
-              futureclips
-            </span>
-            <p className="mt-3 max-w-[24ch] text-[13px] text-muted">
-              Carousels for paid clip campaigns.
-            </p>
+      <footer>
+        <div className="wrap">
+          <div className="foot">
+            <div className="foot-b">
+              <span className="mark">
+                <i>F</i>Future Clips
+              </span>
+              <p
+                style={{
+                  marginTop: 12,
+                  fontSize: 14,
+                  color: "var(--muted)",
+                  maxWidth: "28ch",
+                }}
+              >
+                Campaign-ready carousels for paid clippers.
+              </p>
+            </div>
+            {FOOTER.map((col) => (
+              <nav key={col.heading} aria-label={col.heading}>
+                <h5>{col.heading}</h5>
+                <ul>
+                  {col.links.map(([label, href]) => (
+                    <li key={label}>
+                      <a href={href}>{label}</a>
+                    </li>
+                  ))}
+                </ul>
+              </nav>
+            ))}
           </div>
-
-          {FOOTER_LINKS.map((col) => (
-            <nav key={col.heading} aria-label={col.heading}>
-              <Label className="text-muted">{col.heading}</Label>
-              <ul className="mt-4 flex flex-col gap-2.5">
-                {col.links.map((l) => (
-                  <li key={l}>
-                    <a
-                      href="#start"
-                      className="text-[14px] text-muted transition-colors hover:text-fg"
-                    >
-                      {l}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </nav>
-          ))}
+          <div className="foot-bot">
+            <span>© 2026 Future Clips</span>
+            <span>Built for people who get paid per view</span>
+          </div>
         </div>
-
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-line py-7">
-          <span className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
-            © 2026 Future Clips
-          </span>
-          <span className="font-mono text-[11px] tracking-[0.1em] text-muted uppercase">
-            Built for people who get paid per view
-          </span>
-        </div>
-      </div>
-    </footer>
+      </footer>
+    </>
   );
 }
