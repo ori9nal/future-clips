@@ -1,0 +1,772 @@
+{
+  "id": "f3-p01-B",
+  "dir": "output\\round-7\\f3-p01-B",
+  "files": [
+    "output\\round-7\\f3-p01-B\\01.png",
+    "output\\round-7\\f3-p01-B\\02.png",
+    "output\\round-7\\f3-p01-B\\03.png",
+    "output\\round-7\\f3-p01-B\\04.png",
+    "output\\round-7\\f3-p01-B\\05.png",
+    "output\\round-7\\f3-p01-B\\06.png",
+    "output\\round-7\\f3-p01-B\\07.png",
+    "output\\round-7\\f3-p01-B\\08.png"
+  ],
+  "accountId": "drift",
+  "campaignId": "why-not-what-r7",
+  "postIndex": 1,
+  "seed": 2372677858,
+  "family": "f3-poster-character",
+  "familyName": "POSTER-CHARACTER",
+  "displayCap": 91.12,
+  "accentKey": "accent-B",
+  "accent": "#5B7FFF",
+  "hookType": "lazy-effortless",
+  "slides": [
+    {
+      "role": "cover",
+      "headline": "four lazy nights, one broken week",
+      "kicker": "the maths is ugly",
+      "accentWord": "broken",
+      "eyebrow": "DRIFT · sleep, explained",
+      "wordCount": 14,
+      "stack2": "four lazy nights,\none broken week",
+      "stack3": "four lazy\nnights,\none broken week",
+      "stackCaps3": "FOUR LAZY\nNIGHTS,\nONE BROKEN WEEK",
+      "stackCaps2": "FOUR LAZY NIGHTS,\nONE BROKEN WEEK",
+      "headlineCaps": "FOUR LAZY NIGHTS, ONE BROKEN WEEK",
+      "kickerCaps": "THE MATHS IS UGLY"
+    },
+    {
+      "role": "body",
+      "index": "01",
+      "indexPlain": "1",
+      "title": "the weekend drift",
+      "headline": "the weekend drift",
+      "claim": "Two late nights reset your clock backwards.",
+      "body": "Sleeping in on Saturday feels like repayment. Your body reads it as a time-zone change.\n\nMonday is not laziness. It is jet lag you booked yourself.",
+      "stat": "-14 pts",
+      "accentWord": "drift",
+      "eyebrow": "01 · timing",
+      "wordCount": 41,
+      "stack2": "the weekend\ndrift",
+      "stack3": "the weekend\ndrift",
+      "stackCaps3": "THE WEEKEND\nDRIFT",
+      "stackCaps2": "THE WEEKEND\nDRIFT",
+      "headlineCaps": "THE WEEKEND DRIFT",
+      "kickerCaps": "",
+      "indexDot": "1."
+    },
+    {
+      "role": "body",
+      "index": "02",
+      "indexPlain": "2",
+      "title": "the second wind",
+      "headline": "the second wind",
+      "claim": "Push past the window and it closes.",
+      "body": "Your body opens a door around the same time every night. Miss it and you get a second wind that costs ninety minutes.\n\nDRIFT learns where your door is.",
+      "stat": "-8 pts",
+      "accentWord": "wind",
+      "eyebrow": "02 · wind-down",
+      "wordCount": 44,
+      "stack2": "the second\nwind",
+      "stack3": "the\nsecond\nwind",
+      "stackCaps3": "THE\nSECOND\nWIND",
+      "stackCaps2": "THE SECOND\nWIND",
+      "headlineCaps": "THE SECOND WIND",
+      "kickerCaps": "",
+      "indexDot": "2."
+    },
+    {
+      "role": "body",
+      "index": "03",
+      "indexPlain": "3",
+      "title": "the hard workout",
+      "headline": "the hard workout",
+      "claim": "A late session borrows from the first cycle.",
+      "body": "Training raises your core temperature for hours.",
+      "stat": "-5 pts",
+      "accentWord": "workout",
+      "eyebrow": "03 · activity",
+      "wordCount": 23,
+      "stack2": "the hard\nworkout",
+      "stack3": "the\nhard\nworkout",
+      "stackCaps3": "THE\nHARD\nWORKOUT",
+      "stackCaps2": "THE HARD\nWORKOUT",
+      "headlineCaps": "THE HARD WORKOUT",
+      "kickerCaps": "",
+      "indexDot": "3."
+    },
+    {
+      "role": "body",
+      "index": "04",
+      "indexPlain": "4",
+      "title": "the 3am wakeup",
+      "headline": "the 3am wakeup",
+      "claim": "Waking at 3am is normal. Staying awake is the signal.",
+      "body": "Everyone surfaces between cycles. The question is whether you go back under in four minutes or forty.",
+      "stat": "watch this",
+      "accentWord": "wakeup",
+      "eyebrow": "04 · pattern",
+      "wordCount": 35,
+      "stack2": "the 3am\nwakeup",
+      "stack3": "the\n3am\nwakeup",
+      "stackCaps3": "THE\n3AM\nWAKEUP",
+      "stackCaps2": "THE 3AM\nWAKEUP",
+      "headlineCaps": "THE 3AM WAKEUP",
+      "kickerCaps": "",
+      "indexDot": "4."
+    },
+    {
+      "role": "body",
+      "index": "05",
+      "indexPlain": "5",
+      "title": "the late meal",
+      "headline": "the late meal",
+      "claim": "Digesting and going deep are competing jobs.",
+      "body": "Eat close to bed and the first cycle gets spent on the wrong task.",
+      "stat": "-7 pts",
+      "accentWord": "meal",
+      "eyebrow": "05 · intake",
+      "wordCount": 29,
+      "stack2": "the late\nmeal",
+      "stack3": "the\nlate\nmeal",
+      "stackCaps3": "THE\nLATE\nMEAL",
+      "stackCaps2": "THE LATE\nMEAL",
+      "headlineCaps": "THE LATE MEAL",
+      "kickerCaps": "",
+      "indexDot": "5."
+    },
+    {
+      "role": "body",
+      "index": "06",
+      "indexPlain": "6",
+      "title": "the nightcap",
+      "headline": "the nightcap",
+      "claim": "A drink gets you to sleep and then takes it back.",
+      "body": "The first half of the night looks fine.",
+      "stat": "-13 pts",
+      "accentWord": "nightcap",
+      "eyebrow": "06 · stimulant",
+      "wordCount": 26,
+      "stack2": "the\nnightcap",
+      "stack3": "the\nnightcap",
+      "stackCaps3": "THE\nNIGHTCAP",
+      "stackCaps2": "THE\nNIGHTCAP",
+      "headlineCaps": "THE NIGHTCAP",
+      "kickerCaps": "",
+      "indexDot": "6."
+    },
+    {
+      "role": "closer",
+      "headline": "try one night",
+      "kicker": "you will know which habit it was by breakfast tomorrow",
+      "accentWord": "one",
+      "cta": "try",
+      "eyebrow": "DRIFT",
+      "wordCount": 14,
+      "stack2": "try one\nnight",
+      "stack3": "try\none\nnight",
+      "stackCaps3": "TRY\nONE\nNIGHT",
+      "stackCaps2": "TRY ONE\nNIGHT",
+      "headlineCaps": "TRY ONE NIGHT",
+      "kickerCaps": "YOU WILL KNOW WHICH HABIT IT WAS BY BREAKFAST TOMORROW"
+    }
+  ],
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "furnitureByRole": {
+    "cover": [
+      {
+        "type": "wordmark",
+        "anchor": "top-left",
+        "gap": 34,
+        "size": 30,
+        "tracking": 0.3,
+        "font": {
+          "role": "display-heavy",
+          "weight": 400
+        },
+        "color": "ink",
+        "dot": {
+          "r": 9,
+          "gap": 4,
+          "color": "accent"
+        },
+        "dotOff": [
+          "closer"
+        ]
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 24,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 600
+        },
+        "color": "ink-soft"
+      },
+      {
+        "type": "arrow",
+        "anchor": "bottom-right",
+        "gap": 14,
+        "size": 40,
+        "glyph": "→",
+        "font": {
+          "role": "body",
+          "weight": 400
+        },
+        "color": "ink",
+        "on": [
+          "cover"
+        ]
+      }
+    ],
+    "body": [
+      {
+        "type": "wordmark",
+        "anchor": "top-left",
+        "gap": 34,
+        "size": 30,
+        "tracking": 0.3,
+        "font": {
+          "role": "display-heavy",
+          "weight": 400
+        },
+        "color": "ink",
+        "dot": {
+          "r": 9,
+          "gap": 4,
+          "color": "accent"
+        },
+        "dotOff": [
+          "closer"
+        ]
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 24,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 600
+        },
+        "color": "ink-soft"
+      },
+      {
+        "type": "index",
+        "anchor": "bottom-right",
+        "gap": 20,
+        "size": 30,
+        "pad": 2,
+        "format": "{i}",
+        "font": {
+          "role": "display-heavy",
+          "weight": 400
+        },
+        "color": "ink-soft",
+        "on": [
+          "body"
+        ]
+      }
+    ],
+    "closer": [
+      {
+        "type": "wordmark",
+        "anchor": "top-left",
+        "gap": 34,
+        "size": 30,
+        "tracking": 0.3,
+        "font": {
+          "role": "display-heavy",
+          "weight": 400
+        },
+        "color": "ink",
+        "dot": {
+          "r": 9,
+          "gap": 4,
+          "color": "accent"
+        },
+        "dotOff": [
+          "closer"
+        ]
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 24,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 600
+        },
+        "color": "ink-soft"
+      }
+    ],
+    "body-poster": [
+      {
+        "type": "wordmark",
+        "anchor": "top-left",
+        "gap": 34,
+        "size": 30,
+        "tracking": 0.3,
+        "font": {
+          "role": "display-heavy",
+          "weight": 400
+        },
+        "color": "ink",
+        "dot": {
+          "r": 9,
+          "gap": 4,
+          "color": "accent"
+        },
+        "dotOff": [
+          "closer"
+        ]
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 24,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 600
+        },
+        "color": "ink-soft"
+      }
+    ]
+  },
+  "cropStrategy": "contain",
+  "copyAttempts": 0,
+  "slideMeta": [
+    {
+      "index": 0,
+      "role": "cover",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\01.png",
+      "rects": [
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 202.8466796875,
+          "w": 889.639609375,
+          "h": 382.408203125
+        },
+        {
+          "id": "kicker",
+          "x": 80,
+          "y": 657.4188828125,
+          "w": 337.172,
+          "h": 39.81999999999999
+        }
+      ],
+      "subjectRect": {
+        "x": 297,
+        "y": 711,
+        "w": 515,
+        "h": 749
+      },
+      "subjectId": "sit-phone",
+      "typeInk": {
+        "x": 80,
+        "y": 202,
+        "w": 895,
+        "h": 495
+      },
+      "variant": "cover",
+      "renderedWords": 10,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "headline": 134,
+        "kicker": 44
+      }
+    },
+    {
+      "index": 1,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\02.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 136.984,
+          "w": 231,
+          "h": 26.936
+        },
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 191.213017578125,
+          "w": 447.23620703125,
+          "h": 160.10312500000003
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 417.43614257812504,
+          "w": 685.676,
+          "h": 89.976
+        },
+        {
+          "id": "body",
+          "x": 80,
+          "y": 549.306142578125,
+          "w": 572.508,
+          "h": 304.49399999999997
+        }
+      ],
+      "subjectRect": {
+        "x": 793,
+        "y": 858,
+        "w": 241,
+        "h": 576
+      },
+      "subjectId": "sit-edge",
+      "typeInk": {
+        "x": 80,
+        "y": 137,
+        "w": 685,
+        "h": 717
+      },
+      "variant": "body",
+      "renderedWords": 39,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "headline": 91,
+        "claim": 46,
+        "body": 38
+      }
+    },
+    {
+      "index": 2,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\03.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 136.984,
+          "w": 294,
+          "h": 22.176000000000002
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 214.97039062500002,
+          "w": 491.2139375,
+          "h": 276.9525
+        },
+        {
+          "id": "stat",
+          "x": 80,
+          "y": 554.722890625,
+          "w": 163.2,
+          "h": 36.8
+        }
+      ],
+      "subjectRect": {
+        "x": 834,
+        "y": 716,
+        "w": 212,
+        "h": 720
+      },
+      "subjectId": "stand-slump",
+      "typeInk": {
+        "x": 80,
+        "y": 137,
+        "w": 494,
+        "h": 455
+      },
+      "variant": "body-poster",
+      "renderedWords": 12,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "claim": 88,
+        "stat": 40
+      }
+    },
+    {
+      "index": 3,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\04.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 136.984,
+          "w": 273,
+          "h": 26.936
+        },
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 191.213017578125,
+          "w": 316.90216796874995,
+          "h": 160.81406250000003
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 417.77908007812505,
+          "w": 684.296,
+          "h": 98.43999999999998
+        },
+        {
+          "id": "body",
+          "x": 80,
+          "y": 558.417080078125,
+          "w": 407.512,
+          "h": 88.008
+        }
+      ],
+      "subjectRect": {
+        "x": 864,
+        "y": 858,
+        "w": 170,
+        "h": 576
+      },
+      "subjectId": "stand-slump",
+      "typeInk": {
+        "x": 80,
+        "y": 137,
+        "w": 683,
+        "h": 510
+      },
+      "variant": "body",
+      "renderedWords": 21,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "headline": 91,
+        "claim": 46,
+        "body": 38
+      }
+    },
+    {
+      "index": 4,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\05.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 138.16,
+          "w": 252,
+          "h": 25.759999999999998
+        },
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 191.079716796875,
+          "w": 295.39630859374995,
+          "h": 160.94736328125003
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 418.14708007812504,
+          "w": 717.324,
+          "h": 98.07199999999999
+        },
+        {
+          "id": "body",
+          "x": 80,
+          "y": 558.113080078125,
+          "w": 590.9,
+          "h": 142.61399999999998
+        }
+      ],
+      "subjectRect": {
+        "x": 793,
+        "y": 858,
+        "w": 241,
+        "h": 576
+      },
+      "subjectId": "sit-edge",
+      "typeInk": {
+        "x": 80,
+        "y": 138,
+        "w": 717,
+        "h": 563
+      },
+      "variant": "body",
+      "renderedWords": 33,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "headline": 91,
+        "claim": 46,
+        "body": 38
+      }
+    },
+    {
+      "index": 5,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\06.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 136.984,
+          "w": 231,
+          "h": 22.176000000000002
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 209.38445312500002,
+          "w": 693.50428125,
+          "h": 293.0228125
+        },
+        {
+          "id": "stat",
+          "x": 80,
+          "y": 565.6072656250001,
+          "w": 163.2,
+          "h": 36.39999999999999
+        }
+      ],
+      "subjectRect": {
+        "x": 834,
+        "y": 716,
+        "w": 212,
+        "h": 720
+      },
+      "subjectId": "stand-slump",
+      "typeInk": {
+        "x": 80,
+        "y": 137,
+        "w": 696,
+        "h": 465
+      },
+      "variant": "body-poster",
+      "renderedWords": 12,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "claim": 88,
+        "stat": 40
+      }
+    },
+    {
+      "index": 6,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\07.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 80,
+          "y": 136.984,
+          "w": 294,
+          "h": 22.176000000000002
+        },
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 186.453017578125,
+          "w": 319.55965234375,
+          "h": 160.81406250000003
+        },
+        {
+          "id": "claim",
+          "x": 80,
+          "y": 413.38708007812505,
+          "w": 727.674,
+          "h": 89.976
+        },
+        {
+          "id": "body",
+          "x": 80,
+          "y": 545.257080078125,
+          "w": 576.08,
+          "h": 34.693999999999996
+        }
+      ],
+      "subjectRect": {
+        "x": 864,
+        "y": 858,
+        "w": 170,
+        "h": 576
+      },
+      "subjectId": "stand-slump",
+      "typeInk": {
+        "x": 80,
+        "y": 137,
+        "w": 725,
+        "h": 443
+      },
+      "variant": "body",
+      "renderedWords": 24,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 28,
+        "headline": 91,
+        "claim": 46,
+        "body": 38
+      }
+    },
+    {
+      "index": 7,
+      "role": "closer",
+      "ok": true,
+      "file": "output\\round-7\\f3-p01-B\\08.png",
+      "rects": [
+        {
+          "id": "headline",
+          "x": 80,
+          "y": 211.293017578125,
+          "w": 190.09935546875002,
+          "h": 242.7140625
+        },
+        {
+          "id": "kicker",
+          "x": 80,
+          "y": 525.901080078125,
+          "w": 541.824,
+          "h": 77.01000000000002
+        }
+      ],
+      "subjectRect": {
+        "x": 614,
+        "y": 800,
+        "w": 436,
+        "h": 634
+      },
+      "subjectId": "sit-phone",
+      "typeInk": {
+        "x": 80,
+        "y": 210,
+        "w": 515,
+        "h": 393
+      },
+      "variant": "closer",
+      "renderedWords": 13,
+      "furnitureCount": 2,
+      "fittedSizes": {
+        "headline": 91,
+        "kicker": 34
+      }
+    }
+  ],
+  "fingerprint": {
+    "key": "f3-poster-character|8|lazy-effortless|accent-B",
+    "hash": "0c4d2cff8080"
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  }
+}

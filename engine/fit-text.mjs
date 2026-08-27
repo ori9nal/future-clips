@@ -147,6 +147,34 @@ function decorate(fit, face) {
   return fit;
 }
 
+/**
+ * Negative leading is a poster idiom, but it is only safe when the lines have no
+ * ink to collide. Round 3 rendered a lowercase claim at lineHeight 0.94 and the
+ * descenders of one line crossed the ascenders of the next. This checks the real
+ * ink of each adjacent pair, so all-caps can still be set tight while mixed-case
+ * cannot be set tighter than its own glyphs allow.
+ */
+export function linesCrash(face, lines, size, lineHeight, minGap = 1) {
+  return requiredLineHeight(face, lines, size, minGap) > lineHeight + 1e-9;
+}
+
+/**
+ * The tightest leading these exact lines can take without their ink touching.
+ * A designer setting a stack tight opens the leading just far enough for the one
+ * pair that needs it; `autoLeading` does the same, so all-caps keeps its poster
+ * stack while a lowercase line with a descender gets the room it actually needs.
+ */
+export function requiredLineHeight(face, lines, size, minGap = 1) {
+  if (lines.length < 2) return 0;
+  let need = 0;
+  for (let i = 0; i < lines.length - 1; i++) {
+    const below = verticalInk(face, lines[i], size).below;
+    const above = verticalInk(face, lines[i + 1], size).above;
+    need = Math.max(need, (below + above + minGap) / size);
+  }
+  return need;
+}
+
 /** Ink above and below the baseline for one line, from glyph bounding boxes. */
 export function verticalInk(face, text, size) {
   if (!face.vbox) face.vbox = new Map();
@@ -191,11 +219,17 @@ export function fitText(face, text, box, opts = {}) {
     const lines = wrapText(face, text, size, box.w, lsPx);
     if (!lines) return null;
     if (lines.length > maxLines) return null;
-    const height = lines.length * size * lineHeight;
+    const lh = opts.autoLeading
+      ? Math.max(lineHeight, requiredLineHeight(face, lines, size))
+      : lineHeight;
+    if (!opts.autoLeading && linesCrash(face, lines, size, lineHeight)) return null;
+    const lineHeightUsed = lh;
+    const height = lines.length * size * lineHeightUsed;
     if (height > box.h) return null;
     const width = Math.max(...lines.map((l) => layoutWidth(face, l, size, lsPx)));
     if (width > box.w) return null;
-    return decorate({ size, lines, width, height, lineHeight, tracking, trackingPx: lsPx }, face);
+    return decorate({ size, lines, width, height, lineHeight: lineHeightUsed, tracking, trackingPx: lsPx,
+      paraLast: lines.paraLast }, face);
   };
 
   // primary: binary search for the largest fitting size
@@ -230,10 +264,14 @@ export function fitLines(face, lines, box, opts = {}) {
 
   const attempt = (size) => {
     const lsPx = tracking * size;
+    const lh = opts.autoLeading
+      ? Math.max(lineHeight, requiredLineHeight(face, clean, size))
+      : lineHeight;
+    if (!opts.autoLeading && linesCrash(face, clean, size, lineHeight)) return null;
     const width = Math.max(...clean.map((l) => layoutWidth(face, l, size, lsPx)));
-    const height = clean.length * size * lineHeight;
+    const height = clean.length * size * lh;
     if (width > box.w || height > box.h) return null;
-    return decorate({ size, lines: clean, width, height, lineHeight, tracking, trackingPx: lsPx }, face);
+    return decorate({ size, lines: clean, width, height, lineHeight: lh, tracking, trackingPx: lsPx }, face);
   };
 
   let lo = min, hi = max, best = null;

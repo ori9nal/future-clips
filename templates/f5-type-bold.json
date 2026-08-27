@@ -62,7 +62,7 @@
           "content": "kicker",
           "box": {
             "x": "safe.left",
-            "y": 470,
+            "y": 500,
             "w": "safe.width",
             "h": 58
           },
@@ -110,35 +110,8 @@
           "accent": {
             "target": "line:1",
             "color": "accent"
-          }
-        },
-        {
-          "id": "stat",
-          "content": "eyebrow",
-          "optional": true,
-          "box": {
-            "x": "safe.left",
-            "y": {
-              "after": "headline",
-              "gap": 74
-            },
-            "w": "safe.width",
-            "h": 54
           },
-          "size": [
-            17,
-            25
-          ],
-          "maxLines": 1,
-          "font": {
-            "role": "mono",
-            "weight": 500
-          },
-          "lineHeight": 1.2,
-          "tracking": 0.24,
-          "align": "center",
-          "valign": "top",
-          "color": "#6C7590"
+          "hierarchy": "display"
         }
       ]
     },
@@ -220,7 +193,8 @@
               "color": "accent",
               "opacity": 0.85
             }
-          ]
+          ],
+          "hierarchy": "display"
         },
         {
           "id": "claim",
@@ -305,7 +279,7 @@
           "cx": 0.5,
           "cy": 0.66,
           "r": 0.5,
-          "strength": 0.2,
+          "strength": 0.09,
           "color": "accent"
         }
       },
@@ -315,10 +289,10 @@
         ],
         "grade": "silhouette",
         "color": "#2A3350",
-        "heightPct": 0.3,
+        "heightPct": 0.22,
         "anchor": "center",
         "dy": 176,
-        "opacity": 0.85
+        "opacity": 0.6
       },
       "type": [
         {
@@ -347,7 +321,8 @@
           "accent": {
             "target": "line:1",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "kicker",
@@ -475,7 +450,8 @@
           "accent": {
             "target": "longest-word",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "stat",
@@ -503,6 +479,33 @@
           "align": "left",
           "valign": "top",
           "color": "accent"
+        },
+        {
+          "id": "title",
+          "content": "title",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "stat",
+              "gap": 28
+            },
+            "w": 560,
+            "h": 54
+          },
+          "size": [
+            20,
+            30
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "body",
+            "weight": 500
+          },
+          "lineHeight": 1.2,
+          "tracking": 0.06,
+          "align": "left",
+          "valign": "top",
+          "color": "#98A0B4"
         }
       ]
     }

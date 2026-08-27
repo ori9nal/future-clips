@@ -9,7 +9,7 @@ import path from 'node:path';
 import { h32, rng as makeRng, fingerprint } from './seed.mjs';
 import { BRAND, ACCENTS, makePalette } from './palette.mjs';
 import { buildCopy } from './copy.mjs';
-import { layoutSlide, layoutFurniture, safeBox } from './layout.mjs';
+import { layoutSlide, layoutFurniture, safeBox, coverage } from './layout.mjs';
 import { renderVectorLayer } from './render-type.mjs';
 import { renderBackground, prepareSubject, composeSlide, assertAssetAllowed } from './compose.mjs';
 import { validateCarousel } from './validate.mjs';
@@ -63,7 +63,12 @@ export function diverge({ accountId, campaignId, postIndex, templates }) {
   const accOrder = makeRng(h32(accountId, campaignId, 'accent', accCycle)).shuffle(ACCENTS);
   const accentKey = accOrder[postIndex % ACCENTS.length];
   const slideCount = r.range(tpl.slideCount?.[0] ?? 6, tpl.slideCount?.[1] ?? 10);
-  const hookType = r.pick(tpl.hookTypes);
+  // Hooks are stratified for the same reason families are: two posts sharing
+  // family + slide count + hook + accent produce an identical structural
+  // fingerprint, which is what a reader perceives as "templated".
+  const hookCycle = Math.floor(postIndex / tpl.hookTypes.length);
+  const hookOrder = makeRng(h32(accountId, campaignId, tpl.id, 'hook', hookCycle)).shuffle(tpl.hookTypes);
+  const hookType = hookOrder[postIndex % tpl.hookTypes.length];
   const cropStrategy = r.pick(tpl.cropStrategies ?? ['contain']);
   return { seed, rng: r, tpl, accentKey, slideCount, hookType, cropStrategy };
 }
@@ -98,12 +103,12 @@ export function roleFor(tpl, slide, slideIndex) {
   return tpl.roles[pick] ? pick : 'body';
 }
 
-async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset }) {
+async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset, displayCap }) {
   const role = roleFor(tpl, slide, slideIndex);
   const roleSpec = tpl.roles[role];
   const canvas = tpl.canvas;
 
-  const laid = layoutSlide({ tpl, role, content: slide, palette, canvas });
+  const laid = layoutSlide({ tpl, role, content: slide, palette, canvas, displayCap });
   if (!laid.ok) return { ok: false, ...laid };
 
   // subject placement, including the declared overlap with a named type slot
@@ -129,6 +134,21 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
         }
       }
     }
+    // A subject crossing a DISPLAY line is the corpus idiom. A subject sitting on
+    // body copy is a mistake — round 3 buried two cover kickers behind a figure.
+    // Push the subject clear of any non-display slot it obscures.
+    if (subject) {
+      const displayIds = new Set((roleSpec.type || [])
+        .filter((t) => t.hierarchy === 'display' || t.id === sSpec.overlapSlot).map((t) => t.id));
+      for (const r of laid.rects) {
+        if (displayIds.has(r.id)) continue;
+        const cov = coverage(r, subject.rect);
+        if (cov > 0.1) {
+          const push = r.y + r.h + 14 - subject.rect.y;
+          if (push > 0) subject.rect.y += Math.round(push);
+        }
+      }
+    }
   }
 
   const furniture = layoutFurniture({
@@ -143,6 +163,10 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
   bgCtx.plate = bgSpec.type === 'flat' ? bgSpec.fill : 'paper';
   const background = await renderBackground(bgSpec, bgCtx);
 
+  // rules and swatches sit under the cutout, the way the corpus does it
+  const underLayer = (laid.underShapes || []).length
+    ? (await renderVectorLayer({ width: canvas.w, height: canvas.h, blocks: [], shapes: laid.underShapes })).png
+    : null;
   const typeLayer = (await renderVectorLayer({
     width: canvas.w, height: canvas.h, blocks: laid.blocks, shapes: laid.shapes,
   })).png;
@@ -153,7 +177,7 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
     width: canvas.w, height: canvas.h, blocks: furniture.blocks, shapes: furniture.shapes,
   })).png;
 
-  await composeSlide({ background, subject, typeLayer, furnitureLayer, canvas, out: outFile });
+  await composeSlide({ background, underLayer, subject, typeLayer, furnitureLayer, canvas, out: outFile });
 
   return {
     ok: true,
@@ -175,21 +199,53 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
  */
 export async function renderCarousel({
   accountId = 'drift', campaignId = 'why-not-what', postIndex = 0,
-  outDir = 'output/run', templates = loadTemplates(), maxRetries = 5,
+  outDir = 'output/run', templates = loadTemplates(), maxRetries = 8,
 }) {
   const d = diverge({ accountId, campaignId, postIndex, templates });
   const palette = makePalette(d.accentKey);
   const id = `${d.tpl.id.split('-')[0]}-p${String(postIndex).padStart(2, '0')}-${d.accentKey.slice(-1)}`;
   const dir = path.join(outDir, id);
 
+  /**
+   * The corpus volume curve, stated as an inequality:
+   *     cover  <  closer  <=  min(interiors)
+   * Shaving words until it happened to hold was fragile — 16 of 38 template/hook
+   * combinations failed. The closer now carries three written lengths and the
+   * engine SOLVES for the one that satisfies the inequality against the real
+   * rendered word counts of this particular template.
+   */
+  const solveCloserLen = (mk3, base) => {
+    let best = 1, bestScore = -Infinity;
+    for (const len of [0, 1, 2]) {
+      const c = buildCopy(mk3(), { ...base, closerLen: len });
+      const counts = c.slides.map((slide, i) => {
+        const r = layoutSlide({ tpl: d.tpl, role: roleFor(d.tpl, slide, i), content: slide,
+          palette, canvas: d.tpl.canvas });
+        return r.ok ? r.renderedWords : NaN;
+      });
+      if (counts.some(Number.isNaN)) continue;
+      const cover = counts[0], closer = counts[counts.length - 1];
+      const minInt = Math.min(...counts.slice(1, -1));
+      // strictly satisfied beats nearly satisfied; ties broken toward a fuller closer
+      const score = (cover < closer ? 100 : -(cover - closer)) + (closer <= minInt ? 100 : -(closer - minInt)) + len;
+      if (score > bestScore) { bestScore = score; best = len; }
+    }
+    return best;
+  };
+
   let attempt = 0, copy = null, failures = [];
   for (; attempt <= maxRetries; attempt++) {
+    const base = { slideCount: d.slideCount, hookType: d.hookType, shorten: attempt, hookPick: attempt };
+    const closerLen = solveCloserLen(() => makeRng(d.seed + attempt * 7919), base);
     const rCopy = makeRng(d.seed + attempt * 7919);
-    copy = buildCopy(rCopy, { slideCount: d.slideCount, hookType: d.hookType, shorten: attempt });
+    copy = buildCopy(rCopy, { ...base, closerLen });
 
     // dry-run every slide's layout before rendering a single pixel
+    const cover0 = layoutSlide({ tpl: d.tpl, role: 'cover', content: copy.slides[0], palette, canvas: d.tpl.canvas });
+    const cap0 = cover0.ok && cover0.displaySize ? cover0.displaySize * (d.tpl.hierarchyRatio ?? 0.68) : undefined;
     const dry = copy.slides.map((slide, i) =>
-      layoutSlide({ tpl: d.tpl, role: roleFor(d.tpl, slide, i), content: slide, palette, canvas: d.tpl.canvas })
+      layoutSlide({ tpl: d.tpl, role: roleFor(d.tpl, slide, i), content: slide, palette,
+        canvas: d.tpl.canvas, displayCap: i === 0 ? undefined : cap0 })
     );
     const bad = dry.map((r, i) => ({ r, i })).filter((x) => !x.r.ok);
     if (!bad.length) break;
@@ -206,6 +262,12 @@ export async function renderCarousel({
 
   fs.mkdirSync(dir, { recursive: true });
   const rotateOffset = makeRng(d.seed ^ 0x5bd1e995).int(97);
+  // measure the cover's display size once, then cap every later slide against it
+  const coverLaid = layoutSlide({
+    tpl: d.tpl, role: 'cover', content: copy.slides[0], palette, canvas: d.tpl.canvas,
+  });
+  const displayCap = coverLaid.ok && coverLaid.displaySize
+    ? coverLaid.displaySize * (d.tpl.hierarchyRatio ?? 0.68) : undefined;
   const files = [];
   const slideMeta = [];
   for (let i = 0; i < copy.slides.length; i++) {
@@ -215,6 +277,7 @@ export async function renderCarousel({
     const r = await renderSlide({
       tpl: d.tpl, slide, slideIndex: i, slideCount: copy.slides.length,
       palette, outFile, rngSlide, cropStrategy: d.cropStrategy, rotateOffset,
+      displayCap: i === 0 ? undefined : displayCap,
     });
     if (!r.ok) throw new Error(`render failed on slide ${i + 1}: ${r.reason} (${r.slot})`);
     files.push(outFile);
@@ -229,7 +292,7 @@ export async function renderCarousel({
   const carousel = {
     id, dir, files,
     accountId, campaignId, postIndex,
-    seed: d.seed, family: d.tpl.id, familyName: d.tpl.name,
+    seed: d.seed, family: d.tpl.id, familyName: d.tpl.name, displayCap,
     accentKey: d.accentKey, accent: palette.accent,
     hookType: copy.hookType, slides: copy.slides, canvas: d.tpl.canvas,
     tpl: d.tpl, furnitureByRole, cropStrategy: d.cropStrategy,

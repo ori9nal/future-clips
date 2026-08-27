@@ -36,7 +36,15 @@ async function accentDecay(c) {
 // Corpus §7 rule 5: interior headlines run 35-55% of the cover headline's size.
 // Nothing on an interior slide is allowed to compete with the cover.
 async function hierarchyRatio(c, tpl) {
-  const sizes = c.slideMeta.map((m) => m.fittedSizes?.headline ?? 0);
+  // Compare the largest DISPLAY slot of each variant, not always the slot that
+  // happens to be called "headline" — a stat variant's dominant type is its stat.
+  const displaySize = (m, i) => {
+    const role = m.variant ?? c.slides[i].role;
+    const ids = (tpl.roles[role]?.type || []).filter((t) => t.hierarchy === 'display').map((t) => t.id);
+    const pool = ids.length ? ids : ['headline'];
+    return Math.max(0, ...pool.map((id) => m.fittedSizes?.[id] ?? 0));
+  };
+  const sizes = c.slideMeta.map(displaySize);
   const cover = sizes[0] || 1;
   const interiors = sizes.slice(1, -1).filter(Boolean);
   const ratios = interiors.map((s) => s / cover);
@@ -71,7 +79,12 @@ function overlapIntent(c, tpl) {
     checked++;
     const target = m.rects.find((r) => r.id === spec.overlapSlot);
     if (!target) return;
-    const overlap = target.y + target.h - m.subjectRect.y;
+    // "top": the subject sits above the slot and its FOOT crosses down into the
+    // type. "bottom" (default): the subject sits below and its HEAD crosses up.
+    // Round 7 measured both the same way and reported a 916px overlap.
+    const overlap = spec.overlapEdge === 'top'
+      ? m.subjectRect.y + m.subjectRect.h - target.y
+      : target.y + target.h - m.subjectRect.y;
     if (overlap >= 4 && overlap <= 90) good++;
     else fails.push(`slide ${i + 1}: subject/type overlap ${Math.round(overlap)}px (want 4-90)`);
   });

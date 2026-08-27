@@ -21,35 +21,35 @@ export const HOOK_TYPES = [
 const HOOKS = {
   'side-effect': [
     { headline: 'side effects of six hours', kicker: 'nobody warned you about', accent: 'six' },
-    { headline: 'what six hours quietly costs you', kicker: 'the part no tracker shows', accent: 'quietly' },
-    { headline: 'the hidden tax of short sleep', kicker: 'you are already paying it', accent: 'hidden' },
+    { headline: 'what six hours quietly costs you', kicker: 'no tracker shows this', accent: 'quietly' },
+    { headline: 'the hidden tax of short sleep', kicker: 'you already pay it', accent: 'hidden' },
   ],
   'lazy-effortless': [
-    { headline: 'lazy habits that wreck your sleep', kicker: 'and the lazy fixes that undo them', accent: 'lazy' },
-    { headline: 'four lazy nights, one broken week', kicker: 'the maths is uglier than you think', accent: 'broken' },
+    { headline: 'lazy habits that wreck your sleep', kicker: 'and the lazy fixes', accent: 'lazy' },
+    { headline: 'four lazy nights, one broken week', kicker: 'the maths is ugly', accent: 'broken' },
     { headline: 'the laziest way to sleep deeper', kicker: 'no routine, no supplements', accent: 'laziest' },
   ],
   'numbered-authority': [
-    { headline: 'i tracked ninety nights', kicker: 'only four things moved the score', accent: 'ninety' },
-    { headline: 'five habits that quietly cost points', kicker: 'ranked by how much they take', accent: 'five' },
+    { headline: 'i tracked ninety nights', kicker: 'four things moved it', accent: 'ninety' },
+    { headline: 'five habits that quietly cost points', kicker: 'ranked by what they take', accent: 'five' },
     { headline: 'ninety nights, four real levers', kicker: 'everything else was noise', accent: 'four' },
   ],
   'contrarian-negation': [
-    { headline: 'you are not tired', kicker: 'you are under-slept in a way you cannot feel', accent: 'not' },
-    { headline: 'it is not your mattress', kicker: 'and it was never the melatonin', accent: 'never' },
-    { headline: 'not a discipline problem', kicker: 'a signal problem', accent: 'signal' },
+    { headline: 'you are not tired', kicker: 'in a way you cannot feel', accent: 'not' },
+    { headline: 'it is not your mattress', kicker: 'and never the melatonin', accent: 'not' },
+    { headline: 'not a discipline problem', kicker: 'a signal problem', accent: 'discipline' },
   ],
   'confession-receipt': [
     { headline: 'six things i wish i knew sooner', kicker: 'before ninety nights of data', accent: 'sooner' },
-    { headline: 'my score said seventy-one', kicker: 'here is what it was actually telling me', accent: 'seventy-one' },
-    { headline: 'i blamed everything except this', kicker: 'ninety nights later, it was obvious', accent: 'everything' },
+    { headline: 'my score said seventy-one', kicker: 'here is what it meant', accent: 'score' },
+    { headline: 'i blamed everything except this', kicker: 'ninety nights later', accent: 'everything' },
   ],
   'hypothetical': [
-    { headline: 'if your sleep sent you an invoice', kicker: 'here is what last week cost', accent: 'invoice' },
-    { headline: 'if three a.m. could talk', kicker: 'this is what it would say', accent: 'talk' },
+    { headline: 'if your sleep sent you an invoice', kicker: 'here is last week', accent: 'invoice' },
+    { headline: 'if three a.m. could talk', kicker: 'this is what it says', accent: 'talk' },
   ],
   'status-threat': [
-    { headline: 'what your three a.m. wakeup means', kicker: 'it is rarely the thing you blame', accent: 'means' },
+    { headline: 'what your three a.m. wakeup means', kicker: 'rarely what you blame', accent: 'means' },
     { headline: 'everyone tracks sleep, nobody reads it', kicker: 'the number is not the point', accent: 'nobody' },
     { headline: 'your tracker is grading, not explaining', kicker: 'those are different jobs', accent: 'explaining' },
   ],
@@ -99,17 +99,29 @@ const INSIGHTS = [
 // format depends on.
 const CLOSERS = [
   { line: 'follow for the why', verb: 'follow', accent: 'why',
-    sub: 'every other tracker hands you a number and walks away' },
+    subs: ['not just the number',
+           'other trackers hand you a number',
+           'every other tracker hands you a number and walks away'] },
   { line: 'save this for tonight', verb: 'save', accent: 'tonight',
-    sub: 'read it again before you set the alarm, not after' },
+    subs: ['before you set the alarm',
+           'read it before you set the alarm',
+           'read it again tonight before you set the alarm, not after'] },
   { line: 'download DRIFT', verb: 'download', accent: 'DRIFT',
-    sub: 'it scores the night, then names the one habit that cost you' },
+    subs: ['it names the habit',
+           'it names the habit that cost you',
+           'it scores the night, then names the one habit that cost you'] },
   { line: 'try one night', verb: 'try', accent: 'one',
-    sub: 'you will know which habit it was by breakfast tomorrow' },
+    subs: ['you will know by breakfast',
+           'you will know which habit it was by breakfast',
+           'one night is enough to see which habit was taking the points'] },
   { line: 'follow DRIFT', verb: 'follow', accent: 'DRIFT',
-    sub: 'the only sleep tracker that bothers to explain itself' },
+    subs: ['the tracker that explains itself',
+           'the only sleep tracker that explains itself',
+           'the only sleep tracker that bothers to explain what it just measured'] },
   { line: 'save it, then sleep on it', verb: 'save', accent: 'sleep',
-    sub: 'tomorrow morning you are going to want this list back' },
+    subs: ['you will want this list',
+           'tomorrow you will want this list back',
+           'tomorrow morning you are going to want this list back again'] },
 ];
 
 export const CTA_VERBS = ['follow', 'save', 'download', 'try', 'subscribe', 'comment'];
@@ -152,9 +164,27 @@ export function stackLines(text, n, accentWord) {
  * @returns {{slides: Array, hookType: string, meta: object}}
  * slides[i] = { role, ...contentFields, wordCount }
  */
-export function buildCopy(rng, { slideCount, hookType, tone = 'default', shorten = 0 }) {
+// Round 3 rendered a cover with zero accent because the hook's accent word lived
+// in the kicker, not the headline, so the run splitter never matched it. That is
+// a data error, and data errors should be loud.
+for (const [type, pool] of Object.entries(HOOKS)) {
+  for (const h of pool) {
+    const words = h.headline.toLowerCase().split(/\s+/).map((w) => w.replace(/[^a-z0-9'-]/g, ''));
+    if (!words.includes(h.accent.toLowerCase())) {
+      throw new Error(`hook "${type}": accent "${h.accent}" is not a word in headline "${h.headline}"`);
+    }
+  }
+}
+
+export function buildCopy(rng, { slideCount, hookType, tone = 'default', shorten = 0, hookPick = 0, closerLen = 1 }) {
   const pool = HOOKS[hookType] || HOOKS['side-effect'];
-  const hook = pool[rng.int(pool.length)];
+  // The regeneration ladder walks the hook pool as well as trimming, so a headline
+  // that simply cannot be set in a template's box is replaced rather than shrunk
+  // past the point where the layout gives up entirely.
+  const ordered = hookPick
+    ? pool.slice().sort((a, b) => a.headline.length - b.headline.length)
+    : pool;
+  const hook = ordered[(rng.int(ordered.length) + hookPick) % ordered.length];
 
   const bodyCount = slideCount - 2; // cover + closer
   const picked = rng.sample(INSIGHTS, Math.min(bodyCount, INSIGHTS.length));
@@ -186,15 +216,17 @@ export function buildCopy(rng, { slideCount, hookType, tone = 'default', shorten
   });
 
   picked.forEach((ins, i) => {
-    // volume decays across the interiors
-    const notch = shorten + (i >= Math.ceil(bodyCount * 0.6) ? 1 : 0);
+    // Volume decays MONOTONICALLY across the interiors. Round 5 used a single step
+    // at 60%, which meant a terse variant landing early and a verbose one landing
+    // late produced a rising slope. A ramp cannot do that.
+    const notch = shorten + (bodyCount > 1 ? Math.round((i / (bodyCount - 1)) * 1) : 0);
     slides.push({
       role: 'body',
       index: String(i + 1).padStart(2, '0'),
       indexPlain: String(i + 1),
       title: ins.title,
       headline: ins.title,
-      claim: trimLine(ins.claim, shorten),
+      claim: ins.claim,   // never trimmed: the claim is what a quote/stat slide IS
       body: trimDetail(ins.detail, notch),
       stat: ins.stat,
       accentWord: ins.title.split(/\s+/).slice(-1)[0],
@@ -205,7 +237,7 @@ export function buildCopy(rng, { slideCount, hookType, tone = 'default', shorten
   slides.push({
     role: 'closer',
     headline: closer.line,
-    kicker: closer.sub,
+    kicker: closer.subs[Math.max(0, Math.min(closer.subs.length - 1, closerLen))],
     accentWord: closer.accent,
     cta: closer.verb,
     eyebrow: 'DRIFT',

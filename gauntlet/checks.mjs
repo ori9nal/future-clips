@@ -53,7 +53,8 @@ export async function autoScore(carousel, tpl, opts = {}) {
 
   // ---- 2/3/4. re-run the layout independently ----------------------------
   const laid = carousel.slides.map((slide, i) =>
-    layoutSlide({ tpl, role: carousel.slideMeta[i]?.variant ?? slide.role, content: slide, palette, canvas: tpl.canvas }));
+    layoutSlide({ tpl, role: carousel.slideMeta[i]?.variant ?? slide.role, content: slide, palette,
+      canvas: tpl.canvas, displayCap: i === 0 ? undefined : carousel.displayCap }));
 
   const overflow = laid.map((r, i) => ({ r, i })).filter((x) => !x.r.ok && (x.r.reason === 'no-fit' || x.r.reason === 'missing-content'));
   // pixel corroboration: the type layer's real ink must sit inside the safe box

@@ -131,14 +131,15 @@ function makeRunner(slot, fit, ctx, accentTarget) {
  * Fit every type slot of one slide.
  * @returns {{ok:true, blocks, rects, shapes} | {ok:false, reason, slot}}
  */
-export function layoutSlide({ tpl, role, content, palette, canvas }) {
+export function layoutSlide({ tpl, role, content, palette, canvas, displayCap }) {
   const roleSpec = tpl.roles[role];
   if (!roleSpec) throw new Error(`template ${tpl.id} has no role "${role}"`);
   const ctx = { tpl, placed: new Map(), palette };
   const S = safeBox(tpl);
   const blocks = [];
   const rects = [];
-  const shapes = [];
+  const shapes = [];        // painted with the type, above the subject
+  const underShapes = [];   // painted below the subject: rules, swatches
   let renderedWords = 0;
 
   for (const slot of roleSpec.type || []) {
@@ -154,12 +155,19 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
     const box = resolveBox(slot.box, ctx);
     if (box.w <= 0 || box.h <= 0) return { ok: false, reason: 'degenerate-box', slot: slot.id };
 
+    // The cover must dominate. Once the cover's display size is known it is passed
+    // back in as a ceiling for every later slide, so hierarchy is guaranteed by
+    // construction rather than by hand-tuned per-template maxima.
+    const capped = slot.hierarchy === 'display' && displayCap
+      ? Math.max(slot.size[0], Math.min(slot.size[1], Math.floor(displayCap)))
+      : slot.size[1];
     const opts = {
       min: slot.size[0],
-      max: slot.size[1],
+      max: capped,
       lineHeight: slot.lineHeight ?? 1.05,
       tracking: slot.tracking ?? 0,
       maxLines: slot.maxLines ?? Infinity,
+      autoLeading: slot.autoLeading !== false,
     };
     const fit = slot.mode === 'lines'
       ? fitLines(face, text.split('\n'), box, opts)
@@ -211,6 +219,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
       shadow: slot.shadow
         ? `${slot.shadow.dx}px ${slot.shadow.dy}px ${slot.shadow.blur ?? 0}px ${withAlpha(resolveColor(slot.shadow.color ?? 'ink', palette), slot.shadow.alpha ?? 0.18)}`
         : null,
+      justify: slot.justify === true,
       runsFor: makeRunner(slot, fit, { palette }, accentTarget),
       extraFaces: slot.accent?.font
         ? [resolveFace(slot.accent.font.role ?? slot.font.role, slot.accent.font.weight ?? slot.font.weight, slot.accent.font.style ?? slot.font.style)]
@@ -219,8 +228,9 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
 
     // decorations attached to a slot (rules, highlighter swatches)
     for (const dec of slot.decorations || []) {
+      const bucket = dec.above === true ? shapes : underShapes;
       if (dec.kind === 'rule') {
-        shapes.push({
+        bucket.push({
           kind: 'rect',
           x: dec.align === 'text' ? rect.x : box.x,
           y: rect.y + rect.h + (dec.gap ?? 20),
@@ -230,7 +240,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
           opacity: dec.opacity ?? 1,
         });
       } else if (dec.kind === 'swatch') {
-        shapes.push({
+        bucket.push({
           kind: 'rect',
           x: rect.x - (dec.padX ?? 14),
           y: rect.y + rect.h * (dec.top ?? 0.24),
@@ -259,7 +269,9 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
     }
   }
 
-  return { ok: true, blocks, rects, shapes, safe: S, renderedWords };
+  const displaySize = blocks.find((b) => (roleSpec.type || []).find((t) => t.id === b.id)?.hierarchy === 'display')?.fit.size
+    ?? blocks.find((b) => b.id === 'headline')?.fit.size ?? null;
+  return { ok: true, blocks, rects, shapes, underShapes, safe: S, renderedWords, displaySize };
 }
 
 // ------------------------------------------------------------------- furniture
@@ -321,7 +333,7 @@ export function layoutFurniture({ tpl, role, slideIndex, slideCount, palette, br
       runsFor: null,
     });
 
-    if (f.dot) {
+    if (f.dot && !(f.dotOff || []).includes(role)) {
       shapes.push({
         kind: 'rect', radius: 999,
         x: rect.x - (f.dot.gap ?? 18) - (f.dot.r ?? 5) * 2,
@@ -347,6 +359,18 @@ export function layoutFurniture({ tpl, role, slideIndex, slideCount, palette, br
   }
 
   return { blocks, shapes };
+}
+
+/**
+ * Area of `rect` hidden by `sub`, as a fraction of `rect`.
+ * A subject crossing a display line is the corpus idiom; a subject sitting on top
+ * of body copy is a mistake, and round 3 shipped it on two families.
+ */
+export function coverage(rect, sub) {
+  const w = Math.min(rect.x + rect.w, sub.x + sub.w) - Math.max(rect.x, sub.x);
+  const h = Math.min(rect.y + rect.h, sub.y + sub.h) - Math.max(rect.y, sub.y);
+  if (w <= 0 || h <= 0) return 0;
+  return (w * h) / Math.max(1, rect.w * rect.h);
 }
 
 export { safeBox };

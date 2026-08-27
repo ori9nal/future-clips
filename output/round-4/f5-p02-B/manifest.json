@@ -1,0 +1,723 @@
+{
+  "id": "f5-p02-B",
+  "dir": "output\\round-4\\f5-p02-B",
+  "files": [
+    "output\\round-4\\f5-p02-B\\01.png",
+    "output\\round-4\\f5-p02-B\\02.png",
+    "output\\round-4\\f5-p02-B\\03.png",
+    "output\\round-4\\f5-p02-B\\04.png",
+    "output\\round-4\\f5-p02-B\\05.png",
+    "output\\round-4\\f5-p02-B\\06.png",
+    "output\\round-4\\f5-p02-B\\07.png",
+    "output\\round-4\\f5-p02-B\\08.png"
+  ],
+  "accountId": "drift",
+  "campaignId": "why-not-what-r4",
+  "postIndex": 2,
+  "seed": 4228626450,
+  "family": "f5-type-bold",
+  "familyName": "TYPE-BOLD",
+  "displayCap": 87.04,
+  "accentKey": "accent-B",
+  "accent": "#5B7FFF",
+  "hookType": "hypothetical",
+  "slides": [
+    {
+      "role": "cover",
+      "headline": "if three a.m. could talk",
+      "kicker": "this is what it would say",
+      "accentWord": "talk",
+      "eyebrow": "DRIFT · sleep, explained",
+      "wordCount": 15,
+      "stack2": "if three a.m. could\ntalk",
+      "stack3": "if three\na.m. could\ntalk",
+      "stackCaps3": "IF THREE\nA.M. COULD\nTALK",
+      "stackCaps2": "IF THREE A.M. COULD\nTALK",
+      "headlineCaps": "IF THREE A.M. COULD TALK",
+      "kickerCaps": "THIS IS WHAT IT WOULD SAY"
+    },
+    {
+      "role": "body",
+      "index": "01",
+      "indexPlain": "1",
+      "title": "the snooze button",
+      "headline": "the snooze button",
+      "claim": "Nine more minutes buys you the worst nine minutes.",
+      "body": "You restart a cycle you cannot finish, then break it again.\n\nThe grogginess is the interruption, not the shortage.",
+      "stat": "-4 pts",
+      "accentWord": "button",
+      "eyebrow": "01 · pattern",
+      "wordCount": 36,
+      "stack2": "the snooze\nbutton",
+      "stack3": "the\nsnooze\nbutton",
+      "stackCaps3": "THE\nSNOOZE\nBUTTON",
+      "stackCaps2": "THE SNOOZE\nBUTTON",
+      "headlineCaps": "THE SNOOZE BUTTON",
+      "kickerCaps": "",
+      "indexDot": "1."
+    },
+    {
+      "role": "body",
+      "index": "02",
+      "indexPlain": "2",
+      "title": "the sunday reset",
+      "headline": "the sunday reset",
+      "claim": "You cannot bank sleep in advance.",
+      "body": "An early Sunday night before a hard week does almost nothing.\n\nConsistency compounds. Deposits do not.",
+      "stat": "-3 pts",
+      "accentWord": "reset",
+      "eyebrow": "02 · timing",
+      "wordCount": 30,
+      "stack2": "the sunday\nreset",
+      "stack3": "the\nsunday\nreset",
+      "stackCaps3": "THE\nSUNDAY\nRESET",
+      "stackCaps2": "THE SUNDAY\nRESET",
+      "headlineCaps": "THE SUNDAY RESET",
+      "kickerCaps": "",
+      "indexDot": "2."
+    },
+    {
+      "role": "body",
+      "index": "03",
+      "indexPlain": "3",
+      "title": "the last hour",
+      "headline": "the last hour",
+      "claim": "The hour before bed decides more than the eight after it.",
+      "body": "A bright, loud, scrolling hour keeps your system in daytime mode.\n\nDRIFT looks at how long it took you to actually fall asleep, then points at the hour that caused it.",
+      "stat": "-9 pts",
+      "accentWord": "hour",
+      "eyebrow": "03 · wind-down",
+      "wordCount": 50,
+      "stack2": "the last\nhour",
+      "stack3": "the\nlast\nhour",
+      "stackCaps3": "THE\nLAST\nHOUR",
+      "stackCaps2": "THE LAST\nHOUR",
+      "headlineCaps": "THE LAST HOUR",
+      "kickerCaps": "",
+      "indexDot": "3."
+    },
+    {
+      "role": "body",
+      "index": "04",
+      "indexPlain": "4",
+      "title": "the hard workout",
+      "headline": "the hard workout",
+      "claim": "A late session borrows from the first cycle.",
+      "body": "Training raises your core temperature for hours.\n\nSame workout at 6pm instead of 9pm, and the deep block comes back.",
+      "stat": "-5 pts",
+      "accentWord": "workout",
+      "eyebrow": "04 · activity",
+      "wordCount": 36,
+      "stack2": "the hard\nworkout",
+      "stack3": "the\nhard\nworkout",
+      "stackCaps3": "THE\nHARD\nWORKOUT",
+      "stackCaps2": "THE HARD\nWORKOUT",
+      "headlineCaps": "THE HARD WORKOUT",
+      "kickerCaps": "",
+      "indexDot": "4."
+    },
+    {
+      "role": "body",
+      "index": "05",
+      "indexPlain": "5",
+      "title": "the nightcap",
+      "headline": "the nightcap",
+      "claim": "A drink gets you to sleep and then takes it back.",
+      "body": "The first half of the night looks fine. The second half fragments.",
+      "stat": "-13 pts",
+      "accentWord": "nightcap",
+      "eyebrow": "05 · stimulant",
+      "wordCount": 30,
+      "stack2": "the\nnightcap",
+      "stack3": "the\nnightcap",
+      "stackCaps3": "THE\nNIGHTCAP",
+      "stackCaps2": "THE\nNIGHTCAP",
+      "headlineCaps": "THE NIGHTCAP",
+      "kickerCaps": "",
+      "indexDot": "5."
+    },
+    {
+      "role": "body",
+      "index": "06",
+      "indexPlain": "6",
+      "title": "the moving alarm",
+      "headline": "the moving alarm",
+      "claim": "A wake time that shifts by an hour costs more than a late night.",
+      "body": "Your clock anchors to when you get up, not when you lie down.",
+      "stat": "-10 pts",
+      "accentWord": "alarm",
+      "eyebrow": "06 · timing",
+      "wordCount": 35,
+      "stack2": "the moving\nalarm",
+      "stack3": "the\nmoving\nalarm",
+      "stackCaps3": "THE\nMOVING\nALARM",
+      "stackCaps2": "THE MOVING\nALARM",
+      "headlineCaps": "THE MOVING ALARM",
+      "kickerCaps": "",
+      "indexDot": "6."
+    },
+    {
+      "role": "closer",
+      "headline": "follow DRIFT",
+      "kicker": "the only sleep tracker that bothers to explain itself",
+      "accentWord": "DRIFT",
+      "cta": "follow",
+      "eyebrow": "DRIFT",
+      "wordCount": 12,
+      "stack2": "follow\nDRIFT",
+      "stack3": "follow\nDRIFT",
+      "stackCaps3": "FOLLOW\nDRIFT",
+      "stackCaps2": "FOLLOW\nDRIFT",
+      "headlineCaps": "FOLLOW DRIFT",
+      "kickerCaps": "THE ONLY SLEEP TRACKER THAT BOTHERS TO EXPLAIN ITSELF"
+    }
+  ],
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "furnitureByRole": {
+    "cover": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "arrow",
+        "anchor": "bottom-right",
+        "gap": 18,
+        "size": 40,
+        "glyph": "→",
+        "font": {
+          "role": "body",
+          "weight": 400
+        },
+        "color": "#E4E2DE",
+        "on": [
+          "cover"
+        ]
+      }
+    ],
+    "body": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      },
+      {
+        "type": "index",
+        "anchor": "bottom-right",
+        "gap": 32,
+        "size": 23,
+        "tracking": 0.16,
+        "format": "{i}/{n}",
+        "font": {
+          "role": "mono",
+          "weight": 500
+        },
+        "color": "#7B8399",
+        "on": [
+          "body"
+        ]
+      }
+    ],
+    "closer": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ],
+    "body-figure": [
+      {
+        "type": "wordmark",
+        "anchor": "top-center",
+        "gap": 16,
+        "size": 24,
+        "tracking": 0.42,
+        "font": {
+          "role": "body",
+          "weight": 700
+        },
+        "color": "#E4E2DE"
+      },
+      {
+        "type": "handle",
+        "anchor": "bottom-left",
+        "gap": 30,
+        "size": 25,
+        "font": {
+          "role": "body",
+          "weight": 500
+        },
+        "color": "#7B8399"
+      }
+    ]
+  },
+  "cropStrategy": "contain",
+  "copyAttempts": 0,
+  "slideMeta": [
+    {
+      "index": 0,
+      "role": "cover",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\01.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 308.43,
+          "y": 476.33,
+          "w": 463.14,
+          "h": 27.149999999999995
+        },
+        {
+          "id": "headline",
+          "x": 131.296,
+          "y": 562.328,
+          "w": 817.408,
+          "h": 328.70399999999995
+        },
+        {
+          "id": "stat",
+          "x": 288,
+          "y": 969.482,
+          "w": 504,
+          "h": 24.05
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 132,
+        "y": 476,
+        "w": 811,
+        "h": 518
+      },
+      "variant": "cover",
+      "renderedWords": 15,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 30,
+        "headline": 128,
+        "stat": 25
+      }
+    },
+    {
+      "index": 1,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\02.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 133.72,
+          "w": 249.59999999999997,
+          "h": 23.919999999999998
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 211.558,
+          "w": 613.437,
+          "h": 145.464
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 442.11,
+          "w": 701.328,
+          "h": 94.79999999999998
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 590.324,
+          "w": 792.984,
+          "h": 262.694
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 86,
+        "y": 133,
+        "w": 792,
+        "h": 720
+      },
+      "variant": "body",
+      "renderedWords": 34,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 87,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 2,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\03.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 25.012
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 227.03599999999997,
+          "w": 794.919,
+          "h": 167.30100000000002
+        },
+        {
+          "id": "stat",
+          "x": 86,
+          "y": 464.457,
+          "w": 179.52,
+          "h": 40.04
+        }
+      ],
+      "subjectRect": {
+        "x": 242,
+        "y": 1067,
+        "w": 778,
+        "h": 183
+      },
+      "subjectId": "stage-bar",
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 795,
+        "h": 372
+      },
+      "variant": "body-figure",
+      "renderedWords": 11,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "claim": 87,
+        "stat": 44
+      }
+    },
+    {
+      "index": 3,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\04.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 291.2,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 207.138,
+          "w": 765.687,
+          "h": 61.943999999999996
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 353.786,
+          "w": 748.8,
+          "h": 103.344
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 510.848,
+          "w": 787.018,
+          "h": 312.92999999999995
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 785,
+        "h": 692
+      },
+      "variant": "body",
+      "renderedWords": 48,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 87,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 4,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\05.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 270.40000000000003,
+          "h": 25.012
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 212.60199999999998,
+          "w": 490.767,
+          "h": 144.42000000000002
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 441.726,
+          "w": 785.472,
+          "h": 103.344
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 598.4839999999999,
+          "w": 788.044,
+          "h": 205.35200000000003
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 785,
+        "h": 672
+      },
+      "variant": "body",
+      "renderedWords": 34,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 87,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 5,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\06.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 291.2,
+          "h": 20.592000000000002
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 222.61599999999999,
+          "w": 790.047,
+          "h": 238.20600000000002
+        },
+        {
+          "id": "stat",
+          "x": 86,
+          "y": 530.942,
+          "w": 209.44000000000003,
+          "h": 40.04
+        }
+      ],
+      "subjectRect": {
+        "x": 588,
+        "y": 818,
+        "w": 432,
+        "h": 432
+      },
+      "subjectId": "dial-62",
+      "typeInk": {
+        "x": 87,
+        "y": 132,
+        "w": 789,
+        "h": 439
+      },
+      "variant": "body-figure",
+      "renderedWords": 16,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "claim": 87,
+        "stat": 44
+      }
+    },
+    {
+      "index": 6,
+      "role": "body",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\07.png",
+      "rects": [
+        {
+          "id": "eyebrow",
+          "x": 86,
+          "y": 132.628,
+          "w": 228.79999999999998,
+          "h": 25.012
+        },
+        {
+          "id": "headline",
+          "x": 86,
+          "y": 211.558,
+          "w": 604.9110000000001,
+          "h": 144.42
+        },
+        {
+          "id": "claim",
+          "x": 86,
+          "y": 440.68199999999996,
+          "w": 728.16,
+          "h": 103.344
+        },
+        {
+          "id": "body",
+          "x": 86,
+          "y": 597.7439999999999,
+          "w": 711.436,
+          "h": 91.39
+        }
+      ],
+      "subjectRect": null,
+      "subjectId": null,
+      "typeInk": {
+        "x": 86,
+        "y": 132,
+        "w": 728,
+        "h": 557
+      },
+      "variant": "body",
+      "renderedWords": 33,
+      "furnitureCount": 3,
+      "fittedSizes": {
+        "eyebrow": 26,
+        "headline": 87,
+        "claim": 48,
+        "body": 38
+      }
+    },
+    {
+      "index": 7,
+      "role": "closer",
+      "ok": true,
+      "file": "output\\round-4\\f5-p02-B\\08.png",
+      "rects": [
+        {
+          "id": "headline",
+          "x": 343.3365,
+          "y": 512.878,
+          "w": 393.327,
+          "h": 144.42
+        },
+        {
+          "id": "kicker",
+          "x": 173.00400000000002,
+          "y": 702.92,
+          "w": 733.992,
+          "h": 31.042
+        }
+      ],
+      "subjectRect": {
+        "x": 394,
+        "y": 738,
+        "w": 292,
+        "h": 317
+      },
+      "subjectId": "moon",
+      "typeInk": {
+        "x": 173,
+        "y": 513,
+        "w": 734,
+        "h": 221
+      },
+      "variant": "closer",
+      "renderedWords": 11,
+      "furnitureCount": 2,
+      "fittedSizes": {
+        "headline": 87,
+        "kicker": 34
+      }
+    }
+  ],
+  "fingerprint": {
+    "key": "f5-type-bold|8|hypothetical|accent-B",
+    "hash": "bd2a6a10cc42"
+  },
+  "validation": {
+    "ok": true,
+    "errors": []
+  }
+}

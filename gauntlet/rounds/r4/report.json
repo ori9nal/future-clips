@@ -1,0 +1,1407 @@
+{
+  "round": 4,
+  "campaign": "why-not-what-r4",
+  "n": 10,
+  "strictTier": 1,
+  "autoMean": 67.1,
+  "autoMax": 70,
+  "autoMeanScaled60": 57.51,
+  "renderErrors": [],
+  "fingerprintCollisions": [],
+  "familyMix": {
+    "CUTOUT-EDITORIAL": 2,
+    "POSTER-CHARACTER": 2,
+    "TYPE-BOLD": 2,
+    "TYPE-MONO": 2,
+    "CUTOUT-SPORT": 2
+  },
+  "accentMix": {
+    "accent-B": 5,
+    "accent-A": 5
+  },
+  "hookMix": {
+    "status-threat": 1,
+    "numbered-authority": 2,
+    "hypothetical": 1,
+    "confession-receipt": 1,
+    "lazy-effortless": 3,
+    "side-effect": 1,
+    "contrarian-negation": 1
+  },
+  "slideCountMix": {
+    "6": 4,
+    "7": 1,
+    "8": 4,
+    "10": 1
+  },
+  "worstItems": [
+    {
+      "id": "accent-decay",
+      "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+      "lost": 10,
+      "examples": [
+        "f1-p00-B: cover accent 0.0% below interior mean 2.0%",
+        "f2-p04-B: cover accent 1.8% below interior mean 2.6%",
+        "f5-p05-A: closer accent 1.0% > interior mean 1.0%",
+        "f3-p07-B: closer accent 1.2% > interior mean 1.2%"
+      ]
+    },
+    {
+      "id": "hierarchy-ratio",
+      "label": "interior headline <= 72% of the cover headline",
+      "lost": 10,
+      "examples": [
+        "f2-p04-B: slide 4 headline is 121% of the cover",
+        "f2-p04-B: slide 7 headline is 121% of the cover",
+        "f2-p09-A: slide 4 headline is 76% of the cover",
+        "f2-p09-A: slide 7 headline is 76% of the cover"
+      ]
+    },
+    {
+      "id": "volume-decay",
+      "label": "text volume decays; slide 1 lowest",
+      "lost": 9,
+      "examples": [
+        "f5-p02-B: slide 1 (15) is not the lowest (min of rest = 11)",
+        "f4-p03-A: slide 1 (14) is not the lowest (min of rest = 11)",
+        "f4-p06-A: slide 1 (17) is not the lowest (min of rest = 11)"
+      ]
+    }
+  ],
+  "visionRubric": [
+    {
+      "id": "hook",
+      "max": 10,
+      "label": "the hook stops the scroll"
+    },
+    {
+      "id": "thumbnail",
+      "max": 10,
+      "label": "type hierarchy readable at 200px"
+    },
+    {
+      "id": "overlap",
+      "max": 5,
+      "label": "subject/type overlap reads as intentional"
+    },
+    {
+      "id": "grade",
+      "max": 5,
+      "label": "colour grade coherent, single accent, premium"
+    },
+    {
+      "id": "consistency",
+      "max": 5,
+      "label": "style/character consistency across the set"
+    },
+    {
+      "id": "holistic",
+      "max": 5,
+      "label": "would this plausibly do millions of views"
+    }
+  ],
+  "carousels": [
+    {
+      "id": "f1-p00-B",
+      "family": "f1-cutout-editorial",
+      "familyName": "CUTOUT-EDITORIAL",
+      "accentKey": "accent-B",
+      "accent": "#5B7FFF",
+      "hookType": "status-threat",
+      "slideCount": 7,
+      "seed": 4195071212,
+      "copyAttempts": 0,
+      "fingerprint": {
+        "key": "f1-cutout-editorial|7|status-threat|accent-B",
+        "hash": "51dafb7829e9"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 68,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "7/7 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 6 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[13,32,15,45,21,17,14] first-lowest=true tail-slope=-3.09",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[0,1,1,1,0,1,0] hueSpread=0deg coverage=[0.7,4.9,2.4,1.0,0.1,1.7,0.4]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 7 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"download\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 3,
+            "max": 5,
+            "detail": "cover 0.0% / mid 2.0% / closer 0.0%",
+            "failures": [
+              "cover accent 0.0% below interior mean 2.0%"
+            ]
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 131px, interiors 89/89/89px, ratios 0.68/0.68/0.68",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[accent-decay] cover accent 0.0% below interior mean 2.0%"
+        ]
+      },
+      "sheet": "output\\round-4\\f1-p00-B\\sheet.png",
+      "strip": "output\\round-4\\f1-p00-B\\thumbs.png",
+      "dir": "output\\round-4\\f1-p00-B",
+      "subjects": [
+        "stand-slump",
+        "stage-bar",
+        "dial-91",
+        "dial-62",
+        "bed",
+        "hypnogram-flat",
+        "moon"
+      ]
+    },
+    {
+      "id": "f3-p01-A",
+      "family": "f3-poster-character",
+      "familyName": "POSTER-CHARACTER",
+      "accentKey": "accent-A",
+      "accent": "#FFB020",
+      "hookType": "numbered-authority",
+      "slideCount": 6,
+      "seed": 4211848831,
+      "copyAttempts": 0,
+      "fingerprint": {
+        "key": "f3-poster-character|6|numbered-authority|accent-A",
+        "hash": "1a0c9e1826f9"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 70,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "6/6 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 4 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[10,38,12,48,28,13] first-lowest=true tail-slope=-3.40",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,1,1,1,1,0] hueSpread=20deg coverage=[4.1,1.0,2.2,1.3,1.8,0.7]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 6 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"try\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 4.1% / mid 1.6% / closer 0.0%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 148px, interiors 100/100/100px, ratios 0.68/0.68/0.68",
+            "failures": []
+          }
+        ],
+        "failures": []
+      },
+      "sheet": "output\\round-4\\f3-p01-A\\sheet.png",
+      "strip": "output\\round-4\\f3-p01-A\\thumbs.png",
+      "dir": "output\\round-4\\f3-p01-A",
+      "subjects": [
+        "stand-slump",
+        "sit-edge",
+        "stand-slump",
+        "stand-slump",
+        "sit-edge",
+        "sit-edge"
+      ]
+    },
+    {
+      "id": "f5-p02-B",
+      "family": "f5-type-bold",
+      "familyName": "TYPE-BOLD",
+      "accentKey": "accent-B",
+      "accent": "#5B7FFF",
+      "hookType": "hypothetical",
+      "slideCount": 8,
+      "seed": 4228626450,
+      "copyAttempts": 0,
+      "fingerprint": {
+        "key": "f5-type-bold|8|hypothetical|accent-B",
+        "hash": "bd2a6a10cc42"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 67,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "8/8 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 5 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 2,
+            "max": 5,
+            "detail": "wc=[15,34,11,48,34,16,33,11] first-lowest=false tail-slope=-2.04",
+            "failures": [
+              "slide 1 (15) is not the lowest (min of rest = 11)"
+            ]
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,0,1,1,0,1,0,1] hueSpread=0deg coverage=[27.1,0.6,25.2,0.8,0.6,25.9,0.4,5.1]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 8 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"follow\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 27.1% / mid 8.7% / closer 5.1%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 128px, interiors 87/87/87/87px, ratios 0.68/0.68/0.68/0.68",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[volume-decay] slide 1 (15) is not the lowest (min of rest = 11)"
+        ]
+      },
+      "sheet": "output\\round-4\\f5-p02-B\\sheet.png",
+      "strip": "output\\round-4\\f5-p02-B\\thumbs.png",
+      "dir": "output\\round-4\\f5-p02-B",
+      "subjects": [
+        null,
+        null,
+        "stage-bar",
+        null,
+        null,
+        "dial-62",
+        null,
+        "moon"
+      ]
+    },
+    {
+      "id": "f4-p03-A",
+      "family": "f4-type-mono",
+      "familyName": "TYPE-MONO",
+      "accentKey": "accent-A",
+      "accent": "#FFB020",
+      "hookType": "confession-receipt",
+      "slideCount": 6,
+      "seed": 4245404069,
+      "copyAttempts": 3,
+      "fingerprint": {
+        "key": "f4-type-mono|6|confession-receipt|accent-A",
+        "hash": "6fe816a0f3fb"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 67,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "6/6 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 5 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 2,
+            "max": 5,
+            "detail": "wc=[14,21,12,22,22,11] first-lowest=false tail-slope=-1.00",
+            "failures": [
+              "slide 1 (14) is not the lowest (min of rest = 11)"
+            ]
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,0,1,0,0,0] hueSpread=20deg coverage=[1.8,0.1,1.3,0.1,0.1,0.2]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 6 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"follow\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 1.8% / mid 0.3% / closer 0.0%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 116px, interiors 38/38/38/38px, ratios 0.33/0.33/0.33/0.33",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[volume-decay] slide 1 (14) is not the lowest (min of rest = 11)"
+        ]
+      },
+      "sheet": "output\\round-4\\f4-p03-A\\sheet.png",
+      "strip": "output\\round-4\\f4-p03-A\\thumbs.png",
+      "dir": "output\\round-4\\f4-p03-A",
+      "subjects": [
+        null,
+        null,
+        "hypnogram-flat",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "id": "f2-p04-B",
+      "family": "f2-cutout-sport",
+      "familyName": "CUTOUT-SPORT",
+      "accentKey": "accent-B",
+      "accent": "#5B7FFF",
+      "hookType": "lazy-effortless",
+      "slideCount": 8,
+      "seed": 4127960736,
+      "copyAttempts": 2,
+      "fingerprint": {
+        "key": "f2-cutout-sport|8|lazy-effortless|accent-B",
+        "hash": "cc2ee3024876"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 63,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "8/8 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 6 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[10,16,25,15,21,21,19,16] first-lowest=true tail-slope=-0.21",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,1,1,1,0,1,1,0] hueSpread=0deg coverage=[1.8,5.1,1.4,3.7,0.2,0.9,4.8,0.4]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 8 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"save\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 3,
+            "max": 5,
+            "detail": "cover 1.8% / mid 2.6% / closer 0.0%",
+            "failures": [
+              "cover accent 1.8% below interior mean 2.6%"
+            ]
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 0,
+            "max": 5,
+            "detail": "cover 76px, interiors 51/51/92/51/51/92px, ratios 0.67/0.67/1.21/0.67/0.67/1.21",
+            "failures": [
+              "slide 4 headline is 121% of the cover",
+              "slide 7 headline is 121% of the cover"
+            ]
+          }
+        ],
+        "failures": [
+          "[accent-decay] cover accent 1.8% below interior mean 2.6%",
+          "[hierarchy-ratio] slide 4 headline is 121% of the cover",
+          "[hierarchy-ratio] slide 7 headline is 121% of the cover"
+        ]
+      },
+      "sheet": "output\\round-4\\f2-p04-B\\sheet.png",
+      "strip": "output\\round-4\\f2-p04-B\\thumbs.png",
+      "dir": "output\\round-4\\f2-p04-B",
+      "subjects": [
+        "sit-edge",
+        "stage-bar",
+        "hypnogram-flat",
+        "dial-62",
+        "bed",
+        "rings",
+        "dial-91",
+        null
+      ]
+    },
+    {
+      "id": "f5-p05-A",
+      "family": "f5-type-bold",
+      "familyName": "TYPE-BOLD",
+      "accentKey": "accent-A",
+      "accent": "#FFB020",
+      "hookType": "side-effect",
+      "slideCount": 6,
+      "seed": 4144738355,
+      "copyAttempts": 0,
+      "fingerprint": {
+        "key": "f5-type-bold|6|side-effect|accent-A",
+        "hash": "bf253ce6af6d"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 67,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "6/6 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 5 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[13,38,14,48,19,14] first-lowest=true tail-slope=-4.30",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,0,1,0,0,1] hueSpread=0deg coverage=[3.1,0.4,3.9,0.5,0.4,1.0]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 6 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"save\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 2,
+            "max": 5,
+            "detail": "cover 3.1% / mid 1.0% / closer 1.0%",
+            "failures": [
+              "closer accent 1.0% > interior mean 1.0%"
+            ]
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 116px, interiors 78/78/78px, ratios 0.67/0.67/0.67",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[accent-decay] closer accent 1.0% > interior mean 1.0%"
+        ]
+      },
+      "sheet": "output\\round-4\\f5-p05-A\\sheet.png",
+      "strip": "output\\round-4\\f5-p05-A\\thumbs.png",
+      "dir": "output\\round-4\\f5-p05-A",
+      "subjects": [
+        null,
+        null,
+        "dial-62",
+        null,
+        null,
+        "moon"
+      ]
+    },
+    {
+      "id": "f4-p06-A",
+      "family": "f4-type-mono",
+      "familyName": "TYPE-MONO",
+      "accentKey": "accent-A",
+      "accent": "#FFB020",
+      "hookType": "contrarian-negation",
+      "slideCount": 8,
+      "seed": 4161515974,
+      "copyAttempts": 2,
+      "fingerprint": {
+        "key": "f4-type-mono|8|contrarian-negation|accent-A",
+        "hash": "14f9ec5d1dde"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 67,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "8/8 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 4 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 2,
+            "max": 5,
+            "detail": "wc=[17,31,14,32,27,11,23,14] first-lowest=false tail-slope=-1.93",
+            "failures": [
+              "slide 1 (17) is not the lowest (min of rest = 11)"
+            ]
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[0,0,1,0,0,1,0,0] hueSpread=20deg coverage=[0.0,0.1,1.3,0.1,0.1,0.9,0.1,0.3]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 8 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"save\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 0.0% / mid 0.4% / closer 0.0%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 116px, interiors 38/38/38/38/38/38px, ratios 0.33/0.33/0.33/0.33/0.33/0.33",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[volume-decay] slide 1 (17) is not the lowest (min of rest = 11)"
+        ]
+      },
+      "sheet": "output\\round-4\\f4-p06-A\\sheet.png",
+      "strip": "output\\round-4\\f4-p06-A\\thumbs.png",
+      "dir": "output\\round-4\\f4-p06-A",
+      "subjects": [
+        null,
+        null,
+        "hypnogram-flat",
+        null,
+        null,
+        "rings",
+        null,
+        null
+      ]
+    },
+    {
+      "id": "f3-p07-B",
+      "family": "f3-poster-character",
+      "familyName": "POSTER-CHARACTER",
+      "accentKey": "accent-B",
+      "accent": "#5B7FFF",
+      "hookType": "lazy-effortless",
+      "slideCount": 6,
+      "seed": 4178293593,
+      "copyAttempts": 2,
+      "fingerprint": {
+        "key": "f3-poster-character|6|lazy-effortless|accent-B",
+        "hash": "bc79287e7222"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 67,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "6/6 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 6 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[13,33,16,32,20,14] first-lowest=true tail-slope=-3.40",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,1,1,1,1,1] hueSpread=0deg coverage=[4.3,1.3,1.2,1.1,1.0,1.2]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 6 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"follow\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 2,
+            "max": 5,
+            "detail": "cover 4.3% / mid 1.2% / closer 1.2%",
+            "failures": [
+              "closer accent 1.2% > interior mean 1.2%"
+            ]
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 148px, interiors 100/100/100px, ratios 0.68/0.68/0.68",
+            "failures": []
+          }
+        ],
+        "failures": [
+          "[accent-decay] closer accent 1.2% > interior mean 1.2%"
+        ]
+      },
+      "sheet": "output\\round-4\\f3-p07-B\\sheet.png",
+      "strip": "output\\round-4\\f3-p07-B\\thumbs.png",
+      "dir": "output\\round-4\\f3-p07-B",
+      "subjects": [
+        "stand-slump",
+        "sit-edge",
+        "stand-slump",
+        "stand-slump",
+        "sit-edge",
+        "sit-edge"
+      ]
+    },
+    {
+      "id": "f1-p08-B",
+      "family": "f1-cutout-editorial",
+      "familyName": "CUTOUT-EDITORIAL",
+      "accentKey": "accent-B",
+      "accent": "#5B7FFF",
+      "hookType": "lazy-effortless",
+      "slideCount": 8,
+      "seed": 34324868,
+      "copyAttempts": 0,
+      "fingerprint": {
+        "key": "f1-cutout-editorial|8|lazy-effortless|accent-B",
+        "hash": "90f869c2bbb4"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 70,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "8/8 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 6 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[13,36,16,32,32,15,34,14] first-lowest=true tail-slope=-1.68",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,1,1,0,1,1,1,0] hueSpread=0deg coverage=[1.1,1.8,1.4,0.1,0.8,1.1,1.8,0.3]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 8 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"follow\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 1.1% / mid 1.2% / closer 0.0%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 148px, interiors 98/98/98/98px, ratios 0.66/0.66/0.66/0.66",
+            "failures": []
+          }
+        ],
+        "failures": []
+      },
+      "sheet": "output\\round-4\\f1-p08-B\\sheet.png",
+      "strip": "output\\round-4\\f1-p08-B\\thumbs.png",
+      "dir": "output\\round-4\\f1-p08-B",
+      "subjects": [
+        "stand-slump",
+        "hypnogram",
+        "rings",
+        "bed",
+        "rings",
+        "dial-38",
+        "hypnogram",
+        "moon"
+      ]
+    },
+    {
+      "id": "f2-p09-A",
+      "family": "f2-cutout-sport",
+      "familyName": "CUTOUT-SPORT",
+      "accentKey": "accent-A",
+      "accent": "#FFB020",
+      "hookType": "numbered-authority",
+      "slideCount": 10,
+      "seed": 51102487,
+      "copyAttempts": 3,
+      "fingerprint": {
+        "key": "f2-cutout-sport|10|numbered-authority|accent-A",
+        "hash": "e3b620c35fb9"
+      },
+      "validation": {
+        "ok": true,
+        "errors": []
+      },
+      "auto": {
+        "score": 65,
+        "max": 70,
+        "items": [
+          {
+            "id": "canvas",
+            "label": "canvas is exactly 1080x1440",
+            "points": 5,
+            "max": 5,
+            "detail": "10/10 at 1080x1440",
+            "failures": []
+          },
+          {
+            "id": "overflow",
+            "label": "zero text overflow",
+            "points": 10,
+            "max": 10,
+            "detail": "every slot fitted, ink inside safe box",
+            "failures": []
+          },
+          {
+            "id": "collision",
+            "label": "zero type bounding-box collisions",
+            "points": 10,
+            "max": 10,
+            "detail": "no type-slot overlaps",
+            "failures": []
+          },
+          {
+            "id": "safe",
+            "label": "all content inside safe areas",
+            "points": 5,
+            "max": 5,
+            "detail": "all type inside safe areas",
+            "failures": []
+          },
+          {
+            "id": "hook-words",
+            "label": "slide 1 headline is 4-8 words",
+            "points": 5,
+            "max": 5,
+            "detail": "slide 1 headline = 4 words",
+            "failures": []
+          },
+          {
+            "id": "volume-decay",
+            "label": "text volume decays; slide 1 lowest",
+            "points": 5,
+            "max": 5,
+            "detail": "wc=[9,26,28,17,19,14,16,20,29,14] first-lowest=true tail-slope=-0.70",
+            "failures": []
+          },
+          {
+            "id": "one-accent",
+            "label": "exactly one accent hue",
+            "points": 10,
+            "max": 10,
+            "detail": "clusters/slide=[1,0,1,1,1,1,1,1,1,0] hueSpread=20deg coverage=[3.0,0.5,1.2,4.8,1.6,2.5,3.1,1.2,5.4,0.8]%",
+            "failures": []
+          },
+          {
+            "id": "furniture",
+            "label": "furniture on 100% of slides",
+            "points": 5,
+            "max": 5,
+            "detail": "all 10 slides carry the rail",
+            "failures": []
+          },
+          {
+            "id": "cta",
+            "label": "final slide contains a CTA verb",
+            "points": 5,
+            "max": 5,
+            "detail": "\"download\" on the final slide",
+            "failures": []
+          },
+          {
+            "id": "accent-decay",
+            "label": "accent coverage decays toward the CTA (corpus 10.7/9.0/5.8%)",
+            "points": 5,
+            "max": 5,
+            "detail": "cover 3.0% / mid 2.5% / closer 0.0%",
+            "failures": []
+          },
+          {
+            "id": "hierarchy-ratio",
+            "label": "interior headline <= 72% of the cover headline",
+            "points": 0,
+            "max": 5,
+            "detail": "cover 121px, interiors 82/82/92/82/82/92/82/82px, ratios 0.68/0.68/0.76/0.68/0.68/0.76/0.68/0.68",
+            "failures": [
+              "slide 4 headline is 76% of the cover",
+              "slide 7 headline is 76% of the cover"
+            ]
+          }
+        ],
+        "failures": [
+          "[hierarchy-ratio] slide 4 headline is 76% of the cover",
+          "[hierarchy-ratio] slide 7 headline is 76% of the cover"
+        ]
+      },
+      "sheet": "output\\round-4\\f2-p09-A\\sheet.png",
+      "strip": "output\\round-4\\f2-p09-A\\thumbs.png",
+      "dir": "output\\round-4\\f2-p09-A",
+      "subjects": [
+        "sit-phone",
+        "bed",
+        "rings",
+        "dial-62",
+        "hypnogram-flat",
+        "hypnogram",
+        "dial-38",
+        "rings",
+        "stage-bar",
+        null
+      ]
+    }
+  ]
+}

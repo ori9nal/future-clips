@@ -68,7 +68,11 @@ async function main() {
 
   const collisions = fingerprintCollisions(results.map((r) => ({ id: r.id, fingerprint: r.fingerprint })));
   const autoMax = results.length ? results[0].auto.max : 60;
-  const autoMean = results.length ? results.reduce((a, r) => a + r.auto.score, 0) / results.length : 0;
+  // A carousel the engine could not produce scores ZERO — averaging only over the
+  // survivors would hide render failures behind a healthy-looking mean, which is
+  // exactly what round 6 nearly did.
+  const autoMean = results.reduce((a, r) => a + r.auto.score, 0) / N;
+  const survivorMean = results.length ? results.reduce((a, r) => a + r.auto.score, 0) / results.length : 0;
 
   // aggregate which rubric lines are costing the most across the batch
   const byItem = {};
@@ -82,6 +86,7 @@ async function main() {
   const report = {
     round: ROUND, campaign: CAMPAIGN, n: N, strictTier: STRICT,
     autoMean: +autoMean.toFixed(2), autoMax,
+    survivorMean: +survivorMean.toFixed(2),
     autoMeanScaled60: +(autoMean / autoMax * 60).toFixed(2),
     renderErrors, fingerprintCollisions: collisions,
     familyMix: results.reduce((m, r) => (m[r.familyName] = (m[r.familyName] || 0) + 1, m), {}),
@@ -98,8 +103,9 @@ async function main() {
   fs.writeFileSync(path.join(dir, 'report.json'), JSON.stringify(report, null, 2));
 
   console.log(`\n-- automated mean: ${autoMean.toFixed(2)}/${autoMax}` +
-    (autoMax !== 60 ? `  (= ${(autoMean / autoMax * 60).toFixed(2)}/60 on the base scale)` : ''));
-  console.log(`-- render errors: ${renderErrors.length}`);
+    (autoMax !== 60 ? `  (= ${(autoMean / autoMax * 60).toFixed(2)}/60 on the base scale)` : '') +
+    (renderErrors.length ? `   [failures counted as 0; survivors alone averaged ${survivorMean.toFixed(2)}]` : ''));
+  console.log(`-- render errors: ${renderErrors.length}${renderErrors.length ? '  <-- each scores ZERO' : ''}`);
   console.log(`-- fingerprint collisions: ${collisions.length}` +
     (collisions.length ? ` -> ${collisions.map((c) => c.ids.join('+')).join(' | ')}` : ''));
   console.log(`-- family mix: ${JSON.stringify(report.familyMix)}`);

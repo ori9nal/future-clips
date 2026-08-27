@@ -15,6 +15,12 @@ Scores below are honest. Where a round regressed, it says so.
 |---|---|---|---|---|---|
 | 1 | 52.50 | 21 | **73.5** | 0 | Renders end-to-end; three systemic defects |
 | 2 | 57.30 | 28 | **85.3** | 0 | First pass — so the rubric gets tightened from round 3 |
+| 3 | 53.49 | 26 | **79.5** | 1 | Tightened rubric knocks it back. Two real defects surfaced |
+| 4 | 57.51 | 30 | **87.5** | 1 | Pass 1 of 3. Two carousels scored a clean 70/70 |
+| 5 | 57.00 | 31 | **88.0** | 1 | Pass 2 of 3 |
+| 6 | 47.57 | 30 | **77.6** | 1 | **FAIL** — 2 of 10 did not render. Streak broken |
+| 7 | 54.22 | 32 | **86.2** | 2 | Tier 2 added. Pass 1 of 3 |
+| 8 | 59.40 | 34 | **93.4** | 2 | Pass 2 of 3. Seven carousels perfect on the automated half |
 
 ---
 
@@ -183,3 +189,319 @@ rubric is too soft, not that the work is done. Round 3 runs at **strict tier 1**
 which adds two corpus-derived checks the base 60 never made: accent coverage must
 decay toward the CTA (10.7% → 9.0% → 5.8% in the corpus), and interior headlines
 must stay at or under 72% of the cover headline's size.
+
+---
+
+## Round 3 — rubric tightened to strict tier 1
+
+`node gauntlet/run.mjs --round 3 --n 10 --strict 1`
+Adds two corpus-derived checks (70 points total, reported here on the 60-point base scale):
+**accent-decay** (coverage must fall 10.7% → 9.0% → 5.8% across the set) and
+**hierarchy-ratio** (interior display type ≤72% of the cover's).
+
+Family mix now even — 2 of each — and accents 5/5, confirming the stratification fix.
+
+### Automated — 62.40 / 70 = **53.49 / 60**
+
+| Check | Lost | Note |
+|---|---|---|
+| base 60 checks | 21 | volume-decay only; everything else clean |
+| **hierarchy-ratio** | **35** | interiors running 76–121% of the cover |
+| **accent-decay** | **20** | some covers at 0.0% accent, some closers at 27.6% |
+
+Score fell 5.8 points against round 2, which is the point of tightening. Both new
+checks found real defects that the base 60 could not see.
+
+### Vision — 26 / 40
+
+Two hard defects visible on the sheets:
+
+- **F3's `body-poster` variant crashed its own lines.** A lowercase claim set in Anton
+  at `lineHeight 0.94` put the descenders of one line through the ascenders of the next.
+  Legible, but obviously broken.
+- **Cover kickers buried behind the figure** on F1 and F3. The subject is layer 2, so
+  the type wins the z-order and stays readable — but a flat black silhouette behind
+  grey body copy reads as a mistake, not as a composition.
+
+### Top 3 failure modes
+
+1. **No set-level type hierarchy (35 pts).** Each slide fitted its display type against
+   its own box in isolation. A 3-line cover stack in a 400px box lands smaller than a
+   2-line interior in a 280px box, so interiors were out-shouting the cover by up to 121%.
+2. **Negative leading applied to mixed-case (vision + the crash).** Tight leading is a
+   poster idiom for *caps*. Nothing stopped a template applying it to lowercase text
+   with descenders.
+3. **Accent word could live outside the headline (accent-decay 0.0% covers).** Two hooks
+   had their `accent` word in the kicker, so the run splitter never matched and the cover
+   rendered with no accent at all.
+
+### Fixes applied
+
+1. **Set-level display cap** (`engine/index.mjs`, `layout.mjs`). The cover is laid out
+   first, its display size measured, and `coverSize × 0.68` passed back as a ceiling for
+   every later slide. Templates mark their dominant slot `"hierarchy": "display"`.
+   Hierarchy is now guaranteed by construction, not by hand-tuned maxima.
+2. **Line-crash guard** (`fit-text.mjs → linesCrash`). For every adjacent pair of lines,
+   the real ink below the upper baseline plus the real ink above the lower one must fit
+   inside the line advance. All-caps can still be set tight (Anton's cap height measures
+   0.859em, so 0.90 leading is legal and 0.86 is not); mixed-case cannot be set tighter
+   than its own glyphs allow. Verified: the exact setting that broke round 3 is now rejected.
+3. **Build-time accent guard** (`copy.mjs`). A hook whose accent word is not a word in its
+   headline now throws at module load. Three hooks were wrong; all three fixed.
+4. **Subject nudge** (`index.mjs` + `layout.coverage`). After placement, any non-display
+   type slot more than 10% covered by the subject pushes the subject clear.
+5. Closer blooms damped (F3 0.20 → 0.10, F5 0.20 → 0.09); variants given eyebrows and
+   stat lines so a pull-quote slide is not terser than the cover.
+
+**Verdict: correctly knocked back.** The tightened rubric cost 5.8 automated points and
+surfaced two defects — set hierarchy and mixed-case leading — that the base 60 was blind to.
+
+---
+
+## Round 4 — after the tier-1 fixes
+
+`node gauntlet/run.mjs --round 4 --n 10 --strict 1`
+Render errors: 0 · Fingerprint collisions: 0 · Family mix 2/2/2/2/2 · Accents 5/5
+
+### Automated — 67.10 / 70 = **57.51 / 60**  (+4.02 base-scale)
+
+| Check | Lost (of 100) | Note |
+|---|---|---|
+| **hierarchy-ratio** | 10 (was 35) | only F2 still fails, and for one specific reason |
+| **accent-decay** | 10 (was 20) | covers under-accented, two closers tie their interiors |
+| volume-decay | 9 (was 21) | F4 and F5 covers still the wordiest slide |
+| everything else | 0 | — |
+
+**f3-p01-A and f1-p08-B both scored a clean 70/70.**
+
+### Vision — 30 / 40  (+4)
+
+| Criterion | R3 | R4 | Reasoning |
+|---|---|---|---|
+| hook stops the scroll | 7 | **8** | `I TRACKED / NINETY / NIGHTS` and `four lazy nights, one *broken* week` are both covers I would stop on. |
+| readable at 200px | 7 | **8** | Set hierarchy now holds; the cover reads as the cover. |
+| overlap intentional | 3 | **3** | The kicker-behind-figure defect survived: the nudge guard exempts the slot the template *declares* as the overlap target, and both covers declared the kicker. |
+| grade coherent | 4 | **4** | The blue set (f1-p08-B) is genuinely coherent — blue numerals, blue dial, blue italic accent word, nothing else chromatic. |
+| consistency | 3 | **4** | F3's character recurs across all six slides with one silhouette treatment. Family mix is even, so the *batch* is consistent too. |
+| holistic | 3 | **3** | Two of ten I would not immediately flag as generated. Eight I would. |
+
+### Reference diff — corpus vs best output
+
+**f1-p08-B** against folder 3 (@papanca.io), which it is modelled on:
+
+- Theirs runs a **justified** grotesk body; mine is ragged-right. Justification is
+  a large part of why theirs reads as a magazine rather than as a post.
+- Theirs varies the interior graphic's *scale* — some slides carry a small emoji,
+  one carries a full product mockup. Mine holds every object at the same size.
+- Theirs has a genuinely empty slide (slide 2 of folder 3, top margin 463px). I never
+  give a set a beat of silence.
+- **Mine wins on one thing:** the accent hue is held to a single cluster across all
+  eight slides. Theirs drifts (folder 3 spans h40, h60, h160, h280 across its set).
+
+### Top 3 failure modes
+
+1. **Nudge guard exempts the declared overlap slot (vision, 2 pts).** F1 and F3 covers
+   declare `overlapSlot: "kicker"`, so the guard skips exactly the slot being obscured.
+2. **F2's cover headline box is too small (hierarchy-ratio, 10 pts).** A 2-line stack in a
+   330px box fits at 76px, below several interiors, so the cap has nothing to bite on.
+3. **Covers under-accented, closers over-accented (accent-decay, 10 pts).** An italic
+   accent word at 131px covers under 1% of the canvas; the corpus cover carries 10.7%.
+
+### Fixes applied
+
+1. Cover subjects now declare `overlapSlot: "headline"` — the display line, which is what
+   the corpus actually overlaps — so the nudge guard protects the kicker.
+2. F2's cover headline box enlarged and raised; the strict hierarchy check now compares the
+   **max fitted size across a variant's display slots**, not always the slot named `headline`.
+3. Covers gained a real accent event (an accent rule under the headline, accent arrow);
+   closers lost one.
+4. F4 and F5 covers cut from three text blocks to two, matching the corpus cover shape and
+   dropping the cover word count below every interior.
+5. **Justified body copy** added as a template option (`"justify": true`) — the single
+   biggest remaining difference between folder 3 and my F1.
+
+---
+
+## Round 5 — justification, cover accent, hierarchy
+
+`node gauntlet/run.mjs --round 5 --n 10 --strict 1` · 0 render errors · 0 fingerprint collisions
+
+**Automated 66.50 / 70 = 57.00 / 60** (down 0.51 on round 4)
+**Vision 31 / 40** · **Total 88.0** — pass 2 of 3
+
+The automated score went *down* while the vision score went up, which is worth
+saying out loud: the accent-decay and hierarchy fixes landed (10 → 8 and 10 → 10),
+but shortening the closers to fix one rule pushed the cover/closer word counts into
+ties, and `volume-decay` uses a strict `<`. Several carousels failed on exact ties.
+
+Vision gains: the F1 cover kicker is no longer buried behind the figure, and
+justified body copy pushed f1-p06-B close to folder 3's magazine feel.
+
+### Top 3 failure modes
+
+1. **Justification stretched paragraph-final lines (vision).** The renderer justified
+   every line except the last line of the *block*, so any line ending a stanza got
+   its gaps blown open: `time-zone            change.` The classic defect.
+2. **Cover accent rule ran through the kicker (vision).** F1's decoration gap (30px)
+   exceeded the kicker's own gap (24px), so the rule landed on the type below it.
+3. **Cover/closer word-count ties (volume-decay, 17 pts).** Two rules were pulling in
+   opposite directions and the copy sat exactly between them.
+
+### Fixes applied
+
+1. `wrapText` now reports which lines end a paragraph; the renderer never stretches those.
+2. F1's cover kicker gap raised clear of the rule.
+3. F2's display minima lowered so the cover-derived cap can actually bite (a floor of
+   72px was beating a cap of 68% and letting interiors hit 95% of the cover).
+4. Accent dot suppressed on closer furniture.
+
+---
+
+## Round 6 — FAILED: two carousels did not render
+
+`node gauntlet/run.mjs --round 6 --n 10 --strict 1`
+
+**8 of 10 rendered. The 8 survivors averaged 69.38/70 — the best result so far — and
+that number is meaningless, because two carousels do not exist.**
+
+Counting the failures as zero, which is the only honest arithmetic:
+**Automated 55.50 / 70 = 47.57 / 60 · Vision 30 / 40 · Total 77.6 — FAIL.**
+The pass streak resets.
+
+### What broke
+
+Shortening the kickers in round 5 changed the relative length of several headlines,
+and two covers became unsatisfiable:
+
+- `f4-type-mono` post 7 — `outside-safe(headline)`. **A template bug I introduced:** the
+  cover headline box was set to `x: 70, w: 940`, but F4's safe area is `[118, 962]`.
+  Every possible fit landed outside the safe box.
+- `f2-cutout-sport` post 9 — `no-fit(headline)`. The line-crash guard, working correctly:
+  `"my score said" / "seventy-one"` at `lineHeight 0.9` puts the `y` descender of one
+  line into the `t` ascender of the next. Mixed-case cannot take poster leading.
+
+The second one is the more interesting failure. The guard was right; the *response*
+was wrong. A designer given that pair does not abandon the layout — they open the
+leading a couple of points and move on.
+
+### Top 3 failure modes
+
+1. **The engine gave up (2 carousels, scored 0).** The copy ladder only ever trimmed the
+   same hook. Six trims of an unfittable headline is six ways of not fitting it.
+2. **Reject-on-crash where correct-and-continue was available.** The crash guard had the
+   information needed to compute the *minimum legal leading* and simply did not use it.
+3. **A template box outside its own safe area** was undetectable until a specific hook
+   made every candidate size fail.
+
+### Fixes applied
+
+1. **`autoLeading`** (`fit-text.mjs → requiredLineHeight`). For any block, the tightest
+   leading these exact lines can take is computed from real glyph ink and the declared
+   leading is raised to meet it — only for the pair that needs it. All-caps keeps its
+   poster stack; a lowercase descender/ascender pair gets exactly the room it needs.
+   On by default; a template can opt out with `"autoLeading": false`.
+2. **Copy ladder walks the hook pool**, shortest-first, instead of only trimming; retry
+   budget raised from 6 to 9.
+3. F4's cover headline box moved inside its safe area.
+4. **The harness now scores a failed render as zero** and prints the survivor-only mean
+   separately, so a round can never again look healthy because the broken outputs were
+   quietly excluded from the average.
+
+---
+
+## Round 7 — rubric tightened to strict tier 2
+
+`node gauntlet/run.mjs --round 7 --n 10 --strict 2` · **0 render errors** · 0 collisions
+Tier 2 adds **closer-quiet** (the closer must be the quietest slide after the cover)
+and **overlap-intent** (a declared subject/type overlap must land in 4–90px).
+
+**Automated 72.30 / 80 = 54.22 / 60 · Vision 32 / 40 · Total 86.2 — pass**
+
+Both new checks bit immediately, and one of them was measuring the wrong thing.
+
+| Check | Lost | Note |
+|---|---|---|
+| **closer-quiet** | 35 | closers at 13–14 words against interiors at 10–12 |
+| **overlap-intent** | 30 | `-125px` on F1/F3, `+916px` on F2 |
+| volume-decay | 6 | — |
+| accent-decay | 6 | — |
+
+### Top 3 failure modes
+
+1. **Two rules in direct contradiction (35 pts).** `volume-decay` wants the cover to be
+   the shortest slide; `closer-quiet` wants the closer no longer than any interior.
+   Together they demand `cover < closer ≤ min(interiors)` — a window I had been trying
+   to hit by shaving individual words, and hitting on only **22 of 38** template/hook
+   combinations (measured with `tools/wordbudget.mjs`, written for exactly this).
+2. **`overlap-intent` was edge-blind (30 pts).** F2's cover declares `overlapEdge: "top"`
+   — the subject sits above the headline and its foot crosses down. The check measured
+   it as if the subject sat below, and reported a 916px overlap.
+3. **The nudge guard fought the declared overlap.** On F1/F3 the guard pushed the figure
+   clear of the kicker, which destroyed the headline overlap the template asked for.
+
+### Fixes applied
+
+1. **The volume inequality is now solved, not shaved.** Every closer carries three written
+   lengths, and the engine measures the *real rendered word count* of this template at this
+   slide count and picks the length that satisfies `cover < closer ≤ min(interiors)`.
+   The terse quote/stat variants gained a title line to lift the floor.
+   **22/38 → 37/38 combinations satisfy the inequality**, verified by `tools/wordbudget.mjs`.
+2. `overlap-intent` made edge-aware.
+3. **F1 and F3 covers restructured**: the kicker moved *above* the headline as a
+   letterspaced mono eyebrow. The subject now overlaps the display line with nothing in
+   its way, so the guard and the template no longer disagree.
+
+---
+
+## Round 8 — hard floor reached
+
+`node gauntlet/run.mjs --round 8 --n 10 --strict 2` · **0 render errors** · 1 fingerprint collision
+
+**Automated 79.20 / 80 = 59.40 / 60 · Vision 34 / 40 · Total 93.4 — pass**
+**Seven of ten carousels scored a perfect 80/80.**
+
+| Check | Lost (of 100) | Note |
+|---|---|---|
+| accent-decay | 5 | one closer 2.0% vs interiors 1.7%; one mono cover at 0.0% |
+| volume-decay | 3 | one exact tie |
+| everything else, both tiers | 0 | — |
+
+### Vision — 34 / 40
+
+| Criterion | R7 | R8 | Reasoning |
+|---|---|---|---|
+| hook stops the scroll | 8 | **8** | `IF YOUR SLEEP / SENT YOU AN / INVOICE` over a bowed silhouette holds up. Held back by one visible flaw, below. |
+| readable at 200px | 8 | **9** | Hierarchy is now enforced rather than hoped for; every cover reads as the cover. |
+| overlap intentional | 3 | **4** | The figure crossing the headline reads deliberate. But the accent rule under the headline is painted *above* the cutout and slices straight through the figure's head. |
+| grade coherent | 4 | **5** | Both palettes are genuinely coherent: blue numerals, blue dial, blue italic accent word, and nothing else chromatic on the slide. |
+| consistency | 4 | **4** | The F3 character holds across all six slides. One fingerprint collision in the batch (f3-p04-A + f3-p08-A share family, slide count, hook and accent). |
+| holistic | 3 | **4** | f1-p05-B and f3-p04-A both read as real accounts to me. |
+
+### Reference diff — corpus vs best output
+
+**f1-p05-B** against folder 3, **f3-p04-A** against folders 1/2 (Bedrock Form):
+
+- Bedrock's character is *illustrated* — internal muscle definition, hair, glowing eyes.
+  Mine is a flat silhouette. At thumbnail size they are equivalent; at full size theirs
+  carries far more information and mine reads as a pictogram.
+- Folder 3 varies its interior graphic's scale and sometimes omits it. Mine holds one
+  size and always places one.
+- **Mine wins on accent discipline and on the volume curve** — both measured, both
+  enforced. Folder 3's accent hue wanders across four bins; mine holds one cluster.
+
+### Top 3 failure modes
+
+1. **Slot decorations painted above the cutout (vision, ~2 pts).** A rule under a headline
+   is part of the type block, and in the corpus the cutout *occludes* it. Mine bisected a head.
+2. **Copy ramp over-trimmed the late interiors.** A two-notch monotone ramp cut some
+   slides to a single clause ("It clears slowly.") leaving an unanchored void.
+3. **Hook type was sampled, not stratified** — the last un-stratified divergence axis, and
+   the direct cause of the fingerprint collision.
+
+### Fixes applied
+
+1. **Decorations composite below the subject.** `layoutSlide` now returns `underShapes`
+   and `composeSlide` paints background → decorations → subject → type → furniture.
+   A template can force a decoration above the cutout with `"above": true`.
+2. Copy ramp softened from two notches to one.
+3. **Hook type stratified** by post index, closing the last divergence axis.

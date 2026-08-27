@@ -14,6 +14,35 @@ const TEXT_ALIGN = { left: 'left', center: 'center', right: 'right' };
 function lineNode(block, text, i) {
   const { fit, face } = block;
   const runs = block.runsFor ? block.runsFor(text, i) : [{ text, color: block.color }];
+
+  // Justification, the folder-3 move: every line but the last has its word gaps
+  // stretched to the measure. Only applied when the line carries no accent run,
+  // because a stretched gap inside a coloured phrase reads as a bug.
+  const isLast = i === fit.lines.length - 1 || (fit.paraLast && fit.paraLast[i]);
+  const words = text.split(/\s+/).filter(Boolean);
+  if (block.justify && !isLast && words.length > 1 && runs.length === 1) {
+    return {
+      type: 'div',
+      props: {
+        style: {
+          display: 'flex', flexDirection: 'row', width: '100%',
+          height: fit.size * fit.lineHeight, alignItems: 'center',
+          justifyContent: 'space-between',
+        },
+        children: words.map((w, wi) => ({
+          type: 'span', key: `w${i}_${wi}`,
+          props: {
+            style: {
+              fontFamily: face.satoriName, fontSize: fit.size, lineHeight: fit.lineHeight,
+              letterSpacing: `${fit.trackingPx}px`, color: runs[0].color ?? block.color ?? '#000',
+              whiteSpace: 'pre',
+            },
+            children: w,
+          },
+        })),
+      },
+    };
+  }
   const style = {
     display: 'flex',
     flexDirection: 'row',

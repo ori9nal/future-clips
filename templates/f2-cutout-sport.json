@@ -56,13 +56,13 @@
           "mode": "lines",
           "box": {
             "x": "safe.left",
-            "y": 760,
+            "y": 690,
             "w": "safe.width",
-            "h": 330
+            "h": 420
           },
           "size": [
-            64,
-            132
+            72,
+            156
           ],
           "font": {
             "role": "display-sport",
@@ -77,7 +77,8 @@
           "accent": {
             "target": "line:1",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "kicker",
@@ -93,7 +94,7 @@
           },
           "size": [
             28,
-            44
+            46
           ],
           "maxLines": 2,
           "font": {
@@ -104,7 +105,17 @@
           "lineHeight": 1.22,
           "align": "left",
           "valign": "top",
-          "color": "ink"
+          "color": "ink",
+          "decorations": [
+            {
+              "kind": "rule",
+              "align": "text",
+              "w": 220,
+              "gap": 26,
+              "weight": 6,
+              "color": "accent"
+            }
+          ]
         }
       ]
     },
@@ -139,7 +150,7 @@
             "h": 250
           },
           "size": [
-            48,
+            34,
             92
           ],
           "maxLines": 2,
@@ -156,7 +167,8 @@
           "accent": {
             "target": "last-word",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "claim",
@@ -253,7 +265,8 @@
             "target": "manual",
             "from": "accentWord",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "kicker",
@@ -305,16 +318,43 @@
       },
       "type": [
         {
+          "id": "eyebrow",
+          "content": "eyebrow",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 620,
+            "h": 46
+          },
+          "size": [
+            20,
+            28
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "mono",
+            "weight": 500
+          },
+          "lineHeight": 1.2,
+          "tracking": 0.15,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        },
+        {
           "id": "headline",
           "content": "title",
           "box": {
             "x": "safe.left",
-            "y": 180,
+            "y": {
+              "after": "eyebrow",
+              "gap": 48
+            },
             "w": 700,
             "h": 230
           },
           "size": [
-            48,
+            34,
             92
           ],
           "maxLines": 2,
@@ -331,7 +371,8 @@
           "accent": {
             "target": "last-word",
             "color": "accent"
-          }
+          },
+          "hierarchy": "display"
         },
         {
           "id": "stat",
@@ -346,7 +387,7 @@
             "h": 190
           },
           "size": [
-            72,
+            40,
             150
           ],
           "maxLines": 1,
@@ -359,7 +400,8 @@
           "tracking": -0.03,
           "align": "left",
           "valign": "top",
-          "color": "accent"
+          "color": "accent",
+          "hierarchy": "display"
         },
         {
           "id": "claim",
@@ -387,6 +429,33 @@
           "align": "left",
           "valign": "top",
           "color": "ink"
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "claim",
+              "gap": 34
+            },
+            "w": 560,
+            "h": 200
+          },
+          "size": [
+            24,
+            34
+          ],
+          "maxLines": 5,
+          "font": {
+            "role": "body",
+            "weight": 400,
+            "style": "italic"
+          },
+          "lineHeight": 1.42,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
         }
       ]
     }
@@ -413,7 +482,7 @@
         "role": "body",
         "weight": 400
       },
-      "color": "ink",
+      "color": "accent",
       "on": [
         "cover",
         "body"
@@ -454,7 +523,10 @@
         "r": 6,
         "gap": 0,
         "color": "accent"
-      }
+      },
+      "dotOff": [
+        "closer"
+      ]
     }
   ],
   "bodyVariants": [

@@ -250,8 +250,9 @@ async function clipToCanvas(input, rect, cw, ch) {
 }
 
 /** background -> subject -> type -> furniture, in that order, every time. */
-export async function composeSlide({ background, subject, typeLayer, furnitureLayer, canvas, out }) {
+export async function composeSlide({ background, underLayer, subject, typeLayer, furnitureLayer, canvas, out }) {
   const layers = [];
+  if (underLayer) layers.push({ input: underLayer, left: 0, top: 0 });
   if (subject) {
     const c = await clipToCanvas(subject.input, subject.rect, canvas.w, canvas.h);
     if (c) layers.push(c);
