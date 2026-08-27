@@ -2,110 +2,464 @@
   "id": "f2-cutout-sport",
   "name": "CUTOUT-SPORT",
   "reference": "corpus folder 13 — pure white, expanded grotesk 800 italic, accent on the larger line, cutout crosses the headline cap-height",
-  "canvas": { "w": 1080, "h": 1440 },
-  "safe": { "top": 90, "bottom": 150, "left": 76, "right": 76 },
-  "slideCount": [7, 10],
-  "hookTypes": ["side-effect", "confession-receipt", "numbered-authority", "lazy-effortless"],
-  "cropStrategies": ["contain"],
-
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "safe": {
+    "top": 90,
+    "bottom": 150,
+    "left": 76,
+    "right": 76
+  },
+  "slideCount": [
+    7,
+    10
+  ],
+  "hookTypes": [
+    "side-effect",
+    "confession-receipt",
+    "numbered-authority",
+    "lazy-effortless"
+  ],
+  "cropStrategies": [
+    "contain"
+  ],
   "roles": {
     "cover": {
-      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
       "subject": {
-        "pool": ["stand-slump", "sit-edge", "sit-phone"], "rotate": false,
-        "grade": "duotone", "shadow": "ink", "highlight": "#C9CDD6",
-        "heightPct": 0.52, "anchor": "bottom-right", "dx": 30, "dy": -430
+        "pool": [
+          "stand-slump",
+          "sit-edge",
+          "sit-phone"
+        ],
+        "rotate": false,
+        "grade": "duotone",
+        "shadow": "ink",
+        "highlight": "#C9CDD6",
+        "heightPct": 0.58,
+        "anchor": "bottom-right",
+        "dx": 62,
+        "overlapSlot": "headline",
+        "overlapEdge": "top",
+        "overlapPx": 58,
+        "clampBottom": false
       },
       "type": [
         {
-          "id": "headline", "content": "stack2", "mode": "lines",
-          "box": { "x": "safe.left", "y": 760, "w": "safe.width", "h": 330 },
-          "size": [64, 132],
-          "font": { "role": "display-sport", "weight": 800, "style": "italic" },
-          "lineHeight": 0.9, "tracking": -0.024,
-          "align": "left", "valign": "bottom", "color": "ink",
-          "accent": { "target": "line:1", "color": "accent" }
-        },
-        {
-          "id": "kicker", "content": "kicker",
-          "box": { "x": "safe.left", "y": { "after": "headline", "gap": 20 }, "w": 800, "h": 96 },
-          "size": [28, 44], "maxLines": 2,
-          "font": { "role": "display-sport", "weight": 700, "style": "italic" },
-          "lineHeight": 1.22, "align": "left", "valign": "top", "color": "ink"
-        }
-      ]
-    },
-
-    "body": {
-      "background": { "type": "flat", "fill": "#FFFFFF" },
-      "subject": {
-        "pool": ["hypnogram", "dial-62", "bed", "dial-91", "moon"],
-        "grade": "none", "heightPct": 0.2,
-        "anchor": "bottom-right", "dx": 40, "dy": -170, "opacity": 0.95
-      },
-      "type": [
-        {
-          "id": "headline", "content": "title",
-          "box": { "x": "safe.left", "y": 168, "w": 860, "h": 250 },
-          "size": [48, 92], "maxLines": 2,
-          "font": { "role": "display-sport", "weight": 800, "style": "italic" },
-          "lineHeight": 0.95, "tracking": -0.022,
-          "align": "left", "valign": "top", "color": "ink",
-          "accent": { "target": "last-word", "color": "accent" }
-        },
-        {
-          "id": "claim", "content": "claim",
-          "box": { "x": "safe.left", "y": { "after": "headline", "gap": 42 }, "w": 800, "h": 170 },
-          "size": [30, 46], "maxLines": 3,
-          "font": { "role": "body", "weight": 700, "style": "italic" },
-          "lineHeight": 1.24, "align": "left", "valign": "top", "color": "ink"
-        },
-        {
-          "id": "body", "content": "body",
+          "id": "headline",
+          "content": "stack2",
+          "mode": "lines",
           "box": {
-            "x": "safe.left", "y": { "after": "claim", "gap": 36 }, "w": 730,
-            "h": { "remaining": "claim", "until": 1140, "gap": 36 }
+            "x": "safe.left",
+            "y": 760,
+            "w": "safe.width",
+            "h": 330
           },
-          "size": [26, 40], "maxLines": 8,
-          "font": { "role": "body", "weight": 400, "style": "italic" },
-          "lineHeight": 1.44, "align": "left", "valign": "top", "color": "ink-soft"
+          "size": [
+            64,
+            132
+          ],
+          "font": {
+            "role": "display-sport",
+            "weight": 800,
+            "style": "italic"
+          },
+          "lineHeight": 0.9,
+          "tracking": -0.024,
+          "align": "left",
+          "valign": "bottom",
+          "color": "ink",
+          "accent": {
+            "target": "line:1",
+            "color": "accent"
+          }
+        },
+        {
+          "id": "kicker",
+          "content": "kicker",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 20
+            },
+            "w": 800,
+            "h": 96
+          },
+          "size": [
+            28,
+            44
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "display-sport",
+            "weight": 700,
+            "style": "italic"
+          },
+          "lineHeight": 1.22,
+          "align": "left",
+          "valign": "top",
+          "color": "ink"
         }
       ]
     },
-
+    "body": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "pool": [
+          "hypnogram",
+          "bed",
+          "rings",
+          "stage-bar",
+          "hypnogram-flat"
+        ],
+        "grade": "none",
+        "heightPct": 0.19,
+        "anchor": "bottom-right",
+        "dx": -18,
+        "dy": -186,
+        "opacity": 0.95
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "title",
+          "box": {
+            "x": "safe.left",
+            "y": 168,
+            "w": 860,
+            "h": 250
+          },
+          "size": [
+            48,
+            92
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "display-sport",
+            "weight": 800,
+            "style": "italic"
+          },
+          "lineHeight": 0.95,
+          "tracking": -0.022,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "accent": {
+            "target": "last-word",
+            "color": "accent"
+          }
+        },
+        {
+          "id": "claim",
+          "content": "claim",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 42
+            },
+            "w": 800,
+            "h": 170
+          },
+          "size": [
+            30,
+            46
+          ],
+          "maxLines": 3,
+          "font": {
+            "role": "body",
+            "weight": 700,
+            "style": "italic"
+          },
+          "lineHeight": 1.24,
+          "align": "left",
+          "valign": "top",
+          "color": "ink"
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "claim",
+              "gap": 36
+            },
+            "w": 730,
+            "h": {
+              "remaining": "claim",
+              "until": 1140,
+              "gap": 36
+            }
+          },
+          "size": [
+            26,
+            40
+          ],
+          "maxLines": 8,
+          "font": {
+            "role": "body",
+            "weight": 400,
+            "style": "italic"
+          },
+          "lineHeight": 1.44,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        }
+      ]
+    },
     "closer": {
-      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
       "subject": null,
       "type": [
         {
-          "id": "headline", "content": "headline",
-          "box": { "x": 100, "y": 540, "w": 880, "h": 220 },
-          "size": [58, 104], "maxLines": 2,
-          "font": { "role": "display-sport", "weight": 800, "style": "italic" },
-          "lineHeight": 0.96, "tracking": -0.022,
-          "align": "center", "valign": "top", "color": "ink",
-          "accent": { "target": "manual", "from": "accentWord", "color": "accent" }
+          "id": "headline",
+          "content": "headline",
+          "box": {
+            "x": 100,
+            "y": 540,
+            "w": 880,
+            "h": 220
+          },
+          "size": [
+            58,
+            104
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "display-sport",
+            "weight": 800,
+            "style": "italic"
+          },
+          "lineHeight": 0.96,
+          "tracking": -0.022,
+          "align": "center",
+          "valign": "top",
+          "color": "ink",
+          "accent": {
+            "target": "manual",
+            "from": "accentWord",
+            "color": "accent"
+          }
         },
         {
-          "id": "kicker", "content": "kicker",
-          "box": { "x": 140, "y": { "after": "headline", "gap": 28 }, "w": 800, "h": 110 },
-          "size": [26, 40], "maxLines": 2,
-          "font": { "role": "body", "weight": 400, "style": "italic" },
-          "lineHeight": 1.3, "align": "center", "valign": "top", "color": "ink-soft"
+          "id": "kicker",
+          "content": "kicker",
+          "box": {
+            "x": 140,
+            "y": {
+              "after": "headline",
+              "gap": 28
+            },
+            "w": 800,
+            "h": 110
+          },
+          "size": [
+            26,
+            40
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "body",
+            "weight": 400,
+            "style": "italic"
+          },
+          "lineHeight": 1.3,
+          "align": "center",
+          "valign": "top",
+          "color": "ink-soft"
+        }
+      ]
+    },
+    "body-stat": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "pool": [
+          "dial-38",
+          "dial-62",
+          "dial-91"
+        ],
+        "rotate": false,
+        "grade": "none",
+        "heightPct": 0.34,
+        "anchor": "center",
+        "dx": 250,
+        "dy": 130,
+        "opacity": 1
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "title",
+          "box": {
+            "x": "safe.left",
+            "y": 180,
+            "w": 700,
+            "h": 230
+          },
+          "size": [
+            48,
+            92
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "display-sport",
+            "weight": 800,
+            "style": "italic"
+          },
+          "lineHeight": 0.95,
+          "tracking": -0.022,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "accent": {
+            "target": "last-word",
+            "color": "accent"
+          }
+        },
+        {
+          "id": "stat",
+          "content": "stat",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 46
+            },
+            "w": 520,
+            "h": 190
+          },
+          "size": [
+            72,
+            150
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "display-sport",
+            "weight": 800,
+            "style": "italic"
+          },
+          "lineHeight": 1.0,
+          "tracking": -0.03,
+          "align": "left",
+          "valign": "top",
+          "color": "accent"
+        },
+        {
+          "id": "claim",
+          "content": "claim",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "stat",
+              "gap": 44
+            },
+            "w": 640,
+            "h": 210
+          },
+          "size": [
+            30,
+            48
+          ],
+          "maxLines": 4,
+          "font": {
+            "role": "body",
+            "weight": 700,
+            "style": "italic"
+          },
+          "lineHeight": 1.24,
+          "align": "left",
+          "valign": "top",
+          "color": "ink"
         }
       ]
     }
   },
-
   "furniture": [
-    { "type": "handle", "anchor": "bottom-left", "gap": 26, "size": 26,
-      "font": { "role": "body", "weight": 600 }, "color": "ink" },
-    { "type": "arrow", "anchor": "bottom-right", "gap": 14, "size": 44, "glyph": "→",
-      "font": { "role": "body", "weight": 400 }, "color": "ink", "on": ["cover", "body"] },
-    { "type": "index", "anchor": "bottom-center", "gap": 28, "size": 24, "tracking": 0.12,
-      "format": "{i} / {n}", "font": { "role": "mono", "weight": 500 }, "color": "ink-soft", "on": ["body"] },
-    { "type": "wordmark", "anchor": "top-left", "gap": 6, "size": 26, "tracking": 0.26,
-      "font": { "role": "body", "weight": 800 }, "color": "ink", "on": ["cover", "closer"],
-      "dot": { "r": 6, "gap": 0, "color": "accent" } }
+    {
+      "type": "handle",
+      "anchor": "bottom-left",
+      "gap": 26,
+      "size": 26,
+      "font": {
+        "role": "body",
+        "weight": 600
+      },
+      "color": "ink"
+    },
+    {
+      "type": "arrow",
+      "anchor": "bottom-right",
+      "gap": 14,
+      "size": 44,
+      "glyph": "→",
+      "font": {
+        "role": "body",
+        "weight": 400
+      },
+      "color": "ink",
+      "on": [
+        "cover",
+        "body"
+      ]
+    },
+    {
+      "type": "index",
+      "anchor": "bottom-center",
+      "gap": 28,
+      "size": 24,
+      "tracking": 0.12,
+      "format": "{i} / {n}",
+      "font": {
+        "role": "mono",
+        "weight": 500
+      },
+      "color": "ink-soft",
+      "on": [
+        "body"
+      ]
+    },
+    {
+      "type": "wordmark",
+      "anchor": "top-left",
+      "gap": 6,
+      "size": 26,
+      "tracking": 0.26,
+      "font": {
+        "role": "body",
+        "weight": 800
+      },
+      "color": "ink",
+      "on": [
+        "cover",
+        "closer"
+      ],
+      "dot": {
+        "r": 6,
+        "gap": 0,
+        "color": "accent"
+      }
+    }
+  ],
+  "bodyVariants": [
+    "body",
+    "body",
+    "body-stat"
   ]
 }

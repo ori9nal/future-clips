@@ -94,13 +94,22 @@ const INSIGHTS = [
 ];
 
 // ------------------------------------------------------------------- closers
+// Corpus §10: closers run 9-14 words — a CTA verb plus one reason. Round 2's
+// closers were terser than the covers, which inverted the volume curve the whole
+// format depends on.
 const CLOSERS = [
-  { line: 'follow for the why', sub: 'not just the number', verb: 'follow', accent: 'why' },
-  { line: 'save this for tonight', sub: 'read it before you set the alarm', verb: 'save', accent: 'tonight' },
-  { line: 'download DRIFT', sub: 'it scores the night, then names the habit', verb: 'download', accent: 'DRIFT' },
-  { line: 'try one night', sub: 'you will know by breakfast', verb: 'try', accent: 'one' },
-  { line: 'follow DRIFT', sub: 'the tracker that explains itself', verb: 'follow', accent: 'DRIFT' },
-  { line: 'save it, then sleep on it', sub: 'tomorrow you will want the list', verb: 'save', accent: 'sleep' },
+  { line: 'follow for the why', verb: 'follow', accent: 'why',
+    sub: 'every other tracker hands you a number and walks away' },
+  { line: 'save this for tonight', verb: 'save', accent: 'tonight',
+    sub: 'read it again before you set the alarm, not after' },
+  { line: 'download DRIFT', verb: 'download', accent: 'DRIFT',
+    sub: 'it scores the night, then names the one habit that cost you' },
+  { line: 'try one night', verb: 'try', accent: 'one',
+    sub: 'you will know which habit it was by breakfast tomorrow' },
+  { line: 'follow DRIFT', verb: 'follow', accent: 'DRIFT',
+    sub: 'the only sleep tracker that bothers to explain itself' },
+  { line: 'save it, then sleep on it', verb: 'save', accent: 'sleep',
+    sub: 'tomorrow morning you are going to want this list back' },
 ];
 
 export const CTA_VERBS = ['follow', 'save', 'download', 'try', 'subscribe', 'comment'];

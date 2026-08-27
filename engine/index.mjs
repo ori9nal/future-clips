@@ -13,6 +13,7 @@ import { layoutSlide, layoutFurniture, safeBox } from './layout.mjs';
 import { renderVectorLayer } from './render-type.mjs';
 import { renderBackground, prepareSubject, composeSlide, assertAssetAllowed } from './compose.mjs';
 import { validateCarousel } from './validate.mjs';
+import { isProcedural, renderProcedural } from './subjects.mjs';
 import sharp from 'sharp';
 
 /** Real painted extent of an RGBA layer — used to verify fitText against pixels. */
@@ -41,12 +42,26 @@ export function loadTemplates(dir = TEMPLATE_DIR) {
     .sort((a, b) => a.id.localeCompare(b.id));
 }
 
-/** hash(account, campaign, index) selects every structural axis. */
+/**
+ * hash(account, campaign, index) selects every structural axis.
+ *
+ * Family and accent are STRATIFIED, not sampled. Independent draws gave round 2
+ * six CUTOUT-SPORT carousels out of ten and never once picked F1 or F3 — which is
+ * both a bad test and bad product behaviour, since an account would be posting
+ * the same layout six times running. A seeded permutation of the family list,
+ * walked by post index, guarantees every family appears before any repeats.
+ */
 export function diverge({ accountId, campaignId, postIndex, templates }) {
   const seed = h32(accountId, '|', campaignId, '|', postIndex);
   const r = makeRng(seed);
-  const tpl = templates[r.int(templates.length)];
-  const accentKey = ACCENTS[r.int(ACCENTS.length)];
+
+  const cycle = Math.floor(postIndex / templates.length);
+  const famOrder = makeRng(h32(accountId, campaignId, 'family', cycle)).shuffle(templates);
+  const tpl = famOrder[postIndex % templates.length];
+
+  const accCycle = Math.floor(postIndex / ACCENTS.length);
+  const accOrder = makeRng(h32(accountId, campaignId, 'accent', accCycle)).shuffle(ACCENTS);
+  const accentKey = accOrder[postIndex % ACCENTS.length];
   const slideCount = r.range(tpl.slideCount?.[0] ?? 6, tpl.slideCount?.[1] ?? 10);
   const hookType = r.pick(tpl.hookTypes);
   const cropStrategy = r.pick(tpl.cropStrategies ?? ['contain']);
@@ -63,22 +78,32 @@ function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, ro
        : s.pool[(rotateOffset + slideIndex) % s.pool.length])
     : s.id;
   if (!id) return null;
+  if (isProcedural(id)) return { ...s, id, proceduralId: id, fit: cropStrategy, heightPct: s.heightPct ?? 0.5 };
   const file = path.join(SUBJECT_DIR, `${id}.png`);
   if (!fs.existsSync(file)) throw new Error(`subject "${id}" not found in ${SUBJECT_DIR}`);
-  return {
-    ...s,
-    id,
-    src: file,
-    fit: cropStrategy,
-    heightPct: s.heightPct ?? 0.5,
-  };
+  return { ...s, id, src: file, fit: cropStrategy, heightPct: s.heightPct ?? 0.5 };
+}
+
+/**
+ * Interiors rotate through the template's declared body variants. Round 1's
+ * biggest vision cost was that every interior slide was the same skeleton with
+ * different words; the corpus never does that. Variant choice is positional, so
+ * a set reads as a rhythm rather than as a random shuffle.
+ */
+export function roleFor(tpl, slide, slideIndex) {
+  if (slide.role !== 'body') return slide.role;
+  const variants = tpl.bodyVariants;
+  if (!variants || variants.length < 2) return 'body';
+  const pick = variants[(slideIndex - 1) % variants.length];
+  return tpl.roles[pick] ? pick : 'body';
 }
 
 async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset }) {
-  const roleSpec = tpl.roles[slide.role];
+  const role = roleFor(tpl, slide, slideIndex);
+  const roleSpec = tpl.roles[role];
   const canvas = tpl.canvas;
 
-  const laid = layoutSlide({ tpl, role: slide.role, content: slide, palette, canvas });
+  const laid = layoutSlide({ tpl, role, content: slide, palette, canvas });
   if (!laid.ok) return { ok: false, ...laid };
 
   // subject placement, including the declared overlap with a named type slot
@@ -86,13 +111,19 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
   const sSpec = subjectSpecFor(roleSpec, rngSlide, cropStrategy, palette, slideIndex, rotateOffset);
   if (sSpec) {
     const ctx = { canvas, rng: rngSlide, ...palette, plate: null };
+    if (sSpec.proceduralId) sSpec.procedural = renderProcedural(sSpec.proceduralId, palette);
     subject = await prepareSubject(sSpec, ctx);
     if (subject && sSpec.overlapSlot) {
       const target = laid.rects.find((r) => r.id === sSpec.overlapSlot);
       if (target) {
-        const desiredY = target.y + target.h - (sSpec.overlapPx ?? 40);
+        // overlapEdge "bottom" (default): subject sits below the slot, its top
+        // edge crossing up into the type. "top": subject sits above the slot,
+        // its FOOT crossing down into the type — the folder-13 shoe-on-the-baseline move.
+        const desiredY = sSpec.overlapEdge === 'top'
+          ? target.y + (sSpec.overlapPx ?? 40) - subject.rect.h
+          : target.y + target.h - (sSpec.overlapPx ?? 40);
         subject.rect.y = Math.round(desiredY);
-        if (sSpec.clampBottom !== false) {
+        if (sSpec.clampBottom !== false && sSpec.overlapEdge !== 'top') {
           // never float: keep the contact edge at or below the canvas foot
           subject.rect.y = Math.min(subject.rect.y, canvas.h - subject.rect.h + (sSpec.bleed ?? 0));
         }
@@ -131,6 +162,8 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
     subjectRect: subject?.rect ?? null,
     subjectId: sSpec?.id ?? null,
     typeInk,
+    variant: role,
+    renderedWords: laid.renderedWords,
     furnitureCount: furniture.blocks.length,
     fittedSizes: Object.fromEntries(laid.blocks.map((b) => [b.id, b.fit.size])),
   };
@@ -155,8 +188,8 @@ export async function renderCarousel({
     copy = buildCopy(rCopy, { slideCount: d.slideCount, hookType: d.hookType, shorten: attempt });
 
     // dry-run every slide's layout before rendering a single pixel
-    const dry = copy.slides.map((slide) =>
-      layoutSlide({ tpl: d.tpl, role: slide.role, content: slide, palette, canvas: d.tpl.canvas })
+    const dry = copy.slides.map((slide, i) =>
+      layoutSlide({ tpl: d.tpl, role: roleFor(d.tpl, slide, i), content: slide, palette, canvas: d.tpl.canvas })
     );
     const bad = dry.map((r, i) => ({ r, i })).filter((x) => !x.r.ok);
     if (!bad.length) break;

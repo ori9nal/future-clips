@@ -139,6 +139,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
   const blocks = [];
   const rects = [];
   const shapes = [];
+  let renderedWords = 0;
 
   for (const slot of roleSpec.type || []) {
     const raw = content[slot.content];
@@ -148,6 +149,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
       return { ok: false, reason: 'missing-content', slot: slot.id };
     }
 
+    renderedWords += text.split(/\s+/).filter(Boolean).length;
     const face = resolveFace(slot.font.role, slot.font.weight ?? 400, slot.font.style ?? 'normal');
     const box = resolveBox(slot.box, ctx);
     if (box.w <= 0 || box.h <= 0) return { ok: false, reason: 'degenerate-box', slot: slot.id };
@@ -166,16 +168,33 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
     // fitText returning null is the contract: shorten the copy, never ship overflow
     if (!fit) return { ok: false, reason: 'no-fit', slot: slot.id, box, text };
 
-    // the slot's REAL painted rect, given alignment inside its box
+    // The slot's REAL PAINTED rect. fit.width already includes the ink that
+    // escapes the advance box, and paintedHeight the ink that escapes the line
+    // box when leading is negative — so collisions, `after:` gaps and the safe
+    // check all reason about ink, not about boxes that ink spills out of.
     const alignX = slot.align === 'center' ? box.x + (box.w - fit.width) / 2
       : slot.align === 'right' ? box.x + box.w - fit.width
         : box.x;
     const alignY = slot.valign === 'middle' ? box.y + (box.h - fit.height) / 2
       : slot.valign === 'bottom' ? box.y + box.h - fit.height
         : box.y;
-    const rect = { id: slot.id, x: alignX, y: alignY, w: fit.width, h: fit.height };
+    const rect = {
+      id: slot.id,
+      x: alignX,
+      y: alignY + (fit.inkTop ?? 0),
+      w: fit.width,
+      h: fit.paintedHeight ?? fit.height,
+    };
     ctx.placed.set(slot.id, rect);
     rects.push(rect);
+
+    // Satori paints with the glyph origin at the block's content edge, so a face
+    // whose ink starts left of that origin would paint outside the box. Shift the
+    // painted block by the overhang so ink lands exactly on the intended edge.
+    const inkL = fit.inkLeft ?? 0, inkR = fit.inkRight ?? 0;
+    const paintDx = slot.align === 'center' ? (inkL - inkR) / 2
+      : slot.align === 'right' ? -inkR
+        : inkL;
 
     const accentTarget = slot.accent
       ? pickAccentTarget(slot.accent.target, fit.lines, content[slot.accent.from ?? 'accentWord'])
@@ -183,7 +202,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
 
     blocks.push({
       id: slot.id,
-      x: box.x, y: box.y, w: box.w, h: box.h,
+      x: box.x + paintDx, y: box.y, w: box.w, h: box.h,
       align: slot.align ?? 'left',
       valign: slot.valign ?? 'top',
       fit, face,
@@ -240,7 +259,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas }) {
     }
   }
 
-  return { ok: true, blocks, rects, shapes, safe: S };
+  return { ok: true, blocks, rects, shapes, safe: S, renderedWords };
 }
 
 // ------------------------------------------------------------------- furniture

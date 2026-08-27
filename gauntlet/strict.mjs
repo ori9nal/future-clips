@@ -51,7 +51,7 @@ async function hierarchyRatio(c, tpl) {
 // Corpus §10: no closer is a wall of text; the closer has the lowest word count
 // of any slide in 14 of 17 sets — second only to the cover.
 function closerQuiet(c) {
-  const wcs = c.slides.map((s) => s.wordCount);
+  const wcs = c.slideMeta.map((m, i) => m.renderedWords ?? c.slides[i].wordCount);
   const closer = wcs[wcs.length - 1];
   const interiors = wcs.slice(1, -1);
   const ok = closer <= Math.min(...interiors);
@@ -66,7 +66,7 @@ function overlapIntent(c, tpl) {
   const fails = [];
   let checked = 0, good = 0;
   c.slideMeta.forEach((m, i) => {
-    const spec = tpl.roles[c.slides[i].role]?.subject;
+    const spec = tpl.roles[m.variant ?? c.slides[i].role]?.subject;
     if (!spec?.overlapSlot || !m.subjectRect) return;
     checked++;
     const target = m.rects.find((r) => r.id === spec.overlapSlot);

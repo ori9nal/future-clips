@@ -161,19 +161,29 @@ const ANCHORS = {
  * instead of hoping it looks intentional.
  */
 export async function prepareSubject(spec, ctx) {
-  if (!spec || !spec.src) return null;
-  const file = assertAssetAllowed(spec.src);
-  if (!fs.existsSync(file)) throw new Error(`subject asset missing: ${file}`);
+  if (!spec || (!spec.src && !spec.procedural)) return null;
   const { w: cw, h: ch } = ctx.canvas;
+
+  // Procedural subjects are generated from the live palette, so they can never
+  // carry a hue from another carousel's accent.
+  const source = spec.procedural
+    ? spec.procedural
+    : assertAssetAllowed(spec.src);
+  if (!spec.procedural && !fs.existsSync(source)) throw new Error(`subject asset missing: ${source}`);
 
   // Trim the transparent border first: heightPct must mean "this fraction of the
   // canvas is covered by visible subject", not "by the PNG's padded bounding box".
   // Skipping this is why a cutout ends up floating small in the middle of a slide.
-  let img = sharp(await sharp(file).ensureAlpha().trim({ threshold: 1 }).png().toBuffer());
+  let img = sharp(await sharp(source).ensureAlpha().trim({ threshold: 1 }).png().toBuffer());
   const meta = await img.metadata();
 
-  const targetH = Math.round(ch * (spec.heightPct ?? 0.55));
-  const targetW = Math.round((meta.width / meta.height) * targetH);
+  // Scale by height, then clamp by width. A 900x210 stage bar at heightPct 0.19
+  // is 1174px wide on a 1080 canvas — round 2 sliced several objects flat against
+  // the frame, which reads as a crop bug rather than as a bleed.
+  let targetH = Math.round(ch * (spec.heightPct ?? 0.55));
+  let targetW = Math.round((meta.width / meta.height) * targetH);
+  const maxW = Math.round(cw * (spec.maxWidthPct ?? 0.72));
+  if (targetW > maxW) { targetW = maxW; targetH = Math.round((meta.height / meta.width) * targetW); }
   img = img.resize(targetW, targetH, { fit: 'inside' });
 
   const grade = spec.grade ?? 'none';

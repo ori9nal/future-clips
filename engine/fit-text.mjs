@@ -113,6 +113,61 @@ export function wrapText(face, text, size, maxWidth, letterSpacingPx = 0) {
 }
 
 /**
+ * Attach the numbers layout needs to place PAINTED ink rather than layout boxes:
+ *   inkLeft/inkRight  how far glyphs escape the advance box horizontally
+ *   paintedHeight     real vertical extent from the face's ascender/descender,
+ *                     which exceeds the line box whenever lineHeight < 1
+ */
+function decorate(fit, face) {
+  let l = 0, r = 0;
+  for (const line of fit.lines) {
+    const o = inkOverhang(face, line, fit.size);
+    if (o.left > l) l = o.left;
+    if (o.right > r) r = o.right;
+  }
+  fit.inkLeft = l;
+  fit.inkRight = r;
+
+  // Vertical extent from REAL glyph bounding boxes, not from the face's ascender
+  // and descender. Those metrics reserve room for diacritics the copy never uses,
+  // which inflates every block by ~30% and makes gaps that are visually fine read
+  // as collisions. Baseline placement mirrors satori: the (ascent+descent) box is
+  // centred inside each line box of height size*lineHeight.
+  const upm = face.upm, size = fit.size;
+  const asc = (face.ascender / upm) * size;
+  const desc = (-face.descender / upm) * size;
+  const halfLead = (size * fit.lineHeight - (asc + desc)) / 2;
+  const first = verticalInk(face, fit.lines[0], size);
+  const last = verticalInk(face, fit.lines[fit.lines.length - 1], size);
+  const baseline0 = halfLead + asc;
+  const baselineN = (fit.lines.length - 1) * size * fit.lineHeight + halfLead + asc;
+  fit.inkTop = baseline0 - first.above;          // px from the block's top edge
+  fit.inkBottom = baselineN + last.below;        // px from the block's top edge
+  fit.paintedHeight = Math.max(1, fit.inkBottom - fit.inkTop);
+  return fit;
+}
+
+/** Ink above and below the baseline for one line, from glyph bounding boxes. */
+export function verticalInk(face, text, size) {
+  if (!face.vbox) face.vbox = new Map();
+  let above = 0, below = 0;
+  for (const ch of String(text || '')) {
+    if (/\s/.test(ch)) continue;
+    let e = face.vbox.get(ch);
+    if (e === undefined) {
+      const g = face.ot.charToGlyph(ch);
+      try { const b = g.getBoundingBox(); e = { y1: b.y1, y2: b.y2 }; }
+      catch { e = { y1: 0, y2: face.capHeight }; }
+      face.vbox.set(ch, e);
+    }
+    if (e.y2 > above) above = e.y2;
+    if (-e.y1 > below) below = -e.y1;
+  }
+  if (!above && !below) { above = face.capHeight; below = 0; }
+  return { above: (above / face.upm) * size, below: (below / face.upm) * size };
+}
+
+/**
  * @param {object} face      from fonts.resolveFace()
  * @param {string} text
  * @param {{w:number,h:number}} box
@@ -140,7 +195,7 @@ export function fitText(face, text, box, opts = {}) {
     if (height > box.h) return null;
     const width = Math.max(...lines.map((l) => layoutWidth(face, l, size, lsPx)));
     if (width > box.w) return null;
-    return { size, lines, width, height, lineHeight, tracking, trackingPx: lsPx };
+    return decorate({ size, lines, width, height, lineHeight, tracking, trackingPx: lsPx }, face);
   };
 
   // primary: binary search for the largest fitting size
@@ -178,7 +233,7 @@ export function fitLines(face, lines, box, opts = {}) {
     const width = Math.max(...clean.map((l) => layoutWidth(face, l, size, lsPx)));
     const height = clean.length * size * lineHeight;
     if (width > box.w || height > box.h) return null;
-    return { size, lines: clean, width, height, lineHeight, tracking, trackingPx: lsPx };
+    return decorate({ size, lines: clean, width, height, lineHeight, tracking, trackingPx: lsPx }, face);
   };
 
   let lo = min, hi = max, best = null;

@@ -45,15 +45,15 @@ export async function autoScore(carousel, tpl, opts = {}) {
   };
 
   // ---- 1. canvas (measured on the encoded PNGs) --------------------------
-  const dims = await Promise.all(carousel.files.map(dimensions));
+  const dims = await Promise.all(carousel.files.map((f) => dimensions(f)));
   const wrong = dims.map((d, i) => ({ i, d })).filter((x) => x.d.w !== 1080 || x.d.h !== 1440);
   push('canvas', wrong.length ? 0 : 5,
     wrong.length ? `${wrong.length}/${dims.length} slides off-size` : `${dims.length}/${dims.length} at 1080x1440`,
     wrong.map((x) => `slide ${x.i + 1}: ${x.d.w}x${x.d.h}`));
 
   // ---- 2/3/4. re-run the layout independently ----------------------------
-  const laid = carousel.slides.map((slide) =>
-    layoutSlide({ tpl, role: slide.role, content: slide, palette, canvas: tpl.canvas }));
+  const laid = carousel.slides.map((slide, i) =>
+    layoutSlide({ tpl, role: carousel.slideMeta[i]?.variant ?? slide.role, content: slide, palette, canvas: tpl.canvas }));
 
   const overflow = laid.map((r, i) => ({ r, i })).filter((x) => !x.r.ok && (x.r.reason === 'no-fit' || x.r.reason === 'missing-content'));
   // pixel corroboration: the type layer's real ink must sit inside the safe box
@@ -98,7 +98,9 @@ export async function autoScore(carousel, tpl, opts = {}) {
     hookOK ? [] : [`"${carousel.slides[0].headline}" is ${hw} words (need 4-8)`]);
 
   // ---- 6. volume decay ---------------------------------------------------
-  const wcs = carousel.slides.map((s) => s.wordCount);
+  // count only what a template actually RENDERS — round 1 charged the cover for
+  // fields (eyebrow, stat) that its layout never draws
+  const wcs = carousel.slideMeta.map((m, i) => m.renderedWords ?? carousel.slides[i].wordCount);
   const firstIsLowest = wcs[0] < Math.min(...wcs.slice(1));
   const tail = wcs.slice(1);
   const tailSlope = slope(tail);
@@ -111,18 +113,35 @@ export async function autoScore(carousel, tpl, opts = {}) {
     ]);
 
   // ---- 7. one accent hue -------------------------------------------------
-  const clusterInfo = await Promise.all(carousel.files.map(accentClusters));
+  const clusterInfo = await Promise.all(carousel.files.map((f) => accentClusters(f)));
   const multi = clusterInfo.map((c, i) => ({ c, i })).filter((x) => x.c.clusters.length > 1);
-  const hues = clusterInfo.flatMap((c) => c.clusters.map((k) => k.hueBin));
-  const distinctHues = [...new Set(hues)];
-  const setConsistent = distinctHues.length <= 1;
+  // #FFB020 sits at hue ~75, right on the 60/80 bin boundary, so anti-aliased
+  // edges scatter a single ink across two labels. Compare CIRCULAR DISTANCE
+  // between chroma-weighted mean hues instead of comparing bin labels.
+  const meanHues = clusterInfo.map((c) => {
+    const ks = c.clusters;
+    if (!ks.length) return null;
+    let sx = 0, sy = 0;
+    for (const k of ks) {
+      const rad = (k.hueBin + 10) * Math.PI / 180, w = k.frac * (k.meanC || 1);
+      sx += Math.cos(rad) * w; sy += Math.sin(rad) * w;
+    }
+    let h = Math.atan2(sy, sx) * 180 / Math.PI; return h < 0 ? h + 360 : h;
+  }).filter((h) => h != null);
+  const circDist = (a, b) => { const d = Math.abs(a - b) % 360; return d > 180 ? 360 - d : d; };
+  let hueSpread = 0;
+  for (let i = 0; i < meanHues.length; i++) for (let j = i + 1; j < meanHues.length; j++) {
+    hueSpread = Math.max(hueSpread, circDist(meanHues[i], meanHues[j]));
+  }
+  const distinctHues = meanHues.map((h) => Math.round(h));
+  const setConsistent = hueSpread <= 40;
   const accentPts = (multi.length ? 0 : 7) + (setConsistent ? 3 : 0);
   push('one-accent', accentPts,
-    `clusters/slide=[${clusterInfo.map((c) => c.clusters.length).join(',')}] hues=${distinctHues.join(',') || 'none'} ` +
+    `clusters/slide=[${clusterInfo.map((c) => c.clusters.length).join(',')}] hueSpread=${hueSpread.toFixed(0)}deg ` +
     `coverage=[${clusterInfo.map((c) => (c.chromaticFrac * 100).toFixed(1)).join(',')}]%`,
     [
       ...multi.map((x) => `slide ${x.i + 1}: ${x.c.clusters.length} chromatic clusters (${x.c.clusters.map((k) => `${k.hex}@h${k.hueBin}`).join(' ')})`),
-      ...(setConsistent ? [] : [`set spans ${distinctHues.length} hue bins: ${distinctHues.join(', ')}`]),
+      ...(setConsistent ? [] : [`set hue spread ${hueSpread.toFixed(0)}deg > 40deg (means: ${distinctHues.join(', ')})`]),
     ]);
 
   // ---- 8. furniture ------------------------------------------------------

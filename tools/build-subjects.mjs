@@ -225,16 +225,9 @@ for (const name of Object.keys(POSES)) {
   fs.writeFileSync(path.join(OUT, `${name}.png`), png(figureSvg(name), 1200));
   manifest.push({ id: name, kind: 'figure', file: `${name}.png` });
 }
-for (const [id, svg, w] of [
-  ['dial-62', scoreDial(62), 1000],
-  ['dial-91', scoreDial(91), 1000],
-  ['hypnogram', hypnogram(), 1400],
-  ['moon', moonMark(), 900],
-  ['bed', bedMark(), 1300],
-]) {
-  fs.writeFileSync(path.join(OUT, `${id}.png`), png(svg, w));
-  manifest.push({ id, kind: 'object', file: `${id}.png` });
-}
+// Data objects (dial, hypnogram, moon, bed, ...) are NOT emitted here any more.
+// They carry the accent colour, so they are generated at render time from the
+// live palette in engine/subjects.mjs. See GAUNTLET.md round 1, fix 1.
 fs.writeFileSync(path.join(OUT, 'manifest.json'), JSON.stringify(manifest, null, 2));
 console.log(`${manifest.length} subjects -> ${OUT}`);
 console.log(manifest.map((m) => m.id).join(', '));

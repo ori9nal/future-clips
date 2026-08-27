@@ -59,8 +59,10 @@ async function main() {
         (c.copyAttempts ? `  (copy regen x${c.copyAttempts})` : ''));
       for (const f of auto.failures) console.log(`      ${f}`);
     } catch (e) {
-      renderErrors.push({ postIndex: i, message: e.message });
+      const trace = String(e.stack || '').split(/\r?\n/).slice(1, 6);
+      renderErrors.push({ postIndex: i, message: e.message, stack: trace });
       console.log(`X post ${i}: ${e.message}`);
+      for (const t of trace) console.log(`      ${t.trim()}`);
     }
   }
 

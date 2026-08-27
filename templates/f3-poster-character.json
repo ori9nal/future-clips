@@ -59,7 +59,7 @@
         "rotate": false,
         "grade": "silhouette",
         "color": "ink",
-        "heightPct": 0.5,
+        "heightPct": 0.52,
         "anchor": "bottom-center",
         "dx": 14,
         "overlapSlot": "kicker",
@@ -163,10 +163,10 @@
         ],
         "grade": "silhouette",
         "color": "ink",
-        "heightPct": 0.42,
+        "heightPct": 0.4,
         "anchor": "bottom-right",
-        "dx": 30,
-        "dy": -2,
+        "dx": -46,
+        "dy": -6,
         "opacity": 0.96
       },
       "type": [
@@ -332,9 +332,9 @@
         "rotate": false,
         "grade": "silhouette",
         "color": "ink",
-        "heightPct": 0.46,
+        "heightPct": 0.44,
         "anchor": "bottom-right",
-        "dx": 46,
+        "dx": -30,
         "dy": -6
       },
       "type": [
@@ -411,6 +411,118 @@
           "color": "ink-soft"
         }
       ]
+    },
+    "body-poster": {
+      "background": {
+        "type": "gradient",
+        "angle": 172,
+        "grain": 0.05,
+        "stops": [
+          {
+            "at": 0,
+            "color": "paper"
+          },
+          {
+            "at": 1,
+            "color": "paper-soft"
+          }
+        ],
+        "bloom": {
+          "cx": 0.22,
+          "cy": 0.14,
+          "r": 0.6,
+          "strength": 0.18,
+          "color": "accent"
+        }
+      },
+      "subject": {
+        "pool": [
+          "sit-edge",
+          "sit-phone",
+          "stand-slump"
+        ],
+        "grade": "silhouette",
+        "color": "ink",
+        "heightPct": 0.5,
+        "anchor": "bottom-right",
+        "dx": -34,
+        "dy": -4,
+        "opacity": 0.96
+      },
+      "type": [
+        {
+          "id": "eyebrow",
+          "content": "eyebrow",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 620,
+            "h": 46
+          },
+          "size": [
+            20,
+            28
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "mono",
+            "weight": 500
+          },
+          "lineHeight": 1.2,
+          "tracking": 0.15,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        },
+        {
+          "id": "claim",
+          "content": "claim",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "eyebrow",
+              "gap": 44
+            },
+            "w": 700,
+            "h": 480
+          },
+          "size": [
+            46,
+            96
+          ],
+          "maxLines": 5,
+          "font": {
+            "role": "display-heavy",
+            "weight": 400
+          },
+          "lineHeight": 0.94,
+          "tracking": -0.004,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "accent": {
+            "target": "longest-word",
+            "color": "accent"
+          },
+          "shadow": {
+            "dx": 4,
+            "dy": 5,
+            "blur": 0,
+            "color": "ink",
+            "alpha": 0.12
+          },
+          "decorations": [
+            {
+              "kind": "rule",
+              "align": "text",
+              "w": 240,
+              "gap": 34,
+              "weight": 5,
+              "color": "accent"
+            }
+          ]
+        }
+      ]
     }
   },
   "furniture": [
@@ -473,5 +585,10 @@
         "cover"
       ]
     }
+  ],
+  "bodyVariants": [
+    "body",
+    "body-poster",
+    "body"
   ]
 }

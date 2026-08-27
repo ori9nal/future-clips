@@ -115,16 +115,16 @@
       },
       "subject": {
         "pool": [
-          "dial-62",
           "hypnogram",
-          "moon",
+          "dial-62",
           "bed",
-          "dial-91"
+          "rings",
+          "stage-bar"
         ],
         "grade": "none",
-        "heightPct": 0.175,
+        "heightPct": 0.2,
         "anchor": "bottom-center",
-        "dy": -214,
+        "dy": -168,
         "opacity": 0.95
       },
       "type": [
@@ -312,6 +312,87 @@
           "color": "ink-soft"
         }
       ]
+    },
+    "body-quote": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "pool": [
+          "dial-91",
+          "rings",
+          "stage-bar",
+          "hypnogram-flat",
+          "dial-38"
+        ],
+        "grade": "none",
+        "heightPct": 0.26,
+        "anchor": "bottom-center",
+        "dy": -128,
+        "opacity": 0.95
+      },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": {
+            "x": "safe.left",
+            "y": 200,
+            "w": 300,
+            "h": 96
+          },
+          "size": [
+            56,
+            84
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "display-editorial",
+            "weight": 400
+          },
+          "lineHeight": 1.0,
+          "align": "center",
+          "valign": "top",
+          "color": "accent"
+        },
+        {
+          "id": "claim",
+          "content": "claim",
+          "box": {
+            "x": 110,
+            "y": {
+              "after": "index",
+              "gap": 44
+            },
+            "w": 860,
+            "h": 430
+          },
+          "size": [
+            56,
+            104
+          ],
+          "maxLines": 4,
+          "font": {
+            "role": "display-editorial",
+            "weight": 400
+          },
+          "lineHeight": 1.06,
+          "tracking": -0.012,
+          "align": "center",
+          "valign": "top",
+          "color": "ink",
+          "accent": {
+            "target": "manual",
+            "from": "accentWord",
+            "color": "accent",
+            "font": {
+              "weight": 400,
+              "style": "italic"
+            }
+          }
+        }
+      ]
     }
   },
   "furniture": [
@@ -358,5 +439,10 @@
         "closer"
       ]
     }
+  ],
+  "bodyVariants": [
+    "body",
+    "body-quote",
+    "body"
   ]
 }
