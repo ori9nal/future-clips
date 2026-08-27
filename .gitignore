@@ -1,0 +1,14 @@
+node_modules
+.next
+out
+.env
+.env*.local
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+desktop.ini
+
+# carousel engine
+output/_probe/
+assets/inhouse-only/raw/
+tools/_*.mjs

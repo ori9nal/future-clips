@@ -1,0 +1,52 @@
+[
+  {
+    "id": "sit-edge",
+    "kind": "figure",
+    "file": "sit-edge.png"
+  },
+  {
+    "id": "curl-side",
+    "kind": "figure",
+    "file": "curl-side.png"
+  },
+  {
+    "id": "stand-slump",
+    "kind": "figure",
+    "file": "stand-slump.png"
+  },
+  {
+    "id": "sit-phone",
+    "kind": "figure",
+    "file": "sit-phone.png"
+  },
+  {
+    "id": "head-rest",
+    "kind": "figure",
+    "file": "head-rest.png"
+  },
+  {
+    "id": "dial-62",
+    "kind": "object",
+    "file": "dial-62.png"
+  },
+  {
+    "id": "dial-91",
+    "kind": "object",
+    "file": "dial-91.png"
+  },
+  {
+    "id": "hypnogram",
+    "kind": "object",
+    "file": "hypnogram.png"
+  },
+  {
+    "id": "moon",
+    "kind": "object",
+    "file": "moon.png"
+  },
+  {
+    "id": "bed",
+    "kind": "object",
+    "file": "bed.png"
+  }
+]
