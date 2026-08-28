@@ -12,3 +12,7 @@ desktop.ini
 output/_probe/
 assets/inhouse-only/raw/
 tools/_*.mjs
+
+# sourcing layer
+.cache/
+output/_*/
