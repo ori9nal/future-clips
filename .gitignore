@@ -16,3 +16,4 @@ tools/_*.mjs
 # sourcing layer
 .cache/
 output/_*/
+mining/reference_features.json
