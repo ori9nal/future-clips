@@ -17,3 +17,5 @@ tools/_*.mjs
 .cache/
 output/_*/
 mining/reference_features.json
+output/atlas/
+assets/library/

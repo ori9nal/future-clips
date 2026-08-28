@@ -13,7 +13,7 @@ const keep = [], drop = [];
 for (const it of m.items) {
   const buf = fs.readFileSync(it.file);
   const comp = await componentStats(buf);
-  const halo = it.halo != null ? { halo: it.halo } : await haloScore(buf);
+  const halo = await haloScore(buf); // always fresh: a stored halo predates darkFringe
   const stats = { ...it, ...comp, ...halo, bbox: { x: 0, y: 0, w: it.w, h: it.h } };
   const v = judgeCutout(stats);
   Object.assign(it, comp);

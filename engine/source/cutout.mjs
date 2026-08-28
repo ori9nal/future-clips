@@ -293,8 +293,14 @@ export async function subjectTone(png) {
  * lands in a comparable band. A fixed linear() cannot do this: the same curve
  * that flatters a daylight runner crushes a dark-gym boxer to a silhouette, and
  * a set mixing the two reads as inconsistent rather than as a series.
+ *
+ * `targetHigh` stops well short of 255 ON PURPOSE. These cutouts composite onto
+ * a WHITE page, so any highlight pushed to near-white dissolves into it — a
+ * light-clothed runner stretched to 238 lost their whole upper body to the
+ * background. Capping the highlight keeps the subject reading as an object on
+ * the page rather than a hole in it.
  */
-export async function toBW(png, { targetLow = 26, targetHigh = 238 } = {}) {
+export async function toBW(png, { targetLow = 18, targetHigh = 202 } = {}) {
   const tone = await subjectTone(png);
   const grey = sharp(png).greyscale();
   if (tone.toneP5 == null || tone.toneSpread < 8) return await grey.png({ compressionLevel: 9 }).toBuffer();
@@ -327,6 +333,7 @@ export function judgeCutout(s) {
   // which is the only ground this direction uses.
   if (s.toneMean != null && s.toneMean < 42) fail.push(`toneMean ${s.toneMean} < 42 (renders as a silhouette on white)`);
   if (s.toneSpread != null && s.toneSpread < 40) fail.push(`toneSpread ${s.toneSpread} < 40 (no modelling left in the subject)`);
+  if (s.translucency != null && s.translucency > TRANSLUCENCY_MAX) fail.push(`translucency ${s.translucency} > ${TRANSLUCENCY_MAX} (subject is see-through on white)`);
   return { pass: fail.length === 0, fail };
 }
 
@@ -347,11 +354,72 @@ export async function cutout(file, opts = {}) {
     return await sharp(raw).ensureAlpha().trim({ threshold: 1 }).png({ compressionLevel: 9 }).toBuffer();
   });
 
-  let stats = readJson(`${key}-stats`);
+  let stats = readJson(`${key}-stats-v2`);
   if (!stats) {
     stats = { ...(await alphaStats(buf)), ...(await haloScore(buf)), ...(await componentStats(buf)) };
-    writeJson(`${key}-stats`, stats);
+    writeJson(`${key}-stats-v2`, stats);
   }
 
   return { buf, stats, verdict: judgeCutout(stats), hit, ms: Date.now() - t0, key };
 }
+
+/**
+ * Perceptual hash of the matted subject (dHash, 8x8 over greyscale gradients).
+ *
+ * Stock searches return whole shoots: two adjacent Pexels ids are routinely the
+ * same model, same outfit, same light. Those land in the library as separate
+ * entries and then appear on consecutive slides, which reads as a mistake. Hash
+ * distance catches them where an id comparison cannot.
+ */
+export async function perceptualHash(png) {
+  const W = 9, H = 8;
+  const { data } = await sharp(png)
+    .flatten({ background: '#ffffff' })   // judge the subject as it composites
+    .greyscale().resize(W, H, { fit: 'fill' })
+    .raw().toBuffer({ resolveWithObject: true });
+  let bits = '';
+  for (let y = 0; y < H; y++)
+    for (let x = 0; x < W - 1; x++)
+      bits += data[y * W + x] < data[y * W + x + 1] ? '1' : '0';
+  return bits;
+}
+
+export function hammingDistance(a, b) {
+  if (!a || !b || a.length !== b.length) return Infinity;
+  let d = 0;
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) d++;
+  return d;
+}
+
+/** Distance below this means "the same shoot", not "a similar pose". */
+export const DUPLICATE_DISTANCE = 8;
+
+/**
+ * How much of the subject is SEE-THROUGH.
+ *
+ * A backlit runner, motion blur, smoke or thin fabric leaves the matte with
+ * partial alpha across the subject's interior, not just at its rim. Composited
+ * on white that reads as a faded, half-erased figure — and none of the other
+ * gates can see it: the edge is clean, the mean tone is fine, and a luminance
+ * test finds nothing because the pixels that vanish are the ones it skips
+ * (they are not solid enough to be sampled in the first place).
+ *
+ * Measured as the share of VISIBLE pixels that are not solid. A clean cutout is
+ * a couple of percent — just the antialiased rim. Measured across a 15-subject
+ * library the clean ones sat at 0.01-0.05 and the smoke-obscured boxer at 0.30.
+ */
+export async function translucency(png) {
+  const { data, info } = await sharp(png).ensureAlpha().resize(240, null, { fit: 'inside' })
+    .raw().toBuffer({ resolveWithObject: true });
+  const n = info.width * info.height;
+  let visible = 0, partial = 0;
+  for (let i = 0; i < n; i++) {
+    const a = data[i * 4 + 3];
+    if (a <= 40) continue;
+    visible++;
+    if (a < 210) partial++;
+  }
+  return { translucency: visible ? +(partial / visible).toFixed(4) : 1, visiblePx: visible };
+}
+
+export const TRANSLUCENCY_MAX = 0.06;
