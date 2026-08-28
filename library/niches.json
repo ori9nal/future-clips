@@ -1,0 +1,44 @@
+{
+  "_note": "Per-niche cutout library. Queries ask for well-lit subjects on clean or plain grounds: these cutouts land on WHITE, so a low-key source renders as a silhouette. Separation still matters for the matte, but it comes from a plain backdrop rather than from darkness. `people` feeds F1 (single cutout, bleeds an edge); `objects` feeds F2/F3.",
+  "niches": {
+    "fitness": {
+      "people": [
+        "runner full body white background studio",
+        "athletic man standing full body white background",
+        "fit woman athlete full body white background",
+        "muscular man portrait plain background daylight",
+        "sprinter running daylight full body",
+        "marathon runner racing daylight",
+        "woman running outdoors daylight full body",
+        "athlete jumping white background studio",
+        "man lifting dumbbell white background",
+        "fitness model standing plain backdrop"
+      ],
+      "objects": [
+        "running shoes isolated white background",
+        "dumbbell isolated white background",
+        "sports watch isolated white background",
+        "protein powder container isolated white",
+        "race medal isolated white background",
+        "kettlebell isolated white background",
+        "water bottle isolated white background",
+        "gym towel isolated white"
+      ]
+    },
+    "finance": {
+      "people": [
+        "businessman full body white background studio",
+        "young professional standing plain background daylight",
+        "woman in suit full body white background"
+      ],
+      "objects": [
+        "luxury watch isolated white background",
+        "stack of cash isolated white background",
+        "credit card isolated white background",
+        "laptop isolated white background",
+        "gold bar isolated white background",
+        "smartphone isolated white background"
+      ]
+    }
+  }
+}

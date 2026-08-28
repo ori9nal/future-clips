@@ -1,0 +1,64 @@
+{
+  "_note": "HAND-AUTHORED PLACEHOLDERS standing in for the Phase 2 idea engine, written to the exact output contract that engine will emit: { angle, hook, structure_type, slides:[{text,imageIntent}], cta }. They exist to prove the RENDER path end to end with real cutouts before any model is wired in. They are NOT the idea engine's output and must not be mistaken for evidence that it works — that evidence is IDEAS.md, which does not exist yet.",
+  "campaign": "atlas-fitness",
+  "concepts": [
+    {
+      "angle": "Runners are told to lift less. The opposite is true if you sequence it.",
+      "structure_type": "PRESCRIPTION",
+      "hook": "if you want to get jacked and still run, use this split",
+      "slides": [
+        { "text": "most people run their legs into the ground, then wonder why nothing grows.", "imageIntent": "exhausted runner, low light" },
+        { "text": "lift heavy twice. run easy three times. never on the same legs, never on the same day.", "imageIntent": "athlete mid-lift" },
+        { "text": "hard days hard, easy days easy. the middle is where progress goes to die.", "imageIntent": "runner on empty road" },
+        { "text": "your easy run should feel insultingly slow. that is the point of it.", "imageIntent": "relaxed jogger" },
+        { "text": "one long run a week. everything else is maintenance for that one.", "imageIntent": "long distance runner" },
+        { "text": "eight weeks of this beats eight months of doing both badly.", "imageIntent": "confident athlete" }
+      ],
+      "cta": "follow for the sequencing",
+      "closerKicker": "we post one of these every week"
+    },
+    {
+      "angle": "Same money, opposite life. The comparison does the arguing.",
+      "structure_type": "COMPARISON",
+      "hook": "a $1,200 phone and a $1,200 race entry cost the same",
+      "slides": [
+        { "text": "one of them you replace in two years and never think about again.", "imageIntent": "smartphone isolated" },
+        { "text": "the other one you talk about for the rest of your life.", "imageIntent": "runner finishing race" },
+        { "text": "nobody has ever described an upgrade cycle as the hardest thing they have done.", "imageIntent": "exhausted finisher" },
+        { "text": "the entry fee is not the cost. the six months before it are the cost.", "imageIntent": "early morning training" },
+        { "text": "that is also the entire return.", "imageIntent": "athlete celebrating" }
+      ],
+      "cta": "save this before you upgrade",
+      "closerKicker": "spend it on something that changes you"
+    },
+    {
+      "angle": "VO2max work is simple and everyone overcomplicates it.",
+      "structure_type": "LIST",
+      "hook": "six sessions that actually move your vo2max",
+      "slides": [
+        { "text": "four by four minutes, hard, three minutes easy between. the boring one that works.", "imageIntent": "interval training" },
+        { "text": "thirty by thirty. thirty seconds on, thirty off, until form breaks.", "imageIntent": "sprinter" },
+        { "text": "hill repeats. six times ninety seconds, walk down, no heroics on the first one.", "imageIntent": "runner on hill" },
+        { "text": "the long tempo. forty minutes at a pace you could hold a bad conversation at.", "imageIntent": "steady runner" },
+        { "text": "fartlek. unstructured, by feel, once a week, when you cannot face a plan.", "imageIntent": "runner in park" },
+        { "text": "the time trial. once a month. it is a measurement, not a workout.", "imageIntent": "runner checking watch" }
+      ],
+      "cta": "save this for monday",
+      "closerKicker": "pick two. not six."
+    },
+    {
+      "angle": "The unglamorous inputs are the ones that separate people.",
+      "structure_type": "CONTRAST",
+      "hook": "the athletes still improving after five years do less, not more",
+      "slides": [
+        { "text": "they protect sleep like it is a training session, because it is one.", "imageIntent": "athlete resting" },
+        { "text": "they take the deload week even when they feel fine. especially then.", "imageIntent": "calm athlete" },
+        { "text": "they eat the same boring four meals and stop thinking about it.", "imageIntent": "simple food" },
+        { "text": "they never train through a sharp pain. dull, maybe. sharp, never.", "imageIntent": "athlete stretching" },
+        { "text": "adding is easy. subtracting is what actually moves you forward.", "imageIntent": "solitary runner" }
+      ],
+      "cta": "follow for the boring stuff",
+      "closerKicker": "nobody posts about any of this"
+    }
+  ]
+}

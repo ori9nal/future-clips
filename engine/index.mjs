@@ -7,8 +7,9 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { h32, rng as makeRng, fingerprint } from './seed.mjs';
-import { BRAND, ACCENTS, makePalette } from './palette.mjs';
+import { BRAND, ACCENTS, makePalette, makePaletteFrom, accentKeysOf } from './palette.mjs';
 import { buildCopy } from './copy.mjs';
+import { conceptToSlides } from './concept.mjs';
 import { layoutSlide, layoutFurniture, safeBox, coverage } from './layout.mjs';
 import { renderVectorLayer } from './render-type.mjs';
 import { renderBackground, prepareSubject, composeSlide, assertAssetAllowed } from './compose.mjs';
@@ -34,6 +35,22 @@ async function inkBBox(png) {
 
 const TEMPLATE_DIR = 'templates';
 const SUBJECT_DIR = 'assets/inhouse-only/subjects';
+const LIBRARY_DIR = 'assets/library';
+
+// Per-niche cutout libraries, loaded once per process. These are real matted
+// photographs with attribution, built by tools/build-library.mjs — the thing
+// that replaced procedural silhouettes.
+const _libCache = new Map();
+export function loadLibrary(niche, kind) {
+  const key = `${niche}/${kind}`;
+  if (_libCache.has(key)) return _libCache.get(key);
+  const f = path.join(LIBRARY_DIR, niche, `${kind}.json`);
+  if (!fs.existsSync(f)) throw new Error(`cutout library missing: ${f} — run tools/build-library.mjs --niche ${niche} --kind ${kind}`);
+  const m = JSON.parse(fs.readFileSync(f, 'utf8'));
+  if (!m.items?.length) throw new Error(`cutout library ${f} is empty`);
+  _libCache.set(key, m);
+  return m;
+}
 
 export function loadTemplates(dir = TEMPLATE_DIR) {
   return fs.readdirSync(dir)
@@ -73,9 +90,37 @@ export function diverge({ accountId, campaignId, postIndex, templates }) {
   return { seed, rng: r, tpl, accentKey, slideCount, hookType, cropStrategy };
 }
 
-function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, rotateOffset = 0) {
+/**
+ * `bleed` is either a pixel overhang (legacy templates) or a list of edge names
+ * (the brief's schema). Edge names carry no magnitude — the overhang for those
+ * comes from the anchor plus dx/dy — so they normalise to 0 here.
+ */
+const bleedPx = (b) => (typeof b === 'number' && Number.isFinite(b) ? b : 0);
+
+/** Edges a subject is DECLARED to exit, for the bleed quality gate. */
+export const bleedEdgesOf = (b) => (Array.isArray(b) ? b : []);
+
+function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, rotateOffset = 0, niche = null) {
   const s = roleSpec.subject;
   if (!s) return null;
+
+  // A library subject is a real matted photograph. Selection walks the library
+  // by slide index rather than sampling it, so one carousel never repeats a
+  // cutout and two carousels from adjacent seeds do not open with the same
+  // person.
+  if (s.library) {
+    const useNiche = s.library.niche || niche;
+    if (!useNiche) throw new Error('library subject requires a niche (campaign.niche or template library.niche)');
+    const lib = loadLibrary(useNiche, s.library.kind || 'people');
+    const items = lib.items;
+    const idx = (rotateOffset + slideIndex * 1) % items.length;
+    const item = items[idx];
+    const src = s.library.variant === 'bw' && item.bwFile ? item.bwFile : item.file;
+    return {
+      ...s, id: item.id, src, credit: item.credit,
+      fit: cropStrategy, heightPct: s.heightPct ?? 0.5,
+    };
+  }
   // Rotating the pool by slide index guarantees no two consecutive slides reuse
   // the same object; random picks from a 5-item pool collide roughly 1 slide in 5.
   // Rotate through silhouette CLASSES, then through members of the class, so a
@@ -111,7 +156,7 @@ export function roleFor(tpl, slide, slideIndex) {
   return tpl.roles[pick] ? pick : 'body';
 }
 
-async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset, displayCap }) {
+async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset, displayCap, niche, brand }) {
   const role = roleFor(tpl, slide, slideIndex);
   const roleSpec = tpl.roles[role];
   const canvas = tpl.canvas;
@@ -121,7 +166,7 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
 
   // subject placement, including the declared overlap with a named type slot
   let subject = null;
-  const sSpec = subjectSpecFor(roleSpec, rngSlide, cropStrategy, palette, slideIndex, rotateOffset);
+  const sSpec = subjectSpecFor(roleSpec, rngSlide, cropStrategy, palette, slideIndex, rotateOffset, niche);
   if (sSpec) {
     const ctx = { canvas, rng: rngSlide, ...palette, plate: null };
     if (sSpec.proceduralId) sSpec.procedural = renderProcedural(sSpec.proceduralId, palette);
@@ -137,8 +182,11 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
           : target.y + target.h - (sSpec.overlapPx ?? 40);
         subject.rect.y = Math.round(desiredY);
         if (sSpec.clampBottom !== false && sSpec.overlapEdge !== 'top') {
-          // never float: keep the contact edge at or below the canvas foot
-          subject.rect.y = Math.min(subject.rect.y, canvas.h - subject.rect.h + (sSpec.bleed ?? 0));
+          // never float: keep the contact edge at or below the canvas foot.
+          // `bleed` is a pixel overhang in the legacy templates and a list of
+          // edge names in the brief's schema; an array reaching the arithmetic
+          // silently produced NaN and crashed the compositor, so normalise.
+          subject.rect.y = Math.min(subject.rect.y, canvas.h - subject.rect.h + bleedPx(sSpec.bleed));
         }
       }
     }
@@ -160,7 +208,7 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
   }
 
   const furniture = layoutFurniture({
-    tpl, role: slide.role, slideIndex, slideCount, palette, brand: BRAND,
+    tpl, role: slide.role, slideIndex, slideCount, palette, brand: brand || BRAND,
   });
 
   const bgCtx = { canvas, rng: rngSlide, ...palette, plate: null };
@@ -193,6 +241,7 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
     rects: laid.rects,
     subjectRect: subject?.rect ?? null,
     subjectId: sSpec?.id ?? null,
+    credit: sSpec?.credit ?? null,
     typeInk,
     variant: role,
     renderedWords: laid.renderedWords,
@@ -208,9 +257,18 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
 export async function renderCarousel({
   accountId = 'drift', campaignId = 'why-not-what', postIndex = 0,
   outDir = 'output/run', templates = loadTemplates(), maxRetries = 8,
+  niche = null, campaign = null, concept = null,
 }) {
+  // A partner campaign supplies its own brand kit, niche and rules. Falling back
+  // to the built-in brand keeps the old sleep-app path working unchanged.
+  if (campaign) {
+    campaignId = campaign.id ?? campaignId;
+    niche = niche ?? campaign.niche ?? null;
+  }
   const d = diverge({ accountId, campaignId, postIndex, templates });
-  const palette = makePalette(d.accentKey);
+  const palette = campaign?.brand
+    ? makePaletteFrom(campaign.brand, accentKeysOf(campaign.brand)[postIndex % accentKeysOf(campaign.brand).length])
+    : makePalette(d.accentKey);
   const id = `${d.tpl.id.split('-')[0]}-p${String(postIndex).padStart(2, '0')}-${d.accentKey.slice(-1)}`;
   const dir = path.join(outDir, id);
 
@@ -241,6 +299,27 @@ export async function renderCarousel({
     return best;
   };
 
+  // A CONCEPT bypasses the copy banks entirely: the idea engine already decided
+  // what every slide says, so there is nothing to regenerate. The layout dry-run
+  // still runs, and a concept that cannot be laid out is a hard error rather
+  // than something the renderer silently trims.
+  if (concept) {
+    const built = conceptToSlides(concept);
+    const cover0 = layoutSlide({ tpl: d.tpl, role: 'cover', content: built.slides[0], palette, canvas: d.tpl.canvas });
+    const cap0 = cover0.ok && cover0.displaySize ? cover0.displaySize * (d.tpl.hierarchyRatio ?? 0.68) : undefined;
+    const dry = built.slides.map((slide, i) =>
+      layoutSlide({ tpl: d.tpl, role: roleFor(d.tpl, slide, i), content: slide, palette,
+        canvas: d.tpl.canvas, displayCap: i === 0 ? undefined : cap0 }));
+    const bad = dry.map((r, i) => ({ r, i })).filter((x) => !x.r.ok);
+    if (bad.length) {
+      throw new Error(
+        `${d.tpl.id} concept "${concept.hook}": layout unsatisfiable — ` +
+        bad.map((x) => `s${x.i + 1}:${x.r.reason}(${x.r.slot})`).join(', ') +
+        ' — the idea engine must emit shorter copy for this slot');
+    }
+    return await renderFromCopy({ d, palette, copy: built, dir, id, postIndex, niche, campaign, copyAttempts: 0 });
+  }
+
   let attempt = 0, copy = null, failures = [];
   for (; attempt <= maxRetries; attempt++) {
     const base = { slideCount: d.slideCount, hookType: d.hookType, shorten: attempt, hookPick: attempt };
@@ -268,6 +347,17 @@ export async function renderCarousel({
     }
   }
 
+  return await renderFromCopy({ d, palette, copy, dir, id, postIndex, niche, campaign,
+    accountId, campaignId, copyAttempts: attempt });
+}
+
+/**
+ * Everything downstream of "we have final copy": layout cap, per-slide render,
+ * furniture, fingerprint, validation, manifest. Shared by the copy-bank path and
+ * the concept path so the two cannot drift apart.
+ */
+async function renderFromCopy({ d, palette, copy, dir, id, postIndex, niche, campaign,
+  accountId = 'drift', campaignId = null, copyAttempts = 0 }) {
   fs.mkdirSync(dir, { recursive: true });
   const rotateOffset = makeRng(d.seed ^ 0x5bd1e995).int(97);
   // measure the cover's display size once, then cap every later slide against it
@@ -278,6 +368,7 @@ export async function renderCarousel({
     ? coverLaid.displaySize * (d.tpl.hierarchyRatio ?? 0.68) : undefined;
   const files = [];
   const slideMeta = [];
+  const credits = [];
   for (let i = 0; i < copy.slides.length; i++) {
     const slide = copy.slides[i];
     const outFile = path.join(dir, `${String(i + 1).padStart(2, '0')}.png`);
@@ -285,10 +376,11 @@ export async function renderCarousel({
     const r = await renderSlide({
       tpl: d.tpl, slide, slideIndex: i, slideCount: copy.slides.length,
       palette, outFile, rngSlide, cropStrategy: d.cropStrategy, rotateOffset,
-      displayCap: i === 0 ? undefined : displayCap,
+      displayCap: i === 0 ? undefined : displayCap, niche, brand: campaign?.brand,
     });
     if (!r.ok) throw new Error(`render failed on slide ${i + 1}: ${r.reason} (${r.slot})`);
     files.push(outFile);
+    if (r.credit) credits.push({ slide: i + 1, ...r.credit });
     slideMeta.push({ index: i, role: slide.role, ...r });
   }
 
@@ -301,13 +393,18 @@ export async function renderCarousel({
     id, dir, files,
     accountId, campaignId, postIndex,
     seed: d.seed, family: d.tpl.id, familyName: d.tpl.name, displayCap,
-    accentKey: d.accentKey, accent: palette.accent,
+    accentKey: palette.accentKey, accent: palette.accent,
     hookType: copy.hookType, slides: copy.slides, canvas: d.tpl.canvas,
     tpl: d.tpl, furnitureByRole, cropStrategy: d.cropStrategy,
-    copyAttempts: attempt, slideMeta,
+    copyAttempts, slideMeta,
+    brand: campaign?.brand ?? BRAND,
+    rules: campaign?.rules ?? null,
+    // Attribution travels with the carousel. A set that used licensed stock
+    // cannot be delivered without the record of what it used.
+    credits,
     fingerprint: fingerprint({
       family: d.tpl.id, slideCount: copy.slides.length,
-      hookType: copy.hookType, accent: d.accentKey,
+      hookType: copy.hookType, accent: palette.accentKey,
     }),
   };
   carousel.validation = validateCarousel(carousel);

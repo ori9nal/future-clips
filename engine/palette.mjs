@@ -101,3 +101,37 @@ export function makePalette(accentKey) {
     accentHue: hueOf(BRAND.colors[accentKey]),
   };
 }
+
+/**
+ * Palette from an AGENCY-SUPPLIED brand kit rather than the built-in brand.
+ *
+ * This is the partner-campaign path: an agency hands over palette, logo, handle
+ * and rules once, and every carousel for that campaign is bound to them. A kit
+ * may declare several accents (picked per post index for divergence) or, for
+ * the white/no-colour format the top performers use, an accent identical to ink
+ * — which keeps the one-chromatic-cluster validator satisfied by construction
+ * because there is no chromatic pixel to cluster.
+ *
+ * @param {{colors:{ink,paper,accent?|accents?}}} brand
+ */
+export function makePaletteFrom(brand, accentKey = null) {
+  const c = brand?.colors;
+  if (!c?.ink || !c?.paper) throw new Error('brand kit needs colors.ink and colors.paper');
+  const accents = c.accents && Object.keys(c.accents).length ? c.accents : { 'accent-0': c.accent ?? c.ink };
+  const keys = Object.keys(accents);
+  const key = accentKey && accents[accentKey] ? accentKey : keys[0];
+  const accent = accents[key];
+  return {
+    accentKey: key,
+    ink: c.ink,
+    paper: c.paper,
+    accent,
+    accentHue: hueOf(accent),
+    // true when the kit deliberately has no colour at all — templates use this
+    // to skip decorations that only make sense with an accent
+    monochrome: accent.toUpperCase() === c.ink.toUpperCase(),
+  };
+}
+
+export const accentKeysOf = (brand) =>
+  Object.keys(brand?.colors?.accents || {}).length ? Object.keys(brand.colors.accents) : ['accent-0'];

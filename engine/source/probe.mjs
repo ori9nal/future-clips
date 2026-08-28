@@ -80,6 +80,11 @@ export const MOODS = {
   'plate':    { luma: [22, 150], contrast: [14, 78],  sharpness: 25, clipHigh: 0.10 },
   // bright editorial — bone-plate families
   'high-key': { luma: [140, 242], contrast: [18, 999], sharpness: 55, clipLow: 0.04 },
+  // A candidate that will be MATTED and then dropped on a white ground. The
+  // source background is about to be discarded, so its luminance barely matters;
+  // what matters is that the subject is sharp and has enough separation for the
+  // matte. Deliberately wide on luma, strict on sharpness.
+  'subject': { luma: [30, 235], contrast: [22, 999], sharpness: 120, clipHigh: 0.35 },
 };
 
 export function judge(p, mood = 'low-key') {

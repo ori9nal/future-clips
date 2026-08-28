@@ -1,5 +1,12 @@
 // Campaign rules as an executable validator. These are product requirements,
 // so a violation is a hard reject, not a warning printed at the end.
+//
+// Rules come from the CAMPAIGN, not from a constant: a partner agency declares
+// its own handle, slide bounds, banned claims and canvas when it is onboarded,
+// and this runs them. The built-in brand is only the fallback for the legacy
+// path. Anything hardcoded here would be a rule we silently apply to a client
+// who never agreed to it — the wordmark requirement was exactly that, and the
+// top-performing reference format carries no wordmark at all.
 import { BANNED, CTA_VERBS } from './copy.mjs';
 import { BRAND } from './palette.mjs';
 
@@ -11,52 +18,71 @@ function textOf(slide) {
     .map((k) => slide[k]).filter(Boolean).join(' \n ');
 }
 
+const DEFAULT_RULES = {
+  min_slides: 6,
+  max_slides: 10,
+  canvas: '1080x1440',
+  banned_claims: BANNED,
+  banned_phrases: [],
+  cta_required_on_last: true,
+  wordmark_slides: [0, -1],
+  require_handle_every_slide: true,
+};
+
 export function validateCarousel(carousel) {
   const errors = [];
-  const { slides, tpl, canvas, furnitureByRole } = carousel;
+  const { slides, canvas, furnitureByRole } = carousel;
+  const brand = carousel.brand ?? BRAND;
+  const rules = { ...DEFAULT_RULES, ...(carousel.rules || {}) };
+  // A campaign that declares its own rules opts out of the legacy wordmark
+  // requirement unless it asks for one explicitly.
+  if (carousel.rules && carousel.rules.wordmark_slides === undefined) rules.wordmark_slides = [];
 
-  // 6-10 slides
-  if (slides.length < 6 || slides.length > 10) {
-    errors.push({ rule: 'slide-count', detail: `${slides.length} slides (must be 6-10)` });
+  if (slides.length < rules.min_slides || slides.length > rules.max_slides) {
+    errors.push({ rule: 'slide-count', detail: `${slides.length} slides (must be ${rules.min_slides}-${rules.max_slides})` });
   }
 
-  // 1080 x 1440
-  if (canvas.w !== 1080 || canvas.h !== 1440) {
-    errors.push({ rule: 'canvas', detail: `${canvas.w}x${canvas.h} (must be 1080x1440)` });
+  const [rw, rh] = String(rules.canvas).split('x').map(Number);
+  if (canvas.w !== rw || canvas.h !== rh) {
+    errors.push({ rule: 'canvas', detail: `${canvas.w}x${canvas.h} (must be ${rules.canvas})` });
   }
 
-  // banned claims, anywhere
   const all = norm(slides.map(textOf).join(' '));
-  for (const b of BANNED) {
-    const re = new RegExp(`\\b${b.replace(/\s+/g, '\\s+')}\\b`, 'i');
+  for (const b of [...(rules.banned_claims || []), ...(rules.banned_phrases || [])]) {
+    const re = new RegExp(`\\b${String(b).replace(/\s+/g, '\\s+')}\\b`, 'i');
     if (re.test(all)) errors.push({ rule: 'banned-claim', detail: `"${b}" appears in the copy` });
   }
 
-  // @drift.sleep on every slide (rendered furniture, not just intent)
-  slides.forEach((s, i) => {
-    const items = furnitureByRole[s.role] || [];
-    if (!items.some((f) => f.type === 'handle')) {
-      errors.push({ rule: 'handle-missing', detail: `slide ${i + 1} (${s.role}) has no ${BRAND.handle}` });
-    }
-  });
+  // the campaign's handle, on every slide, as RENDERED furniture — not merely
+  // as an intention recorded in the content object
+  if (rules.require_handle_every_slide) {
+    const handle = rules.required_mention ?? brand.handle;
+    slides.forEach((s, i) => {
+      const items = furnitureByRole[s.role] || [];
+      if (!items.some((f) => f.type === 'handle')) {
+        errors.push({ rule: 'handle-missing', detail: `slide ${i + 1} (${s.role}) has no ${handle}` });
+      }
+    });
+  }
 
-  // wordmark on slide 1 and the final slide
-  for (const [idx, label] of [[0, 'first'], [slides.length - 1, 'final']]) {
-    const s = slides[idx];
+  for (const idx of rules.wordmark_slides || []) {
+    const at = idx < 0 ? slides.length + idx : idx;
+    const s = slides[at];
+    if (!s) continue;
     const items = furnitureByRole[s.role] || [];
     const hasMark = items.some((f) => f.type === 'wordmark')
-      || norm(textOf(s)).includes(norm(BRAND.wordmark));
-    if (!hasMark) errors.push({ rule: 'wordmark-missing', detail: `${label} slide carries no ${BRAND.wordmark} wordmark` });
+      || norm(textOf(s)).includes(norm(brand.wordmark));
+    if (!hasMark) errors.push({ rule: 'wordmark-missing', detail: `slide ${at + 1} carries no ${brand.wordmark} wordmark` });
   }
 
-  // final slide must contain a CTA verb
-  const last = slides[slides.length - 1];
-  const lastText = norm(textOf(last));
-  if (!CTA_VERBS.some((v) => new RegExp(`\\b${v}\\b`).test(lastText))) {
-    errors.push({ rule: 'cta-missing', detail: `final slide has no CTA verb (${CTA_VERBS.join('/')})` });
+  if (rules.cta_required_on_last) {
+    const last = slides[slides.length - 1];
+    const lastText = norm(textOf(last));
+    if (!CTA_VERBS.some((v) => new RegExp(`\\b${v}\\b`).test(lastText))) {
+      errors.push({ rule: 'cta-missing', detail: `final slide has no CTA verb (${CTA_VERBS.join('/')})` });
+    }
   }
 
-  // exactly one accent declared
   if (!carousel.accentKey) errors.push({ rule: 'accent', detail: 'no accent selected' });
 
   return { ok: errors.length === 0, errors };

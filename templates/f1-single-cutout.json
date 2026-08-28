@@ -1,0 +1,293 @@
+{
+  "id": "f1-single-cutout",
+  "name": "SINGLE-CUTOUT",
+  "reference": "the 193,422-like format: white ground, plain regular-weight sans headline top-left lowercase, ONE B&W cutout bleeding off the bottom-right, mono @handle bottom-left, arrow bottom-right. No accent colour, no gradient, no grain, no vignette, no split-tone.",
+  "canvas": {
+    "w": 1080,
+    "h": 1440
+  },
+  "safe": {
+    "top": 96,
+    "bottom": 132,
+    "left": 84,
+    "right": 84
+  },
+  "slideCount": [
+    7,
+    10
+  ],
+  "hookTypes": [
+    "prescription",
+    "comparison",
+    "contrast",
+    "list",
+    "reframe"
+  ],
+  "cropStrategies": [
+    "contain"
+  ],
+  "roles": {
+    "cover": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "library": {
+          "kind": "people",
+          "variant": "bw"
+        },
+        "grade": "none",
+        "heightPct": 0.8,
+        "maxWidthPct": 0.62,
+        "anchor": "bottom-center",
+        "dx": 96,
+        "dy": 44,
+        "bleed": [
+          "bottom"
+        ],
+        "_placementNote": "centre-biased and bleeding the bottom. Anchoring a tall narrow figure to the right corner leaves an unbalanced void on the left and collides with the arrow; the reference format centres the subject and lets the white read as margin."
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 760,
+            "h": 300
+          },
+          "size": [
+            40,
+            62
+          ],
+          "maxLines": 3,
+          "font": {
+            "role": "body",
+            "weight": 400
+          },
+          "lineHeight": 1.22,
+          "tracking": -0.004,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        }
+      ]
+    },
+    "body": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "library": {
+          "kind": "people",
+          "variant": "bw"
+        },
+        "grade": "none",
+        "heightPct": 0.6,
+        "maxWidthPct": 0.5,
+        "anchor": "bottom-right",
+        "dx": 10,
+        "dy": 34,
+        "bleed": [
+          "bottom"
+        ]
+      },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 260,
+            "h": 60
+          },
+          "size": [
+            22,
+            30
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "mono",
+            "weight": 500
+          },
+          "lineHeight": 1.2,
+          "tracking": 0.08,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        },
+        {
+          "id": "headline",
+          "content": "title",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "index",
+              "gap": 30
+            },
+            "w": 700,
+            "h": 220
+          },
+          "size": [
+            38,
+            56
+          ],
+          "maxLines": 3,
+          "font": {
+            "role": "body",
+            "weight": 400
+          },
+          "lineHeight": 1.2,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "optional": true,
+          "_optionalNote": "a concept slide is often a single sentence, which the title slot already carries. Requiring an elaboration would force the idea engine to pad, and padding is exactly what the reference format does not do.",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 32
+            },
+            "w": 640,
+            "h": 300
+          },
+          "size": [
+            26,
+            34
+          ],
+          "maxLines": 6,
+          "font": {
+            "role": "body",
+            "weight": 400
+          },
+          "lineHeight": 1.42,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ]
+    },
+    "closer": {
+      "background": {
+        "type": "flat",
+        "fill": "#FFFFFF"
+      },
+      "subject": {
+        "library": {
+          "kind": "people",
+          "variant": "bw"
+        },
+        "grade": "none",
+        "heightPct": 0.74,
+        "maxWidthPct": 0.62,
+        "anchor": "bottom-center",
+        "dx": 96,
+        "dy": 44,
+        "bleed": [
+          "bottom"
+        ],
+        "_placementNote": "centre-biased and bleeding the bottom. Anchoring a tall narrow figure to the right corner leaves an unbalanced void on the left and collides with the arrow; the reference format centres the subject and lets the white read as margin."
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 720,
+            "h": 280
+          },
+          "size": [
+            40,
+            60
+          ],
+          "maxLines": 3,
+          "font": {
+            "role": "body",
+            "weight": 400
+          },
+          "lineHeight": 1.22,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "kicker",
+          "content": "kicker",
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 26
+            },
+            "w": 620,
+            "h": 120
+          },
+          "size": [
+            24,
+            32
+          ],
+          "maxLines": 2,
+          "font": {
+            "role": "body",
+            "weight": 400
+          },
+          "lineHeight": 1.4,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ]
+    }
+  },
+  "furniture": [
+    {
+      "type": "handle",
+      "anchor": "bottom-left",
+      "gap": 20,
+      "size": 26,
+      "font": {
+        "role": "mono",
+        "weight": 400
+      },
+      "color": "ink"
+    },
+    {
+      "type": "arrow",
+      "anchor": "bottom-right",
+      "gap": 10,
+      "size": 40,
+      "glyph": "→",
+      "font": {
+        "role": "body",
+        "weight": 400
+      },
+      "color": "ink",
+      "on": [
+        "cover",
+        "body"
+      ]
+    }
+  ],
+  "bodyVariants": [
+    "body"
+  ]
+}
