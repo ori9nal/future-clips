@@ -1,114 +1,81 @@
-# GAP.md — what still separates our carousels from the references
+# GAP.md — my own rating, and the one thing that causes it
 
-Generated set: `output/atlas/` — 4 carousels, 30 slides, campaign `atlas-fitness`,
-template `f1-single-cutout`, 4/4 passing the campaign rules validator.
-
-```
-node --env-file=.env.local tools/build-library.mjs --niche fitness --kind people
-node tools/dedupe-library.mjs      --niche fitness --kind people --apply
-node tools/translucency-check.mjs  --niche fitness --kind people --apply
-node tools/render-campaign.mjs
-```
+You said 9/100. I rated it myself before reading that back, and I got **12/100**.
+Close enough that I am not going to argue for the extra three points.
 
 ---
 
-## What now matches the reference format
+## The test that matters
 
-| Reference property | Ours | |
+Not "is it well-constructed". The test is: **would a 22-year-old clipper,
+thumb moving, stop and swipe to slide 2?**
+
+| | my constellation slide | papanca "athlete maxxing" (45.6K likes) |
 |---|---|---|
-| White ground | `#FFFFFF` flat, no gradient | ✅ |
-| One B&W cutout | real matted photograph, per slide | ✅ |
-| Plain regular-weight sans, lowercase, top-left | Archivo 400, `lowercase: true` | ✅ |
-| Mono @handle bottom-left | JetBrains Mono 400 | ✅ |
-| → arrow bottom-right | ✅ | |
-| No accent colour | accent === ink, 0 chromatic clusters by construction | ✅ |
-| No grain / vignette / split-tone | none | ✅ |
-| Bleeds an edge | bottom, anchor-driven | ✅ |
+| stopwatch | flat gold circle, two vector hands | — |
+| bottle | orange rounded rect, "1L" in a white band | a real Precision Hydration bottle, label legible |
+| shoe | a black blob with an orange sole | an actual Nike Vaporfly, visible knit and carbon plate |
+| medal | gold circle, striped ribbon | the real Berlin Marathon medal, Brandenburg Gate embossed |
+| watch | drawn rectangle with drawn numbers | a photographed Apple Watch mid-run |
+| people | **none** | two athletes, cut out, greyscale |
 
-Everything the *previous* direction got wrong — dark plates, split-toning, grain,
-coloured accent words, procedural silhouettes — is gone.
+**Would I swipe? No.** It reads as a corporate infographic — the visual language
+of a slide deck or a language-learning app. Nothing on it is *desirable*.
 
 ---
 
-## The gap, stated precisely
+## The single cause: vector illustration cannot carry aspiration
 
-**It is no longer a rendering problem. It is a semantic-selection problem, and it
-is glaring.**
+Your words were "generic emojis, no true graphic designer feel", and that is
+precisely the failure. My objects **are** emoji. A flat orange rectangle with
+"1L" on it is an icon of a bottle. It is not a bottle.
 
-Look at `output/atlas/f1-p00-B`. The carousel is about running and lifting. It shows:
+The reference format works because the objects are **photographs of real,
+specific, expensive, wanted things**. A Vaporfly is aspiration. A drawing of a
+shoe is a pictogram. Aspiration is the entire engine of this niche — *athlete
+maxxing*, *looksmaxxing*, the whole category is built on wanting the thing in
+the frame.
 
-- slide 03 — **a man in a business suit**
-- slide 02 — a man in a polo shirt
-- slide 04 — a man in jeans and a Superman t-shirt
-- closer — a man in a plain tee, leaning
+I made a wrong trade and should name it plainly: you said "no stock photos", and
+I solved that by **drawing** the objects. Drawing removed exactly the property —
+photographic realness — that made the format work in the first place. I traded
+away the thing that mattered to satisfy the constraint, and reported a $0 cost
+as if it were an achievement. It was not an achievement. It was the reason the
+output is bad.
 
-Not one of them is doing anything athletic. Every cutout is technically
-immaculate — clean alpha, full tonal range, correct scale, correct bleed, no
-halo, no ghost, no duplicate — and the set is still wrong, because a suit does
-not belong on a slide that reads *"hard days hard, easy days easy."*
+**Photographic objects are not optional for this format. They are the format.**
 
-This is exactly the failure the brief predicted: **a perfectly graded photo of
-the wrong subject is still wrong.** Every gate I can compute from pixels now
-passes. What is left requires knowing what the photograph is *of*, and no
-pixel statistic answers that.
+That is why the credits matter, and why "I spent $0" was the wrong thing to be
+proud of.
 
-### Why the stock queries do not fix it alone
+## The second failure: no people
 
-The queries ask for `"fitness model standing plain backdrop"` and
-`"athletic man standing full body white background"`. Pexels and Unsplash return
-generic studio people for both, because that is what those phrases match in
-their tag space. Tightening the wording moves the distribution a little and
-costs a lot of API calls; it does not make the result *verified*.
+Every high performer in the corpus puts a human cutout in the frame — greyscale,
+bleeding an edge, at scale. My constellation has zero people. It is a diagram
+about training, not an image about an athlete.
 
-The brief's own answer is the right one, and it is the piece not yet built: an
-LLM turns each slide's beat into a query, **and a vision check confirms the
-returned frame actually depicts that beat** before it enters the library.
+## The third: what I generated with stock was worse
 
----
-
-## Secondary gaps
-
-1. **Dead space.** The reference sets the subject large and lets it dominate the
-   lower two-thirds. Ours are smaller and leave more empty page, particularly on
-   interior slides. Partly a sizing parameter, partly a consequence of stock
-   subjects being shot full-body with margin.
-2. **No F2 or F3.** SCRAPBOOK-COLLAGE and TWO-OBJECT-COMPARE are unbuilt, and the
-   object library (`library/niches.json` → `objects`) has never been run. The
-   $1,200-phone-vs-$1,200-race-entry comparison — the 37k post — needs F3.
-3. **The ideas are hand-authored.** `concepts/atlas-fitness.json` is four
-   concepts I wrote to the idea engine's output contract. They prove the render
-   path. **They are not evidence the idea engine works, because it does not
-   exist.** `IDEAS.md` is deliberately absent rather than fabricated.
-4. **The corpus distributions are from the local sample only.** See `MINING.md`.
+The depth-poster set is worse than the constellation, and you were right about
+that too. Orange-washed photographs of strangers in polo shirts and business
+suits on a running carousel. Wrong subjects, wrongly graded, arbitrarily placed.
+Both directions failed for the same underlying reason: **I never had access to
+the right pictures**, and I kept shipping around that instead of saying so.
 
 ---
 
-## Measurement bugs found and fixed along the way
+## What actually fixes it
 
-Each of these changed the output visibly, and each was found by looking at
-rendered pixels rather than at a score.
+1. **Generate the objects photographically.** Nano Banana Pro, product-shot
+   prompts, isolated on white, then matte. ~2 credits each. A 60-object niche
+   library is ~120 credits, built once, reused forever.
+2. **Generate the people the same way**, or train a Soul so the same athlete
+   recurs across every slide of every carousel.
+3. Keep the drawn layer for **data only** — the charts, the stat, the week grid.
+   Those were the strong ones and they are genuinely better drawn, because a
+   chart has to say the campaign's real number. Everything physical becomes
+   photographic.
 
-| Bug | Effect | Fix |
-|---|---|---|
-| **Halo gate had the wrong sign** | rejected 30 of 42 white-background candidates while keeping dark-background ones measuring −0.40 | on white the *dark* fringe is the visible defect, not the bright one; gate on `darkFringe` |
-| **Translucent haze in the matte** | subject sat at alpha 181–254 while 31,368 px carried alpha 1–40; showed as a ghost AND inflated the trim box so subjects rendered undersized | alpha curve (floor 60 / ceil 200) before anything else; opaque px 1,501 → 103,189 |
-| **Fixed B&W linear** | flattered a daylight runner, crushed a dark-gym boxer to a silhouette in the same set | `toBW` normalises each subject's own range; highlight capped at 202 so it cannot dissolve into the page |
-| **Queries written for the old aesthetic** | "dark studio", "dark gym" → near-black blobs on white | rewritten for daylight and plain backdrops |
-| **Same-shoot duplicates** | two frames of the same model on consecutive slides | perceptual hash misses this (poses genuinely differ); one item per photographer catches it exactly |
-| **Wrong see-through metric** | measured luminance of *solid* pixels, so it structurally could not see partial alpha | measure `translucency` — share of visible pixels that are not solid |
-| **Stats cache not versioned** | `darkFringe` gate silently never fired on cached entries | versioned stats key |
-| **`bleed` type conflict** | array of edge names reached arithmetic → NaN offsets → compositor crash | normalise; edge names carry no magnitude |
-
----
-
-## What unblocks the rest
-
-1. **An Anthropic API key.** Two things depend on it, and they are the two things
-   that matter most:
-   - the **Phase 2 idea engine** — per the corrected brief this is *the actual
-     product*, and there is a hard stop until 10 generated concepts have been
-     reviewed;
-   - **semantic verification of sourced imagery** — the gap described above.
-2. **The Claude in Chrome extension connected**, for Instagram reference mining
-   (Apify is off the table). The measurement subsystem is built and validated;
-   it needs engagement-labelled posts to run against.
+The layout solver, the label geometry, the collision work, the type fitting —
+those all stand. They were never the problem. The problem is that I have been
+filling a good frame with pictograms.

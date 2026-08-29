@@ -2,12 +2,28 @@
   "id": "meridian-endurance",
   "name": "Meridian Endurance",
   "niche": "fitness",
-  "_brief": "An imaginary partner campaign, written the way a real agency handover should read. MERIDIAN is an endurance coaching brand for people in their late twenties and thirties who already train and are tired of being sold intensity. Its whole position is that the sport is won in the unglamorous middle — sleep, easy days, patience — so the art direction is deliberately calm: bone ground, near-black ink, a single burnt rust that appears once per slide and never twice. No neon, no gradients, no hype.",
+  "_brief": "Rewritten against a REAL Whop Content Rewards campaign (whop.com/contentrewards), not invented. Live campaigns there carry: a one-line pitch, a category and type, per-platform CPM with a min and max per submission, a total budget with a paid-out meter, an average review time, content requirements, and a linked campaign brief. Everything below mirrors that shape so the engine is building against the structure clippers actually see.",
+
+  "whop": {
+    "campaignType": "Slideshows",
+    "category": "Product",
+    "reviewDays": 9,
+    "budgetUsd": 5000,
+    "paidOutUsd": 715.20,
+    "payout": {
+      "cpmUsd": 1.0,
+      "minPerSubmissionUsd": 1.0,
+      "maxPerSubmissionUsd": 500.0,
+      "platforms": ["instagram", "tiktok", "youtube", "x"]
+    },
+    "_payoutNote": "Observed live: $1.00 per 1k views, $1 min and $500 max per submission, identical across all four platforms. A clipper is paid on VIEWS, which is why hook strength and swipe-through matter more to them than craft — and why our quality gates should optimise for the first slide above all."
+  },
 
   "agency": {
     "code": "MERIDIAN25",
     "name": "Meridian Collective",
-    "contact": "partners@meridian.example"
+    "contact": "partners@meridian.example",
+    "revShare": 0.25
   },
 
   "brand": {
@@ -19,22 +35,21 @@
       "paper": "#EFEAE0",
       "accents": { "rust": "#A8442A" }
     },
-    "_colorNote": "Bone rather than white, and a burnt rust rather than a signal red. The measured reference corpus uses bone and cream far more often than pure white, and one desaturated accent reads as considered where a saturated one reads as an ad.",
     "logo": null
   },
 
   "voice": {
     "person": "second, direct, no exclamation marks",
     "register": "plain, unhurried, slightly contrarian",
-    "avoid": ["hustle", "grind", "beast mode", "no excuses", "crush it", "unlock"],
-    "_note": "The brand's whole claim is that intensity is over-sold. Copy that shouts contradicts the positioning."
+    "avoid": ["hustle", "grind", "beast mode", "no excuses", "crush it", "unlock"]
   },
 
   "rules": {
     "required_mention": "@meridian.endurance",
     "min_slides": 6,
     "max_slides": 9,
-    "canvas": ["1080x1350", "1080x1440"],
+    "canvas": ["1080x1350", "1080x1920", "1080x1440"],
+    "_canvasNote": "1080x1920 added because every Whop campaign observed pays on TikTok and YouTube as well as Instagram, at the same CPM. Shipping 4:5 only forfeits three of four payable platforms.",
     "banned_phrases": ["hustle", "grind", "beast mode", "no excuses"],
     "banned_claims": [
       "guaranteed",
@@ -47,9 +62,18 @@
     "zero_gen_mode": false
   },
 
+  "contentRequirements": {
+    "_note": "Whop campaigns state these as a short list and link a fuller brief. Ours are machine-checkable, which is the thing the validator already enforces.",
+    "mustTagHandle": true,
+    "mustNotShowCompetitorBrands": true,
+    "originalContentOnly": true,
+    "minSlidesForPayout": 6
+  },
+
   "source": {
     "video": null,
     "libraries": [
+      { "niche": "fitness", "kind": "objects" },
       { "niche": "fitness", "kind": "people" },
       { "niche": "fitness", "kind": "plates" }
     ]
