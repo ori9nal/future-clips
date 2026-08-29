@@ -1,212 +1,202 @@
-# PLAN.md — the AI as art director
+# PLAN.md — 100 templates, a small model, and real margin
 
-The ask: **the main AI is the graphic designer**, assembling elements from
-campaign clips, agency assets, mascots, and AI-made parts. No stock.
+**Your architecture is better than mine and the numbers prove it.** Pre-build the
+templates once as product assets; at request time a cheap model only *chooses*
+elements, *makes or finds* them, grades, and composites. No expensive model ever
+sits in the request path.
 
-The cost math below moves *when* the designer runs. That is the single most
-important decision in this plan, so it comes first.
+Changing the plan to **30–35 slides for $20** is what unlocks it. The per-slide
+budget goes from $0.00075 to **$0.175** — 230× more headroom — and that is the
+difference between "cannot afford AI" and "can afford AI plus a quality check on
+every slide".
 
 ---
 
-## 0. The finding that shapes everything
+## 1. The economics, worked
 
-Running Claude as art director **per carousel** costs roughly **$0.26–0.34**:
+Binding case is an **agency-attributed** subscriber, because the 25% share comes
+off the top.
 
-| stage | model | tokens | cost |
-|---|---|---|---|
-| concept + hooks | Opus 5 | 3k in / 2k out | $0.065 |
-| art direction, 8 slides batched | Opus 5 | 6k in / 4k out | $0.130 |
-| element prompt expansion | Haiku 4.5 | 2k in / 1k out | $0.007 |
-| vision critique, 8 slides | Sonnet 5 | 16k in / 2.4k out | $0.056 |
-| | | | **$0.258** |
-
-The plan sells **$20 for 200 carousels** — **$0.10 of revenue per carousel**, with
-a stated COGS ceiling of **$0.006**. Per-carousel art direction is **2.6× the
-entire revenue** and **43× the ceiling**. It cannot ship that way at any model tier;
-even all-Haiku lands near $0.05, still 8× the ceiling.
-
-**So the designer runs once per CAMPAIGN, not once per carousel.**
-
-It designs a *system* — archetypes, element sets, treatment rules — and the
-deterministic engine executes that system hundreds of times for fractions of a
-cent. This is also exactly what the reference products do: growithalex ships a
-**Brand System Document** built once, plus a **reference anchor image** that a
-30-image library is generated from.
-
-| | design time (once per campaign) | generate time (per carousel) |
+| | attributed | unattributed |
 |---|---|---|
-| who | **Claude Opus 5** as art director | the engine |
-| does | picks archetypes, briefs elements, sets treatment rules, critiques samples | resolves elements from cache, lays out, validates |
-| costs | **~$4–6, once** | **~$0.002** |
-| human | approves the style guide | nothing |
+| revenue | $20.00 | $20.00 |
+| Stripe (2.9% + 30¢) | −$0.88 | −$0.88 |
+| agency share 25% | −$5.00 | — |
+| **available** | **$14.12** | **$19.12** |
+| COGS budget at 40% net margin ($8 profit) | **$6.12** | $11.12 |
+| **budget per slide (35 slides)** | **$0.175** | $0.318 |
 
-Amortised over a partner campaign serving thousands of carousels this is
-~$0.001 each — inside the ceiling with room. See §6 for where it does *not* fit.
+### What a slide actually costs
 
----
+| line | cache hit | cache miss |
+|---|---|---|
+| template | $0 — pre-built product asset | $0 |
+| element selection (Haiku 4.5, ~1.5k in / 400 out) | $0.0035 | $0.0035 |
+| element generation (2 new @ $0.035) | $0 | $0.070 |
+| vision QC (Sonnet 5, 1 image + 300 out) | $0.0060 | $0.0060 |
+| compose + grade (CPU) | $0.00005 | $0.00005 |
+| storage + egress (WebP) | $0.00002 | $0.00002 |
+| **total** | **$0.0095** | **$0.080** |
 
-## 1. The element bus — five sources, no stock
+At a realistic **80% library hit rate**: `0.8 × 0.0095 + 0.2 × 0.080` = **$0.024 per slide**.
 
-Every element carries `provenance`, so `zero_gen_mode` can filter to the two
-client-owned sources and still produce a full carousel.
+| | attributed | unattributed |
+|---|---|---|
+| 35 slides × $0.024 | $0.84 | $0.84 |
+| profit | **$13.28** | **$18.28** |
+| **net margin** | **66%** | **91%** |
 
-| # | source | provenance | cost | status |
-|---|---|---|---|---|
-| 1 | **Campaign clips** — ffmpeg scene-detect → frame → matte | `campaign-video` | $0 | **built** (`engine/source/frames.mjs`) |
-| 2 | **Agency / clipping assets** — brand uploads via admin | `agency-asset` | $0 | **built** (`lib/ingest.ts`) |
-| 3 | **Mascot** — the account's recurring character | `mascot` | generated once | to build |
-| 4 | **AI elements** — objects, textures, grounds | `ai-element` | ~$0.035 each, cached | client built, needs a key |
-| 5 | **Drawn graphics** — charts, stats, rings | `drawn` | $0 | **built** (`engine/objects.mjs`) |
+**You asked for 40%. This lands at 66% on the worst case.**
 
-Resolution order is cheapest-and-most-on-brand first: **1 → 2 → 3 → 5 → 4**.
-Generation is the last resort, never the default, and every result is cached by
-content hash so a campaign pays for each element once, ever.
+Even the pathological case — *every* slide generating two fresh elements, zero
+cache — costs $2.80 and still returns **56%**. The margin is not fragile.
 
-### The mascot is the differentiator
+### The headroom is the point
 
-One trained character, reused across every slide of every carousel forever.
-That is the "same character, every slide" promise on the product site, and it is
-the thing stock can never do. Two routes:
+Budget is $0.175/slide; the plan spends $0.024. **That is 7× spare**, and it
+should be spent on quality, not banked:
 
-- **Higgsfield `soul_2`** — train a Soul from 5–20 images, then reference it by
-  id in any later generation. Already wired into this session.
-- **Reference-anchor prompting** — one approved image passed as a reference to
-  every subsequent call. Cheaper, slightly less consistent.
-
----
-
-## 2. The pipeline
-
-```
-DESIGN TIME  (once per campaign, human approves)
-  1  brief        brand kit + references + source clips
-  2  ART DIRECT   Opus 5 -> STYLE GUIDE  (archetypes, element manifest,
-                                          treatment + colour rules, type scale)
-  3  BUILD        resolve/generate every element in the manifest -> library
-  4  CRITIQUE     render 3 sample carousels, Opus 5 looks at them, revises
-                  the style guide, re-renders. Max 2 rounds.
-  --> approved style guide + element library, both versioned
-
-GENERATE TIME  (per carousel, no model in the path)
-  5  concept      pick a structure + copy from the campaign's idea bank
-  6  compose      engine executes the style guide against the element library
-  7  validate     fitText, safe areas, spellcheck, campaign rules, COGS
-```
-
-### What the art director actually emits
-
-Not pixels — *decisions*. The engine turns decisions into pixels deterministically.
-
-```json
-{
-  "archetypes": [
-    { "id": "hero-cutout", "use": "covers",
-      "ground": "bone", "subject": { "provenance": ["campaign-video","mascot"],
-      "treatment": "greyscale", "bleed": "bottom", "heightPct": 0.72 },
-      "type": { "face": "display-editorial", "case": "lower",
-                "sizeRange": [88, 132], "maxHookWords": 6 } },
-    { "id": "constellation", "use": "value slides",
-      "elements": 7, "labels": true, "ground": "white",
-      "rule": "objects keep their own colour, people go greyscale" }
-  ],
-  "elementManifest": [
-    { "role": "hero", "brief": "the mascot mid-stride, three-quarter view",
-      "source": "mascot" },
-    { "role": "data", "brief": "weekly volume, peaking at 58 mi", "source": "drawn" },
-    { "role": "object", "brief": "worn race shoe, side profile, studio light",
-      "source": "ai-element" }
-  ],
-  "narrativeEnergy": { "hook": "tension", "value": "clarity", "cta": "resolution" }
-}
-```
-
-`narrativeEnergy` is the part worth stealing from the reference workflow: the
-director picks imagery by *what the slide is doing*, not by keyword match. My
-current matcher scores an intent string against a stock query — that is the
-difference between a designer and a search box.
+- a **vision QC on every slide** is already in the number above — affordable now,
+  impossible under the old 200-carousel plan
+- 3–4 generated elements per slide instead of 2
+- regenerate-on-reject rather than ship-and-hope
+- the good image model for subjects, not the cheap one
 
 ---
 
-## 3. The critique loop — what makes it a designer
+## 2. What changed about the product
 
-A designer looks at their own work. At design time only, Claude is shown the
-rendered sample slides and returns structured corrections:
+**$20 buys ~4–5 carousels, not 200.** That is a different promise: *premium and
+few*, not *cheap and many*. It is also the honest one — 200 carousels a month at
+this quality was never going to be true, and 35 excellent slides is worth more
+to a clipper than 200 mediocre ones.
 
-```json
-{ "verdict": "revise",
-  "fixes": [
-    { "slide": 1, "issue": "hero reads small against a 132px headline",
-      "change": "subject.heightPct 0.72 -> 0.86" },
-    { "slide": 4, "issue": "four objects cluster left, right third is dead",
-      "change": "constellation.minAngularSpread 0.6" }
-  ] }
-```
-
-Every fix is a **parameter change to the style guide**, never a one-off nudge to
-one image — so the correction applies to all 200 carousels, not one.
+It also fixes the flaw in the last plan: there is no per-campaign design pass to
+amortise, so **self-serve and partner campaigns cost the same**. The templates
+are product assets, paid for once by us, not per customer.
 
 ---
 
-## 4. Which model — the direct answer
+## 3. TikTok — what the format actually demands
+
+TikTok is network-blocked from this machine (`ERR_CONNECTION_RESET`), so this is
+from analysis rather than my own browsing. Flagging that rather than dressing it
+up.
+
+Three things that are **not** true of Instagram and that we currently get wrong:
+
+1. **9:16 / 1080×1920, not 4:5.** Every template we have is 1080×1350 or
+   1080×1440. The product page promises TikTok export. That is a gap.
+2. **Centre-safe.** TikTok's right rail and bottom caption cover the edges — text
+   and key elements must sit centred, inside a safe box. Our safe areas are
+   Instagram-shaped.
+3. **Concrete, numeric hooks.** The winning pattern is a specific outcome, not an
+   abstraction: *"Month 1: $0. Month 3: $284."* My hooks — "the boring part is
+   the sport" — are abstract, which RESEARCH.md §1 already flagged as
+   gap-closing rather than gap-opening. Numbers open the gap harder.
+
+Also confirmed: dark ground + accent + dramatic imagery beat plain black-on-white
+(127K views in 72h on the same content); the three formats that carry are
+**numbered list, comparison, story reveal**.
+
+**Implication for the template library:** it needs a 9:16 family with a centre-
+safe grid, not just a resize of the 4:5 ones.
+
+---
+
+## 4. The 100+ template library
+
+Templates are **data**, built once, versioned as product assets.
+
+**Coverage, not count.** 100 arbitrary templates is worse than 60 that span the
+axes properly. The library is a grid:
+
+| axis | values |
+|---|---|
+| canvas | 1080×1350 (IG) · 1080×1920 (TikTok) |
+| archetype | single-cutout · constellation · comparison · statement · numbered-list · story-reveal |
+| ground | white · bone · dark · graded photo |
+| type voice | editorial serif · plain sans · heavy condensed |
+| density | 1 element · 3 · 7–14 |
+
+2 × 6 × 4 × 3 × 3 = 432 combinations. **Ship ~100 hand-tuned points in that
+space**, not the full cross-product — the tuned ones are where the design lives.
+
+Uniqueness does not come from template count. It comes from
+`template × elements × palette × copy × seed`, and the divergence engine and
+fingerprint collision check for that are **already built**.
+
+---
+
+## 5. The request-time pipeline — no expensive model in it
+
+```
+1  PICK      seed + campaign + concept -> template          deterministic
+2  BRIEF     Haiku 4.5: for each slot, what element and why  ~$0.0035/slide
+3  RESOLVE   ladder: campaign clip -> agency asset -> mascot
+             -> drawn graphic -> cache -> GENERATE           $0 or ~$0.035/element
+4  GRADE     match every element to the template's rule       CPU
+5  COMPOSE   engine: fit, safe areas, collisions, rules       CPU
+6  QC        Sonnet 5 looks at the slide: ship or redo        ~$0.006/slide
+```
+
+Haiku's job in step 2 is deliberately small: **choose and describe, never
+design**. The design is already in the template. That is what keeps it cheap and
+what keeps it consistent.
+
+Step 6 is the part the old plan could not afford. A slide that fails QC is
+regenerated once against the returned reason; the second result ships either way
+and the failure is logged, so bad templates surface in the data.
+
+---
+
+## 6. Models — the direct answer
 
 | stage | model | why |
 |---|---|---|
-| **Art direction** | **`claude-opus-5`** | Runs once per campaign and sets the quality of everything downstream. This is the wrong place to save money — the whole plan works *because* this call is rare. |
-| **Critique (vision)** | **`claude-opus-5`** | Same call, same reason. Judging a rendered layout is the hardest task here. |
-| **Concept / hooks** | **`claude-opus-5`** | Taste-bound. RESEARCH.md §1: the hook is ~80% of the outcome. |
-| **Prompt expansion** | **`claude-haiku-4-5`** | Mechanical brief → prompt rewriting. No judgment. |
+| element brief + selection | **`claude-haiku-4-5`** | $1/$5 per MTok. Choosing from a manifest is not a taste task, and it runs 35× a month per user. |
+| per-slide vision QC | **`claude-sonnet-5`** | $2/$10. Needs vision and judgment; at $0.006 a slide it fits with room. |
+| template authoring, hook writing, campaign onboarding | **`claude-opus-5`** | Rare, offline, sets the ceiling for everything else. Never in the request path. |
 
-**Where you can cut, if you want to:** moving critique to `claude-sonnet-5`
-saves about 60% of that stage. At design-time frequency it is a few dollars a
-campaign, so I would not — but it is your call, not mine.
+**Images:** Nano Banana / Gemini Flash Image (~$0.035) for subjects and objects
+where prompt adherence *is* the problem; FLUX schnell (~$0.003) for grounds and
+textures; a trained Soul or reference anchor for the mascot.
 
-Two cost levers that cost nothing in quality:
-- **Prompt caching** on the brand document and style guide (stable across every
-  call in a campaign) — ~90% off the cached input.
-- **Batch API** for the element-generation sweep — 50% off, and nothing at design
-  time is latency-sensitive.
-
-### Image models
-
-| use | model | cost | why |
-|---|---|---|---|
-| mascot | Higgsfield `soul_2`, or Nano Banana with a reference anchor | one-off training | character consistency is the entire promise |
-| objects & subjects | **Nano Banana 2 / Gemini Flash Image** | ~$0.034–0.067 | best prompt adherence; semantics are the whole problem |
-| grounds & textures | **FLUX schnell** via fal | ~$0.003 | semantics barely matter, volume does |
+**Free savings, no quality cost:** prompt-cache the template manifest and brand
+document (stable across every call — ~90% off cached input), and use the Batch
+API for element sweeps (50% off, nothing offline is latency-sensitive).
 
 ---
 
-## 5. Build order
+## 7. Build order
 
-1. **Style guide as data** — one JSON schema the art director writes and the
-   engine reads. Everything else hangs off this.
-2. **Element bus + provenance** — one resolver over the five sources, with the
-   priority ladder and `zero_gen_mode` filtering.
-3. **Art director call** — brief → style guide, against the schema.
-4. **Mascot pipeline** — train/anchor once, reference thereafter.
-5. **Critique loop** — render samples, revise parameters, re-render, cap at 2.
-6. **Admin surface** — approve the style guide, see the element library, see the
-   spend.
+1. **9:16 template family + centre-safe grid** — the TikTok gap, no key needed.
+2. **Template schema v2** — archetype, density, ground, voice as first-class
+   fields the picker can query. No key needed.
+3. **Element bus + provenance ladder** — one resolver over the five sources, with
+   `zero_gen_mode` filtering. No key needed.
+4. **Haiku brief step** — needs the Anthropic key.
+5. **Generation + cache** — needs an image key.
+6. **Sonnet QC loop** — needs the Anthropic key.
+7. **Author the ~100 templates** — the long tail, and the actual product.
 
-Steps 1, 2 and 6 need no API key and are worth doing first. Steps 3–5 need the
-Anthropic key; step 4 needs an image source.
+Steps 1–3 and 7 need nothing from you. 4 and 6 need the Anthropic key; 5 needs
+Higgsfield re-auth or a `FAL_KEY`.
 
 ---
 
-## 6. Where this plan does not fit — stated, not buried
+## 8. What I would push back on
 
-- **Self-serve campaigns break the amortisation.** A partner campaign serving
-  thousands of carousels amortises a $5 design pass to ~$0.001. One user's own
-  campaign making 200 carousels carries **$0.025 each — 4× the ceiling.** Fix by
-  seeding self-serve campaigns from a pre-built niche style guide (near-zero
-  design cost) and reserving a bespoke design pass for the $39 tier.
-- **Critique needs a taste anchor.** Claude judging its own layout without a
-  reference will converge on "fine". It should be shown the campaign's reference
-  images alongside the render and asked to compare, not to rate.
-- **$0.006 was set before any of this existed.** With generation amortised the
-  engine still lands far under it; the design pass is what pushes a small
-  campaign over. That number may need to become "per campaign" rather than
-  "per carousel" — worth deciding deliberately.
-- **Element generation is still blocked.** Higgsfield's session is expired, Flow
-  cannot be automated from here (RESEARCH.md Part 2), and there is no `FAL_KEY`.
-  Steps 1, 2 and 6 proceed without it; steps 3–5 do not.
+- **35 slides is ~4 carousels.** If a clipper needs to post daily, that is a week
+  of content, not a month. Either the number climbs to ~60 (still 62% margin at
+  these costs) or the plan is positioned as *premium few*, deliberately.
+- **The 25% agency share is the real cost line**, not compute — $5.00 against a
+  COGS of $0.84. Worth deciding whether it applies to the whole subscription or
+  only the first N months.
+- **80% cache hit is an assumption, not a measurement.** It holds once a niche
+  library is warm and is much worse for the first users in a new niche. The
+  pathological case still returns 56%, so this does not threaten the plan, but
+  the first cohort in any niche costs real money.
+- **I have not verified TikTok myself.** The network here blocks it. Before
+  building the 9:16 family on those three claims, someone should look at actual
+  million-view slideshows on a machine that can reach it.
