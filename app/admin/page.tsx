@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { listCampaigns, libraryFor } from "@/lib/campaigns";
+import AppShell from "@/components/AppShell";
 import { createCampaign } from "./actions";
 
 export const dynamic = "force-dynamic";
@@ -8,65 +9,64 @@ export default function AdminHome() {
   const campaigns = listCampaigns();
 
   return (
-    <main className="adm">
-      <header className="adm-head">
-        <div>
-          <p className="adm-eyebrow">Admin</p>
-          <h1>Partner campaigns</h1>
-          <p className="adm-sub">
-            Everything an agency hands over once — brand kit, handle, rules, source visuals.
-            Clippers open a campaign and generate; they never upload any of this.
-          </p>
-        </div>
+    <AppShell active="admin">
+      <header className="fc-head">
+        <p className="fc-eyebrow">Campaigns</p>
+        <h1>Everything a brand hands over, once.</h1>
+        <p className="fc-sub">
+          Brand kit, handle, rules and source visuals. A clipper opens a campaign and generates —
+          they never upload any of this.
+        </p>
       </header>
 
-      <section className="adm-grid">
+      <section className="fc-grid" style={{ marginBottom: 26 }}>
         {campaigns.map((c) => {
           const lib = libraryFor(c.niche, "people");
+          const accent = Object.values(c.brand.colors.accents)[0] as string;
           return (
-            <Link key={c.id} href={`/admin/campaigns/${c.id}`} className="adm-card">
-              <div className="adm-card-top">
-                <span className="adm-swatch" style={{ background: c.brand.colors.ink }} />
+            <Link key={c.id} href={`/admin/campaigns/${c.id}`} className="fc-tile">
+              <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+                <span className="fc-sw" style={{ background: c.brand.colors.ink, width: 34, height: 34 }} />
+                <span className="fc-sw" style={{ background: accent, width: 34, height: 34 }} />
                 <div>
-                  <h2>{c.name}</h2>
-                  <p className="adm-handle">{c.brand.handle || "no handle set"}</p>
+                  <h3>{c.name}</h3>
+                  <p className="fc-handle">{c.brand.handle || "no handle set"}</p>
                 </div>
               </div>
-              <dl className="adm-meta">
-                <div><dt>Niche</dt><dd>{c.niche}</dd></div>
-                <div><dt>Slides</dt><dd>{c.rules.min_slides}–{c.rules.max_slides}</dd></div>
-                <div><dt>Cutouts</dt><dd>{lib.items.length}</dd></div>
-                <div><dt>Zero-gen</dt><dd>{c.rules.zero_gen_mode ? "on" : "off"}</dd></div>
-              </dl>
-              {c.agency ? <p className="adm-agency">Attributed to {c.agency.code}</p> : null}
+              <div className="fc-meta">
+                <div><span>Niche</span><b>{c.niche}</b></div>
+                <div><span>Slides</span><b>{c.rules.min_slides}–{c.rules.max_slides}</b></div>
+                <div><span>Images</span><b>{lib.items.length}</b></div>
+                <div><span>Zero-gen</span><b>{c.rules.zero_gen_mode ? "on" : "off"}</b></div>
+              </div>
+              {c.agency ? (
+                <p className="fc-tag" style={{ marginTop: 14, display: "inline-block" }}>
+                  {c.agency.code} · 25% share
+                </p>
+              ) : null}
             </Link>
           );
         })}
-        {!campaigns.length ? <p className="adm-empty">No campaigns yet. Create the first one below.</p> : null}
+        {!campaigns.length ? <p className="fc-note">No campaigns yet. Create the first one below.</p> : null}
       </section>
 
-      <section className="adm-new">
+      <section className="fc-card">
         <h2>New campaign</h2>
-        <form action={createCampaign} className="adm-form">
-          <label>
-            <span>Campaign name</span>
-            <input name="name" required placeholder="Atlas Performance" />
-          </label>
-          <label>
-            <span>Handle</span>
-            <input name="handle" required placeholder="@atlas.performance" />
-          </label>
-          <label>
-            <span>Niche</span>
-            <input name="niche" defaultValue="fitness" required />
-          </label>
-          <label>
-            <span>Agency ref code <em>(optional — 25% share)</em></span>
-            <input name="agency_code" placeholder="ATLAS25" />
-          </label>
-          <button type="submit" className="adm-btn">Create campaign</button>
+        <form action={createCampaign} className="fc-form">
+          <div className="fc-row">
+            <label><span>Campaign name</span><input name="name" required placeholder="Meridian Endurance" /></label>
+            <label><span>Handle</span><input name="handle" required placeholder="@meridian.endurance" /></label>
+          </div>
+          <div className="fc-row">
+            <label><span>Niche</span><input name="niche" defaultValue="fitness" required /></label>
+            <label>
+              <span>Agency ref code <em>(optional — 25% share)</em></span>
+              <input name="agency_code" placeholder="MERIDIAN25" />
+            </label>
+          </div>
+          <button type="submit" className="fc-btn">Create campaign</button>
         </form>
       </section>
-    </main>
+    </AppShell>
   );
 }

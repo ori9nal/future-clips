@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { listCampaigns } from "@/lib/campaigns";
 import StudioClient from "./StudioClient";
+import AppShell from "@/components/AppShell";
 
 export const dynamic = "force-dynamic";
 
@@ -36,5 +37,9 @@ export default function StudioPage() {
       return { id: t.id, name: t.name, canvas: `${t.canvas.w}x${t.canvas.h}` };
     });
 
-  return <StudioClient campaigns={campaigns} families={families} />;
+  return (
+    <AppShell active="studio">
+      <StudioClient campaigns={campaigns} families={families} />
+    </AppShell>
+  );
 }
