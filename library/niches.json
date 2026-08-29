@@ -1,5 +1,5 @@
 {
-  "_note": "Per-niche cutout library. Queries ask for well-lit subjects on clean or plain grounds: these cutouts land on WHITE, so a low-key source renders as a silhouette. Separation still matters for the matte, but it comes from a plain backdrop rather than from darkness. `people` feeds F1 (single cutout, bleeds an edge); `objects` feeds F2/F3.",
+  "_note": "Per-niche cutout library. Queries ask for well-lit subjects on clean or plain grounds: these cutouts land on WHITE, so a low-key source renders as a silhouette. Separation for the matte comes from a plain backdrop rather than from darkness. `people` feeds F1/F2 (single cutout, bleeds an edge); `objects` feeds the comparison and collage formats.",
   "niches": {
     "fitness": {
       "people": [
@@ -12,24 +12,33 @@
         "woman running outdoors daylight full body",
         "athlete jumping white background studio",
         "man lifting dumbbell white background",
-        "fitness model standing plain backdrop"
+        "boxer training plain background daylight",
+        "woman lifting barbell white background",
+        "tired athlete resting daylight"
       ],
       "objects": [
         "running shoes isolated white background",
         "dumbbell isolated white background",
         "sports watch isolated white background",
-        "protein powder container isolated white",
         "race medal isolated white background",
         "kettlebell isolated white background",
-        "water bottle isolated white background",
-        "gym towel isolated white"
+        "protein shaker isolated white background"
+      ],
+      "plates": [
+        "desert sand dunes landscape",
+        "stadium track empty",
+        "mountain sunrise landscape",
+        "empty gym interior wide"
       ]
     },
     "finance": {
       "people": [
         "businessman full body white background studio",
         "young professional standing plain background daylight",
-        "woman in suit full body white background"
+        "woman in suit full body white background",
+        "man working laptop plain background",
+        "person thinking plain background daylight",
+        "young man casual standing white background"
       ],
       "objects": [
         "luxury watch isolated white background",
@@ -38,7 +47,62 @@
         "laptop isolated white background",
         "gold bar isolated white background",
         "smartphone isolated white background"
+      ],
+      "plates": [
+        "city skyline dusk",
+        "desert dunes warm light",
+        "empty office interior wide",
+        "mountain range clouds"
+      ]
+    },
+    "creator": {
+      "people": [
+        "photographer holding camera white background",
+        "young creator with laptop plain background",
+        "woman filming smartphone white background",
+        "designer working plain background daylight",
+        "man with headphones white background studio",
+        "person editing video plain background"
+      ],
+      "objects": [
+        "camera isolated white background",
+        "microphone isolated white background",
+        "laptop isolated white background",
+        "smartphone tripod isolated white background",
+        "headphones isolated white background",
+        "ring light isolated white background"
+      ],
+      "plates": [
+        "film studio lighting interior",
+        "desert landscape warm",
+        "sunset clouds sky",
+        "bookshelf library interior"
+      ]
+    },
+    "mindset": {
+      "people": [
+        "man sitting alone plain background daylight",
+        "woman thinking plain background white",
+        "person walking away plain background",
+        "young man reading plain background daylight",
+        "person standing still white background studio",
+        "woman looking down plain background daylight"
+      ],
+      "objects": [
+        "open book isolated white background",
+        "alarm clock isolated white background",
+        "coffee cup isolated white background",
+        "journal notebook isolated white background",
+        "houseplant isolated white background",
+        "single chair isolated white background"
+      ],
+      "plates": [
+        "calm sea horizon",
+        "misty forest morning",
+        "empty room window light",
+        "mountain peak clouds"
       ]
     }
-  }
+  },
+  "_platesNote": "`plates` are full-bleed BACKGROUNDS, not cutouts: they are never matted. The depth format grades them hard toward the brand accent so a set reads as one world."
 }

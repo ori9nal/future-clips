@@ -1,0 +1,224 @@
+{
+  "id": "f5-cream-editorial",
+  "name": "CREAM-EDITORIAL",
+  "reference": "Pinterest reference sheet: the 'Hot Takes*', 'Recaps*', 'Compilations:', 'Splitscreens' family. Bone ground rather than white, a spelled-out number as a small-caps eyebrow (ONE / THREE / SEVEN), a Playfair italic display carrying the title, a hairline rule, and a small sans body. The asterisk is part of the voice.",
+  "canvas": { "w": 1080, "h": 1440 },
+  "safe": { "top": 88, "bottom": 124, "left": 104, "right": 104 },
+  "slideCount": [7, 10],
+  "hookTypes": ["list", "reframe", "comparison", "contrast"],
+  "cropStrategies": ["contain"],
+  "hierarchyRatio": 0.56,
+
+  "roles": {
+    "cover": {
+      "background": { "type": "flat", "fill": "paper" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.52,
+        "maxWidthPct": 0.54,
+        "anchor": "bottom-center",
+        "dx": 0,
+        "dy": 40,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "eyebrow",
+          "content": "kicker",
+          "optional": true,
+          "box": { "x": "safe.left", "y": "safe.top", "w": 872, "h": 40 },
+          "size": [17, 22],
+          "maxLines": 1,
+          "font": { "role": "body", "weight": 600 },
+          "lineHeight": 1.2,
+          "tracking": 0.26,
+          "align": "center",
+          "valign": "top",
+          "color": "ink-soft",
+          "uppercase": true
+        },
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": { "x": "safe.left", "y": { "after": "eyebrow", "gap": 40 }, "w": 872, "h": 400 },
+          "size": [76, 132],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400, "style": "italic" },
+          "lineHeight": 1.0,
+          "tracking": -0.014,
+          "align": "center",
+          "valign": "top",
+          "color": "accent",
+          "hierarchy": "display",
+          "lowercase": true,
+          "decorations": [
+            { "kind": "rule", "align": "text", "w": "text", "gap": 30, "weight": 3, "color": "ink-soft", "above": true }
+          ]
+        }
+      ]
+    },
+
+    "body": {
+      "background": { "type": "flat", "fill": "paper" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.44,
+        "maxWidthPct": 0.42,
+        "anchor": "bottom-right",
+        "dx": 30,
+        "dy": 30,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": { "x": "safe.left", "y": "safe.top", "w": 300, "h": 40 },
+          "size": [17, 22],
+          "maxLines": 1,
+          "font": { "role": "body", "weight": 600 },
+          "lineHeight": 1.2,
+          "tracking": 0.26,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "uppercase": true
+        },
+        {
+          "id": "headline",
+          "content": "title",
+          "box": { "x": "safe.left", "y": { "after": "index", "gap": 34 }, "w": 620, "h": 300 },
+          "size": [54, 94],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400, "style": "italic" },
+          "lineHeight": 1.02,
+          "tracking": -0.012,
+          "align": "left",
+          "valign": "top",
+          "color": "accent",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "optional": true,
+          "box": { "x": "safe.left", "y": { "after": "headline", "gap": 30 }, "w": 500, "h": 260 },
+          "size": [23, 30],
+          "maxLines": 7,
+          "font": { "role": "body", "weight": 400 },
+          "lineHeight": 1.52,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "lowercase": true
+        }
+      ]
+    },
+
+    "body-wide": {
+      "_note": "No image, full measure. The reference sets these as a single justified column with big air above.",
+      "background": { "type": "flat", "fill": "paper" },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": { "x": "safe.left", "y": "safe.top", "w": 300, "h": 40 },
+          "size": [17, 22],
+          "maxLines": 1,
+          "font": { "role": "body", "weight": 600 },
+          "lineHeight": 1.2,
+          "tracking": 0.26,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "uppercase": true
+        },
+        {
+          "id": "headline",
+          "content": "title",
+          "box": { "x": "safe.left", "y": 420, "w": 872, "h": 330 },
+          "size": [60, 104],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400, "style": "italic" },
+          "lineHeight": 1.02,
+          "align": "left",
+          "valign": "top",
+          "color": "accent",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "optional": true,
+          "box": { "x": "safe.left", "y": { "after": "headline", "gap": 36 }, "w": 872, "h": 300 },
+          "size": [25, 33],
+          "maxLines": 8,
+          "font": { "role": "body", "weight": 400 },
+          "lineHeight": 1.56,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "justify": true,
+          "lowercase": true
+        }
+      ]
+    },
+
+    "closer": {
+      "background": { "type": "flat", "fill": "paper" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.48,
+        "maxWidthPct": 0.50,
+        "anchor": "bottom-center",
+        "dx": 0,
+        "dy": 38,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": { "x": "safe.left", "y": 190, "w": 872, "h": 340 },
+          "size": [66, 116],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400, "style": "italic" },
+          "lineHeight": 1.02,
+          "align": "center",
+          "valign": "top",
+          "color": "accent",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "kicker",
+          "content": "kicker",
+          "optional": true,
+          "box": { "x": 190, "y": { "after": "headline", "gap": 26 }, "w": 700, "h": 110 },
+          "size": [22, 29],
+          "maxLines": 2,
+          "font": { "role": "body", "weight": 400 },
+          "lineHeight": 1.5,
+          "align": "center",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ]
+    }
+  },
+
+  "furniture": [
+    { "type": "handle", "anchor": "bottom-left", "gap": 18, "size": 23,
+      "font": { "role": "mono", "weight": 400 }, "color": "ink-soft" },
+    { "type": "arrow", "anchor": "bottom-right", "gap": 10, "size": 36, "glyph": "→",
+      "font": { "role": "body", "weight": 400 }, "color": "ink-soft", "on": ["cover", "body", "body-wide"] }
+  ],
+
+  "bodyVariants": ["body", "body-wide", "body", "body"]
+}

@@ -1,0 +1,184 @@
+{
+  "id": "f2-editorial-serif",
+  "name": "EDITORIAL-SERIF",
+  "reference": "@papanca.io's own cover, measured from the corpus: white ground, high-contrast editorial serif set LARGE and lowercase, exactly one word in italic carrying the payload, one B&W cutout bleeding the bottom, mono handle, arrow. The italic word is the only emphasis in the whole set — there is no accent colour anywhere.",
+  "canvas": { "w": 1080, "h": 1440 },
+  "safe": { "top": 100, "bottom": 128, "left": 96, "right": 96 },
+  "slideCount": [7, 10],
+  "hookTypes": ["reframe", "contrast", "comparison", "prescription"],
+  "cropStrategies": ["contain"],
+  "hierarchyRatio": 0.50,
+
+  "roles": {
+    "cover": {
+      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.60,
+        "maxWidthPct": 0.62,
+        "anchor": "bottom-center",
+        "dx": 0,
+        "dy": 46,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": { "x": "safe.left", "y": 150, "w": 888, "h": 420 },
+          "size": [72, 124],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400 },
+          "lineHeight": 1.02,
+          "tracking": -0.014,
+          "align": "center",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true,
+          "accent": {
+            "target": "manual",
+            "from": "accentWord",
+            "color": "ink",
+            "_colorNote": "ink, not accent. The emphasis is the ITALIC, not a hue — the reference carries no colour at all.",
+            "font": { "weight": 400, "style": "italic" }
+          }
+        }
+      ]
+    },
+
+    "body": {
+      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.48,
+        "maxWidthPct": 0.44,
+        "anchor": "bottom-right",
+        "dx": 22,
+        "dy": 34,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": { "x": "safe.left", "y": "safe.top", "w": 200, "h": 44 },
+          "size": [19, 25],
+          "maxLines": 1,
+          "font": { "role": "mono", "weight": 400 },
+          "lineHeight": 1.2,
+          "tracking": 0.16,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        },
+        {
+          "id": "headline",
+          "content": "title",
+          "box": { "x": "safe.left", "y": { "after": "index", "gap": 40 }, "w": 600, "h": 320 },
+          "size": [48, 78],
+          "maxLines": 4,
+          "font": { "role": "display-editorial", "weight": 400 },
+          "lineHeight": 1.06,
+          "tracking": -0.01,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "optional": true,
+          "box": { "x": "safe.left", "y": { "after": "headline", "gap": 30 }, "w": 500, "h": 240 },
+          "size": [24, 30],
+          "maxLines": 6,
+          "font": { "role": "body", "weight": 400 },
+          "lineHeight": 1.5,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ]
+    },
+
+    "body-quiet": {
+      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "type": [
+        {
+          "id": "headline",
+          "content": "title",
+          "box": { "x": 130, "y": 430, "w": 820, "h": 430 },
+          "size": [62, 104],
+          "maxLines": 5,
+          "font": { "role": "display-editorial", "weight": 400 },
+          "lineHeight": 1.08,
+          "tracking": -0.012,
+          "align": "center",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        }
+      ]
+    },
+
+    "closer": {
+      "background": { "type": "flat", "fill": "#FFFFFF" },
+      "subject": {
+        "library": { "kind": "people", "variant": "bw" },
+        "grade": "none",
+        "heightPct": 0.54,
+        "maxWidthPct": 0.56,
+        "anchor": "bottom-center",
+        "dx": 0,
+        "dy": 44,
+        "bleed": ["bottom"]
+      },
+      "type": [
+        {
+          "id": "headline",
+          "content": "headline",
+          "box": { "x": "safe.left", "y": 170, "w": 888, "h": 330 },
+          "size": [64, 108],
+          "maxLines": 3,
+          "font": { "role": "display-editorial", "weight": 400 },
+          "lineHeight": 1.04,
+          "tracking": -0.014,
+          "align": "center",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "kicker",
+          "content": "kicker",
+          "optional": true,
+          "box": { "x": 180, "y": { "after": "headline", "gap": 26 }, "w": 720, "h": 110 },
+          "size": [23, 30],
+          "maxLines": 2,
+          "font": { "role": "body", "weight": 400 },
+          "lineHeight": 1.45,
+          "align": "center",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ]
+    }
+  },
+
+  "furniture": [
+    { "type": "handle", "anchor": "bottom-left", "gap": 20, "size": 25,
+      "font": { "role": "mono", "weight": 400 }, "color": "ink" },
+    { "type": "arrow", "anchor": "bottom-right", "gap": 10, "size": 38, "glyph": "→",
+      "font": { "role": "body", "weight": 400 }, "color": "ink", "on": ["cover", "body", "body-quiet"] }
+  ],
+
+  "bodyVariants": ["body", "body", "body-quiet", "body"]
+}

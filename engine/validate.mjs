@@ -42,9 +42,12 @@ export function validateCarousel(carousel) {
     errors.push({ rule: 'slide-count', detail: `${slides.length} slides (must be ${rules.min_slides}-${rules.max_slides})` });
   }
 
-  const [rw, rh] = String(rules.canvas).split('x').map(Number);
-  if (canvas.w !== rw || canvas.h !== rh) {
-    errors.push({ rule: 'canvas', detail: `${canvas.w}x${canvas.h} (must be ${rules.canvas})` });
+  // `canvas` may be one size or a list. A campaign that ships both 4:5 and 4:3
+  // template families needs to declare both; a single string would silently
+  // fail every carousel from the other family.
+  const allowed = (Array.isArray(rules.canvas) ? rules.canvas : [rules.canvas]).map(String);
+  if (!allowed.some((a) => { const [w, h] = a.split('x').map(Number); return canvas.w === w && canvas.h === h; })) {
+    errors.push({ rule: 'canvas', detail: `${canvas.w}x${canvas.h} (must be one of ${allowed.join(', ')})` });
   }
 
   const all = norm(slides.map(textOf).join(' '));

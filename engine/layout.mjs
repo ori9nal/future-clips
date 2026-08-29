@@ -140,11 +140,18 @@ export function layoutSlide({ tpl, role, content, palette, canvas, displayCap })
   const rects = [];
   const shapes = [];        // painted with the type, above the subject
   const underShapes = [];   // painted below the subject: rules, swatches
+  const underBlocks = [];   // TYPE painted below the subject, so the cutout occludes it
   let renderedWords = 0;
 
   for (const slot of roleSpec.type || []) {
     const raw = content[slot.content];
-    const text = raw == null ? '' : String(raw).trim();
+    // Case is a TEMPLATE decision, not a copy decision: the same sentence is set
+    // lowercase in one family and caps in another. Declaring it here and applying
+    // it before fitting matters — caps are materially wider, so transforming
+    // after the fit would overflow the box the fitter just proved.
+    let text = raw == null ? '' : String(raw).trim();
+    if (slot.lowercase) text = text.toLowerCase();
+    else if (slot.uppercase) text = text.toUpperCase();
     if (!text) {
       if (slot.optional) continue;
       return { ok: false, reason: 'missing-content', slot: slot.id };
@@ -208,7 +215,12 @@ export function layoutSlide({ tpl, role, content, palette, canvas, displayCap })
       ? pickAccentTarget(slot.accent.target, fit.lines, content[slot.accent.from ?? 'accentWord'])
       : null;
 
-    blocks.push({
+    // A slot marked `under` renders into the layer BELOW the subject, so the
+    // cutout crops the letterforms. This is the single most common move in the
+    // reference posters — a figure jumping through the headline — and it is not
+    // achievable by z-order alone, because the compositor always paints type
+    // above the subject.
+    (slot.under ? underBlocks : blocks).push({
       id: slot.id,
       x: box.x + paintDx, y: box.y, w: box.w, h: box.h,
       align: slot.align ?? 'left',
@@ -271,7 +283,7 @@ export function layoutSlide({ tpl, role, content, palette, canvas, displayCap })
 
   const displaySize = blocks.find((b) => (roleSpec.type || []).find((t) => t.id === b.id)?.hierarchy === 'display')?.fit.size
     ?? blocks.find((b) => b.id === 'headline')?.fit.size ?? null;
-  return { ok: true, blocks, rects, shapes, underShapes, safe: S, renderedWords, displaySize };
+  return { ok: true, blocks, rects, shapes, underShapes, underBlocks, safe: S, renderedWords, displaySize };
 }
 
 // ------------------------------------------------------------------- furniture

@@ -111,10 +111,33 @@ export async function renderBackground(spec, ctx) {
       // type into ONE chromatic cluster instead of adding a second.
       const lo = hexToRgb(resolveColor(spec.shadow ?? 'ink', ctx));
       const hi = hexToRgb(resolveColor(spec.highlight ?? 'accent', ctx));
-      plate = plate.greyscale().linear(
+      // greyscale() leaves ONE band, and linear() with per-channel arrays
+      // cannot expand 1 band to 3 ("Band expansion using linear is
+      // unsupported"). toColourspace() is lazy, so chaining it does not help —
+      // the buffer has to be materialised between the two operations.
+      const original = await plate.png().toBuffer();
+      const grey = await sharp(original).greyscale().toColourspace('srgb').png().toBuffer();
+      const toned = await sharp(grey).linear(
         [(hi.r - lo.r) / 255, (hi.g - lo.g) / 255, (hi.b - lo.b) / 255],
         [lo.r, lo.g, lo.b]
-      );
+      ).png().toBuffer();
+      // `strength` 1 is a full duotone, which flattens every plate in a set to
+      // the same wash — a desert, a sky and a dark studio all arrive identical.
+      // Blending back toward the original keeps each location recognisable
+      // while still pulling the set toward one hue.
+      const strength = spec.strength ?? 1;
+      plate = strength >= 1
+        ? sharp(toned)
+        : sharp(await sharp(original)
+            .composite([{ input: toned, blend: 'over',
+                          ...(strength < 1 ? {} : {}) }])
+            .png().toBuffer());
+      if (strength < 1) {
+        const veil = await sharp(toned).ensureAlpha()
+          .composite([{ input: Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}"><rect width="${w}" height="${h}" fill="rgba(255,255,255,${strength})"/></svg>`), blend: 'dest-in' }])
+          .png().toBuffer();
+        plate = sharp(await sharp(original).composite([{ input: veil }]).png().toBuffer());
+      }
     } else if (grade === 'bw') {
       plate = plate.greyscale().linear(spec.contrast ?? 1.15, -(128 * ((spec.contrast ?? 1.15) - 1)));
     }
@@ -249,14 +272,34 @@ async function clipToCanvas(input, rect, cw, ch) {
   return { input: cropped, left: Math.max(0, left), top: Math.max(0, top) };
 }
 
-/** background -> subject -> type -> furniture, in that order, every time. */
-export async function composeSlide({ background, underLayer, subject, typeLayer, furnitureLayer, canvas, out }) {
+/**
+ * background -> cards(back) -> subject -> cards(front) -> type -> furniture.
+ *
+ * Cards straddle the subject deliberately: the depth format puts some panels
+ * behind the figure and some in front of it, and that overlap is what reads as
+ * physical layers rather than as a collage pasted flat.
+ */
+export async function composeSlide({ background, underLayer, cardsBack, cardsFront, subject, typeLayer, furnitureLayer, canvas, out }) {
   const layers = [];
   if (underLayer) layers.push({ input: underLayer, left: 0, top: 0 });
+
+  const pushCards = async (cards) => {
+    for (const c of cards || []) {
+      if (c.shadow) {
+        const s = await clipToCanvas(c.shadow.input, { x: c.shadow.left, y: c.shadow.top, w: c.rect.w, h: c.rect.h }, canvas.w, canvas.h);
+        if (s) layers.push(s);
+      }
+      const k = await clipToCanvas(c.card.input, c.rect, canvas.w, canvas.h);
+      if (k) layers.push(k);
+    }
+  };
+
+  await pushCards(cardsBack);
   if (subject) {
     const c = await clipToCanvas(subject.input, subject.rect, canvas.w, canvas.h);
     if (c) layers.push(c);
   }
+  await pushCards(cardsFront);
   if (typeLayer) layers.push({ input: typeLayer, left: 0, top: 0 });
   if (furnitureLayer) layers.push({ input: furnitureLayer, left: 0, top: 0 });
 

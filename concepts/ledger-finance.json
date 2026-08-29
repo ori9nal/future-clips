@@ -1,0 +1,61 @@
+{
+  "campaign": "ledger-finance",
+  "niche": "finance",
+  "concepts": [
+    {
+      "angle": "Same money, opposite life. The comparison argues for you.",
+      "structure_type": "COMPARISON",
+      "hook": "a new phone and a race entry cost the same",
+      "kicker": "make better choices",
+      "accentWord": "same",
+      "coverImageIntent": "young man casual standing white background",
+      "slides": [
+        {
+          "text": "one of them you replace in two years and never think about again."
+        },
+        {
+          "text": "the other one you talk about for the rest of your life.",
+          "imageIntent": "person thinking plain background daylight"
+        },
+        {
+          "text": "nobody has described an upgrade cycle as the hardest thing they have done."
+        },
+        {
+          "text": "the price is not the cost. the six months before it are the cost.",
+          "imageIntent": "man working laptop plain background"
+        }
+      ],
+      "cta": "save this before you upgrade",
+      "closerKicker": "spend it on something that changes you",
+      "closerImageIntent": "businessman full body white background studio"
+    },
+    {
+      "angle": "Most people optimise the wrong end of the equation.",
+      "structure_type": "REFRAME",
+      "hook": "you cannot budget your way out of a small income",
+      "kicker": "the maths is ugly",
+      "accentWord": "cannot",
+      "coverImageIntent": "person thinking plain background daylight",
+      "slides": [
+        {
+          "text": "cutting coffee saves you nine hundred a year. a raise saves you nine thousand."
+        },
+        {
+          "text": "one of those is a habit. the other is a conversation you keep avoiding.",
+          "imageIntent": "woman in suit full body white background"
+        },
+        {
+          "text": "track spending for one month. not forever. one month tells you everything."
+        },
+        {
+          "text": "then spend the rest of the year on the income side.",
+          "imageIntent": "young professional standing plain background daylight"
+        }
+      ],
+      "cta": "follow for the boring maths",
+      "closerKicker": "we post one every week",
+      "closerImageIntent": "man working laptop plain background"
+    }
+  ],
+  "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."
+}

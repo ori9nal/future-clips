@@ -2,44 +2,50 @@
   "id": "atlas-fitness",
   "name": "Atlas Performance",
   "niche": "fitness",
-  "_note": "A PARTNER CAMPAIGN: everything an agency hands over once — brand kit, handle, rules, source material — after which a clipper opens it with one tap and generates. Uploaded and edited on the admin side; never authored by hand in the repo once the admin UI exists. This file is the contract that UI writes to.",
-
+  "_note": "Partner campaign. Brand kit, rules and source libraries an agency hands over once; edited on the admin side.",
+  "agency": {
+    "code": "ATLAS25",
+    "name": "Atlas Performance Media",
+    "contact": ""
+  },
   "brand": {
     "name": "ATLAS",
     "handle": "@atlas.performance",
     "wordmark": "ATLAS",
     "colors": {
-      "ink": "#111111",
-      "paper": "#FFFFFF",
+      "ink": "#16150F",
+      "paper": "#F1EDE2",
       "accents": {
-        "mono": "#111111"
+        "primary": "#B4432A"
       }
     },
-    "_colorsNote": "accent === ink is deliberate. The top-performing reference posts carry NO accent colour at all, and making the accent identical to ink satisfies the one-chromatic-cluster gate by construction rather than by luck.",
     "logo": null
   },
-
   "rules": {
     "required_mention": "@atlas.performance",
     "min_slides": 6,
     "max_slides": 11,
-    "canvas": "1080x1440",
+    "canvas": [
+      "1080x1350",
+      "1080x1440"
+    ],
     "banned_phrases": [],
     "banned_claims": [
       "guaranteed",
-      "cures",
       "clinically proven",
       "medically approved",
-      "burn fat overnight"
+      "cures"
     ],
     "cta_required_on_last": true,
     "zero_gen_mode": false
   },
-
   "source": {
     "video": null,
     "libraries": [
-      { "niche": "fitness", "kind": "people" }
+      {
+        "niche": "fitness",
+        "kind": "people"
+      }
     ]
   }
 }

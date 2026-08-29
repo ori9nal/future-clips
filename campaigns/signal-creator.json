@@ -1,0 +1,51 @@
+{
+  "id": "signal-creator",
+  "name": "Signal Studio",
+  "niche": "creator",
+  "_note": "Partner campaign. Brand kit, rules and source libraries an agency hands over once; edited on the admin side.",
+  "agency": {
+    "code": "SIGNAL25",
+    "name": "Signal Studio Media",
+    "contact": ""
+  },
+  "brand": {
+    "name": "SIGNAL",
+    "handle": "@signal.studio",
+    "wordmark": "SIGNAL",
+    "colors": {
+      "ink": "#121212",
+      "paper": "#F5F2EC",
+      "accents": {
+        "primary": "#D93A56"
+      }
+    },
+    "logo": null
+  },
+  "rules": {
+    "required_mention": "@signal.studio",
+    "min_slides": 6,
+    "max_slides": 11,
+    "canvas": [
+      "1080x1350",
+      "1080x1440"
+    ],
+    "banned_phrases": [],
+    "banned_claims": [
+      "guaranteed",
+      "clinically proven",
+      "medically approved",
+      "cures"
+    ],
+    "cta_required_on_last": true,
+    "zero_gen_mode": false
+  },
+  "source": {
+    "video": null,
+    "libraries": [
+      {
+        "niche": "creator",
+        "kind": "people"
+      }
+    ]
+  }
+}

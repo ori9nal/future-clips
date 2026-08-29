@@ -15,6 +15,8 @@ import { renderVectorLayer } from './render-type.mjs';
 import { renderBackground, prepareSubject, composeSlide, assertAssetAllowed } from './compose.mjs';
 import { validateCarousel } from './validate.mjs';
 import { isProcedural, renderProcedural, shapeClassOf } from './subjects.mjs';
+import { pickSubject } from './match.mjs';
+import { buildCards } from './cards.mjs';
 import sharp from 'sharp';
 
 /** Real painted extent of an RGBA layer — used to verify fitText against pixels. */
@@ -100,24 +102,27 @@ const bleedPx = (b) => (typeof b === 'number' && Number.isFinite(b) ? b : 0);
 /** Edges a subject is DECLARED to exit, for the bleed quality gate. */
 export const bleedEdgesOf = (b) => (Array.isArray(b) ? b : []);
 
-function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, rotateOffset = 0, niche = null) {
+function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, rotateOffset = 0, niche = null,
+  intent = null, used = null) {
   const s = roleSpec.subject;
   if (!s) return null;
 
-  // A library subject is a real matted photograph. Selection walks the library
-  // by slide index rather than sampling it, so one carousel never repeats a
-  // cutout and two carousels from adjacent seeds do not open with the same
-  // person.
+  // A library subject is a real matted photograph, chosen to ANSWER THE SLIDE.
+  // Walking the library by index guaranteed variety and guaranteed irrelevance;
+  // the intent match is what ties the picture to the words. `used` keeps one
+  // carousel from repeating a subject.
   if (s.library) {
     const useNiche = s.library.niche || niche;
     if (!useNiche) throw new Error('library subject requires a niche (campaign.niche or template library.niche)');
     const lib = loadLibrary(useNiche, s.library.kind || 'people');
-    const items = lib.items;
-    const idx = (rotateOffset + slideIndex * 1) % items.length;
-    const item = items[idx];
+    const chosen = pickSubject(lib.items, intent, { used: used || new Set(), minScore: s.library.minScore ?? 0.25 });
+    if (!chosen) return null;
+    const { item, score, matched } = chosen;
+    if (used) used.add(item.id);
     const src = s.library.variant === 'bw' && item.bwFile ? item.bwFile : item.file;
     return {
       ...s, id: item.id, src, credit: item.credit,
+      matchScore: score, matched,
       fit: cropStrategy, heightPct: s.heightPct ?? 0.5,
     };
   }
@@ -156,7 +161,8 @@ export function roleFor(tpl, slide, slideIndex) {
   return tpl.roles[pick] ? pick : 'body';
 }
 
-async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset, displayCap, niche, brand }) {
+async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFile, rngSlide, cropStrategy, rotateOffset, displayCap, niche, brand, usedSubjects }) {
+  const cardWarnings = [];
   const role = roleFor(tpl, slide, slideIndex);
   const roleSpec = tpl.roles[role];
   const canvas = tpl.canvas;
@@ -166,7 +172,8 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
 
   // subject placement, including the declared overlap with a named type slot
   let subject = null;
-  const sSpec = subjectSpecFor(roleSpec, rngSlide, cropStrategy, palette, slideIndex, rotateOffset, niche);
+  const sSpec = subjectSpecFor(roleSpec, rngSlide, cropStrategy, palette, slideIndex, rotateOffset, niche,
+    slide.imageIntent, usedSubjects);
   if (sSpec) {
     const ctx = { canvas, rng: rngSlide, ...palette, plate: null };
     if (sSpec.proceduralId) sSpec.procedural = renderProcedural(sSpec.proceduralId, palette);
@@ -216,12 +223,24 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
   if (bgSpec.type === 'photo' && bgSpec.pool) {
     bgSpec.src = path.join('assets/inhouse-only/plates', bgSpec.pool[rngSlide.int(bgSpec.pool.length)]);
   }
+  // A photo background can also come from the campaign's own plate library,
+  // walked by slide index so one carousel does not open and close on the same
+  // landscape.
+  if (bgSpec.type === 'photo' && bgSpec.library && niche) {
+    const plates = loadLibrary(bgSpec.library.niche || niche, bgSpec.library.kind || 'plates');
+    const item = plates.items[(rotateOffset + slideIndex) % plates.items.length];
+    bgSpec.src = item.file;
+    bgSpec.credit = item.credit;
+  }
   bgCtx.plate = bgSpec.type === 'flat' ? bgSpec.fill : 'paper';
   const background = await renderBackground(bgSpec, bgCtx);
 
   // rules and swatches sit under the cutout, the way the corpus does it
-  const underLayer = (laid.underShapes || []).length
-    ? (await renderVectorLayer({ width: canvas.w, height: canvas.h, blocks: [], shapes: laid.underShapes })).png
+  const underLayer = ((laid.underShapes || []).length || (laid.underBlocks || []).length)
+    ? (await renderVectorLayer({
+        width: canvas.w, height: canvas.h,
+        blocks: laid.underBlocks || [], shapes: laid.underShapes || [],
+      })).png
     : null;
   const typeLayer = (await renderVectorLayer({
     width: canvas.w, height: canvas.h, blocks: laid.blocks, shapes: laid.shapes,
@@ -233,7 +252,22 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
     width: canvas.w, height: canvas.h, blocks: furniture.blocks, shapes: furniture.shapes,
   })).png;
 
-  await composeSlide({ background, underLayer, subject, typeLayer, furnitureLayer, canvas, out: outFile });
+  // Cards: decoration with depth. Declared back-to-front; `z:"front"` puts a
+  // panel in front of the subject.
+  const cardSpecs = (roleSpec.cards || []).map((c) => ({ ...c }));
+  for (const c of cardSpecs) {
+    if (c.library && niche) {
+      const lib = loadLibrary(c.library.niche || niche, c.library.kind || 'plates');
+      const item = lib.items[(rotateOffset + slideIndex + (c.offset ?? 0)) % lib.items.length];
+      c.src = c.library.variant === 'bw' && item.bwFile ? item.bwFile : item.file;
+    }
+  }
+  const built = await buildCards(cardSpecs, { canvas, rng: rngSlide, ...palette, plate: bgCtx.plate },
+    (m) => cardWarnings.push(m));
+  const cardsBack = built.filter((_, i) => (cardSpecs[i].z ?? 'back') !== 'front');
+  const cardsFront = built.filter((_, i) => cardSpecs[i].z === 'front');
+
+  await composeSlide({ background, underLayer, cardsBack, cardsFront, subject, typeLayer, furnitureLayer, canvas, out: outFile });
 
   return {
     ok: true,
@@ -242,6 +276,8 @@ async function renderSlide({ tpl, slide, slideIndex, slideCount, palette, outFil
     subjectRect: subject?.rect ?? null,
     subjectId: sSpec?.id ?? null,
     credit: sSpec?.credit ?? null,
+    cardWarnings,
+    subjectMatch: sSpec ? { score: sSpec.matchScore ?? null, matched: sSpec.matched ?? null, intent: slide.imageIntent ?? null } : null,
     typeInk,
     variant: role,
     renderedWords: laid.renderedWords,
@@ -369,6 +405,8 @@ async function renderFromCopy({ d, palette, copy, dir, id, postIndex, niche, cam
   const files = [];
   const slideMeta = [];
   const credits = [];
+  // one carousel never repeats a cutout
+  const usedSubjects = new Set();
   for (let i = 0; i < copy.slides.length; i++) {
     const slide = copy.slides[i];
     const outFile = path.join(dir, `${String(i + 1).padStart(2, '0')}.png`);
@@ -376,7 +414,7 @@ async function renderFromCopy({ d, palette, copy, dir, id, postIndex, niche, cam
     const r = await renderSlide({
       tpl: d.tpl, slide, slideIndex: i, slideCount: copy.slides.length,
       palette, outFile, rngSlide, cropStrategy: d.cropStrategy, rotateOffset,
-      displayCap: i === 0 ? undefined : displayCap, niche, brand: campaign?.brand,
+      displayCap: i === 0 ? undefined : displayCap, niche, brand: campaign?.brand, usedSubjects,
     });
     if (!r.ok) throw new Error(`render failed on slide ${i + 1}: ${r.reason} (${r.slot})`);
     files.push(outFile);

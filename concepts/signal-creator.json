@@ -1,0 +1,61 @@
+{
+  "campaign": "signal-creator",
+  "niche": "creator",
+  "concepts": [
+    {
+      "angle": "Consistency beats quality until quality is the only thing left.",
+      "structure_type": "PRESCRIPTION",
+      "hook": "post before it is ready or you will never post",
+      "kicker": "the only rule that matters",
+      "accentWord": "never",
+      "coverImageIntent": "young creator with laptop plain background",
+      "slides": [
+        {
+          "text": "your tenth post will beat your first no matter how long you polish the first."
+        },
+        {
+          "text": "ship weekly. review monthly. rebuild quarterly.",
+          "imageIntent": "designer working plain background daylight"
+        },
+        {
+          "text": "the algorithm cannot rank a draft."
+        },
+        {
+          "text": "nobody remembers the bad ones. they remember that you kept going.",
+          "imageIntent": "woman filming smartphone white background"
+        }
+      ],
+      "cta": "follow for the workflow",
+      "closerKicker": "one system every week",
+      "closerImageIntent": "photographer holding camera white background"
+    },
+    {
+      "angle": "Most creators confuse output with a body of work.",
+      "structure_type": "CONTRAST",
+      "hook": "a hundred posts is not a portfolio",
+      "kicker": "volume is not a body of work",
+      "accentWord": "not",
+      "coverImageIntent": "photographer holding camera white background",
+      "slides": [
+        {
+          "text": "a portfolio has a point of view. a feed has a posting schedule."
+        },
+        {
+          "text": "pick three things you want to be known for. delete the rest.",
+          "imageIntent": "designer working plain background daylight"
+        },
+        {
+          "text": "repetition is how a style becomes recognisable, not how it becomes boring."
+        },
+        {
+          "text": "one idea, said well, a hundred ways.",
+          "imageIntent": "man with headphones white background studio"
+        }
+      ],
+      "cta": "save this before you post again",
+      "closerKicker": "three things, said well",
+      "closerImageIntent": "young creator with laptop plain background"
+    }
+  ],
+  "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."
+}

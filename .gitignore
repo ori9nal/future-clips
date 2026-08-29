@@ -19,3 +19,7 @@ output/_*/
 mining/reference_features.json
 output/atlas/
 assets/library/
+reference/pinterest/carousel/
+reference/pinterest/design/
+reference/growithalex/
+output/

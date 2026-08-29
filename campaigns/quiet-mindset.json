@@ -1,0 +1,51 @@
+{
+  "id": "quiet-mindset",
+  "name": "Quiet Hours",
+  "niche": "mindset",
+  "_note": "Partner campaign. Brand kit, rules and source libraries an agency hands over once; edited on the admin side.",
+  "agency": {
+    "code": "QUIET25",
+    "name": "Quiet Hours Media",
+    "contact": ""
+  },
+  "brand": {
+    "name": "QUIET",
+    "handle": "@quiet.hours",
+    "wordmark": "QUIET",
+    "colors": {
+      "ink": "#15171B",
+      "paper": "#EAE6DC",
+      "accents": {
+        "primary": "#5A6B3C"
+      }
+    },
+    "logo": null
+  },
+  "rules": {
+    "required_mention": "@quiet.hours",
+    "min_slides": 6,
+    "max_slides": 11,
+    "canvas": [
+      "1080x1350",
+      "1080x1440"
+    ],
+    "banned_phrases": [],
+    "banned_claims": [
+      "guaranteed",
+      "clinically proven",
+      "medically approved",
+      "cures"
+    ],
+    "cta_required_on_last": true,
+    "zero_gen_mode": false
+  },
+  "source": {
+    "video": null,
+    "libraries": [
+      {
+        "niche": "mindset",
+        "kind": "people"
+      }
+    ]
+  }
+}

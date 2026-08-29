@@ -1,0 +1,51 @@
+{
+  "id": "ledger-finance",
+  "name": "Ledger",
+  "niche": "finance",
+  "_note": "Partner campaign. Brand kit, rules and source libraries an agency hands over once; edited on the admin side.",
+  "agency": {
+    "code": "LEDGER25",
+    "name": "Ledger Media",
+    "contact": ""
+  },
+  "brand": {
+    "name": "LEDGER",
+    "handle": "@ledger.daily",
+    "wordmark": "LEDGER",
+    "colors": {
+      "ink": "#0E1116",
+      "paper": "#FFFFFF",
+      "accents": {
+        "primary": "#1E5C4A"
+      }
+    },
+    "logo": null
+  },
+  "rules": {
+    "required_mention": "@ledger.daily",
+    "min_slides": 6,
+    "max_slides": 11,
+    "canvas": [
+      "1080x1350",
+      "1080x1440"
+    ],
+    "banned_phrases": [],
+    "banned_claims": [
+      "guaranteed",
+      "clinically proven",
+      "medically approved",
+      "cures"
+    ],
+    "cta_required_on_last": true,
+    "zero_gen_mode": false
+  },
+  "source": {
+    "video": null,
+    "libraries": [
+      {
+        "niche": "finance",
+        "kind": "people"
+      }
+    ]
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "campaign": "quiet-mindset",
+  "niche": "mindset",
+  "concepts": [
+    {
+      "angle": "Rest is a skill people are actively bad at.",
+      "structure_type": "REFRAME",
+      "hook": "you are not tired, you are unfinished",
+      "kicker": "the difference matters",
+      "accentWord": "unfinished",
+      "coverImageIntent": "man sitting alone plain background daylight",
+      "slides": [
+        {
+          "text": "tiredness is physical. what most people feel is an open loop."
+        },
+        {
+          "text": "write down the thing you keep half-remembering. the tiredness lifts.",
+          "imageIntent": "young man reading plain background daylight"
+        },
+        {
+          "text": "rest does not work while the loop is still running."
+        },
+        {
+          "text": "close it badly rather than leave it open.",
+          "imageIntent": "woman thinking plain background white"
+        }
+      ],
+      "cta": "save this for tonight",
+      "closerKicker": "one of these every week",
+      "closerImageIntent": "person standing still white background studio"
+    },
+    {
+      "angle": "Discipline is mostly environment design.",
+      "structure_type": "PRESCRIPTION",
+      "hook": "stop relying on discipline, change the room",
+      "kicker": "willpower is a bad plan",
+      "accentWord": "room",
+      "coverImageIntent": "person walking away plain background",
+      "slides": [
+        {
+          "text": "you will not out-willpower a phone on the pillow next to you."
+        },
+        {
+          "text": "make the good thing take ten seconds and the bad thing take ten minutes.",
+          "imageIntent": "woman looking down plain background daylight"
+        },
+        {
+          "text": "every habit you kept was one you made easy by accident."
+        },
+        {
+          "text": "design the room once instead of deciding a hundred times.",
+          "imageIntent": "man sitting alone plain background daylight"
+        }
+      ],
+      "cta": "follow for the small changes",
+      "closerKicker": "design it once",
+      "closerImageIntent": "person standing still white background studio"
+    }
+  ],
+  "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."
+}
