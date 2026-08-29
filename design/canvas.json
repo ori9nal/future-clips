@@ -1,0 +1,15 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "title": "The Future Clips — homepage",
+      "x": 0,
+      "y": 0,
+      "w": 1320,
+      "h": 6800,
+      "expand": "fill",
+      "print": "flow"
+    }
+  ],
+  "launch": { "view": "focused", "file": "Main.dc.html" }
+}

@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="The Future Clips turns any idea into a scroll-stopping slideshow in minutes. Consistent character, viral hooks, no AI watermark.">
+<title>The Future Clips — Turn any idea into a viral slideshow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: #56544E; background-color: #FAF9F6;
+    background-image:
+      radial-gradient(900px 620px at 88% -80px, rgba(216,255,71,.40), rgba(216,255,71,0) 62%),
+      radial-gradient(760px 520px at 6% 30px, rgba(255,238,199,.55), rgba(255,238,199,0) 66%),
+      radial-gradient(1100px 700px at 50% 620px, rgba(255,255,255,.85), rgba(255,255,255,0) 70%),
+      linear-gradient(180deg, #FFFEFA 0%, #FDFCF7 34%, rgba(250,249,246,0) 76%);
+    background-repeat: no-repeat; background-size: 100% 1600px;
+    font-family: "Manrope", Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.6;
+    overflow-x: hidden; -webkit-font-smoothing: antialiased; text-wrap: pretty;
+  }
+  ::selection { background: #D8FF47; color: #0E0E10; }
+  :focus-visible { outline: 2.5px solid #0E0E10; outline-offset: 3px; border-radius: 6px; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: #0E0E10; }
+  summary { list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  details[open] .pm { transform: rotate(45deg); }
+  @keyframes fcDriftA { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(4%,3%,0) scale(1.12); } }
+  @keyframes fcDriftB { 0%,100% { transform: translate3d(0,0,0) scale(1.08); } 50% { transform: translate3d(-5%,4%,0) scale(1); } }
+  @keyframes fcPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+<template id="__bundler_thumbnail" data-bg-color="#FAF9F6">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" width="240" height="240">
+    <rect width="240" height="240" fill="#FAF9F6"></rect>
+    <rect x="72" y="112" width="72" height="48" rx="8" fill="#C9C7C1"></rect>
+    <rect x="86" y="98" width="72" height="48" rx="8" fill="#6E6C67"></rect>
+    <rect x="100" y="84" width="72" height="48" rx="8" fill="#0E0E10"></rect>
+    <rect x="100" y="150" width="40" height="8" rx="4" fill="#D8FF47"></rect>
+  </svg>
+</template>
+</helmet>
+
+<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden">
+  <div style="position:absolute;top:-14vh;right:-12vw;width:min(62vw,720px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(216,255,71,.34), rgba(216,255,71,0) 68%);filter:blur(20px);animation:fcDriftA 26s ease-in-out infinite"></div>
+  <div style="position:absolute;top:22vh;left:-16vw;width:min(58vw,640px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(255,231,178,.42), rgba(255,231,178,0) 68%);filter:blur(24px);animation:fcDriftB 32s ease-in-out infinite"></div>
+  <div style="position:absolute;top:118vh;right:4vw;width:min(46vw,480px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(216,255,71,.20), rgba(216,255,71,0) 68%);filter:blur(26px);animation:fcDriftB 38s ease-in-out infinite"></div>
+</div>
+
+<div style="position:relative;z-index:1">
+
+<header style="position:sticky;top:0;z-index:60;background:rgba(250,249,246,.78);backdrop-filter:blur(16px);border-bottom:1px solid #EAE7DE">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px);display:flex;align-items:center;justify-content:space-between;height:clamp(66px,8vw,78px);gap:16px">
+    <a href="#top" style="display:block;position:relative;width:160px;height:40px;overflow:hidden;flex:0 0 auto" aria-label="The Future Clips">
+      <img src="assets/logo.png" alt="The Future Clips" style="position:absolute;width:275px;height:auto;left:-57px;top:-26px">
+    </a>
+    <nav style="{{ navStyle }}" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#examples">Examples</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div style="{{ headerCtaStyle }}">
+      <a href="#start" style="font-size:15px;font-weight:500;white-space:nowrap">Log in</a>
+      <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:15px;font-weight:600;padding:12px 20px;white-space:nowrap;min-height:46px" style-hover="background:#26262A">Start free</a>
+    </div>
+    <button type="button" onClick="{{ toggleMenu }}" aria-label="Menu" aria-expanded="{{ menuOpen }}" style="{{ burgerStyle }}">
+      <span style="{{ burgerTopStyle }}"></span>
+      <span style="{{ burgerMidStyle }}"></span>
+      <span style="{{ burgerBotStyle }}"></span>
+    </button>
+  </div>
+  <div style="{{ mobileMenuStyle }}">
+    <nav style="display:flex;flex-direction:column;padding:8px clamp(18px,4vw,36px) 20px" aria-label="Mobile">
+      <a href="#features" onClick="{{ closeMenu }}" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Features</a>
+      <a href="#how" onClick="{{ closeMenu }}" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">How it works</a>
+      <a href="#examples" onClick="{{ closeMenu }}" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Examples</a>
+      <a href="#pricing" onClick="{{ closeMenu }}" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Pricing</a>
+      <a href="#faq" onClick="{{ closeMenu }}" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">FAQ</a>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <a href="#start" onClick="{{ closeMenu }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#FAF9F6;border:1px solid #E0DCD2;color:#0E0E10;font-size:16px;font-weight:600">Log in</a>
+        <a href="#start" onClick="{{ closeMenu }}" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600">Start free</a>
+      </div>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+<section style="position:relative;padding:clamp(48px,9vw,96px) 0 0;text-align:center;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(#EEEBE2 1px,transparent 1px),linear-gradient(90deg,#EEEBE2 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(180deg,rgba(0,0,0,.45),transparent 58%);-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.45),transparent 58%);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:#fff;border:1px solid #E6E3DB;border-radius:9999px;padding:7px 16px 7px 8px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#56544E;margin-bottom:clamp(20px,4vw,32px);max-width:100%">
+      <b style="background:#D8FF47;color:#0E0E10;border-radius:9999px;padding:4px 10px;font-size:.92em;font-weight:500;letter-spacing:.08em">New</b> Slideshows, generated in minutes
+    </span>
+    <h1 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(2.05rem,7.4vw,4.4rem);line-height:1.03;letter-spacing:-.03em;max-width:20ch;margin-inline:auto;text-wrap:balance">Turn any idea into a <span style="background:#D8FF47;padding:0 .12em;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone">scroll-stopping</span> slideshow</h1>
+    <p style="margin:clamp(18px,3.5vw,28px) auto 0;max-width:54ch;font-size:clamp(16px,3.6vw,19px);line-height:1.55">Built on proven viral hooks, with the same character and style across every slide. Export ready to post to TikTok, Instagram and YouTube — no AI watermark.</p>
+    <div style="margin-top:clamp(24px,4.5vw,36px);display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+      <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#26262A">Start free</a>
+      <a href="#examples" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#F2F0EA">See examples</a>
+    </div>
+    <p style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
+  </div>
+
+  <div style="position:relative;width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px);margin-top:clamp(40px,7vw,64px)">
+    <div style="display:flex;gap:clamp(12px,2.2vw,20px);align-items:center;justify-content:center;flex-wrap:wrap">
+      <div style="flex:0 1 200px;min-width:132px;max-width:230px;border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:repeating-linear-gradient(135deg,#EFEDE6 0 9px,#E7E4DB 9px 18px);display:grid;place-items:center;padding:12px;opacity:.6">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63;text-align:center">slide 1</span>
+      </div>
+      <div style="position:relative;flex:0 1 288px;min-width:220px;max-width:320px">
+        <div style="border-radius:18px;overflow:hidden;aspect-ratio:4/5;background:repeating-linear-gradient(135deg,#EDEAE1 0 9px,#E4E1D6 9px 18px);display:grid;place-items:center;padding:16px;box-shadow:0 24px 60px -24px rgba(14,14,16,.28)">
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63;text-align:center">generated slideshow<br>cover slide</span>
+        </div>
+        <div style="position:absolute;left:50%;transform:translateX(-50%);bottom:-26px;width:max-content;max-width:96%;background:#0E0E10;border-radius:14px;padding:14px 20px;box-shadow:0 18px 40px -16px rgba(14,14,16,.45);display:flex;align-items:center;gap:14px">
+          <span style="width:9px;height:9px;border-radius:50%;background:#D8FF47;flex:0 0 auto;animation:fcPulse 1.8s ease-in-out infinite"></span>
+          <div style="text-align:left">
+            <b style="display:block;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(22px,5.4vw,30px);color:#fff;letter-spacing:-.02em;line-height:1.05;font-variant-numeric:tabular-nums">{{ viewsText }}</b>
+            <span style="display:block;margin-top:3px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#8F8D87">Views</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex:0 1 200px;min-width:132px;max-width:230px;border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:repeating-linear-gradient(135deg,#EFEDE6 0 9px,#E7E4DB 9px 18px);display:grid;place-items:center;padding:12px;opacity:.6">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63;text-align:center">slide 3</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="features" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Features
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Everything a viral slideshow needs.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Six things we handle so you can post instead of edit.</p>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(36px,6vw,60px);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))">
+      <sc-for list="{{ features }}" as="f" hint-placeholder-count="6">
+        <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+          <span style="display:grid;place-items:center;width:44px;height:44px;border-radius:12px;background:#F4F7E4;border:1px solid #E7EDCB;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:17px">{{ f.icon }}</span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">{{ f.title }}</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">{{ f.body }}</p>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section id="how" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>How it works
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Idea to posted, in three steps.</h2>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(36px,6vw,60px);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))">
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">01</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Enter your idea or topic</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">One line is enough. We match it to a hook structure that already performs in your niche.</p>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">02</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Pick your style &amp; character</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Choose a look and a character once. They stay identical across every slide in the set.</p>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">03</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Generate &amp; export ready-to-post slides</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Sized for each platform, watermark-free, downloadable in one tap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="compare" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:46ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Old way vs. Future Clips
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Making slideshows the old way is a nightmare.</h2>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(36px,6vw,60px);grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));max-width:1000px;margin-inline:auto">
+      <div style="background:#F5F4F0;border:1px solid #E6E3DB;border-radius:18px;padding:clamp(22px,4vw,32px)">
+        <div style="display:flex;align-items:center;gap:11px;padding-bottom:18px;border-bottom:1px solid #E4E1D8">
+          <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:#E4E1D8;color:#6E6B63;font-size:13px;font-weight:700">✕</span>
+          <h3 style="margin:0;color:#6E6B63;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">The old way</h3>
+        </div>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+          <sc-for list="{{ oldWay }}" as="o" hint-placeholder-count="6">
+            <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>{{ o }}</span>
+            </li>
+          </sc-for>
+        </ul>
+      </div>
+      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.34) 0%, rgba(216,255,71,.08) 36%, rgba(255,255,255,0) 64%), #fff;border:1px solid #E4E7CE;border-radius:18px;padding:clamp(22px,4vw,32px);box-shadow:0 24px 60px -34px rgba(150,180,40,.4)">
+        <div style="display:flex;align-items:center;gap:11px;padding-bottom:18px;border-bottom:1px solid #EDEFDC">
+          <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:#D8FF47;color:#0E0E10;font-size:13px;font-weight:700">✓</span>
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">With Future Clips</h3>
+        </div>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+          <sc-for list="{{ newWay }}" as="w" hint-placeholder-count="6">
+            <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>{{ w }}</span>
+            </li>
+          </sc-for>
+        </ul>
+      </div>
+    </div>
+    <p style="margin:clamp(26px,4vw,34px) auto 0;text-align:center;max-width:30ch;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(1.1rem,3.6vw,1.5rem);letter-spacing:-.02em;line-height:1.2">You already know the grind. We deleted it.</p>
+  </div>
+</section>
+
+<section id="examples" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:46ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Examples
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Slideshows made with the tool.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Same character, same style, every slide. Swap in your own topic and the structure holds.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,45%),1fr));gap:clamp(12px,2vw,18px);margin-top:clamp(36px,6vw,60px)">
+      <sc-for list="{{ examples }}" as="e" hint-placeholder-count="5">
+        <figure style="margin:0">
+          <div style="position:relative;border-radius:14px;aspect-ratio:4/5;background:repeating-linear-gradient(135deg,#EFEDE6 0 9px,#E7E4DB 9px 18px);display:grid;place-items:center;padding:12px;overflow:hidden">
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63;text-align:center">example<br>slideshow</span>
+            <span style="position:absolute;left:10px;bottom:10px;display:inline-flex;align-items:center;gap:7px;background:rgba(14,14,16,.88);color:#fff;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.06em">
+              <span style="width:6px;height:6px;border-radius:50%;background:#D8FF47"></span>{{ e.views }}
+            </span>
+          </div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">{{ e.niche }}</figcaption>
+        </figure>
+      </sc-for>
+    </div>
+    <p style="margin-top:26px;text-align:center;font-size:14px;color:#6E6B63">Placeholder slots — drop your real exports in here.</p>
+  </div>
+</section>
+
+<section id="pricing" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Pricing
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Two free. Then pick a plan.</h2>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:clamp(24px,4vw,34px)">
+      <div style="display:inline-flex;gap:4px;background:#fff;border:1px solid #E6E3DB;border-radius:12px;padding:5px;max-width:100%">
+        <button type="button" onClick="{{ pickMonthly }}" style="{{ monthlyStyle }}">Monthly</button>
+        <button type="button" onClick="{{ pickYearly }}" style="{{ yearlyStyle }}">Yearly · 2 months free</button>
+      </div>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(26px,4vw,36px);grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));align-items:stretch">
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Clipper</h3>
+          
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1">{{ clipperPrice }}</b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">{{ clipperBilling }}</p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10">{{ clipperPer }}</p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For getting started.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>40 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Viral hook library</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Same character, every slide</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>No AI watermark</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>TikTok, Instagram &amp; YouTube exports</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
+        </div>
+      </div>
+      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.40) 0%, rgba(216,255,71,.10) 34%, rgba(255,255,255,0) 62%), linear-gradient(180deg,#FFFFFF 0%,#FCFBF6 100%);border:1px solid #E4E7CE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column;box-shadow:0 24px 60px -34px rgba(150,180,40,.45)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Pro</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#0E0E10;color:#D8FF47;white-space:nowrap">Most popular</span>
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1">{{ proPrice }}</b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">{{ proBilling }}</p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F7E4;border:1px solid #E7EDCB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10">{{ proPer }}</p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For posting every day.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Clipper +</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>60 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Saved characters &amp; brand kits</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Priority generation queue</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Bulk export</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#26262A">Start free</a>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Studio</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#F4F2EC;color:#56544E;white-space:nowrap">Teams</span>
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1">{{ studioPrice }}</b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">{{ studioBilling }}</p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10">{{ studioPer }}</p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For agencies &amp; teams.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Pro +</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>200 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Multi-account tracking</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Seats for your whole roster</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Shared character library</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,11px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
+    <p style="text-align:center;margin-top:24px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">Founding price held for the first 500 accounts</p>
+  </div>
+</section>
+
+<section id="faq" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center">
+      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em">Frequently asked</h2>
+    </div>
+    <div style="max-width:800px;margin:clamp(32px,5vw,52px) auto 0;display:flex;flex-direction:column;gap:12px">
+      <sc-for list="{{ faqs }}" as="q" hint-placeholder-count="5">
+        <details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">{{ q.q }}<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">{{ q.a }}</p>
+        </details>
+      </sc-for>
+    </div>
+  </div>
+</section>
+
+<section style="padding:clamp(74px,13vw,132px) 0 0">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="background:#0E0E10;border-radius:22px;padding:clamp(30px,6vw,64px);display:grid;gap:clamp(24px,4vw,32px);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));align-items:center">
+      <div>
+        <h2 style="margin:0;color:#fff;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.5rem,5vw,2.5rem);line-height:1.06;letter-spacing:-.025em">Running an agency?</h2>
+        <p style="margin-top:14px;font-size:clamp(15px,3.4vw,17px);color:#9C9A94;max-width:50ch">Put The Future Clips in front of your roster. They ship ten times the content and you take up to half of every subscription it brings in.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:20px">
+        <div>
+          <span style="display:block;font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(44px,11vw,64px);font-weight:700;color:#D8FF47;letter-spacing:-.04em;line-height:1">50%</span>
+          <span style="display:block;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8F8D87">Revenue share</span>
+        </div>
+        <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;font-size:16px;font-weight:600;padding:17px 28px;min-height:54px;white-space:nowrap" style-hover="background:#E9E7E0">Partner with us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="start" style="padding:clamp(74px,13vw,132px) 0 clamp(70px,12vw,120px);text-align:center;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="max-width:44ch;margin-inline:auto">
+      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.8rem,6.4vw,3.2rem);line-height:1.04;letter-spacing:-.03em">Make two, then decide.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Two slideshows, no card, no call.</p>
+    </div>
+    <form onSubmit="{{ submit }}" style="margin-top:clamp(24px,4.5vw,36px)">
+      <div style="display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center">
+        <input id="email" type="email" placeholder="you@email.com" autocomplete="email" required style="flex:1 1 220px;min-width:0;background:#fff;border:1px solid #E0DCD2;border-radius:10px;padding:17px 22px;font-family:inherit;font-size:16px;color:#0E0E10;min-height:54px">
+        <button type="submit" style="flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:#0E0E10;color:#fff;font-family:inherit;font-size:16px;font-weight:600;padding:17px 28px;min-height:54px;cursor:pointer">Start free</button>
+      </div>
+      <p role="status" aria-live="polite" style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;min-height:20px;color:#6E6B63">{{ msg }}</p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer style="border-top:1px solid #EAE7DE">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:clamp(26px,4vw,36px);padding:clamp(40px,7vw,60px) 0 clamp(28px,5vw,40px)">
+      <div>
+        <span style="display:block;position:relative;width:160px;height:40px;overflow:hidden">
+          <img src="assets/logo.png" alt="The Future Clips" style="position:absolute;width:275px;height:auto;left:-57px;top:-26px">
+        </span>
+        <p style="margin-top:16px;font-size:15px;color:#6E6B63;max-width:30ch">Viral-ready slideshows, generated in minutes.</p>
+      </div>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Product</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li>
+          <li><a href="#examples">Examples</a></li><li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </nav>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Platforms</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#features">TikTok</a></li><li><a href="#features">Instagram</a></li>
+          <li><a href="#features">YouTube</a></li><li><a href="#faq">Export sizes</a></li>
+        </ul>
+      </nav>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Company</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#faq">FAQ</a></li><li><a href="#start">Contact</a></li>
+          <li><a href="#start">Affiliates</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div style="border-top:1px solid #EAE7DE;padding:22px 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">
+      <span>© 2026 The Future Clips</span><span>Slideshows that get watched</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{}">
+const TARGET = 1284930;
+
+class Component extends DCLogic {
+  state = {
+    views: 0,
+    cycle: "yearly",
+    menuOpen: false,
+    mobile: typeof window !== "undefined" ? window.innerWidth < 900 : false,
+    msg: "Founding price locked when you join."
+  };
+
+  componentDidMount() {
+    this._onResize = () => {
+      const mobile = window.innerWidth < 900;
+      if (mobile !== this.state.mobile) this.setState({ mobile, menuOpen: false });
+    };
+    window.addEventListener("resize", this._onResize);
+    this._onResize();
+
+    const reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    if (reduce) { this.setState({ views: TARGET }); return; }
+
+    const DUR = 4200, HOLD = 1800;
+    let start = null;
+    const tick = (t) => {
+      if (start === null) start = t;
+      const e = t - start;
+      if (e <= DUR) {
+        const p = e / DUR;
+        const eased = 1 - Math.pow(1 - p, 3);
+        this.setState({ views: Math.round(TARGET * eased) });
+      } else if (e < DUR + HOLD) {
+        if (this.state.views !== TARGET) this.setState({ views: TARGET });
+      } else {
+        start = t;
+      }
+      this._raf = requestAnimationFrame(tick);
+    };
+    this._raf = requestAnimationFrame(tick);
+  }
+
+  componentWillUnmount() {
+    if (this._raf) cancelAnimationFrame(this._raf);
+    window.removeEventListener("resize", this._onResize);
+  }
+
+  pill(active) {
+    return {
+      border: 0, background: active ? "#0E0E10" : "transparent", color: active ? "#fff" : "#6E6B63",
+      fontFamily: "'IBM Plex Mono', monospace", fontSize: "11px", letterSpacing: ".07em",
+      textTransform: "uppercase", padding: "12px 16px", minHeight: "46px", borderRadius: "8px",
+      cursor: "pointer", whiteSpace: "nowrap"
+    };
+  }
+
+  bar(open, which) {
+    const base = { display: "block", width: "20px", height: "2px", background: "#0E0E10", borderRadius: "2px", transition: "transform .2s, opacity .2s" };
+    if (!open) return base;
+    if (which === "top") return { ...base, transform: "translateY(6px) rotate(45deg)" };
+    if (which === "mid") return { ...base, opacity: 0 };
+    return { ...base, transform: "translateY(-6px) rotate(-45deg)" };
+  }
+
+  renderVals() {
+    const { mobile, menuOpen, cycle } = this.state;
+    const yearly = cycle === "yearly";
+
+    return {
+      viewsText: this.state.views.toLocaleString("en-US"),
+
+      navStyle: mobile
+        ? { display: "none" }
+        : { display: "flex", gap: "clamp(18px,2.4vw,32px)", fontSize: "15px", fontWeight: 500, color: "#56544E", whiteSpace: "nowrap" },
+      headerCtaStyle: mobile
+        ? { display: "none" }
+        : { display: "flex", alignItems: "center", gap: "14px" },
+      burgerStyle: mobile
+        ? { display: "flex", flexDirection: "column", justifyContent: "center", gap: "4px", width: "48px", height: "48px", padding: "0 14px", background: "#fff", border: "1px solid #E6E3DB", borderRadius: "10px", cursor: "pointer" }
+        : { display: "none" },
+      burgerTopStyle: this.bar(menuOpen, "top"),
+      burgerMidStyle: this.bar(menuOpen, "mid"),
+      burgerBotStyle: this.bar(menuOpen, "bot"),
+      mobileMenuStyle: mobile && menuOpen
+        ? { display: "block", borderTop: "1px solid #EAE7DE", background: "rgba(250,249,246,.97)", backdropFilter: "blur(16px)" }
+        : { display: "none" },
+      menuOpen: menuOpen ? "true" : "false",
+      toggleMenu: () => this.setState((s) => ({ menuOpen: !s.menuOpen })),
+      closeMenu: () => this.setState({ menuOpen: false }),
+
+      monthlyStyle: this.pill(!yearly),
+      yearlyStyle: this.pill(yearly),
+      pickMonthly: () => this.setState({ cycle: "monthly" }),
+      pickYearly: () => this.setState({ cycle: "yearly" }),
+      clipperPrice: yearly ? "$16" : "$20",
+      clipperBilling: yearly ? "$192 a year · 2 months free" : "Billed monthly · cancel anytime",
+      clipperPer: yearly ? "≈40¢ per slideshow" : "≈50¢ per slideshow",
+      proPrice: yearly ? "$32" : "$39",
+      proBilling: yearly ? "$384 a year · 2 months free" : "Billed monthly · cancel anytime",
+      proPer: yearly ? "≈53¢ per slideshow" : "≈65¢ per slideshow",
+      studioPrice: yearly ? "$79" : "$99",
+      studioBilling: yearly ? "$948 a year · 2 months free" : "Billed monthly · cancel anytime",
+      studioPer: yearly ? "≈40¢ per slideshow" : "≈50¢ per slideshow",
+
+      oldWay: [
+        "Prompt ChatGPT 20 times for one usable image",
+        "Characters look different on every slide",
+        "Manually strip AI metadata from each image",
+        "Hunt for a hook that stops the scroll",
+        "Rebuild every layout in Canva by hand",
+        "Hours per slideshow."
+      ],
+      newWay: [
+        "One idea in, full slideshow out",
+        "Same character, every single slide",
+        "Ships clean — no AI watermark, ever",
+        "Proven viral hooks built in",
+        "Post-ready for TikTok, IG & YouTube",
+        "About 2 minutes."
+      ],
+
+      features: [
+        { icon: "◈", title: "The same character, every slide", body: "Lock a character once and it holds its face, outfit and style across the whole set." },
+        { icon: "↗", title: "Built-in viral hook library", body: "Openers that already perform, grouped by niche, so slide one earns the swipe." },
+        { icon: "◎", title: "No AI watermark", body: "Clean exports. Nothing on the image says a tool made it." },
+        { icon: "▤", title: "TikTok, Instagram, YouTube", body: "Every set exports at the right size and safe area for each platform." },
+        { icon: "⚡", title: "Minutes, not evenings", body: "A full slideshow generates in about two minutes. Regenerate any slide on its own." },
+        { icon: "✦", title: "Unique output every time", body: "Layout, crop and palette are seeded to your account, so no two creators post the same set." }
+      ],
+
+      examples: [
+        { niche: "Finance", views: "1.2M" },
+        { niche: "Longevity", views: "840K" },
+        { niche: "Fitness", views: "2.1M" },
+        { niche: "Business", views: "610K" },
+        { niche: "Mindset", views: "1.5M" }
+      ],
+
+      faqs: [
+        { q: "How does character consistency work?", a: "You pick or upload a character once. We hold its features, outfit and rendering style as fixed inputs for every slide in the set, so slide eight looks like slide one instead of a cousin of it." },
+        { q: "Is there an AI watermark on the output?", a: "No. Exports are clean images with no badge, corner mark or metadata stamp. What you download is what you post." },
+        { q: "Which platforms does it export for?", a: "TikTok photo mode, Instagram carousels and YouTube community posts. Each export is sized and safe-area-checked per platform, so captions and UI never cover your text." },
+        { q: "How do the monthly limits work?", a: "One slideshow of up to ten slides counts as one. Regenerating a single slide is free, and unused slideshows roll over for one month. Limits reset on your billing date." },
+        { q: "Is my output unique to me?", a: "Yes. Layout, crop, palette and hook variation are seeded to your account, so two creators entering the same topic get different sets." }
+      ],
+
+      msg: this.state.msg,
+      submit: (e) => {
+        e.preventDefault();
+        const v = e.target.querySelector("#email").value.trim();
+        this.setState({ msg: /.+@.+\..+/.test(v) ? "You're in. Check your inbox." : "Enter a valid email address." });
+      }
+    };
+  }
+}
+</script>
+</body>
+</html>

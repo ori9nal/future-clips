@@ -1,0 +1,63 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "01 Cover"
+    },
+    {
+      "file": "Problem.dc.html",
+      "x": 1240,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "02 Problem"
+    },
+    {
+      "file": "App.dc.html",
+      "x": 2480,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "03 App"
+    },
+    {
+      "file": "Plan.dc.html",
+      "x": 3720,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "04 Plan"
+    },
+    {
+      "file": "Proof.dc.html",
+      "x": 0,
+      "y": 1560,
+      "w": 1080,
+      "h": 1350,
+      "title": "05 Proof"
+    },
+    {
+      "file": "Get.dc.html",
+      "x": 1240,
+      "y": 1560,
+      "w": 1080,
+      "h": 1350,
+      "title": "06 Get"
+    },
+    {
+      "file": "Cta.dc.html",
+      "x": 2480,
+      "y": 1560,
+      "w": 1080,
+      "h": 1350,
+      "title": "07 Cta"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

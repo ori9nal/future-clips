@@ -87,11 +87,18 @@ export async function renderConstellation({
   };
 
   // Photo sizes need sharp, so they are measured up front rather than inside the map.
+  // SCALE HIERARCHY. Every object arriving at roughly one size is what makes a
+  // frame read as a diagram: the eye has no entry point and nothing recedes.
+  // `weight` sets the role — 3 hero, 2 support, 1 accent — and multiplies the
+  // natural size. The reference always has something large and something tiny.
+  const WEIGHT_MUL = { 3: 1.55, 2: 1.0, 1: 0.68 };
   const items = [];
   for (const o of objects) {
-    const size = o.file ? await photoSize(o.file, o.heightPct, canvas) : sizeOf(o.id);
+    const base = o.file ? await photoSize(o.file, o.heightPct, canvas) : sizeOf(o.id);
+    const mul = WEIGHT_MUL[o.weight ?? 2] ?? 1;
     items.push({
-      id: o.id, label: o.label, ...size,
+      id: o.id, label: o.label,
+      w: Math.round(base.w * mul), h: Math.round(base.h * mul),
       labelW: o.label ? Math.max(...rowsFor(o.label).map(measure)) + 12 : 0,
     });
   }

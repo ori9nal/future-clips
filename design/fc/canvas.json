@@ -1,0 +1,335 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": -1400,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "00 Entry"
+    },
+    {
+      "file": "MinimalismA.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "01 Minimalism A"
+    },
+    {
+      "file": "MinimalismB.dc.html",
+      "x": 1240,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "01 Minimalism B"
+    },
+    {
+      "file": "MaximalismA.dc.html",
+      "x": 2620,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "02 Maximalism A"
+    },
+    {
+      "file": "MaximalismB.dc.html",
+      "x": 3860,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "02 Maximalism B"
+    },
+    {
+      "file": "FuturisticA.dc.html",
+      "x": 5240,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "03 Futuristic A"
+    },
+    {
+      "file": "FuturisticB.dc.html",
+      "x": 6480,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "03 Futuristic B"
+    },
+    {
+      "file": "VectorArtA.dc.html",
+      "x": 7860,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "04 Vector art A"
+    },
+    {
+      "file": "VectorArtB.dc.html",
+      "x": 9100,
+      "y": 0,
+      "w": 1080,
+      "h": 1350,
+      "title": "04 Vector art B"
+    },
+    {
+      "file": "CollageA.dc.html",
+      "x": 0,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "05 Collage art A"
+    },
+    {
+      "file": "CollageB.dc.html",
+      "x": 1240,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "05 Collage art B"
+    },
+    {
+      "file": "RetroA.dc.html",
+      "x": 2620,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "06 Retro A"
+    },
+    {
+      "file": "RetroB.dc.html",
+      "x": 3860,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "06 Retro B"
+    },
+    {
+      "file": "CyberpunkA.dc.html",
+      "x": 5240,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "07 Cyberpunk A"
+    },
+    {
+      "file": "CyberpunkB.dc.html",
+      "x": 6480,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "07 Cyberpunk B"
+    },
+    {
+      "file": "PopArtA.dc.html",
+      "x": 7860,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "08 Pop art A"
+    },
+    {
+      "file": "PopArtB.dc.html",
+      "x": 9100,
+      "y": 1600,
+      "w": 1080,
+      "h": 1350,
+      "title": "08 Pop art B"
+    },
+    {
+      "file": "GlassA.dc.html",
+      "x": 0,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "09 Glass morphism A"
+    },
+    {
+      "file": "GlassB.dc.html",
+      "x": 1240,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "09 Glass morphism B"
+    },
+    {
+      "file": "ClayA.dc.html",
+      "x": 2620,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "10 Clay style A"
+    },
+    {
+      "file": "ClayB.dc.html",
+      "x": 3860,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "10 Clay style B"
+    },
+    {
+      "file": "PixelA.dc.html",
+      "x": 5240,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "11 Pixel art A"
+    },
+    {
+      "file": "PixelB.dc.html",
+      "x": 6480,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "11 Pixel art B"
+    },
+    {
+      "file": "EditorialA.dc.html",
+      "x": 7860,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "12 Editorial A"
+    },
+    {
+      "file": "EditorialB.dc.html",
+      "x": 9100,
+      "y": 3200,
+      "w": 1080,
+      "h": 1350,
+      "title": "12 Editorial B"
+    },
+    {
+      "file": "Y2KA.dc.html",
+      "x": 0,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "13 Y2K A"
+    },
+    {
+      "file": "Y2KB.dc.html",
+      "x": 1240,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "13 Y2K B"
+    },
+    {
+      "file": "SwissA.dc.html",
+      "x": 2620,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "14 Swiss design A"
+    },
+    {
+      "file": "SwissB.dc.html",
+      "x": 3860,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "14 Swiss design B"
+    },
+    {
+      "file": "SurrealA.dc.html",
+      "x": 5240,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "15 Surreal design A"
+    },
+    {
+      "file": "SurrealB.dc.html",
+      "x": 6480,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "15 Surreal design B"
+    },
+    {
+      "file": "BohemianA.dc.html",
+      "x": 7860,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "16 Bohemian A"
+    },
+    {
+      "file": "BohemianB.dc.html",
+      "x": 9100,
+      "y": 4800,
+      "w": 1080,
+      "h": 1350,
+      "title": "16 Bohemian B"
+    },
+    {
+      "file": "VictorianA.dc.html",
+      "x": 0,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "17 Victorian style A"
+    },
+    {
+      "file": "VictorianB.dc.html",
+      "x": 1240,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "17 Victorian style B"
+    },
+    {
+      "file": "GraffitiA.dc.html",
+      "x": 2620,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "18 Graffiti A"
+    },
+    {
+      "file": "GraffitiB.dc.html",
+      "x": 3860,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "18 Graffiti B"
+    },
+    {
+      "file": "AuroraA.dc.html",
+      "x": 5240,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "19 Aurora A"
+    },
+    {
+      "file": "AuroraB.dc.html",
+      "x": 6480,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "19 Aurora B"
+    },
+    {
+      "file": "HandwrittenA.dc.html",
+      "x": 7860,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "20 Handwritten A"
+    },
+    {
+      "file": "HandwrittenB.dc.html",
+      "x": 9100,
+      "y": 6400,
+      "w": 1080,
+      "h": 1350,
+      "title": "20 Handwritten B"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

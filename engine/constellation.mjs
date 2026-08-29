@@ -26,8 +26,12 @@ const rectsOverlap = (a, b, pad = 0) =>
  */
 export function solveConstellation({
   canvas, items, centre, seed = 1,
-  margin = 40, gap = 16, labelH = 54, tries = 2200,
-  minScale = 0.55, maxScale = 1.0,
+  // Margins and gaps were tuned for a sparse frame and are the direct cause of
+  // "too misplaced": objects orbited at a polite distance with white space
+  // between every pair, so the frame read as a diagram rather than a collage.
+  // The reference packs its objects until they nearly touch.
+  margin = 20, gap = 6, labelH = 52, tries = 3000,
+  minScale = 0.62, maxScale = 1.0,
 }) {
   const r = makeRng(seed);
   const placed = [];
@@ -65,9 +69,13 @@ export function solveConstellation({
       const cxC = centre.x + centre.w / 2;
       const cyC = centre.y + centre.h / 2;
       // radius grows with attempts, so a crowded ring pushes outward
-      const rMin = Math.max(centre.w, centre.h) * 0.58;
-      const rMax = Math.min(canvas.w, canvas.h) * 0.62;
-      const rad = rMin + (rMax - rMin) * (0.25 + 0.75 * r()) * (0.7 + 0.5 * relax);
+      // Start the ring right at the title's edge and let it reach the corners.
+      // The old floor pushed everything outward and left a white moat around
+      // the centre; the old ceiling stopped short of the corners and left them
+      // empty. Both showed up as "misplaced".
+      const rMin = Math.max(centre.w, centre.h) * 0.42;
+      const rMax = Math.hypot(canvas.w, canvas.h) * 0.44;
+      const rad = rMin + (rMax - rMin) * (0.15 + 0.85 * r()) * (0.8 + 0.4 * relax);
 
       const x = Math.round(cxC + Math.cos(angle) * rad - w / 2);
       const y = Math.round(cyC + Math.sin(angle) * rad * 0.92 - boxH / 2);
