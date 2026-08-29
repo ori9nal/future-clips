@@ -115,7 +115,10 @@ function subjectSpecFor(roleSpec, rng, cropStrategy, palette, slideIndex = 0, ro
     const useNiche = s.library.niche || niche;
     if (!useNiche) throw new Error('library subject requires a niche (campaign.niche or template library.niche)');
     const lib = loadLibrary(useNiche, s.library.kind || 'people');
-    const chosen = pickSubject(lib.items, intent, { used: used || new Set(), minScore: s.library.minScore ?? 0.25 });
+    const chosen = pickSubject(lib.items, intent, {
+      used: used || new Set(), minScore: s.library.minScore ?? 0.25,
+      rng, topK: s.library.topK ?? 4,
+    });
     if (!chosen) return null;
     const { item, score, matched } = chosen;
     if (used) used.add(item.id);

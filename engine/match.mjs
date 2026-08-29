@@ -80,7 +80,7 @@ export function scoreItem(item, intent) {
  * than handed a silent fallback that looks like a choice — an unmatched slide
  * is a real defect and the quality gate needs to be able to see it.
  */
-export function pickSubject(items, intent, { used = new Set(), minScore = 0.25 } = {}) {
+export function pickSubject(items, intent, { used = new Set(), minScore = 0.25, rng = null, topK = 4 } = {}) {
   const pool = items.filter((i) => !used.has(i.id));
   if (!pool.length) return null;
 
@@ -88,9 +88,24 @@ export function pickSubject(items, intent, { used = new Set(), minScore = 0.25 }
     .map((item) => ({ item, score: scoreItem(item, intent) }))
     .sort((a, b) => b.score - a.score);
 
-  const best = ranked[0];
-  if (best && best.score >= minScore) {
-    return { item: best.item, score: +best.score.toFixed(3), matched: true };
+  // Argmax over a fixed library is fully deterministic: the same intent returns
+  // the same photograph every time, so two carousels built from one concept are
+  // illustrated identically. Measured across a 40-carousel spread, EVERY intent
+  // resolved to exactly one subject and a single photo appeared 16 times.
+  //
+  // Sampling from the top K *qualifying* matches keeps the picture relevant
+  // while letting the seed choose which relevant picture. K is capped by how
+  // many actually clear the bar, so a lone good match is still taken.
+  const qualifying = ranked.filter((r) => r.score >= minScore);
+  if (qualifying.length) {
+    const band = qualifying.slice(0, Math.max(1, topK));
+    const pickIdx = rng ? rng.int(band.length) : 0;
+    const chosen = band[pickIdx];
+    return { item: chosen.item, score: +chosen.score.toFixed(3), matched: true, from: band.length };
   }
-  return { item: pool[0], score: best ? +best.score.toFixed(3) : 0, matched: false };
+
+  // Nothing matched. Spread the fallback across the library rather than always
+  // handing back pool[0], which is what made one subject appear 16 times.
+  const idx = rng ? rng.int(pool.length) : 0;
+  return { item: pool[idx], score: ranked[0] ? +ranked[0].score.toFixed(3) : 0, matched: false, from: 0 };
 }
