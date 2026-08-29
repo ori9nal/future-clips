@@ -5,9 +5,8 @@
     {
       "angle": "Consistency beats quality until quality is the only thing left.",
       "structure_type": "PRESCRIPTION",
-      "hook": "post before it is ready or you will never post",
+      "hook": "post it before it is ready",
       "kicker": "the only rule that matters",
-      "accentWord": "never",
       "coverImageIntent": "young creator with laptop plain background",
       "slides": [
         {
@@ -27,12 +26,13 @@
       ],
       "cta": "follow for the workflow",
       "closerKicker": "one system every week",
-      "closerImageIntent": "photographer holding camera white background"
+      "closerImageIntent": "photographer holding camera white background",
+      "longHook": "post before it is ready or you will never post"
     },
     {
       "angle": "Most creators confuse output with a body of work.",
       "structure_type": "CONTRAST",
-      "hook": "a hundred posts is not a portfolio",
+      "hook": "posts are not a portfolio",
       "kicker": "volume is not a body of work",
       "accentWord": "not",
       "coverImageIntent": "photographer holding camera white background",
@@ -54,7 +54,8 @@
       ],
       "cta": "save this before you post again",
       "closerKicker": "three things, said well",
-      "closerImageIntent": "young creator with laptop plain background"
+      "closerImageIntent": "young creator with laptop plain background",
+      "longHook": "a hundred posts is not a portfolio"
     }
   ],
   "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."

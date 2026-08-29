@@ -5,7 +5,7 @@
     {
       "angle": "Same money, opposite life. The comparison argues for you.",
       "structure_type": "COMPARISON",
-      "hook": "a new phone and a race entry cost the same",
+      "hook": "same price, different life",
       "kicker": "make better choices",
       "accentWord": "same",
       "coverImageIntent": "young man casual standing white background",
@@ -27,12 +27,13 @@
       ],
       "cta": "save this before you upgrade",
       "closerKicker": "spend it on something that changes you",
-      "closerImageIntent": "businessman full body white background studio"
+      "closerImageIntent": "businessman full body white background studio",
+      "longHook": "a new phone and a race entry cost the same"
     },
     {
       "angle": "Most people optimise the wrong end of the equation.",
       "structure_type": "REFRAME",
-      "hook": "you cannot budget your way out of a small income",
+      "hook": "you cannot budget your way out",
       "kicker": "the maths is ugly",
       "accentWord": "cannot",
       "coverImageIntent": "person thinking plain background daylight",
@@ -54,7 +55,8 @@
       ],
       "cta": "follow for the boring maths",
       "closerKicker": "we post one every week",
-      "closerImageIntent": "man working laptop plain background"
+      "closerImageIntent": "man working laptop plain background",
+      "longHook": "you cannot budget your way out of a small income"
     }
   ],
   "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."

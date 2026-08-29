@@ -5,9 +5,8 @@
     {
       "angle": "Rest is a skill people are actively bad at.",
       "structure_type": "REFRAME",
-      "hook": "you are not tired, you are unfinished",
+      "hook": "not tired. unfinished.",
       "kicker": "the difference matters",
-      "accentWord": "unfinished",
       "coverImageIntent": "man sitting alone plain background daylight",
       "slides": [
         {
@@ -27,14 +26,14 @@
       ],
       "cta": "save this for tonight",
       "closerKicker": "one of these every week",
-      "closerImageIntent": "person standing still white background studio"
+      "closerImageIntent": "person standing still white background studio",
+      "longHook": "you are not tired, you are unfinished"
     },
     {
       "angle": "Discipline is mostly environment design.",
       "structure_type": "PRESCRIPTION",
-      "hook": "stop relying on discipline, change the room",
+      "hook": "change the room, not you",
       "kicker": "willpower is a bad plan",
-      "accentWord": "room",
       "coverImageIntent": "person walking away plain background",
       "slides": [
         {
@@ -54,7 +53,8 @@
       ],
       "cta": "follow for the small changes",
       "closerKicker": "design it once",
-      "closerImageIntent": "person standing still white background studio"
+      "closerImageIntent": "person standing still white background studio",
+      "longHook": "stop relying on discipline, change the room"
     }
   ],
   "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."

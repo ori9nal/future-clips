@@ -26,7 +26,7 @@
   "cropStrategies": [
     "contain"
   ],
-  "hierarchyRatio": 0.48,
+  "hierarchyRatio": 0.82,
   "roles": {
     "cover": {
       "background": {
@@ -48,10 +48,10 @@
           },
           "offset": 1,
           "z": "back",
-          "widthPct": 0.3,
+          "widthPct": 0.276,
           "aspect": 0.8,
           "cx": 0.3,
-          "cy": 0.63,
+          "cy": 0.74,
           "rotate": -7,
           "border": {
             "color": "paper",
@@ -72,10 +72,10 @@
           },
           "offset": 3,
           "z": "front",
-          "widthPct": 0.33,
+          "widthPct": 0.304,
           "aspect": 0.8,
           "cx": 0.68,
-          "cy": 0.6,
+          "cy": 0.74,
           "rotate": 6,
           "border": {
             "color": "paper",
@@ -96,13 +96,13 @@
           "content": "headline",
           "box": {
             "x": "safe.left",
-            "y": 150,
+            "y": 120,
             "w": 928,
-            "h": 446
+            "h": 470
           },
           "size": [
             64,
-            152
+            202
           ],
           "maxLines": 4,
           "font": {
@@ -190,11 +190,11 @@
               "gap": 30
             },
             "w": 640,
-            "h": 405
+            "h": 568
           },
           "size": [
             42,
-            101
+            135
           ],
           "maxLines": 4,
           "font": {
@@ -303,11 +303,11 @@
             "x": "safe.left",
             "y": 130,
             "w": 928,
-            "h": 338
+            "h": 474
           },
           "size": [
             57,
-            136
+            182
           ],
           "maxLines": 4,
           "font": {
@@ -393,11 +393,11 @@
             "x": "safe.left",
             "y": 160,
             "w": 928,
-            "h": 405
+            "h": 470
           },
           "size": [
             59,
-            140
+            186
           ],
           "maxLines": 4,
           "font": {
@@ -442,6 +442,93 @@
           "lowercase": true
         }
       ]
+    },
+    "body-light": {
+      "background": {
+        "type": "flat",
+        "fill": "paper"
+      },
+      "type": [
+        {
+          "id": "index",
+          "content": "indexDot",
+          "box": {
+            "x": "safe.left",
+            "y": "safe.top",
+            "w": 200,
+            "h": 40
+          },
+          "size": [
+            18,
+            24
+          ],
+          "maxLines": 1,
+          "font": {
+            "role": "mono",
+            "weight": 700
+          },
+          "lineHeight": 1.2,
+          "tracking": 0.2,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft"
+        },
+        {
+          "id": "headline",
+          "content": "title",
+          "box": {
+            "x": "safe.left",
+            "y": 300,
+            "w": 928,
+            "h": 625
+          },
+          "size": [
+            42,
+            135
+          ],
+          "maxLines": 4,
+          "font": {
+            "role": "display-editorial",
+            "weight": 900
+          },
+          "lineHeight": 0.98,
+          "tracking": -0.014,
+          "align": "left",
+          "valign": "top",
+          "color": "ink",
+          "hierarchy": "display",
+          "lowercase": true
+        },
+        {
+          "id": "body",
+          "content": "body",
+          "optional": true,
+          "box": {
+            "x": "safe.left",
+            "y": {
+              "after": "headline",
+              "gap": 34
+            },
+            "w": 760,
+            "h": 220
+          },
+          "size": [
+            23,
+            29
+          ],
+          "maxLines": 5,
+          "font": {
+            "role": "body",
+            "weight": 500
+          },
+          "lineHeight": 1.44,
+          "align": "left",
+          "valign": "top",
+          "color": "ink-soft",
+          "lowercase": true
+        }
+      ],
+      "_note": "The bright beat. The reference alternates dark plates with near-white ones; holding one tone across a whole set is what made ours score 47.9 on variety against the reference 86.1."
     }
   },
   "furniture": [
@@ -449,7 +536,7 @@
       "type": "wordmark",
       "anchor": "top-center",
       "gap": 6,
-      "size": 20,
+      "size": 21,
       "tracking": 0.22,
       "font": {
         "role": "body",
@@ -488,8 +575,21 @@
   ],
   "bodyVariants": [
     "body",
+    "body-light",
     "body-cards",
     "body",
-    "body"
-  ]
+    "body-light"
+  ],
+  "copyLimits": {
+    "hookWords": [
+      2,
+      6
+    ],
+    "titleWords": [
+      3,
+      9
+    ],
+    "_note": "Measured from the reference set: hooks average 5.0 words. displayPct 28% of frame height is only reachable at 3-6 words; at 10 the fitter must shrink the headline by half and the whole format collapses into a caption."
+  },
+  "_hierarchyNote": "0.48 made every interior half the cover's size, which is why displayPct averaged 16.6 against the reference's 28.2. The reference keeps interiors nearly as loud as the cover and separates them by layout instead."
 }

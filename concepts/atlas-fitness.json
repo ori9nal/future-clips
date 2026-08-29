@@ -5,7 +5,7 @@
     {
       "angle": "Runners are told to lift less. The opposite is true if you sequence it.",
       "structure_type": "PRESCRIPTION",
-      "hook": "lift heavy, run easy, never on the same legs",
+      "hook": "never on the same legs",
       "kicker": "the split that actually works",
       "accentWord": "never",
       "coverImageIntent": "sprinter running daylight full body",
@@ -31,12 +31,13 @@
       ],
       "cta": "follow for the sequencing",
       "closerKicker": "one of these every week",
-      "closerImageIntent": "muscular man portrait plain background daylight"
+      "closerImageIntent": "muscular man portrait plain background daylight",
+      "longHook": "lift heavy, run easy, never on the same legs"
     },
     {
       "angle": "The unglamorous inputs separate people after year five.",
       "structure_type": "CONTRAST",
-      "hook": "the athletes still improving after five years do less",
+      "hook": "five years in, they do less",
       "kicker": "nobody posts about this part",
       "accentWord": "less",
       "coverImageIntent": "tired athlete resting daylight",
@@ -59,7 +60,8 @@
       ],
       "cta": "save this for your next deload",
       "closerKicker": "the boring stuff compounds",
-      "closerImageIntent": "athlete jumping white background studio"
+      "closerImageIntent": "athlete jumping white background studio",
+      "longHook": "the athletes still improving after five years do less"
     }
   ],
   "_note": "HAND-AUTHORED, standing in for the Phase 2 idea engine and written to its exact output contract. imageIntent uses the vocabulary the stock library was built from, because the matcher scores intent against the query that found each cutout."
