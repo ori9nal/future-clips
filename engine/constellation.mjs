@@ -136,6 +136,16 @@ export const OBJECT_SIZE = {
   'bottle':      { w: 105, h: 229 },
   'tub':         { w: 175, h: 208 },
   'shoe':        { w: 285, h: 148 },
+  // app screenshots read as tall slabs; they carry the campaign's real numbers
+  'app-balance': { w: 196, h: 400 },
+  'app-payout':  { w: 196, h: 400 },
+  // cafe
+  'coffee-bag':  { w: 192, h: 263 },
+  'pour-over':   { w: 204, h: 224 },
+  'cup':         { w: 214, h: 153 },
+  'beans':       { w: 196, h: 140 },
+  'brew-scale':  { w: 208, h: 129 },
+  'grinder':     { w: 148, h: 227 },
 };
 
 export const sizeOf = (id) => OBJECT_SIZE[id] || { w: 220, h: 220 };

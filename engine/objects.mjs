@@ -284,3 +284,23 @@ export function renderObject(id, opts = {}) {
   const [svg, width] = gen(opts);
   return png(svg, Math.round((opts.width ?? width) * (opts.scale ?? 1)));
 }
+
+/* ───────────────────── unified registry ─────────────────────
+ * Three families, one lookup. Kept as separate modules because they are
+ * separate design vocabularies — a finance app screen and a coffee bag should
+ * not share a palette constant — but the renderer should not have to know
+ * which family an id belongs to.
+ */
+import { UI_OBJECTS, renderUiObject } from './objects-ui.mjs';
+import { CAFE_OBJECTS, renderCafeObject } from './objects-cafe.mjs';
+
+export const ALL_OBJECT_IDS = [
+  ...Object.keys(OBJECTS), ...Object.keys(UI_OBJECTS), ...Object.keys(CAFE_OBJECTS),
+];
+
+export function renderAnyObject(id, opts = {}) {
+  if (Object.hasOwn(OBJECTS, id)) return renderObject(id, opts);
+  if (Object.hasOwn(UI_OBJECTS, id)) return renderUiObject(id, opts);
+  if (Object.hasOwn(CAFE_OBJECTS, id)) return renderCafeObject(id, opts);
+  throw new Error(`unknown object "${id}"`);
+}

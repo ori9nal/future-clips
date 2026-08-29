@@ -5,7 +5,7 @@
 // objects and still have them not collide across seeds.
 import sharp from 'sharp';
 import { Resvg } from '@resvg/resvg-js';
-import { renderObject } from './objects.mjs';
+import { renderAnyObject } from './objects.mjs';
 import { solveConstellation, sizeOf } from './constellation.mjs';
 import path from 'node:path';
 import { resolveFace } from './fonts.mjs';
@@ -30,13 +30,18 @@ const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replac
 export async function renderConstellation({
   canvas, title, handle, objects, palette, seed = 1,
   titleSize = [58, 104], ground = '#FFFFFF', margin = 42,
+  centreW = 0.50, centreH = 0.22, maxLines = 3,
 }) {
   // 1. Reserve the centre for the title, then fit the title INTO that reserve.
   // 50% wide, not 62%: at 62% the keep-out left only ~19% of the frame either
   // side of the title — too narrow for any object — so every slide had a dead
   // horizontal band across its middle and all the mass at top and bottom.
-  const boxW = Math.round(canvas.w * 0.50);
-  const boxH = Math.round(canvas.h * 0.22);
+  // The reserve is density-dependent. A cover carries a big title and few
+  // objects, so it needs a deeper centre; a full slide carries seven objects
+  // and a small title. Fixing one size meant a six-word cover simply could not
+  // be fitted at its own minimum.
+  const boxW = Math.round(canvas.w * centreW);
+  const boxH = Math.round(canvas.h * centreH);
   const centre = {
     x: Math.round((canvas.w - boxW) / 2),
     y: Math.round(canvas.h * 0.38),
@@ -45,9 +50,14 @@ export async function renderConstellation({
 
   const face = resolveFace('display-editorial', 400, 'normal');
   const fit = fitText(face, title, { w: centre.w, h: centre.h }, {
-    min: titleSize[0], max: titleSize[1], lineHeight: 1.02, tracking: -0.015, maxLines: 3,
+    min: titleSize[0], max: titleSize[1], lineHeight: 1.02, tracking: -0.015, maxLines,
   });
-  if (!fit) throw new Error(`constellation title will not fit: "${title}"`);
+  if (!fit) {
+    throw new Error(
+      `constellation title will not fit: "${title}" — ${title.split(/\s+/).length} words at ` +
+      `min ${titleSize[0]}px in a ${boxW}x${boxH} reserve over ${maxLines} lines. ` +
+      `Shorten the title, lower titleSize[0], or raise centreH.`);
+  }
 
   // 2. Solve object placement around that reserve. Labels are measured FIRST so
   //    the solver reserves the width the caption will really occupy.
@@ -74,7 +84,7 @@ export async function renderConstellation({
   const layers = [];
   for (const p of placed) {
     const spec = objects[p.i];
-    const buf = renderObject(p.id, { ...(spec.opts || {}), width: p.rect.w });
+    const buf = renderAnyObject(p.id, { ...(spec.opts || {}), width: p.rect.w });
     const resized = await sharp(buf)
       .resize(p.rect.w, p.rect.h, { fit: 'inside' })
       .png().toBuffer();
