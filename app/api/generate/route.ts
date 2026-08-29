@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 import { getCampaign } from "@/lib/campaigns";
 
 export const maxDuration = 300;
@@ -33,7 +34,9 @@ export async function POST(req: Request) {
   const concept = concepts[conceptIndex];
   if (!concept) return Response.json({ error: `no concept at index ${conceptIndex}` }, { status: 404 });
 
-  const engine: any = await import(/* webpackIgnore: true */ "../../../engine/index.mjs" as any);
+  // Absolute file URL: a relative specifier would resolve against .next/server.
+  const engineUrl = pathToFileURL(path.join(process.cwd(), "engine", "index.mjs")).href;
+  const engine: any = await import(/* webpackIgnore: true */ engineUrl);
   const templates = engine.loadTemplates().filter((t: any) => !family || t.id === family);
   if (!templates.length) return Response.json({ error: `no template "${family}"` }, { status: 404 });
 

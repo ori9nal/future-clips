@@ -11,6 +11,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 export type IngestResult = { ok: boolean; id?: string; reason?: string; stats?: any };
 
@@ -21,8 +22,9 @@ export async function ingestUpload(
   const kind = opts.kind || "people";
   // Loaded lazily: the engine is ESM and pulls in sharp + the ONNX worker, which
   // must not be dragged into every request that merely renders the admin page.
+  const cutoutUrl = pathToFileURL(path.join(process.cwd(), "engine", "source", "cutout.mjs")).href;
   const { cutout, cleanMatte, toBW, subjectTone, judgeCutout } = await import(
-    /* webpackIgnore: true */ "../engine/source/cutout.mjs" as any
+    /* webpackIgnore: true */ cutoutUrl
   );
 
   let r: any;
