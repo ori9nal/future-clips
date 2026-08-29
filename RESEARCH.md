@@ -160,3 +160,84 @@ Sources: [TikTok Photo Mode reach](https://reelbase.io/blog/tiktok-photo-mode-al
 [blueprint design trend](https://www.kittl.com/blogs/blueprint-graphic-design-trend-stl/) ·
 [2026 design trends](https://www.kittl.com/blogs/graphic-design-trends-2026/) ·
 [@papanca.io post](https://www.instagram.com/p/Dbz--lRAPwD/)
+
+---
+
+# PART 2 — how the people selling this actually build it
+
+Went looking for the YouTube/tutorial workflows, as asked. They converge on one
+architecture, and it is **not** the one I have been building.
+
+## The market architecture
+
+| stage | tool | what it does |
+|---|---|---|
+| structure | **Claude** | finds "narrative anchors", maps them to a 7-slide sequence at 1080×1350 |
+| brand | **Brand System Document** in a Claude Project | hex codes, fonts, voice — loaded once, read by every slide |
+| visuals | **Nano Banana 2 / Gemini Flash Image** | generates the slide **including its text**, at 4K |
+| polish | Canva | resize, nudge, strip logos |
+
+Two techniques matter more than the tool list:
+
+**1. The Reference Image technique.** You upload *one* high-tier design as a
+visual anchor and prompt "create a slide in the style of [reference]". From that
+single anchor they generate "a consistent 30-image asset library in one
+session". Consistency comes from the anchor, not from a template.
+
+**2. Assets chosen by narrative energy.** Claude picks imagery by what the slide
+is *doing* — "tension for hooks, clarity for data" — not by keyword match. My
+matcher scores an intent string against a stock query. Theirs reasons about the
+slide's job.
+
+## Why theirs looks designed and mine looks assembled
+
+A diffusion model trained on real design produces lighting, texture, material
+and depth that a geometric compositor cannot fake. My engine places rectangles
+precisely; it has no idea what a photograph of a sauna looks like. That is the
+whole gap, and no amount of layout tuning closes it.
+
+**But the generated-slide approach has real costs** the tutorials gloss over:
+text rendered by an image model cannot be guaranteed — no fit contract, no
+spellcheck, no safe areas, no banned-claim validation, and the handle may come
+out misspelled. That is exactly what the brief's quality gates exist to prevent.
+
+## The hybrid that should actually be built
+
+This is what "use a bit of AI for certain elements and other sources for
+different elements, like a human does" resolves to:
+
+```
+Claude          →  structure, hooks, per-slide copy, and the image BRIEF
+image model     →  backgrounds, textures, subjects, objects — anchored to ONE
+                   reference image so the whole set shares a world
+compositor      →  type + furniture ON TOP, with the fit contract, spellcheck,
+                   safe areas and campaign rules still enforced
+```
+
+The model supplies richness. The compositor supplies correctness. Neither can
+do the other's job, and every version I have shipped so far has been the
+compositor trying to do both.
+
+## Blocked, and honestly so
+
+**Google Flow cannot be driven from here.** Four attempts across two sessions:
+its editor is a heavy canvas app that starves the extension's script injection,
+returning a 5s timeout on every click and screenshot. ImageFX no longer exists
+as a separate tool — Google folded image generation into Flow, so there is no
+lighter page to fall back to.
+
+Working image sources, in order of preference:
+
+1. **Higgsfield MCP** — already wired into this session, session expired. Carries
+   `nano_banana_pro` and `soul_2` (a trained reusable character), which is
+   precisely the architecture above. Needs the connector removed and re-added.
+2. **Google AI Studio / Gemini API key** — Nano Banana directly; literally the
+   tool every tutorial uses.
+3. **`FAL_KEY`** — client already built, cached, budget-capped.
+
+Until one of those exists, another build round produces the same class of
+result, because the missing input is the same missing input.
+
+Sources: [Carousel Engine: Claude + Nano Banana](https://podcasts.apple.com/nz/podcast/407-max-the-instagram-carousel-engine-claude-strategy/id1817366984?i=1000759076811) ·
+[AI carousel tutorial workflow](https://theaibreak.substack.com/p/tutorial-how-to-make-viral-instagram) ·
+[Nano Banana carousels](https://www.youtube.com/watch?v=IIXupZAGvDk)
