@@ -1,0 +1,59 @@
+{
+  "_note": "Written to the Phase 2 idea engine's output contract, and to MERIDIAN's declared voice and copy budget. Hooks are 2-6 words because the depth format cannot set a ten-word hook at the size that makes it work (templates/f6 copyLimits). imageIntent uses the vocabulary the stock library was built from.",
+  "campaign": "meridian-endurance",
+  "niche": "fitness",
+  "concepts": [
+    {
+      "angle": "The sport is won in the boring middle, not in the hard sessions people post about.",
+      "structure_type": "CONTRAST",
+      "hook": "the boring part is the sport",
+      "kicker": "nobody films this bit",
+      "accentWord": "boring",
+      "coverImageIntent": "runner full body white background studio",
+      "slides": [
+        { "text": "everyone can do the hard session. almost nobody does the easy one properly.", "imageIntent": "woman running outdoors daylight full body" },
+        { "text": "your easy run should feel insulting. that is what makes the hard one possible." },
+        { "text": "sleep is a session. miss it and you did not train, you just got tired.", "imageIntent": "tired athlete resting daylight" },
+        { "text": "take the down week before you need it, not after.", "imageIntent": "athlete resting plain background" },
+        { "text": "five years of patient beats one year of heroic, every time." }
+      ],
+      "cta": "follow for the unglamorous half",
+      "closerKicker": "we post one of these a week",
+      "closerImageIntent": "marathon runner racing daylight"
+    },
+    {
+      "angle": "People buy intensity because it feels like progress. Consistency feels like nothing and does everything.",
+      "structure_type": "REFRAME",
+      "hook": "you are not undertrained",
+      "kicker": "you are underslept",
+      "accentWord": "undertrained",
+      "coverImageIntent": "tired athlete resting daylight",
+      "slides": [
+        { "text": "adding a session to a body that has not recovered is not training. it is debt." },
+        { "text": "the plan you can repeat in february beats the one you abandon in january.", "imageIntent": "runner full body white background studio" },
+        { "text": "if every run hurts, none of them are doing what they are for.", "imageIntent": "sprinter running daylight full body" },
+        { "text": "measure the week, not the session." }
+      ],
+      "cta": "save this before your next block",
+      "closerKicker": "patience is a training variable",
+      "closerImageIntent": "muscular man portrait plain background daylight"
+    },
+    {
+      "angle": "A concrete two-line comparison does the arguing better than a paragraph.",
+      "structure_type": "COMPARISON",
+      "hook": "same hours, different athlete",
+      "kicker": "where the difference actually lives",
+      "accentWord": "different",
+      "coverImageIntent": "athlete jumping white background studio",
+      "slides": [
+        { "text": "six hard days, no sleep, one injury. that is a season lost in march." },
+        { "text": "four steady days, eight hours, no injuries. that is a season.", "imageIntent": "woman running outdoors daylight full body" },
+        { "text": "the second athlete trained fewer hours and finished more races.", "imageIntent": "marathon runner racing daylight" },
+        { "text": "the difference was never effort. it was what happened between sessions." }
+      ],
+      "cta": "follow for the between-sessions work",
+      "closerKicker": "the half nobody sells you",
+      "closerImageIntent": "man lifting dumbbell white background"
+    }
+  ]
+}

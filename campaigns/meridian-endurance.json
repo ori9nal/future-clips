@@ -1,0 +1,57 @@
+{
+  "id": "meridian-endurance",
+  "name": "Meridian Endurance",
+  "niche": "fitness",
+  "_brief": "An imaginary partner campaign, written the way a real agency handover should read. MERIDIAN is an endurance coaching brand for people in their late twenties and thirties who already train and are tired of being sold intensity. Its whole position is that the sport is won in the unglamorous middle — sleep, easy days, patience — so the art direction is deliberately calm: bone ground, near-black ink, a single burnt rust that appears once per slide and never twice. No neon, no gradients, no hype.",
+
+  "agency": {
+    "code": "MERIDIAN25",
+    "name": "Meridian Collective",
+    "contact": "partners@meridian.example"
+  },
+
+  "brand": {
+    "name": "MERIDIAN",
+    "handle": "@meridian.endurance",
+    "wordmark": "MERIDIAN",
+    "colors": {
+      "ink": "#171512",
+      "paper": "#EFEAE0",
+      "accents": { "rust": "#A8442A" }
+    },
+    "_colorNote": "Bone rather than white, and a burnt rust rather than a signal red. The measured reference corpus uses bone and cream far more often than pure white, and one desaturated accent reads as considered where a saturated one reads as an ad.",
+    "logo": null
+  },
+
+  "voice": {
+    "person": "second, direct, no exclamation marks",
+    "register": "plain, unhurried, slightly contrarian",
+    "avoid": ["hustle", "grind", "beast mode", "no excuses", "crush it", "unlock"],
+    "_note": "The brand's whole claim is that intensity is over-sold. Copy that shouts contradicts the positioning."
+  },
+
+  "rules": {
+    "required_mention": "@meridian.endurance",
+    "min_slides": 6,
+    "max_slides": 9,
+    "canvas": ["1080x1350", "1080x1440"],
+    "banned_phrases": ["hustle", "grind", "beast mode", "no excuses"],
+    "banned_claims": [
+      "guaranteed",
+      "clinically proven",
+      "medically approved",
+      "cures",
+      "burn fat overnight"
+    ],
+    "cta_required_on_last": true,
+    "zero_gen_mode": false
+  },
+
+  "source": {
+    "video": null,
+    "libraries": [
+      { "niche": "fitness", "kind": "people" },
+      { "niche": "fitness", "kind": "plates" }
+    ]
+  }
+}
