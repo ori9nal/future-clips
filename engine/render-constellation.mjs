@@ -3,6 +3,7 @@
 // Deliberately its own path rather than a template role, because the geometry is
 // solved rather than declared — you cannot write fixed boxes for seven scattered
 // objects and still have them not collide across seeds.
+import fs from 'node:fs';
 import sharp from 'sharp';
 import { Resvg } from '@resvg/resvg-js';
 import { renderAnyObject } from './objects.mjs';
@@ -15,6 +16,17 @@ const ttf = (f) => path.join(FONT_DIR, `${f.id}.ttf`);
 // resvg matches <text> by the family name inside the file, not by our role id.
 const FAMILY = { 'display-editorial': 'Playfair Display', body: 'Archivo', mono: 'JetBrains Mono' };
 import { fitText } from './fit-text.mjs';
+
+/**
+ * Natural display size for a PHOTOGRAPHIC asset: scale it by a fraction of the
+ * canvas height and let its OWN aspect decide the width. A declared box would
+ * squash a shoe or stretch a runner.
+ */
+async function photoSize(file, heightPct, canvas) {
+  const d = await sharp(file).metadata();
+  const h = Math.round(canvas.h * (heightPct ?? 0.16));
+  return { w: Math.round((d.width / d.height) * h), h };
+}
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
@@ -74,17 +86,24 @@ export async function renderConstellation({
     return [words.slice(0, mid).join(' '), words.slice(mid).join(' ')].filter(Boolean);
   };
 
-  const items = objects.map((o) => ({
-    id: o.id, label: o.label, ...sizeOf(o.id),
-    labelW: o.label ? Math.max(...rowsFor(o.label).map(measure)) + 12 : 0,
-  }));
+  // Photo sizes need sharp, so they are measured up front rather than inside the map.
+  const items = [];
+  for (const o of objects) {
+    const size = o.file ? await photoSize(o.file, o.heightPct, canvas) : sizeOf(o.id);
+    items.push({
+      id: o.id, label: o.label, ...size,
+      labelW: o.label ? Math.max(...rowsFor(o.label).map(measure)) + 12 : 0,
+    });
+  }
   const { placed, dropped } = solveConstellation({ canvas, items, centre, seed, margin });
 
   // 3. Composite: ground, then every object, then one type layer over the lot.
   const layers = [];
   for (const p of placed) {
     const spec = objects[p.i];
-    const buf = renderAnyObject(p.id, { ...(spec.opts || {}), width: p.rect.w });
+    const buf = spec.file
+      ? fs.readFileSync(spec.file)
+      : renderAnyObject(p.id, { ...(spec.opts || {}), width: p.rect.w });
     const resized = await sharp(buf)
       .resize(p.rect.w, p.rect.h, { fit: 'inside' })
       .png().toBuffer();
