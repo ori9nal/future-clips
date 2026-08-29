@@ -17,7 +17,7 @@ import { fitText } from './fit-text.mjs';
 
 const FONT_DIR = 'assets/fonts';
 const ttf = (f) => path.join(FONT_DIR, `${f.id}.ttf`);
-const FAMILY = { display: 'Archivo Black', serif: 'Playfair Display', mono: 'JetBrains Mono' };
+const FAMILY = { display: 'Archivo Black', serif: 'Playfair Display', small: 'Archivo', mono: 'JetBrains Mono' };
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
 /**
@@ -47,14 +47,24 @@ async function scrimFor(plate, canvas, band) {
  * @param {string} [o.handle]
  * @param {object} o.palette    { ink, paper, accent }
  */
+/**
+ * THREE-RUN HEADLINE — the move every reference grid makes and mine did not.
+ * growithalex never sets one size: it is a small sans line, then a huge serif
+ * word, then a small sans line. "steal my / CAROUSEL / layouts". One size reads
+ * as a caption; three read as a designed headline.
+ *
+ * `lead` and `tail` are the small sans lines, `headline` is the hero.
+ */
 export async function renderPhotoSlide({
-  canvas, plate, headline, accentWord, kicker, handle, palette,
-  size = [64, 132], align = 'left', valign = 'bottom', index = null, showArrow = true, out,
+  canvas, plate, headline, lead, tail, accentWord, kicker, handle, palette,
+  size = [64, 132], align = 'left', valign = 'bottom', index = null, showArrow = true,
+  heroFace = 'display-editorial', out,
 }) {
   const M = Math.round(canvas.w * 0.075);
   const boxW = canvas.w - M * 2;
 
-  const face = resolveFace('display-block', 900, 'normal');
+  const face = resolveFace(heroFace, heroFace === 'display-editorial' ? 900 : 900, 'normal');
+  const smallFace = resolveFace('body', 700, 'normal');
   const monoFace = resolveFace('mono', 500, 'normal');
 
   const fit = fitText(face, headline, { w: boxW, h: Math.round(canvas.h * 0.42) }, {
@@ -63,7 +73,23 @@ export async function renderPhotoSlide({
   if (!fit) throw new Error(`headline will not fit: "${headline}"`);
 
   const lineH = fit.size * 0.98;
-  const blockH = fit.lines.length * lineH;
+  // The small runs are sized OFF the hero so the ratio holds at any hero size —
+  // but they must ALSO obey the box. The first version sized them purely by
+  // ratio and a long tail ran straight off the frame ("...who still needs
+  // briefi"). Every run goes through the same measure now: nothing renders
+  // wider than the safe box, ever.
+  const measureRun = (str, px) => {
+    let u = 0;
+    for (const ch of String(str)) u += smallFace.ot.charToGlyph(ch).advanceWidth || smallFace.upm * 0.5;
+    return (u / smallFace.upm) * px;
+  };
+  let smallSize = Math.max(22, Math.round(fit.size * 0.26));
+  for (const run of [lead, tail].filter(Boolean)) {
+    while (smallSize > 16 && measureRun(run, smallSize) > boxW) smallSize -= 1;
+  }
+  const leadH = lead ? smallSize * 1.5 : 0;
+  const tailH = tail ? smallSize * 1.5 : 0;
+  const blockH = fit.lines.length * lineH + leadH + tailH;
   const kickerH = kicker ? 46 : 0;
   const top = valign === 'bottom'
     ? canvas.h - Math.round(canvas.h * 0.14) - blockH
@@ -91,24 +117,36 @@ export async function renderPhotoSlide({
   //    occurrence is lifted, so a common word does not colour the whole line.
   const x = align === 'center' ? canvas.w / 2 : M;
   const anchor = align === 'center' ? 'middle' : 'start';
+  const HERO_FAMILY = heroFace === 'display-editorial' ? FAMILY.serif : FAMILY.display;
+
+  const leadSvg = lead
+    ? `<text x="${x}" y="${(top + smallSize).toFixed(1)}" text-anchor="${anchor}"
+        font-family="${FAMILY.small}" font-size="${smallSize}" font-weight="700"
+        fill="${palette.paper}">${esc(lead)}</text>` : '';
+
   let accentDone = false;
   const lines = fit.lines.map((ln, i) => {
-    const y = top + i * lineH + fit.size * 0.80;
+    const y = top + leadH + i * lineH + fit.size * 0.80;
     if (accentWord && !accentDone) {
       const re = new RegExp(`\\b(${accentWord.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})\\b`, 'i');
       if (re.test(ln)) {
         accentDone = true;
         const [before, word, after] = ln.split(re);
         return `<text x="${x}" y="${y.toFixed(1)}" text-anchor="${anchor}"
-          font-family="${FAMILY.display}" font-size="${fit.size}" font-weight="400"
+          font-family="${HERO_FAMILY}" font-size="${fit.size}" font-weight="400"
           letter-spacing="${(-0.022 * fit.size).toFixed(2)}" fill="${palette.paper}"
           >${esc(before)}<tspan fill="${palette.accent}">${esc(word)}</tspan>${esc(after)}</text>`;
       }
     }
     return `<text x="${x}" y="${y.toFixed(1)}" text-anchor="${anchor}"
-      font-family="${FAMILY.display}" font-size="${fit.size}" font-weight="400"
+      font-family="${HERO_FAMILY}" font-size="${fit.size}" font-weight="400"
       letter-spacing="${(-0.022 * fit.size).toFixed(2)}" fill="${palette.paper}">${esc(ln)}</text>`;
   }).join('');
+
+  const tailSvg = tail
+    ? `<text x="${x}" y="${(top + leadH + fit.lines.length * lineH + smallSize * 1.15).toFixed(1)}"
+        text-anchor="${anchor}" font-family="${FAMILY.small}" font-size="${smallSize}"
+        font-weight="700" fill="${palette.paper}">${esc(tail)}</text>` : '';
 
   const kickerSvg = kicker
     ? `<text x="${x}" y="${(top - 26).toFixed(1)}" text-anchor="${anchor}"
@@ -128,11 +166,11 @@ export async function renderPhotoSlide({
         fill="${palette.paper}" opacity="0.7">${esc(index)}</text>` : '';
 
   const typeSvg = `<svg xmlns="http://www.w3.org/2000/svg" width="${canvas.w}" height="${canvas.h}">
-    ${kickerSvg}${lines}${handleSvg}${arrowSvg}${indexSvg}</svg>`;
+    ${kickerSvg}${leadSvg}${lines}${tailSvg}${handleSvg}${arrowSvg}${indexSvg}</svg>`;
 
   const typePng = Buffer.from(new Resvg(typeSvg, {
     background: 'rgba(0,0,0,0)', fitTo: { mode: 'width', value: canvas.w },
-    font: { fontFiles: [ttf(face), ttf(monoFace)], loadSystemFonts: false },
+    font: { fontFiles: [ttf(face), ttf(smallFace), ttf(monoFace)], loadSystemFonts: false },
   }).render().asPng());
 
   const buf = await sharp(plateBuf)
