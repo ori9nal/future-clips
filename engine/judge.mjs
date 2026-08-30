@@ -45,10 +45,22 @@ export function logicCheck(carousel) {
 
   // A promise the campaign cannot keep is worse than a weak hook: it gets the
   // clipper's submission rejected in review, which costs them 9 days.
-  const offers = carousel.campaign?.offers || [];
   const claimed = all.join(' ').toLowerCase();
+  // A banned term is banned as a CLAIM, not as a word. "Nothing is waterproof"
+  // is the campaign warning against the claim; flagging it made the checker
+  // punish the copy for being accurate. Look back a short window for a negator
+  // before deciding the term was asserted.
+  const NEGATOR = /\b(not|never|nothing|no|isn'?t|aren'?t|without|beyond|forget)\b[^.]{0,24}$/;
   for (const banned of carousel.campaign?.rules?.banned_claims || []) {
-    if (claimed.includes(String(banned).toLowerCase())) failures.push(`banned claim present: "${banned}"`);
+    const term = String(banned).toLowerCase();
+    let from = 0, asserted = false;
+    for (;;) {
+      const i = claimed.indexOf(term, from);
+      if (i === -1) break;
+      if (!NEGATOR.test(claimed.slice(Math.max(0, i - 40), i))) { asserted = true; break; }
+      from = i + term.length;
+    }
+    if (asserted) failures.push(`banned claim present: "${banned}"`);
   }
   if (carousel.campaign?.rules?.required_mention) {
     const h = carousel.campaign.rules.required_mention.toLowerCase();

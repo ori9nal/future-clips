@@ -354,10 +354,18 @@ export async function cutout(file, opts = {}) {
     return await sharp(raw).ensureAlpha().trim({ threshold: 1 }).png({ compressionLevel: 9 }).toBuffer();
   });
 
-  let stats = readJson(`${key}-stats-v2`);
+  // v3 adds translucency. judgeCutout has always had the translucency gate and
+  // translucency() has always existed, but the two were never connected: stats
+  // never carried the field, so `s.translucency != null` was false and the
+  // check silently skipped. Five visibly see-through face mattes reported
+  // "pass" because of it.
+  let stats = readJson(`${key}-stats-v3`);
   if (!stats) {
-    stats = { ...(await alphaStats(buf)), ...(await haloScore(buf)), ...(await componentStats(buf)) };
-    writeJson(`${key}-stats-v2`, stats);
+    stats = {
+      ...(await alphaStats(buf)), ...(await haloScore(buf)),
+      ...(await componentStats(buf)), ...(await translucency(buf)),
+    };
+    writeJson(`${key}-stats-v3`, stats);
   }
 
   return { buf, stats, verdict: judgeCutout(stats), hit, ms: Date.now() - t0, key };
