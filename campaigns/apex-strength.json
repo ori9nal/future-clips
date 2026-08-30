@@ -1,0 +1,71 @@
+{
+  "id": "apex-strength-oct",
+  "brand": "APEX",
+  "product": "strength tracking app",
+  "advertiser": "Apex Labs",
+  "agency": "Northbound Creator Group",
+  "status": "live",
+  "opened": "2026-08-24",
+  "closes": "2026-09-21",
+
+  "payout": {
+    "model": "per_1k_views",
+    "rate_usd": 1.0,
+    "min_payout_usd": 1.0,
+    "max_payout_usd": 500.0,
+    "budget_total_usd": 12000,
+    "budget_remaining_usd": 7340,
+    "review_days": 9,
+    "platforms": ["instagram", "tiktok", "youtube", "x"],
+    "rate_same_across_platforms": true
+  },
+
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "9:16",
+    "required_mention": "@apex.strength",
+    "required_link_in_bio": true,
+    "must_show_app": true,
+    "must_show_app_note": "At least one slide must be a full-bleed screenshot of the app. Reviewers reject sets that only talk about it.",
+    "original_footage_only": true,
+    "no_reposting_brand_assets": true
+  },
+
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "guaranteed results",
+      "lose 10kg in a week",
+      "steroid",
+      "medically proven",
+      "cures"
+    ],
+    "banned_topics": ["injury advice", "supplement dosing", "cutting weight for a weigh-in"],
+    "tone": "First person. Speak like a lifter, not a brand. No exclamation marks.",
+    "disclosure": "#ad must appear in the caption, not in the slides."
+  },
+
+  "assets_supplied_by_agency": {
+    "logo": null,
+    "mascot": null,
+    "palette": ["#0B0B0C", "#FF5A1F", "#F2F0EB"],
+    "app_screens": ["home", "progress", "session"],
+    "fonts": null,
+    "note": "Clipper supplies their own footage. Agency supplies app screens and the palette only."
+  },
+
+  "brief": {
+    "audience": "18-27 men who already train 3-5x a week and track nothing",
+    "insight": "They think they are progressing because the weight feels heavier. They have no idea whether it actually went up.",
+    "angle": "Rank the things that actually drive progress, put the app in as the thing that shows you the answer.",
+    "hook_style": "countdown",
+    "payload": "A ranked list with a rating out of 10 and a one-line verdict, counted down so the swipe pays off at the end."
+  },
+
+  "compliance_notes": [
+    "Rate is per 1,000 views, paid after a 9 day review window.",
+    "Views on reposted or duplicated sets are not counted.",
+    "A set missing the required mention is rejected outright, not edited."
+  ]
+}
