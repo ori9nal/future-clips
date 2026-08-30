@@ -16,8 +16,8 @@ const STEPS = [
   },
   {
     n: "03",
-    title: "Post and cash out",
-    body: "Export thirty unique carousels and post them across the week. Get paid per verified view, same as video.",
+    title: "Post and get paid",
+    body: "Export thirty unique carousels and post them across the week. The campaign pays you per verified view, same as video.",
   },
 ];
 
@@ -164,7 +164,7 @@ export default function Home() {
           <div className="wrap">
             <div className="head">
               <span className="eyebrow">Features</span>
-              <h2 className="h2">From campaign to cash out.</h2>
+              <h2 className="h2">Everything between brief and payout.</h2>
             </div>
             <div className="grid4">
               {FEATURES.map((f) => (

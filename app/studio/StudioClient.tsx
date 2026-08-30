@@ -1,164 +1,146 @@
 "use client";
 
 import { useState } from "react";
+import type { Spec } from "@/lib/specs";
 
-type Concept = { i: number; hook: string; structure: string; slides: number };
-type Campaign = {
-  id: string; name: string; niche: string; handle: string;
-  ink: string; paper: string; accent: string; concepts: Concept[];
-};
-type Family = { id: string; name: string; canvas: string };
+type Logic = { pass: boolean; failures: string[]; warnings: string[] };
+type Result = { style: string; ms: number; logic: Logic; slides: string[] };
 
-type Result = {
-  id: string; family: string; slides: number; ms: number; valid: boolean;
-  errors?: { rule: string; detail: string }[];
-  files: string[];
-  subjects: { slide: number; id: string; matched: boolean | null; score: number | null; intent: string | null }[];
-};
+const money = (n: number) => `$${n.toLocaleString("en-US")}`;
 
-export default function StudioClient({
-  campaigns, families,
-}: { campaigns: Campaign[]; families: Family[] }) {
-  const [campaignId, setCampaignId] = useState(campaigns[0]?.id ?? "");
-  const [conceptIndex, setConceptIndex] = useState(0);
-  const [family, setFamily] = useState(families[0]?.id ?? "");
+export function StudioClient({ campaigns }: { campaigns: Spec[] }) {
+  const [id, setId] = useState(campaigns[0]?.id ?? "");
+  const [style, setStyle] = useState<"native" | "mascot">("native");
   const [busy, setBusy] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
-  const [err, setErr] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  const campaign = campaigns.find((c) => c.id === campaignId);
+  const spec = campaigns.find((c) => c.id === id);
+  const hasMascot = !!spec?.assets.mascot;
 
-  async function generate() {
-    setBusy(true); setErr(null); setResult(null);
+  async function render() {
+    setBusy(true);
+    setError(null);
+    setResult(null);
     try {
-      const res = await fetch("/api/generate", {
+      const r = await fetch("/api/sets", {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify({ campaignId, conceptIndex, family }),
+        body: JSON.stringify({ campaignId: id, style }),
       });
-      const json = await res.json();
-      if (!res.ok) setErr(json.error || `HTTP ${res.status}`);
-      else setResult(json);
+      const j = await r.json();
+      if (!r.ok) setError(j.error ?? "render failed");
+      else setResult(j);
     } catch (e: any) {
-      setErr(String(e?.message || e));
+      setError(e?.message ?? "network error");
     } finally {
       setBusy(false);
     }
   }
 
-  const fallbacks = result?.subjects.filter((s) => s.id && s.matched === false).length ?? 0;
+  if (!campaigns.length) {
+    return (
+      <p className="empty">
+        No campaigns yet. <a href="/admin/new">Create one</a>.
+      </p>
+    );
+  }
 
   return (
     <>
-      <header className="fc-head">
-        <p className="fc-eyebrow">Studio</p>
-        <h1>Turn an idea into a slideshow.</h1>
-        <p className="fc-sub">
-          Pick a campaign, a concept and a look. The engine lays out every slide against the
-          campaign&apos;s brand kit and hard-validates it before you see it.
-        </p>
-      </header>
-
-      <section className="fc-card">
-        <div className="fc-form">
-          <div className="fc-row">
-            <label>
-              <span>Campaign</span>
-              <select value={campaignId} onChange={(e) => { setCampaignId(e.target.value); setConceptIndex(0); }}>
-                {campaigns.map((c) => <option key={c.id} value={c.id}>{c.name} · {c.niche}</option>)}
-              </select>
-            </label>
-            <label>
-              <span>Look</span>
-              <select value={family} onChange={(e) => setFamily(e.target.value)}>
-                {families.map((f) => <option key={f.id} value={f.id}>{f.name} · {f.canvas}</option>)}
-              </select>
-            </label>
-          </div>
-
-          <label>
-            <span>Idea <em>— the hook the set is built around</em></span>
-            <select value={conceptIndex} onChange={(e) => setConceptIndex(Number(e.target.value))}>
-              {campaign?.concepts.map((k) => (
-                <option key={k.i} value={k.i}>{k.structure} — “{k.hook}”</option>
-              ))}
-            </select>
-          </label>
-
-          {campaign ? (
-            <div className="fc-swatches">
-              <span className="fc-sw" style={{ background: campaign.ink }} title={`ink ${campaign.ink}`} />
-              <span className="fc-sw" style={{ background: campaign.paper }} title={`paper ${campaign.paper}`} />
-              <span className="fc-sw" style={{ background: campaign.accent }} title={`accent ${campaign.accent}`} />
-              <code>{campaign.handle}</code>
-            </div>
-          ) : null}
-
-          <button className="fc-btn" data-variant="lime" onClick={generate} disabled={busy || !campaignId}>
-            {busy ? "Generating…" : "Generate slideshow"}
-          </button>
+      <section className="panel">
+        <div className="field">
+          <label htmlFor="campaign">Campaign</label>
+          <select id="campaign" value={id} onChange={(e) => { setId(e.target.value); setResult(null); }}>
+            {campaigns.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.brand} — {c.niche}
+              </option>
+            ))}
+          </select>
         </div>
+
+        <div className="field">
+          <label>Style</label>
+          <div className="segmented" role="group" aria-label="Style">
+            <button
+              type="button"
+              aria-pressed={style === "native"}
+              className={style === "native" ? "on" : ""}
+              onClick={() => { setStyle("native"); setResult(null); }}
+            >
+              Native
+            </button>
+            <button
+              type="button"
+              aria-pressed={style === "mascot"}
+              className={style === "mascot" ? "on" : ""}
+              disabled={!hasMascot}
+              title={hasMascot ? "" : "This campaign has no mascot asset"}
+              onClick={() => { setStyle("mascot"); setResult(null); }}
+            >
+              Mascot
+            </button>
+          </div>
+          {!hasMascot && <p className="hint">Mascot style needs a mascot asset on the campaign.</p>}
+        </div>
+
+        <button className="primary" onClick={render} disabled={busy}>
+          {busy ? "Rendering…" : `Render ${(spec?.content.ranked.length ?? 0) + 2} slides`}
+        </button>
       </section>
 
-      {err ? (
-        <section className="fc-card fc-err">
-          <h2>Could not generate</h2>
-          <pre>{err}</pre>
+      {spec && (
+        <section className="brief">
+          <h2>What the brief locks</h2>
+          <dl>
+            <div><dt>Rate</dt><dd>{money(spec.payout.rate_usd)} / 1k views</dd></div>
+            <div><dt>Budget left</dt><dd>{money(spec.payout.budget_remaining_usd)}</dd></div>
+            <div><dt>Review</dt><dd>{spec.payout.review_days} days</dd></div>
+            <div><dt>Aspect</dt><dd>{spec.requirements.aspect}</dd></div>
+            <div><dt>Mention</dt><dd>{spec.requirements.required_mention}</dd></div>
+            <div><dt>Platforms</dt><dd>{spec.payout.platforms.join(", ")}</dd></div>
+          </dl>
+          <p className="banned">
+            <strong>Banned claims:</strong> {spec.rules.banned_claims.join(" · ")}
+          </p>
         </section>
-      ) : null}
+      )}
 
-      {result ? (
-        <>
-          <section className="fc-card">
-            <h2>
-              {result.family}
-              <span className="fc-tag">{result.slides} slides</span>
-              <span className="fc-tag">{(result.ms / 1000).toFixed(1)}s</span>
-              <span className="fc-tag" data-ok={result.valid ? "1" : "0"}>
-                {result.valid ? "rules pass" : "rules fail"}
-              </span>
-              {fallbacks ? <span className="fc-tag" data-ok="0">{fallbacks} unmatched image{fallbacks > 1 ? "s" : ""}</span> : null}
-            </h2>
+      {error && (
+        <p className="error" role="alert">
+          {error}
+        </p>
+      )}
 
-            {!result.valid && result.errors?.length ? (
-              <ul style={{ margin: "0 0 14px", paddingLeft: 18, fontSize: 12.5, color: "var(--fc-bad)" }}>
-                {result.errors.map((e, i) => <li key={i}><strong>{e.rule}</strong> — {e.detail}</li>)}
-              </ul>
-            ) : null}
+      {result && (
+        <section>
+          <div className={`verdict ${result.logic.pass ? "ok" : "bad"}`}>
+            <strong>{result.logic.pass ? "Checks passed" : "Checks failed"}</strong>
+            <span>
+              {result.slides.length} slides in {(result.ms / 1000).toFixed(1)}s
+            </span>
+          </div>
+          {result.logic.failures.map((f) => (
+            <p className="issue fail" key={f}>{f}</p>
+          ))}
+          {result.logic.warnings.map((w) => (
+            <p className="issue warn" key={w}>{w}</p>
+          ))}
 
-            <div className="fc-slides">
-              {result.files.map((f, i) => (
-                // eslint-disable-next-line @next/next/no-img-element
-                <a key={f} href={f} target="_blank" rel="noreferrer" className="fc-slide">
-                  <img src={f} alt={`slide ${i + 1}`} />
-                  <b>{String(i + 1).padStart(2, "0")}</b>
-                </a>
-              ))}
-            </div>
-          </section>
-
-          <section className="fc-card">
-            <h2>Image match</h2>
-            <p className="fc-note" style={{ marginBottom: 12 }}>
-              Whether each slide&apos;s picture was chosen to answer its own text, or fell back
-              because nothing in the library matched. A fallback is a real defect, not a style choice.
-            </p>
-            <table className="fc-table">
-              <thead><tr><th>#</th><th>intent</th><th>image</th><th>score</th></tr></thead>
-              <tbody>
-                {result.subjects.filter((s) => s.id).map((s) => (
-                  <tr key={s.slide} data-bad={s.matched === false ? "1" : "0"}>
-                    <td>{s.slide}</td>
-                    <td>{s.intent || <em>none given</em>}</td>
-                    <td>{s.id}</td>
-                    <td>{s.matched === false ? "fallback" : s.score}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
-        </>
-      ) : null}
+          <div className="strip">
+            {result.slides.map((s, i) => (
+              <figure key={s}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={s} alt={`Slide ${i + 1}`} width={1080} height={1920} />
+                <figcaption>
+                  {String(i + 1).padStart(2, "0")} / {String(result.slides.length).padStart(2, "0")}
+                </figcaption>
+              </figure>
+            ))}
+          </div>
+        </section>
+      )}
     </>
   );
 }

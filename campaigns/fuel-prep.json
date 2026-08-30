@@ -1,0 +1,53 @@
+{
+  "id": "fuel-prep",
+  "brand": "FUEL",
+  "product": "high-protein meal prep",
+  "niche": "nutrition",
+  "advertiser": "Fuel Kitchen",
+  "agency": "Northbound Creator Group",
+  "status": "live",
+  "payout": {
+    "model": "per_1k_views", "rate_usd": 0.9, "min_payout_usd": 1.0, "max_payout_usd": 400.0,
+    "budget_total_usd": 6000, "budget_remaining_usd": 4410, "review_days": 7,
+    "platforms": ["instagram", "tiktok"], "rate_same_across_platforms": true
+  },
+  "requirements": {
+    "min_slides": 5, "max_slides": 8, "aspect": "9:16",
+    "required_mention": "@fuel.kitchen", "required_link_in_bio": true,
+    "must_show_app": false, "original_footage_only": true
+  },
+  "rules": {
+    "banned_claims": ["guaranteed", "detox", "burns fat", "clean eating", "lose weight fast"],
+    "banned_topics": ["calorie targets for individuals", "supplement dosing", "cutting for a weigh-in"],
+    "tone": "First person, practical. No exclamation marks. Cooking and habit, never nutrition prescriptions.",
+    "disclosure": "#ad in the caption."
+  },
+  "assets": {
+    "palette": ["#141210", "#F2760C", "#FBF7F1"],
+    "mascot": null,
+    "photos": { "dir": "output/niche/food", "credit": "Pexels" }
+  },
+  "content": {
+    "style": "native",
+    "hook": {
+      "photo": 30635709,
+      "lines": ["FOUR MEAL PREP", "RULES, RANKED BY", "WHAT SURVIVED"],
+      "sub": ["two years of Sundays"]
+    },
+    "ranked": [
+      { "photo": 30635713, "name": "Seven identical meals", "score": "2/10",
+        "lines": ["You will eat four of them", "and buy lunch on Thursday.", "I did this for a year."] },
+      { "photo": 30635715, "name": "Weighing every gram", "score": "4/10",
+        "lines": ["Worth it for two weeks so", "you learn what portions look", "like. After that it is a chore."] },
+      { "photo": 30635711, "name": "Cooking the carb separately", "score": "8/10",
+        "lines": ["Rice goes gluey by day three.", "Ten minutes fresh beats", "four days of reheating it."] },
+      { "photo": 30635717, "name": "Two proteins, not one", "score": "10/10",
+        "lines": ["Same oven, same hour.", "Boredom is what actually", "kills a prep by Wednesday."] }
+    ],
+    "closer": {
+      "photo": 30635712,
+      "lines": ["Prep for four days,", "not seven. You will", "finish all four."],
+      "cta": "Follow @fuel.kitchen"
+    }
+  }
+}

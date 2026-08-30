@@ -1,27 +1,6 @@
 {
   "version": "0.0.1",
   "configurations": [
-    {
-      "name": "clipcarousel",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "next",
-        "start",
-        "-p",
-        "3210"
-      ],
-      "port": 3210
-    },
-    {
-      "name": "clipcarousel-dev",
-      "runtimeExecutable": "npx",
-      "runtimeArgs": [
-        "next",
-        "dev",
-        "-p",
-        "3211"
-      ],
-      "port": 3211
-    }
+    { "name": "future-clips", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 }
   ]
 }

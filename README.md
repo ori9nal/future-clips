@@ -63,23 +63,37 @@ gets paid.
 
 ## Deploying
 
-**Blocked on account permissions.** `deploy_to_vercel` returns:
+The Vercel project already exists: **future-clips**
+(`prj_j55AR37CEDttehNz3RnTolaSNDNa`, team `earnfromwhop07-5800s-projects`).
 
-```
-403 forbidden — You don't have permission to create a project.
-```
-
-The connected Vercel credential can list projects on team
-`earnfromwhop07-5800s-projects` but cannot create one. To deploy yourself:
+Push from this directory:
 
 ```bash
 npx vercel --prod
 ```
 
-That prompts a login and creates the project under your own credentials.
-Set the two `NEXT_PUBLIC_SUPABASE_*` values as Vercel project environment
-variables afterwards and delete `.env.production` — cleaner than shipping the
-file, and it makes key rotation a dashboard action instead of a redeploy.
+It will ask you to log in the first time, then link to the existing `future-clips`
+project. The CLI uploads `public/carousels/` along with the source, which the MCP
+deploy tool cannot do — it inlines files as base64 and 293 KB of images becomes
+~393 KB of base64, past the size of a single tool call.
 
-**The team is on the Hobby plan.** Hobby forbids commercial use. This has to be
-upgraded to Pro before the site takes money or promotes a paid product.
+`.env.production` holds the two `NEXT_PUBLIC_SUPABASE_*` values and is not
+git-ignored, so it uploads with the deploy. Cleaner long-term: set both in the
+Vercel dashboard under Settings -> Environment Variables and delete the file, so
+rotating the key doesn't need a redeploy.
+
+### Two things that will bite otherwise
+
+- **Next.js version is pinned for a reason.** Vercel refuses to build versions with
+  known CVEs. A build on `15.5.4` failed with `VULNERABLE_NEXTJS_VERSION`
+  (CVE-2025-66478) before it compiled anything. This project is on `15.5.24`. If you
+  bump Next, check the build succeeds before assuming it shipped.
+- **The team is on the Hobby plan**, which forbids commercial use. Upgrade to Pro
+  before this page sells anything.
+
+## Image assets
+
+`public/carousels/` holds 15 example carousels at 500px wide, WebP q70 (293 KB total),
+generated from `Carousel examples/`. They are other creators' posts, used with
+permission, and the page says so in the status section and the FAQ. They are not
+Future Clips output — do not relabel them as such.

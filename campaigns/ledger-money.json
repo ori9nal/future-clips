@@ -1,0 +1,53 @@
+{
+  "id": "ledger-money",
+  "brand": "LEDGER",
+  "product": "spend tracker",
+  "niche": "personal finance",
+  "advertiser": "Ledger Money Ltd",
+  "agency": "Northbound Creator Group",
+  "status": "live",
+  "payout": {
+    "model": "per_1k_views", "rate_usd": 1.25, "min_payout_usd": 2.0, "max_payout_usd": 500.0,
+    "budget_total_usd": 9000, "budget_remaining_usd": 5120, "review_days": 9,
+    "platforms": ["instagram", "tiktok", "youtube"], "rate_same_across_platforms": true
+  },
+  "requirements": {
+    "min_slides": 5, "max_slides": 8, "aspect": "9:16",
+    "required_mention": "@ledger.money", "required_link_in_bio": true,
+    "must_show_app": false, "original_footage_only": true
+  },
+  "rules": {
+    "banned_claims": ["guaranteed", "get rich", "passive income", "double your money", "financial advice"],
+    "banned_topics": ["individual stock picks", "crypto tips", "tax avoidance"],
+    "tone": "First person, plain. No exclamation marks. Budgeting habits only, never investment advice.",
+    "disclosure": "#ad in the caption."
+  },
+  "assets": {
+    "palette": ["#101418", "#4ADE80", "#F4F6F3"],
+    "mascot": null,
+    "photos": { "dir": "output/niche/money", "credit": "Pexels" }
+  },
+  "content": {
+    "style": "native",
+    "hook": {
+      "photo": 5955098,
+      "lines": ["FOUR MONEY HABITS", "RANKED BY WHAT", "THEY ACTUALLY SAVED"],
+      "sub": ["worst to best"]
+    },
+    "ranked": [
+      { "photo": 6615073, "name": "Cutting small treats", "score": "2/10",
+        "lines": ["Skipping coffee saves about", "forty a month. Your rent and", "your car are the real numbers."] },
+      { "photo": 7864380, "name": "An app you open once", "score": "4/10",
+        "lines": ["Installing it is not tracking.", "I had three of them and still", "could not tell you my total."] },
+      { "photo": 20373372, "name": "Moving it on payday", "score": "9/10",
+        "lines": ["Before you see the balance,", "not after. I never once", "missed what had already gone."] },
+      { "photo": 7605227, "name": "Writing down every spend", "score": "10/10",
+        "lines": ["One month, every single one.", "The number that shocked me", "was not the big purchases."] }
+    ],
+    "closer": {
+      "photo": 19879393,
+      "lines": ["Thirty days of writing", "it down changes what", "you buy on day nine."],
+      "cta": "Follow @ledger.money"
+    }
+  }
+}

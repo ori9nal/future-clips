@@ -93,10 +93,65 @@ export function captionBlock(face, lines, box, o = {}) {
  *
  * @returns {Array} bands scored, quietest first
  */
-export async function captionBands(img, { w, h, sharp, bands = 7, margin = 64, avoid = [] }) {
+/**
+ * Score one rectangle of the picture: how busy it is, and how much of it is
+ * skin. Used to place a caption over the area it will ACTUALLY occupy.
+ *
+ * Scoring fixed-height bands and then letting the text block grow past the
+ * band was the bug: a band only guaranteed its own 158px were quiet, so a
+ * three-line hook anchored in a quiet strip above a head still landed across
+ * the face below it.
+ */
+export async function scoreRegion(img, { w, h, sharp, rect, skinWeight = 260 }) {
   const S = 160, sh = Math.round((S * h) / w);
   const { data, info } = await sharp(img).resize(S, sh, { fit: 'fill' })
-    .greyscale().raw().toBuffer({ resolveWithObject: true });
+    .removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  return scoreRect(data, info, { w, h }, rect, skinWeight);
+}
+
+function scoreRect(data, info, frame, rect, skinWeight) {
+  const x0 = Math.max(0, Math.floor((rect.x / frame.w) * info.width));
+  const x1 = Math.min(info.width, Math.ceil(((rect.x + rect.w) / frame.w) * info.width));
+  const y0 = Math.max(0, Math.floor((rect.y / frame.h) * info.height));
+  const y1 = Math.min(info.height, Math.ceil(((rect.y + rect.h) / frame.h) * info.height));
+  const lum = [];
+  let skin = 0, n = 0;
+  for (let y = y0; y < y1; y++) {
+    for (let x = x0; x < x1; x++) {
+      const p = (y * info.width + x) * 3;
+      const r = data[p], g = data[p + 1], b = data[p + 2];
+      lum.push(0.2126 * r + 0.7152 * g + 0.0722 * b);
+      n++;
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+      if (r > 95 && g > 40 && b > 20 && mx - mn > 15 && Math.abs(r - g) > 15 && r > g && r > b) skin++;
+    }
+  }
+  if (!n) return { range: 255, skin: 1, score: 1e6 };
+  lum.sort((a, b) => a - b);
+  const p10 = lum[Math.floor(lum.length * 0.1)], p90 = lum[Math.floor(lum.length * 0.9)];
+  const skinShare = skin / n;
+  return { range: Math.round(p90 - p10), skin: +skinShare.toFixed(3), score: +((p90 - p10) + skinShare * skinWeight).toFixed(1) };
+}
+
+/** Slide a window of a known height through a zone and rank the positions. */
+export async function placementsFor(img, { w, h, sharp, zone, blockH, margin = 64, step = 40, avoid = [], skinWeight = 260 }) {
+  const S = 160, sh = Math.round((S * h) / w);
+  const { data, info } = await sharp(img).resize(S, sh, { fit: 'fill' })
+    .removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const out = [];
+  const last = zone[1] - blockH;
+  for (let y = zone[0]; y <= last; y += step) {
+    const rect = { x: margin, y, w: w - margin * 2, h: blockH };
+    if (avoid.some((a) => rect.y < a.y + a.h && a.y < rect.y + rect.h)) continue;
+    out.push({ ...rect, ...scoreRect(data, info, { w, h }, rect, skinWeight) });
+  }
+  return out.sort((a, b) => a.score - b.score);
+}
+
+export async function captionBands(img, { w, h, sharp, bands = 7, margin = 64, avoid = [], skinWeight = 260 }) {
+  const S = 160, sh = Math.round((S * h) / w);
+  const { data, info } = await sharp(img).resize(S, sh, { fit: 'fill' })
+    .removeAlpha().raw().toBuffer({ resolveWithObject: true });
 
   const out = [];
   const bandH = Math.round((h * 0.74) / bands);
@@ -105,16 +160,36 @@ export async function captionBands(img, { w, h, sharp, bands = 7, margin = 64, a
     if (avoid.some((a) => by < a.y + a.h && a.y < by + bandH)) continue;
     const y0 = Math.max(0, Math.floor((by / h) * info.height));
     const y1 = Math.min(info.height, Math.ceil(((by + bandH) / h) * info.height));
-    const vals = [];
-    for (let y = y0; y < y1; y++) for (let x = 0; x < info.width; x++) vals.push(data[y * info.width + x]);
-    if (!vals.length) continue;
-    vals.sort((a, b) => a - b);
-    const mean = vals.reduce((s, v) => s + v, 0) / vals.length;
-    const p10 = vals[Math.floor(vals.length * 0.1)];
-    const p90 = vals[Math.floor(vals.length * 0.9)];
-    // A stroked caption survives almost any ground; what actually hurts is
-    // BUSY ground. Range beats brightness as the measure of busy.
-    out.push({ x: margin, y: by, w: w - margin * 2, h: bandH, mean: +mean.toFixed(1), range: p90 - p10, score: p90 - p10 });
+    const lum = [];
+    let skin = 0, n = 0;
+    for (let y = y0; y < y1; y++) {
+      for (let x = 0; x < info.width; x++) {
+        const p = (y * info.width + x) * 3;
+        const r = data[p], g = data[p + 1], b = data[p + 2];
+        lum.push(0.2126 * r + 0.7152 * g + 0.0722 * b);
+        n++;
+        // Classic RGB skin rule. Crude, but a caption across someone's face is
+        // the one placement that always looks wrong, and busy-ness alone cannot
+        // see it — a face in flat light is one of the QUIETEST bands there is,
+        // which is exactly how the money set put its hook across a man's eyes.
+        const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+        if (r > 95 && g > 40 && b > 20 && mx - mn > 15 && Math.abs(r - g) > 15 && r > g && r > b) skin++;
+      }
+    }
+    if (!n) continue;
+    lum.sort((a, b) => a - b);
+    const mean = lum.reduce((s, v) => s + v, 0) / lum.length;
+    const p10 = lum[Math.floor(lum.length * 0.1)];
+    const p90 = lum[Math.floor(lum.length * 0.9)];
+    const skinShare = skin / n;
+    // A stroked caption survives almost any ground; what hurts is BUSY ground,
+    // and what looks careless is a face. Range measures busy, skin measures face.
+    const score = (p90 - p10) + skinShare * skinWeight;
+    out.push({
+      x: margin, y: by, w: w - margin * 2, h: bandH,
+      mean: +mean.toFixed(1), range: Math.round(p90 - p10),
+      skin: +skinShare.toFixed(3), score: +score.toFixed(1),
+    });
   }
   return out.sort((a, b) => a.score - b.score);
 }

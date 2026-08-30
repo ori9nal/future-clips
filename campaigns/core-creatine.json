@@ -1,0 +1,101 @@
+{
+  "id": "core-creatine",
+  "brand": "CORE",
+  "product": "creatine monohydrate",
+  "niche": "supplements",
+  "status": "live",
+  "payout": {
+    "rate_usd": 0.8,
+    "min_payout_usd": 1,
+    "max_payout_usd": 300,
+    "budget_total_usd": 5000,
+    "budget_remaining_usd": 5000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "9:16",
+    "required_mention": "@core.labs",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "steroid",
+      "medically proven",
+      "cures",
+      "burns fat"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#0B0B0C",
+      "#4CC9F0",
+      "#F2F0EB"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/gym/1389931",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "native",
+    "hook": {
+      "photo": "31849598",
+      "lines": [
+        "THREE CREATINE",
+        "MYTHS I BELIEVED",
+        "FOR YEARS"
+      ],
+      "sub": [
+        "worst to best"
+      ]
+    },
+    "ranked": [
+      {
+        "photo": "31849596",
+        "name": "You need to load it",
+        "score": "2/10",
+        "lines": [
+          "Loading just fills the tank",
+          "faster. Skipping it costs you",
+          "about three weeks, not results."
+        ]
+      },
+      {
+        "photo": "31849594",
+        "name": "Timing matters",
+        "score": "3/10",
+        "lines": [
+          "Before, after, with food,",
+          "on rest days. It saturates",
+          "over weeks, not minutes."
+        ]
+      },
+      {
+        "photo": "31849595",
+        "name": "Cycling off",
+        "score": "4/10",
+        "lines": [
+          "Nothing needs a break from it.",
+          "Stopping just drains what you",
+          "spent a month building."
+        ]
+      }
+    ],
+    "closer": {
+      "photo": "31849590",
+      "lines": [
+        "Five grams. Every day.",
+        "That is the entire protocol."
+      ],
+      "cta": "Follow @core.labs"
+    }
+  }
+}

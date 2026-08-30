@@ -7,19 +7,22 @@
   "status": "live",
   "opened": "2026-08-24",
   "closes": "2026-09-21",
-
   "payout": {
     "model": "per_1k_views",
-    "rate_usd": 1.0,
-    "min_payout_usd": 1.0,
-    "max_payout_usd": 500.0,
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
     "budget_total_usd": 12000,
     "budget_remaining_usd": 7340,
     "review_days": 9,
-    "platforms": ["instagram", "tiktok", "youtube", "x"],
+    "platforms": [
+      "instagram",
+      "tiktok",
+      "youtube",
+      "x"
+    ],
     "rate_same_across_platforms": true
   },
-
   "requirements": {
     "min_slides": 5,
     "max_slides": 10,
@@ -31,7 +34,6 @@
     "original_footage_only": true,
     "no_reposting_brand_assets": true
   },
-
   "rules": {
     "banned_claims": [
       "guaranteed",
@@ -41,20 +43,30 @@
       "medically proven",
       "cures"
     ],
-    "banned_topics": ["injury advice", "supplement dosing", "cutting weight for a weigh-in"],
+    "banned_topics": [
+      "injury advice",
+      "supplement dosing",
+      "cutting weight for a weigh-in"
+    ],
     "tone": "First person. Speak like a lifter, not a brand. No exclamation marks.",
     "disclosure": "#ad must appear in the caption, not in the slides."
   },
-
   "assets_supplied_by_agency": {
     "logo": null,
     "mascot": null,
-    "palette": ["#0B0B0C", "#FF5A1F", "#F2F0EB"],
-    "app_screens": ["home", "progress", "session"],
+    "palette": [
+      "#0B0B0C",
+      "#FF5A1F",
+      "#F2F0EB"
+    ],
+    "app_screens": [
+      "home",
+      "progress",
+      "session"
+    ],
     "fonts": null,
     "note": "Clipper supplies their own footage. Agency supplies app screens and the palette only."
   },
-
   "brief": {
     "audience": "18-27 men who already train 3-5x a week and track nothing",
     "insight": "They think they are progressing because the weight feels heavier. They have no idea whether it actually went up.",
@@ -62,10 +74,86 @@
     "hook_style": "countdown",
     "payload": "A ranked list with a rating out of 10 and a one-line verdict, counted down so the swipe pays off at the end."
   },
-
   "compliance_notes": [
     "Rate is per 1,000 views, paid after a 9 day review window.",
     "Views on reposted or duplicated sets are not counted.",
     "A set missing the required mention is rejected outright, not edited."
-  ]
+  ],
+  "niche": "fitness",
+  "assets": {
+    "palette": [
+      "#0B0B0C",
+      "#FF5A1F",
+      "#F2F0EB"
+    ],
+    "mascot": "output/mascot/m4-cut.png",
+    "photos": {
+      "dir": "output/gym/1389931",
+      "credit": "Pexels"
+    },
+    "app_screen": "output/apex/app-progress.png"
+  },
+  "content": {
+    "style": "native",
+    "hook": {
+      "photo": 30165254,
+      "lines": [
+        "FOUR THINGS THAT",
+        "ACTUALLY MOVED",
+        "MY LIFTS"
+      ],
+      "sub": [
+        "ranked worst to best"
+      ]
+    },
+    "ranked": [
+      {
+        "photo": 30165246,
+        "name": "Chasing soreness",
+        "score": "2/10",
+        "lines": [
+          "Sore means you did something new.",
+          "It does not mean it worked."
+        ]
+      },
+      {
+        "photo": 30165252,
+        "name": "Adding more exercises",
+        "score": "4/10",
+        "lines": [
+          "Six movements you half-finish",
+          "beat nothing. Three you finish",
+          "beat all six."
+        ]
+      },
+      {
+        "photo": 30165250,
+        "name": "Sleeping eight hours",
+        "score": "9/10",
+        "lines": [
+          "The most boring one on here",
+          "and the only one I noticed",
+          "within a week."
+        ]
+      },
+      {
+        "photo": 30165251,
+        "name": "Writing every set down",
+        "score": "10/10",
+        "lines": [
+          "I thought I was progressing",
+          "for two years. I was repeating",
+          "the same three sessions."
+        ]
+      }
+    ],
+    "closer": {
+      "screen": "output/apex/app-progress.png",
+      "lines": [
+        "Two years of guessing.",
+        "Twelve months of writing it down."
+      ],
+      "cta": "Follow @apex.strength"
+    }
+  }
 }

@@ -1,0 +1,707 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Future Clips — Turn any idea into a viral slideshow</title>
+<meta name="description" content="The Future Clips turns any idea into a scroll-stopping slideshow in minutes. Consistent character, viral hooks, no AI watermark.">
+<meta property="og:title" content="The Future Clips — Turn any idea into a viral slideshow">
+<meta property="og:description" content="The Future Clips turns any idea into a scroll-stopping slideshow in minutes. Consistent character, viral hooks, no AI watermark.">
+<link rel="icon" href="logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0; color: #56544E; background-color: #FAF9F6;
+    background-image:
+      radial-gradient(900px 620px at 88% -80px, rgba(216,255,71,.40), rgba(216,255,71,0) 62%),
+      radial-gradient(760px 520px at 6% 30px, rgba(255,238,199,.55), rgba(255,238,199,0) 66%),
+      radial-gradient(1100px 700px at 50% 620px, rgba(255,255,255,.85), rgba(255,255,255,0) 70%),
+      linear-gradient(180deg, #FFFEFA 0%, #FDFCF7 34%, rgba(250,249,246,0) 76%);
+    background-repeat: no-repeat; background-size: 100% 1600px;
+    font-family: "Manrope", Helvetica, Arial, sans-serif; font-size: 17px; line-height: 1.6;
+    overflow-x: hidden; -webkit-font-smoothing: antialiased; text-wrap: pretty;
+  }
+  ::selection { background: #D8FF47; color: #0E0E10; }
+  :focus-visible { outline: 2.5px solid #0E0E10; outline-offset: 3px; border-radius: 6px; }
+  a { color: inherit; text-decoration: none; }
+  a:hover { color: #0E0E10; }
+  summary { list-style: none; }
+  summary::-webkit-details-marker { display: none; }
+  details[open] .pm { transform: rotate(45deg); }
+  @keyframes fcDriftA { 0%,100% { transform: translate3d(0,0,0) scale(1); } 50% { transform: translate3d(4%,3%,0) scale(1.12); } }
+  @keyframes fcDriftB { 0%,100% { transform: translate3d(0,0,0) scale(1.08); } 50% { transform: translate3d(-5%,4%,0) scale(1); } }
+  @keyframes fcPulse { 0%,100% { opacity: .55; } 50% { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+
+/* ── responsive nav: CSS breakpoints, not a JS state flag ─────────── */
+.fc-navlinks { display:flex; gap:clamp(18px,2.4vw,32px); font-size:15px; font-weight:500; color:#56544E; white-space:nowrap; }
+.fc-navcta { display:flex; align-items:center; gap:14px; }
+.fc-burger { display:none; flex-direction:column; justify-content:center; gap:4px; width:48px; height:48px; padding:0 14px; background:#fff; border:1px solid #E6E3DB; border-radius:10px; cursor:pointer; }
+.fc-burger span { display:block; width:20px; height:2px; background:#0E0E10; border-radius:2px; transition:transform .2s, opacity .2s; }
+.fc-burger.open span:nth-child(1) { transform:translateY(6px) rotate(45deg); }
+.fc-burger.open span:nth-child(2) { opacity:0; }
+.fc-burger.open span:nth-child(3) { transform:translateY(-6px) rotate(-45deg); }
+.fc-mobile { display:none; margin-top:10px; background:rgba(253,252,248,.97); backdrop-filter:blur(18px); border:1px solid #E7E4DB; border-radius:16px; box-shadow:0 18px 40px -18px rgba(14,14,16,.22); overflow:hidden; }
+@media (max-width:899px) {
+  .fc-navlinks, .fc-navcta { display:none; }
+  .fc-burger { display:flex; }
+  .fc-mobile.open { display:block; }
+}
+
+/* ── pricing toggle ───────────────────────────────────────────────── */
+.fc-pill { border:0; background:transparent; color:#6E6B63; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.07em; text-transform:uppercase; padding:12px 16px; min-height:46px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:background .18s, color .18s; }
+.fc-pill.fc-on { background:#0E0E10; color:#fff; }
+
+/* ── hero: the deck drops in and spreads ──────────────────────────── */
+.fc-stagewrap { position:relative; width:100%; margin-top:clamp(36px,6vw,60px); overflow:hidden; padding-bottom:clamp(64px,9vw,92px); }
+.fc-stage { position:relative; height:clamp(300px,44vw,430px); display:flex; align-items:center; justify-content:center; }
+.fc-card { position:absolute; margin:0; width:var(--w); border-radius:16px; overflow:hidden; background:#EFEDE6; border:1px solid rgba(14,14,16,.07); box-shadow:0 22px 50px -26px rgba(14,14,16,.42); animation:fcDrop .95s cubic-bezier(.18,.86,.24,1) both; animation-delay:var(--d); }
+.fc-card img { width:100%; height:auto; aspect-ratio:4/5; object-fit:cover; object-position:top center; display:block; }
+.fc-card-lead { border-radius:20px; box-shadow:0 34px 70px -30px rgba(14,14,16,.55); }
+@keyframes fcDrop {
+  from { opacity:0; transform:translate3d(0,-140px,0) rotate(0deg) scale(.86); }
+  to   { opacity:1; transform:translate3d(var(--x),0,0) rotate(var(--r)) scale(1); }
+}
+.fc-idx { position:absolute; top:10px; left:12px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.1em; color:rgba(255,255,255,.92); background:rgba(14,14,16,.55); backdrop-filter:blur(6px); padding:4px 8px; border-radius:6px; }
+.fc-dots { position:absolute; left:0; right:0; bottom:12px; display:flex; gap:5px; justify-content:center; }
+.fc-dots i { width:5px; height:5px; border-radius:50%; background:rgba(255,255,255,.45); display:block; }
+.fc-dots i.on { background:#fff; width:16px; border-radius:3px; }
+.fc-badge { position:absolute; left:50%; bottom:-6px; transform:translateX(-50%); z-index:20; display:flex; align-items:center; gap:14px; background:#0E0E10; border-radius:14px; padding:14px 24px; box-shadow:0 18px 44px -14px rgba(14,14,16,.55); white-space:nowrap; animation:fcBadge .9s cubic-bezier(.18,.86,.24,1) both; animation-delay:.62s; }
+@keyframes fcBadge {
+  from { opacity:0; transform:translateX(-50%) translateY(-46px) scale(.9); }
+  to   { opacity:1; transform:translateX(-50%) translateY(0) scale(1); }
+}
+.fc-dot { width:9px; height:9px; border-radius:50%; background:#D8FF47; flex:0 0 auto; animation:fcPulse 1.8s ease-in-out infinite; }
+.fc-badge b { display:block; font-family:'Archivo',sans-serif; font-stretch:112%; font-weight:700; font-size:clamp(24px,5.6vw,34px); color:#fff; letter-spacing:-.02em; line-height:1.05; font-variant-numeric:tabular-nums; }
+.fc-badge span:last-child { display:block; margin-top:3px; font-family:'IBM Plex Mono',monospace; font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:#8F8D87; }
+@media (max-width:900px) {
+  .fc-card { --w:150px !important; }
+  .fc-card-lead { --w:200px !important; }
+  .fc-card:nth-child(1) { --x:-232px; --r:-11deg; }
+  .fc-card:nth-child(2) { --x:-124px; --r:-6deg; }
+  .fc-card:nth-child(4) { --x:124px;  --r:6deg; }
+  .fc-card:nth-child(5) { --x:232px;  --r:11deg; }
+}
+@media (max-width:560px) {
+  .fc-card:nth-child(1), .fc-card:nth-child(5) { display:none; }
+  .fc-card { --w:120px !important; }
+  .fc-card-lead { --w:168px !important; }
+  .fc-card:nth-child(2) { --x:-104px; --r:-8deg; }
+  .fc-card:nth-child(4) { --x:104px;  --r:8deg; }
+}
+
+/* footer links sit at 21px tall — under the 24px target-size minimum.
+   Pad them out on touch widths without touching desktop rhythm. */
+@media (max-width:899px) {
+  footer a { display:inline-block; padding-block:9px; }
+  header .mark, header a[aria-label] { min-height:44px; display:flex; align-items:center; }
+}
+
+/* ── features: flat rows, hairline separated, no icon glyphs ──────── */
+.fc-feat { padding:clamp(24px,3.6vw,34px) 0; border-top:1px solid #E9E6DE; }
+.fc-feat .fc-rule { display:block; width:30px; height:4px; border-radius:2px; background:#D8FF47; }
+.fc-feat h3 { margin-top:18px !important; }
+
+/* ── reveal on scroll ─────────────────────────────────────────────── */
+.fc-js .fc-reveal { opacity:0; transform:translateY(24px); transition:opacity .75s cubic-bezier(.2,.8,.25,1), transform .75s cubic-bezier(.2,.8,.25,1); transition-delay:calc(var(--i,0) * 70ms); }
+.fc-js .fc-reveal.fc-in { opacity:1; transform:none; }
+
+@media (prefers-reduced-motion: reduce) {
+  .fc-card, .fc-badge { animation:none !important; opacity:1 !important; transform:translate3d(var(--x),0,0) rotate(var(--r)) !important; }
+  .fc-badge { transform:translateX(-50%) !important; animation:none !important; opacity:1 !important; }
+  .fc-js .fc-reveal { opacity:1 !important; transform:none !important; transition:none !important; }
+}
+
+</style>
+</head>
+<body>
+<div style="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden">
+  <div style="position:absolute;top:-14vh;right:-12vw;width:min(62vw,720px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(216,255,71,.34), rgba(216,255,71,0) 68%);filter:blur(20px);animation:fcDriftA 26s ease-in-out infinite"></div>
+  <div style="position:absolute;top:22vh;left:-16vw;width:min(58vw,640px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(255,231,178,.42), rgba(255,231,178,0) 68%);filter:blur(24px);animation:fcDriftB 32s ease-in-out infinite"></div>
+  <div style="position:absolute;top:118vh;right:4vw;width:min(46vw,480px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 50% 50%, rgba(216,255,71,.20), rgba(216,255,71,0) 68%);filter:blur(26px);animation:fcDriftB 38s ease-in-out infinite"></div>
+</div>
+
+<div style="position:relative;z-index:1">
+
+<header style="position:sticky;top:0;z-index:60;padding:clamp(10px,2vw,16px) clamp(12px,3vw,22px) 0;background:transparent">
+  <div style="width:100%;max-width:1180px;margin-inline:auto">
+  <div style="width:100%;padding-inline:clamp(14px,2.6vw,22px);display:flex;align-items:center;justify-content:space-between;height:clamp(58px,8vw,68px);gap:16px;background:rgba(253,252,248,.86);backdrop-filter:blur(18px) saturate(160%);border:1px solid #E7E4DB;border-radius:16px;box-shadow:0 10px 30px -14px rgba(14,14,16,.18)">
+    <a href="#top" style="display:block;position:relative;width:160px;height:40px;overflow:hidden;flex:0 0 auto" aria-label="The Future Clips">
+      <img src="logo.png" alt="The Future Clips" style="position:absolute;width:275px;height:auto;left:-57px;top:-26px">
+    </a>
+    <nav class="fc-navlinks" aria-label="Main">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#examples">Examples</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="fc-navcta">
+      <a href="#start" style="font-size:15px;font-weight:500;white-space:nowrap">Log in</a>
+      <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:15px;font-weight:600;padding:12px 20px;white-space:nowrap;min-height:46px" style-hover="background:#26262A">Start free</a>
+    </div>
+    <button type="button" onclick="fcToggle()" aria-label="Menu" aria-expanded="false" class="fc-burger" id="fcBurger">
+      <span ></span>
+      <span ></span>
+      <span ></span>
+    </button>
+  </div>
+  <div class="fc-mobile" id="fcMobile">
+    <nav style="display:flex;flex-direction:column;padding:8px clamp(18px,4vw,36px) 20px" aria-label="Mobile">
+      <a href="#features" onclick="fcClose()" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Features</a>
+      <a href="#how" onclick="fcClose()" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">How it works</a>
+      <a href="#examples" onclick="fcClose()" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Examples</a>
+      <a href="#pricing" onclick="fcClose()" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">Pricing</a>
+      <a href="#faq" onclick="fcClose()" style="padding:15px 0;font-size:17px;font-weight:600;color:#0E0E10;border-bottom:1px solid #F0EDE4">FAQ</a>
+      <div style="display:flex;gap:10px;margin-top:18px">
+        <a href="#start" onclick="fcClose()" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#FAF9F6;border:1px solid #E0DCD2;color:#0E0E10;font-size:16px;font-weight:600">Log in</a>
+        <a href="#start" onclick="fcClose()" style="flex:1;display:inline-flex;align-items:center;justify-content:center;min-height:50px;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600">Start free</a>
+      </div>
+    </nav>
+  </div>
+  </div>
+</header>
+
+<main id="top">
+
+<section class="fc-sec" style="position:relative;padding:clamp(48px,9vw,96px) 0 0;text-align:center;overflow:hidden">
+  <div style="position:absolute;inset:0;background-image:linear-gradient(#EEEBE2 1px,transparent 1px),linear-gradient(90deg,#EEEBE2 1px,transparent 1px);background-size:72px 72px;mask-image:linear-gradient(180deg,rgba(0,0,0,.45),transparent 58%);-webkit-mask-image:linear-gradient(180deg,rgba(0,0,0,.45),transparent 58%);pointer-events:none"></div>
+  <div style="position:relative;width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <span style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;background:#fff;border:1px solid #E6E3DB;border-radius:9999px;padding:7px 16px 7px 8px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#56544E;margin-bottom:clamp(20px,4vw,32px);max-width:100%">
+      <b style="background:#D8FF47;color:#0E0E10;border-radius:9999px;padding:4px 10px;font-size:.92em;font-weight:500;letter-spacing:.08em">New</b> Slideshows, generated in minutes
+    </span>
+    <h1 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(2.05rem,7.4vw,4.4rem);line-height:1.03;letter-spacing:-.03em;max-width:20ch;margin-inline:auto;text-wrap:balance">Turn any idea into a <span style="background:#D8FF47;padding:0 .12em;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone">scroll-stopping</span> slideshow</h1>
+    <p style="margin:clamp(18px,3.5vw,28px) auto 0;max-width:54ch;font-size:clamp(16px,3.6vw,19px);line-height:1.55">Built on proven viral hooks, with the same character and style across every slide. Export ready to post to TikTok, Instagram and YouTube — no AI watermark.</p>
+    <div style="margin-top:clamp(24px,4.5vw,36px);display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
+      <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#26262A">Start free</a>
+      <a href="#examples" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#F2F0EA">See examples</a>
+    </div>
+    <p style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
+  </div>
+
+  <div class="fc-stagewrap"><div class="fc-stage"><figure class="fc-card" style="--x:-405px;--r:-13deg;--d:.10s;--w:190px;z-index:0"><img src="carousels/golden-six.webp" alt="Longevity carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:-208px;--r:-6.5deg;--d:.20s;--w:200px;z-index:1"><img src="carousels/running.webp" alt="Running carousel" width="500" height="625"></figure><figure class="fc-card fc-card-lead" style="--x:0px;--r:0deg;--d:.30s;--w:286px;z-index:3"><img src="carousels/finance-rules.webp" alt="Finance carousel" width="500" height="625"><span class="fc-idx">01 / 09</span><span class="fc-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></figure><figure class="fc-card" style="--x:208px;--r:6.5deg;--d:.40s;--w:200px;z-index:1"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:405px;--r:13deg;--d:.50s;--w:190px;z-index:0"><img src="carousels/not-ugly.webp" alt="Habits carousel" width="500" height="625"></figure><div class="fc-badge"><span class="fc-dot"></span><div><b id="fcViews">0</b><span>Views</span></div></div></div></div>
+</section>
+
+<section class="fc-sec" id="features" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Features
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Everything a viral slideshow needs.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Six things we handle so you can post instead of edit.</p>
+    </div>
+    <div style="display:grid;gap:0 clamp(30px,5vw,68px);margin-top:clamp(30px,5vw,48px);grid-template-columns:repeat(auto-fit,minmax(min(340px,100%),1fr))">
+      <div class="fc-feat fc-reveal" style="--i:0">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">The same character, every slide</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">Lock a character once and it holds its face, outfit and style across the whole set.</p>
+        </div>
+<div class="fc-feat fc-reveal" style="--i:1">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Built-in viral hook library</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">Openers that already perform, grouped by niche, so slide one earns the swipe.</p>
+        </div>
+<div class="fc-feat fc-reveal" style="--i:2">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">No AI watermark</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">Clean exports. Nothing on the image says a tool made it.</p>
+        </div>
+<div class="fc-feat fc-reveal" style="--i:3">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">TikTok, Instagram, YouTube</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">Every set exports at the right size and safe area for each platform.</p>
+        </div>
+<div class="fc-feat fc-reveal" style="--i:4">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Minutes, not evenings</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">A full slideshow generates in about two minutes. Regenerate any slide on its own.</p>
+        </div>
+<div class="fc-feat fc-reveal" style="--i:5">
+          <span class="fc-rule"></span>
+          <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Unique output every time</h3>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">Layout, crop and palette are seeded to your account, so no two creators post the same set.</p>
+        </div>
+    </div>
+  </div>
+</section>
+
+<section class="fc-sec" id="how" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>How it works
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Idea to posted, in three steps.</h2>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(36px,6vw,60px);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr))">
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">01</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Enter your idea or topic</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">One line is enough. We match it to a hook structure that already performs in your niche.</p>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">02</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Pick your style &amp; character</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Choose a look and a character once. They stay identical across every slide in the set.</p>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">03</span>
+        <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Generate &amp; export ready-to-post slides</h3>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Sized for each platform, watermark-free, downloadable in one tap.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fc-sec" id="compare" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:46ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Old way vs. Future Clips
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Making slideshows the old way is a nightmare.</h2>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(36px,6vw,60px);grid-template-columns:repeat(auto-fit,minmax(min(320px,100%),1fr));max-width:1000px;margin-inline:auto">
+      <div style="background:#F5F4F0;border:1px solid #E6E3DB;border-radius:18px;padding:clamp(22px,4vw,32px)">
+        <div style="display:flex;align-items:center;gap:11px;padding-bottom:18px;border-bottom:1px solid #E4E1D8">
+          <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:#E4E1D8;color:#6E6B63;font-size:13px;font-weight:700">✕</span>
+          <h3 style="margin:0;color:#6E6B63;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">The old way</h3>
+        </div>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+          <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Prompt ChatGPT 20 times for one usable image</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Characters look different on every slide</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Manually strip AI metadata from each image</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Hunt for a hook that stops the scroll</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Rebuild every layout in Canva by hand</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Hours per slideshow.</span>
+            </li>
+        </ul>
+      </div>
+      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.34) 0%, rgba(216,255,71,.08) 36%, rgba(255,255,255,0) 64%), #fff;border:1px solid #E4E7CE;border-radius:18px;padding:clamp(22px,4vw,32px);box-shadow:0 24px 60px -34px rgba(150,180,40,.4)">
+        <div style="display:flex;align-items:center;gap:11px;padding-bottom:18px;border-bottom:1px solid #EDEFDC">
+          <span style="display:grid;place-items:center;width:26px;height:26px;border-radius:8px;background:#D8FF47;color:#0E0E10;font-size:13px;font-weight:700">✓</span>
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">With Future Clips</h3>
+        </div>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column">
+          <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>One idea in, full slideshow out</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Same character, every single slide</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Ships clean — no AI watermark, ever</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Proven viral hooks built in</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Post-ready for TikTok, IG &amp; YouTube</span>
+            </li>
+<li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>About 2 minutes.</span>
+            </li>
+        </ul>
+      </div>
+    </div>
+    <p style="margin:clamp(26px,4vw,34px) auto 0;text-align:center;max-width:30ch;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(1.1rem,3.6vw,1.5rem);letter-spacing:-.02em;line-height:1.2">You already know the grind. We deleted it.</p>
+  </div>
+</section>
+
+<section class="fc-sec" id="examples" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:46ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Examples
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Slideshows made with the tool.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Same character, same style, every slide. Swap in your own topic and the structure holds.</p>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(150px,45%),1fr));gap:clamp(12px,2vw,18px);margin-top:clamp(36px,6vw,60px)">
+      <figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/finance-rules.webp" alt="Finance carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Finance</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/golden-six.webp" alt="Longevity carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Longevity</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/running.webp" alt="Running carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Running</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Calisthenics</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/lazy-habits.webp" alt="Athletics carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Athletics</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/ufc.webp" alt="Combat sports carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Combat sports</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/photoshoot.webp" alt="Brand / DTC carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Brand / DTC</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/info-power.webp" alt="Mindset carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Mindset</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/premium.webp" alt="Design carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Design</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/bad-vs-viral.webp" alt="Design carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Design</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/same-carousel.webp" alt="Marketing carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Marketing</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/teach.webp" alt="Education carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Education</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/fonts.webp" alt="Design carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Design</figcaption>
+        </figure>
+<figure style="margin:0">
+          <div style="border-radius:14px;overflow:hidden;aspect-ratio:4/5;background:#EFEDE6"><img src="carousels/not-ugly.webp" alt="Self-improvement carousel cover" style="width:100%;height:100%;object-fit:cover;object-position:top center;display:block"></div>
+          <figcaption style="margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:11px;color:#6E6B63">Self-improvement</figcaption>
+        </figure>
+    </div>
+    
+  </div>
+</section>
+
+<section class="fc-sec" id="pricing" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+      <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
+        <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Pricing
+      </span>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Two free. Then pick a plan.</h2>
+    </div>
+    <div style="display:flex;justify-content:center;margin-top:clamp(24px,4vw,34px)">
+      <div style="display:inline-flex;gap:4px;background:#fff;border:1px solid #E6E3DB;border-radius:12px;padding:5px;max-width:100%">
+        <button type="button" onclick="fcCycle('monthly')" class="fc-pill" id="fcMonthly">Monthly</button>
+        <button type="button" onclick="fcCycle('yearly')" class="fc-pill fc-on" id="fcYearly">Yearly · 2 months free</button>
+      </div>
+    </div>
+    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(26px,4vw,36px);grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));align-items:stretch">
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Clipper</h3>
+          
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="clipperPrice">$16</span></b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="clipperBilling">$192 a year · 2 months free</span></p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="clipperPer">≈40¢ per slideshow</span></p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For getting started.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>40 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Viral hook library</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Same character, every slide</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>No AI watermark</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>TikTok, Instagram &amp; YouTube exports</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
+        </div>
+      </div>
+      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.40) 0%, rgba(216,255,71,.10) 34%, rgba(255,255,255,0) 62%), linear-gradient(180deg,#FFFFFF 0%,#FCFBF6 100%);border:1px solid #E4E7CE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column;box-shadow:0 24px 60px -34px rgba(150,180,40,.45)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Pro</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#0E0E10;color:#D8FF47;white-space:nowrap">Most popular</span>
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="proPrice">$32</span></b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="proBilling">$384 a year · 2 months free</span></p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F7E4;border:1px solid #E7EDCB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="proPer">≈53¢ per slideshow</span></p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For posting every day.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Clipper +</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>60 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Saved characters &amp; brand kits</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Priority generation queue</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Bulk export</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#26262A">Start free</a>
+        </div>
+      </div>
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Studio</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#F4F2EC;color:#56544E;white-space:nowrap">Teams</span>
+        </div>
+        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="studioPrice">$79</span></b>
+          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="studioBilling">$948 a year · 2 months free</span></p>
+        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="studioPer">≈40¢ per slideshow</span></p>
+        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For agencies &amp; teams.</p>
+        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
+          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Pro +</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>200 slideshows a month</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Multi-account tracking</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Seats for your whole roster</span></li>
+          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Shared character library</span></li>
+        </ul>
+        <div style="margin-top:auto;padding-top:30px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
+        </div>
+      </div>
+    </div>
+    <p style="text-align:center;margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,11px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
+    <p style="text-align:center;margin-top:24px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">Founding price held for the first 500 accounts</p>
+  </div>
+</section>
+
+<section class="fc-sec" id="faq" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="text-align:center">
+      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em">Frequently asked</h2>
+    </div>
+    <div style="max-width:800px;margin:clamp(32px,5vw,52px) auto 0;display:flex;flex-direction:column;gap:12px">
+      <details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">How does character consistency work?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">You pick or upload a character once. We hold its features, outfit and rendering style as fixed inputs for every slide in the set, so slide eight looks like slide one instead of a cousin of it.</p>
+        </details>
+<details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">Is there an AI watermark on the output?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">No. Exports are clean images with no badge, corner mark or metadata stamp. What you download is what you post.</p>
+        </details>
+<details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">Which platforms does it export for?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">TikTok photo mode, Instagram carousels and YouTube community posts. Each export is sized and safe-area-checked per platform, so captions and UI never cover your text.</p>
+        </details>
+<details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">How do the monthly limits work?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">One slideshow of up to ten slides counts as one. Regenerating a single slide is free, and unused slideshows roll over for one month. Limits reset on your billing date.</p>
+        </details>
+<details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
+          <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">Is my output unique to me?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">Yes. Layout, crop, palette and hook variation are seeded to your account, so two creators entering the same topic get different sets.</p>
+        </details>
+    </div>
+  </div>
+</section>
+
+<section class="fc-sec" style="padding:clamp(74px,13vw,132px) 0 0">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="background:#0E0E10;border-radius:22px;padding:clamp(30px,6vw,64px);display:grid;gap:clamp(24px,4vw,32px);grid-template-columns:repeat(auto-fit,minmax(min(280px,100%),1fr));align-items:center">
+      <div>
+        <h2 style="margin:0;color:#fff;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.5rem,5vw,2.5rem);line-height:1.06;letter-spacing:-.025em">Running an agency?</h2>
+        <p style="margin-top:14px;font-size:clamp(15px,3.4vw,17px);color:#9C9A94;max-width:50ch">Put The Future Clips in front of your roster. They ship ten times the content and you take up to half of every subscription it brings in.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;align-items:flex-start;gap:20px">
+        <div>
+          <span style="display:block;font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(44px,11vw,64px);font-weight:700;color:#D8FF47;letter-spacing:-.04em;line-height:1">50%</span>
+          <span style="display:block;margin-top:8px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#8F8D87">Revenue share</span>
+        </div>
+        <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;font-size:16px;font-weight:600;padding:17px 28px;min-height:54px;white-space:nowrap" style-hover="background:#E9E7E0">Partner with us</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="fc-sec" id="start" style="padding:clamp(74px,13vw,132px) 0 clamp(70px,12vw,120px);text-align:center;scroll-margin-top:90px">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="max-width:44ch;margin-inline:auto">
+      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.8rem,6.4vw,3.2rem);line-height:1.04;letter-spacing:-.03em">Make two, then decide.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Two slideshows, no card, no call.</p>
+    </div>
+    <form onsubmit="return fcSubmit(event)" style="margin-top:clamp(24px,4.5vw,36px)">
+      <div style="display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center">
+        <input id="email" type="email" placeholder="you@email.com" autocomplete="email" required style="flex:1 1 220px;min-width:0;background:#fff;border:1px solid #E0DCD2;border-radius:10px;padding:17px 22px;font-family:inherit;font-size:16px;color:#0E0E10;min-height:54px">
+        <button type="submit" style="flex:0 0 auto;display:inline-flex;align-items:center;justify-content:center;border:0;border-radius:10px;background:#0E0E10;color:#fff;font-family:inherit;font-size:16px;font-weight:600;padding:17px 28px;min-height:54px;cursor:pointer">Start free</button>
+      </div>
+      <p role="status" aria-live="polite" style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;min-height:20px;color:#6E6B63"><span id="fcMsg">Founding price locked when you join.</span></p>
+    </form>
+  </div>
+</section>
+
+</main>
+
+<footer style="border-top:1px solid #EAE7DE">
+  <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(min(200px,100%),1fr));gap:clamp(26px,4vw,36px);padding:clamp(40px,7vw,60px) 0 clamp(28px,5vw,40px)">
+      <div>
+        <span style="display:block;position:relative;width:160px;height:40px;overflow:hidden">
+          <img src="logo.png" alt="The Future Clips" style="position:absolute;width:275px;height:auto;left:-57px;top:-26px">
+        </span>
+        <p style="margin-top:16px;font-size:15px;color:#6E6B63;max-width:30ch">Viral-ready slideshows, generated in minutes.</p>
+      </div>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Product</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#features">Features</a></li><li><a href="#how">How it works</a></li>
+          <li><a href="#examples">Examples</a></li><li><a href="#pricing">Pricing</a></li>
+        </ul>
+      </nav>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Platforms</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#features">TikTok</a></li><li><a href="#features">Instagram</a></li>
+          <li><a href="#features">YouTube</a></li><li><a href="#faq">Export sizes</a></li>
+        </ul>
+      </nav>
+      <nav>
+        <h5 style="font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:#0E0E10;margin:0 0 16px">Company</h5>
+        <ul style="margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px;font-size:15px;color:#6E6B63">
+          <li><a href="#faq">FAQ</a></li><li><a href="#start">Contact</a></li>
+          <li><a href="#start">Affiliates</a></li>
+        </ul>
+      </nav>
+    </div>
+    <div style="border-top:1px solid #EAE7DE;padding:22px 0;display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">
+      <span>© 2026 The Future Clips</span><span>Slideshows that get watched</span>
+    </div>
+  </div>
+</footer>
+
+</div>
+<script>
+
+var FC_TARGET = 1304895, FC_URL = "https://waipwmyncpsgoglmkhdz.supabase.co", FC_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT";
+var fcCycleState = "yearly", fcRef = "";
+
+var FC_PRICES = {
+  yearly:  { clipperPrice:"$16", clipperBilling:"$192 a year \u00b7 2 months free", clipperPer:"\u224840\u00a2 per slideshow",
+             proPrice:"$32", proBilling:"$384 a year \u00b7 2 months free", proPer:"\u224853\u00a2 per slideshow",
+             studioPrice:"$79", studioBilling:"$948 a year \u00b7 2 months free", studioPer:"\u224840\u00a2 per slideshow" },
+  monthly: { clipperPrice:"$20", clipperBilling:"Billed monthly \u00b7 cancel anytime", clipperPer:"\u224850\u00a2 per slideshow",
+             proPrice:"$39", proBilling:"Billed monthly \u00b7 cancel anytime", proPer:"\u224865\u00a2 per slideshow",
+             studioPrice:"$99", studioBilling:"Billed monthly \u00b7 cancel anytime", studioPer:"\u224850\u00a2 per slideshow" }
+};
+
+function fcToggle(){
+  var b=document.getElementById("fcBurger"), m=document.getElementById("fcMobile");
+  var open=!m.classList.contains("open");
+  m.classList.toggle("open",open); b.classList.toggle("open",open);
+  b.setAttribute("aria-expanded",open?"true":"false");
+}
+function fcClose(){
+  var b=document.getElementById("fcBurger"), m=document.getElementById("fcMobile");
+  m.classList.remove("open"); b.classList.remove("open"); b.setAttribute("aria-expanded","false");
+}
+function fcCycle(c){
+  fcCycleState=c;
+  document.getElementById("fcYearly").classList.toggle("fc-on", c==="yearly");
+  document.getElementById("fcMonthly").classList.toggle("fc-on", c==="monthly");
+  var vals=FC_PRICES[c];
+  Object.keys(vals).forEach(function(k){
+    var el=document.querySelector('[data-p="'+k+'"]');
+    if(el) el.textContent=vals[k];
+  });
+}
+
+/* the counter rolls up from zero, holds, then runs again */
+(function(){
+  var el=document.getElementById("fcViews"); if(!el) return;
+  var fmt=function(n){ return n.toLocaleString("en-US"); };
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(FC_TARGET); return; }
+  var DUR=4200, HOLD=2600, start=null;
+  function tick(t){
+    if(start===null) start=t;
+    var e=t-start;
+    if(e<=DUR){ el.textContent=fmt(Math.round(FC_TARGET*(1-Math.pow(1-e/DUR,3)))); }
+    else if(e<DUR+HOLD){ el.textContent=fmt(FC_TARGET); }
+    else { start=t; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
+
+/* reveal sections on scroll */
+(function(){
+  document.documentElement.classList.add("fc-js");
+  var els=[].slice.call(document.querySelectorAll(".fc-sec, .fc-reveal"));
+  if(!els.length) return;
+  els.forEach(function(e){ if(!e.classList.contains("fc-reveal")) e.classList.add("fc-reveal"); });
+  var showAll=function(){ els.forEach(function(e){ e.classList.add("fc-in"); }); };
+  var show=function(e){ e.classList.add("fc-in"); };
+  var sweep=function(){
+    var n=0;
+    els.forEach(function(e){
+      if(e.classList.contains("fc-in")) { n++; return; }
+      if(e.getBoundingClientRect().top < innerHeight*0.92){ show(e); n++; }
+    });
+    if(n===els.length){ window.removeEventListener("scroll",sweep); window.removeEventListener("resize",sweep); }
+  };
+  if("IntersectionObserver" in window){
+    var io=new IntersectionObserver(function(rows){
+      rows.forEach(function(r){ if(r.isIntersecting){ show(r.target); io.unobserve(r.target); } });
+    },{rootMargin:"0px 0px -8% 0px"});
+    els.forEach(function(e){ io.observe(e); });
+  }
+  /* belt and braces: scroll/resize sweep, plus a hard deadline */
+  window.addEventListener("scroll",sweep,{passive:true});
+  window.addEventListener("resize",sweep,{passive:true});
+  sweep();
+  setTimeout(sweep,600);
+  setTimeout(showAll,4000);
+})();
+
+/* revenue-share attribution survives the visit */
+(function(){
+  try{
+    var u=new URLSearchParams(location.search).get("ref")||"";
+    var clean=u.replace(/[^A-Za-z0-9_-]/g,"").slice(0,64);
+    if(clean){ localStorage.setItem("fc_ref",clean); fcRef=clean; }
+    else { fcRef=localStorage.getItem("fc_ref")||""; }
+  }catch(_){}
+})();
+
+function fcSubmit(e){
+  e.preventDefault();
+  var msg=document.getElementById("fcMsg");
+  var email=(document.getElementById("email").value||"").trim().toLowerCase();
+  if(!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)){ msg.textContent="That email doesn't look right."; return false; }
+  msg.textContent="Saving\u2026";
+  fetch(FC_URL+"/rest/v1/signups",{
+    method:"POST",
+    headers:{ apikey:FC_KEY, Authorization:"Bearer "+FC_KEY, "Content-Type":"application/json", Prefer:"return=minimal" },
+    body:JSON.stringify({ email:email, role:"clipper", agency_code:fcRef||null })
+  }).then(function(r){
+    if(r.ok) msg.textContent="You're in. Founding price locked.";
+    else if(r.status===409) msg.textContent="You're already on the list.";
+    else msg.textContent="Couldn't save that. Try again in a second.";
+  }).catch(function(){ msg.textContent="Couldn't save that. Try again in a second."; });
+  return false;
+}
+
+</script>
+</body>
+</html>

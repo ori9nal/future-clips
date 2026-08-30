@@ -1,0 +1,52 @@
+.studio{
+  --ground:#0B0B0C; --surface:#141518; --line:#26282D;
+  --text:#F2F0EB; --muted:#8A8F97; --accent:#FF5A1F; --ok:#34D07F; --bad:#FF5A5A;
+  max-width:1180px;margin:0 auto;padding:2.6rem 1.4rem 5rem;color:var(--text);
+  font-family:"Poppins",system-ui,-apple-system,sans-serif;
+}
+@media (prefers-color-scheme:light){
+  .studio{--ground:#F5F3EF;--surface:#fff;--line:#DEDAD2;--text:#131316;--muted:#61666E;--accent:#D8410B}
+}
+.studio a{color:var(--accent)}
+.studio .eyebrow{font-family:ui-monospace,monospace;font-size:.7rem;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 .7rem}
+.studio h1{font-size:clamp(1.9rem,4.6vw,3rem);line-height:1.05;margin:0 0 .6rem;letter-spacing:-.02em}
+.studio .lede{color:var(--muted);max-width:60ch;margin:0 0 2.2rem}
+.studio .panel{display:flex;flex-wrap:wrap;gap:1.4rem;align-items:flex-end;
+  background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:1.2rem;margin-bottom:1.4rem}
+.studio .field{display:flex;flex-direction:column;gap:.45rem;min-width:220px}
+.studio label{font-size:.72rem;letter-spacing:.13em;text-transform:uppercase;color:var(--muted)}
+.studio select{background:var(--ground);color:var(--text);border:1px solid var(--line);
+  border-radius:8px;padding:.65rem .8rem;font:inherit;font-size:.95rem;min-width:260px}
+.studio .segmented{display:flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;width:max-content}
+.studio .segmented button{background:var(--ground);color:var(--muted);border:0;padding:.65rem 1.3rem;
+  font:inherit;font-size:.9rem;cursor:pointer}
+.studio .segmented button.on{background:var(--accent);color:#0B0B0C;font-weight:600}
+.studio .segmented button:disabled{opacity:.4;cursor:not-allowed}
+.studio .hint{font-size:.78rem;color:var(--muted);margin:.1rem 0 0}
+.studio .primary{background:var(--accent);color:#0B0B0C;border:0;border-radius:8px;
+  padding:.8rem 1.5rem;font:inherit;font-weight:600;cursor:pointer}
+.studio .primary:disabled{opacity:.6;cursor:progress}
+.studio .brief{background:var(--surface);border:1px solid var(--line);border-radius:12px;
+  padding:1.1rem 1.2rem;margin-bottom:1.6rem}
+.studio .brief h2{font-size:.78rem;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin:0 0 .9rem}
+.studio .brief dl{display:flex;flex-wrap:wrap;gap:1.6rem;margin:0 0 .9rem}
+.studio .brief dt{font-size:.66rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 .2rem}
+.studio .brief dd{margin:0;font-weight:600;font-variant-numeric:tabular-nums}
+.studio .banned{margin:0;font-size:.84rem;color:var(--muted)}
+.studio .error{background:rgba(255,90,90,.12);border:1px solid var(--bad);color:var(--bad);
+  border-radius:8px;padding:.8rem 1rem;font-size:.9rem}
+.studio .verdict{display:flex;gap:1rem;align-items:baseline;padding:.7rem 1rem;border-radius:8px;margin-bottom:.7rem}
+.studio .verdict.ok{background:rgba(52,208,127,.12);color:var(--ok)}
+.studio .verdict.bad{background:rgba(255,90,90,.12);color:var(--bad)}
+.studio .verdict span{color:var(--muted);font-size:.85rem}
+.studio .issue{margin:.2rem 0;font-size:.85rem}
+.studio .issue.fail{color:var(--bad)}
+.studio .issue.warn{color:var(--muted)}
+.studio .strip{display:flex;gap:1rem;overflow-x:auto;padding:1rem 0 .6rem;scroll-snap-type:x mandatory}
+.studio .strip figure{margin:0;flex:0 0 min(60vw,240px);scroll-snap-align:center}
+.studio .strip img{width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;
+  border-radius:8px;display:block;background:var(--surface)}
+.studio .strip figcaption{font-family:ui-monospace,monospace;font-size:.66rem;letter-spacing:.12em;
+  color:var(--muted);padding-top:.45rem}
+.studio .empty{color:var(--muted)}
