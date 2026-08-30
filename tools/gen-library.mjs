@@ -20,9 +20,14 @@ const NICHE = arg('--niche', 'fitness');
 const ONLY = (arg('--only', '') || '').split(',').filter(Boolean);
 
 // One studio, one light, one background — stated identically every time.
+// COLOUR IS NOT OPTIONAL. The first library came back almost entirely grey
+// because the prompt never asked for colour, and grey objects on white read as
+// a diagram. The reference frame is vivid — orange shoes, cobalt plates, gold
+// medal — so saturation is stated explicitly and every object names its own hue.
 const PRODUCT_SUFFIX =
-  'isolated on a pure white seamless background, soft even studio lighting, ' +
-  'sharp focus, high detail, commercial product photography, no text, no watermark';
+  'isolated on a pure white seamless background, bright even studio lighting, ' +
+  'vivid saturated colour, rich colourful product, high contrast, sharp focus, ' +
+  'high detail, commercial product photography, no text, no watermark';
 const PERSON_SUFFIX =
   'full body, isolated on a plain light grey studio background, soft directional ' +
   'studio lighting, sharp focus, editorial photography, no text, no watermark';
@@ -30,24 +35,28 @@ const PERSON_SUFFIX =
 const NICHES = {
   fitness: {
     objects: {
-      'shoe':        'a worn carbon-plate racing shoe, three-quarter side view',
-      'medal':       'a marathon finisher medal on a striped ribbon, hanging',
-      'watch':       'a black sports GPS watch, face up, showing a run screen',
-      'bottle':      'a matte insulated sports water bottle, standing upright',
-      'tub':         'a tub of creatine supplement powder, label facing forward',
-      'dumbbell':    'a single hex rubber dumbbell, side view',
-      'kettlebell':  'a black cast iron kettlebell, side view',
-      'foam-roller': 'a textured foam roller lying horizontally',
-      'shaker':      'a protein shaker bottle with a black lid',
-      'plate':       'a single olympic weight plate standing on edge',
-      'gel':         'an energy gel sachet lying flat',
-      'strap':       'a heart rate chest strap monitor, coiled',
+      'shoe':        'a bright orange and white carbon-plate racing shoe, three-quarter side view',
+      'shoe-blue':   'an electric blue running shoe with a white sole, side view',
+      'medal':       'a shiny gold marathon finisher medal on a bright blue and red striped ribbon',
+      'watch':       'a sports GPS watch with a vivid lime green strap, face up',
+      'bottle':      'a bright orange insulated sports water bottle, standing upright',
+      'tub':         'a tub of supplement powder with a vivid green lid and white body',
+      'dumbbell':    'a hex rubber dumbbell with a bright red handle, side view',
+      'kettlebell':  'a competition kettlebell painted vivid yellow, side view',
+      'foam-roller': 'a bright teal textured foam roller lying horizontally',
+      'plate':       'a cobalt blue olympic bumper weight plate standing upright, seen face on',
+      'towel':       'a folded bright coral gym towel',
+      'band':        'a bright purple resistance band, loosely coiled',
+      'jumprope':    'a speed jump rope with vivid red handles, coiled',
+      'gel':         'a colourful energy gel sachet standing upright',
     },
     people: {
       'runner':      'a lean male distance runner mid-stride in a plain singlet and shorts',
       'runner-w':    'a female distance runner mid-stride in a plain running kit',
       'lifter':      'a muscular male athlete standing, arms at sides, plain shorts',
       'resting':     'an exhausted athlete sitting on the floor, head down, after training',
+      'kettle-swing':'a male athlete mid kettlebell swing, side view, full body',
+      'stretch':     'a female athlete stretching a hamstring, standing, full body',
     },
   },
 };
