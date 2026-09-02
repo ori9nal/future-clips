@@ -1,0 +1,94 @@
+{
+  "id": "signal-hooks",
+  "brand": "SIGNAL",
+  "product": "creator toolkit",
+  "niche": "marketing",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 8000,
+    "budget_remaining_usd": 8000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@signal.studio",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "medically proven",
+      "cures",
+      "miracle"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#0A0A0B",
+      "#FFD426",
+      "#FFFFFF"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/money",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "poster",
+    "hook": {
+      "lines": [
+        "NOBODY",
+        "SAVES A",
+        "BORING",
+        "CAROUSEL"
+      ],
+      "sub": [
+        "here is what the saved ones do"
+      ]
+    },
+    "ranked": [
+      {
+        "name": "Lead with a number",
+        "score": "01",
+        "lines": [
+          "A count tells the reader how long this will take. Four things gets swiped; some thoughts on does not.",
+          "Put it in the first three words, not the second line."
+        ]
+      },
+      {
+        "name": "Rank it worst to best",
+        "score": "02",
+        "lines": [
+          "A countdown gives the swipe a destination. Every slide promises the next one is better.",
+          "Ranking forces you to have an opinion, which is the actual scarce thing."
+        ]
+      },
+      {
+        "name": "One idea per slide",
+        "score": "03",
+        "lines": [
+          "Two ideas on a slide means neither is remembered. Split it and take the extra slide.",
+          "If a slide needs a paragraph to explain, it is two slides."
+        ]
+      }
+    ],
+    "closer": {
+      "lines": [
+        "SAVE THIS",
+        "THEN FIX",
+        "SLIDE ONE"
+      ],
+      "cta": "Follow SIGNAL"
+    }
+  }
+}

@@ -1,0 +1,103 @@
+{
+  "id": "lumen-barrier",
+  "brand": "LUMEN",
+  "product": "barrier serum",
+  "niche": "skincare",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 8000,
+    "budget_remaining_usd": 8000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@lumen.skin",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "cures",
+      "medically proven",
+      "clinically proven",
+      "anti-ageing"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#241C1E",
+      "#D2436A",
+      "#FBF3EE"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/skin",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "pastel",
+    "kicker": "the barrier talk nobody gave you",
+    "hook": {
+      "lines": [
+        "Why does my skin",
+        "get worse when",
+        "I try harder?"
+      ],
+      "sub": [
+        "it is usually the barrier"
+      ],
+      "body": "Most sensitive skin is not sensitive. It is a barrier stripped by a routine doing too much, too often. The fix is almost always subtraction."
+    },
+    "ranked": [
+      {
+        "photo": "17891763",
+        "name": "Too many actives",
+        "score": "the usual cause",
+        "lines": [
+          "Acid on Monday, retinoid on Tuesday, vitamin C on Wednesday. Each is fine alone. Stacked, they never let the barrier finish repairing."
+        ],
+        "note": "Try one active, three nights a week, for a month before adding anything."
+      },
+      {
+        "photo": "3846099",
+        "name": "Water that is too hot",
+        "score": "underrated",
+        "lines": [
+          "Hot water strips the lipids that hold moisture in. The tightness afterwards is not clean, it is damage you can feel."
+        ],
+        "note": "Lukewarm, and pat dry rather than rub."
+      },
+      {
+        "photo": "6417958",
+        "name": "Skipping moisturiser",
+        "score": "backwards",
+        "lines": [
+          "Oily skin that is stripped produces more oil, not less. The shine people fight is often the barrier trying to rebuild itself."
+        ],
+        "note": "A light gel moisturiser is still a moisturiser."
+      }
+    ],
+    "closer": {
+      "lines": [
+        "Do less for four weeks.",
+        "Then judge."
+      ],
+      "points": [
+        "Cleanser, moisturiser, SPF. That is the whole routine.",
+        "Add one active back, three nights a week.",
+        "Give any change a month before deciding."
+      ],
+      "cta": "save this"
+    }
+  }
+}

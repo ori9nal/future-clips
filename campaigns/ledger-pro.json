@@ -1,0 +1,159 @@
+{
+  "id": "ledger-pro",
+  "brand": "LEDGER",
+  "product": "spend tracker",
+  "niche": "personal finance",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 8000,
+    "budget_remaining_usd": 8000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@ledger.money",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "get rich",
+      "passive income",
+      "financial advice"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#111418",
+      "#1F6F4A",
+      "#FFFFFF"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/money",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "document",
+    "hook": {
+      "lines": [
+        "How much cash",
+        "should you keep?"
+      ],
+      "sub": [
+        "The answer is not three months for everyone. It depends on how quickly your income could be replaced."
+      ],
+      "table": [
+        [
+          "SITUATION",
+          "MONTHS",
+          "WHY"
+        ],
+        [
+          "Salaried, in demand",
+          "3",
+          "Replaceable quickly"
+        ],
+        [
+          "Salaried, niche role",
+          "6",
+          "Longer search"
+        ],
+        [
+          "Freelance or contract",
+          "6-9",
+          "Income is lumpy"
+        ],
+        [
+          "Sole earner, dependants",
+          "9-12",
+          "No second income"
+        ]
+      ]
+    },
+    "ranked": [
+      {
+        "name": "Count expenses, not income",
+        "lines": [
+          "The figure is built from what leaves your account each month, not what arrives. Take the last three statements and use the highest month, not the average."
+        ],
+        "table": [
+          [
+            "CATEGORY",
+            "TREAT AS"
+          ],
+          [
+            "Rent, bills, food",
+            "Essential"
+          ],
+          [
+            "Subscriptions",
+            "Only if kept while jobless"
+          ],
+          [
+            "Everything else",
+            "Excluded"
+          ]
+        ],
+        "note": "Most people overstate the number by including spending they would stop the week they lost their job."
+      },
+      {
+        "name": "Where it should sit",
+        "lines": [
+          "Accessible within a day, separate from the account you spend from, and earning something. The separation matters more than the rate."
+        ],
+        "table": [
+          [
+            "ACCOUNT",
+            "ACCESS",
+            "USE"
+          ],
+          [
+            "Easy-access savings",
+            "Same day",
+            "The whole fund"
+          ],
+          [
+            "Current account",
+            "Instant",
+            "One month only"
+          ],
+          [
+            "Notice or fixed",
+            "30-90 days",
+            "Not this"
+          ]
+        ]
+      },
+      {
+        "name": "What counts as an emergency",
+        "lines": [
+          "A test worth applying: is it unexpected, necessary, and urgent? Fewer things pass all three than you would guess."
+        ],
+        "note": "A holiday is none of the three. A boiler in January is all three."
+      }
+    ],
+    "closer": {
+      "lines": [
+        "Pick your row.",
+        "Then automate it."
+      ],
+      "points": [
+        "Find your situation in the table on slide one.",
+        "Multiply by your essential monthly spend.",
+        "Move a fixed sum on payday until you hit it."
+      ],
+      "cta": "Track it with LEDGER"
+    }
+  }
+}

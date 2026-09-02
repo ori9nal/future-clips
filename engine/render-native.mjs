@@ -104,7 +104,7 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
   throw new Error(`caption fits no placement: ${lines.join(' / ')}`);
 }
 
-async function nativeSlides(spec, root, outDir) {
+export async function nativeSlides(spec, root, outDir) {
   const face = loadFace(FACE.cap.file);
   const photoDir = path.join(root, spec.assets.photos.dir);
   const cache = path.join(outDir, '_plates');
@@ -210,7 +210,7 @@ function mascotImg(file, x, y, w, { flip = false } = {}) {
     `x="${x}" y="${y}" width="${w}" height="${w}" preserveAspectRatio="xMidYMid meet"/></g>`;
 }
 
-function mascotSlides(spec, root) {
+export function mascotSlides(spec, root) {
   const [INK, ACCENT, BONE] = spec.assets.palette;
   const M = path.join(root, spec.assets.mascot);
   if (!fs.existsSync(M)) throw new Error(`mascot asset missing: ${spec.assets.mascot}`);

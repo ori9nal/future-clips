@@ -1,0 +1,93 @@
+{
+  "id": "quiet-miles",
+  "brand": "QUIET",
+  "product": "running club",
+  "niche": "mindset",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 8000,
+    "budget_remaining_usd": 8000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@quiet.miles",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "medically proven",
+      "cures",
+      "miracle"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#16181B",
+      "#D8541F",
+      "#FAF9F7"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/run",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "editorial",
+    "hook": {
+      "photo": "2803158",
+      "lines": [
+        "Running did not",
+        "make me faster.",
+        "It made me quieter."
+      ],
+      "sub": [
+        "Six months of easy miles, and the only measurable change was the one nobody tracks."
+      ]
+    },
+    "ranked": [
+      {
+        "photo": "17637894",
+        "name": "The first mile is a negotiation",
+        "score": "every time",
+        "lines": [
+          "It never gets easier to start. What changes is how long you argue about it. Mine went from twenty minutes to about ninety seconds."
+        ]
+      },
+      {
+        "photo": "37129866",
+        "name": "Nobody is watching",
+        "score": "nobody",
+        "lines": [
+          "The self-consciousness that kept me indoors for a year turned out to be entirely constructed. Runners nod. That is the whole interaction."
+        ]
+      },
+      {
+        "photo": "31539139",
+        "name": "Slow is the point",
+        "score": "the point",
+        "lines": [
+          "I spent a year running every session hard because slow felt like failing. The slow ones are where the adaptation lives."
+        ]
+      }
+    ],
+    "closer": {
+      "lines": [
+        "You do not have to be fast.",
+        "You have to keep going."
+      ],
+      "cta": "Run with us"
+    }
+  }
+}

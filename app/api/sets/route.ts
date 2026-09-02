@@ -30,9 +30,11 @@ export async function POST(req: Request) {
   }
 
   const root = process.cwd();
-  const engineUrl = pathToFileURL(path.join(root, "engine", "render-native.mjs")).href;
+  const registryUrl = pathToFileURL(path.join(root, "engine", "styles", "registry.mjs")).href;
+  const nativeUrl = pathToFileURL(path.join(root, "engine", "render-native.mjs")).href;
   const judgeUrl = pathToFileURL(path.join(root, "engine", "judge.mjs")).href;
-  const engine: any = await import(/* webpackIgnore: true */ engineUrl);
+  const registry: any = await import(/* webpackIgnore: true */ registryUrl);
+  const engine: any = await import(/* webpackIgnore: true */ nativeUrl);
   const { logicCheck }: any = await import(/* webpackIgnore: true */ judgeUrl);
 
   const rel = path.join("output", "sets", `${campaignId}-${style}`);
@@ -40,14 +42,14 @@ export async function POST(req: Request) {
 
   const started = Date.now();
   try {
-    await engine.preflightFonts(root);
     const logic = logicCheck(engine.copyOf(spec));
-    const files: string[] = await engine.renderCampaign({ spec, root, style, outDir });
+    const { files, canvas } = await registry.render({ spec, root, styleId: style, outDir });
     return Response.json({
       style,
+      canvas,
       ms: Date.now() - started,
       logic,
-      slides: files.map((f) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
+      slides: files.map((f: string) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
     });
   } catch (e: any) {
     // Render failures here are almost always copy that will not fit. Say which

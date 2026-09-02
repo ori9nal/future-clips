@@ -1,0 +1,98 @@
+{
+  "id": "meridian-vo2",
+  "brand": "MERIDIAN",
+  "product": "training platform",
+  "niche": "longevity",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 8000,
+    "budget_remaining_usd": 8000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@meridian.lab",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "medically proven",
+      "cures",
+      "reverses ageing"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#14171A",
+      "#B03A2E",
+      "#FFFFFF"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/run",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "clinical",
+    "source": "Meridian Lab — training review, 2026",
+    "hook": {
+      "photo": "18447597",
+      "lines": [
+        "Why four sessions",
+        "beat seven."
+      ],
+      "sub": [
+        "Training volume is not the input most people think it is. Below a threshold nothing adapts; above it, recovery becomes the limit. Four sessions sit on the useful side of both."
+      ]
+    },
+    "ranked": [
+      {
+        "photo": "2803158",
+        "name": "Frequency over duration",
+        "score": "strong",
+        "lines": [
+          "Three to four sessions a week clears the adaptation threshold for most untrained adults. A fifth adds load without adding signal, and it is the first thing to go when a week gets busy."
+        ]
+      },
+      {
+        "photo": "37129866",
+        "name": "Intensity distribution",
+        "score": "strong",
+        "lines": [
+          "Roughly eighty per cent easy, twenty per cent hard. The common failure is the middle: sessions run too hard to recover from and too easy to drive change."
+        ]
+      },
+      {
+        "photo": "31539139",
+        "name": "Progression rate",
+        "score": "moderate",
+        "lines": [
+          "Volume rises when the current volume stops feeling hard, not on a fixed schedule. A calendar-driven increase is how most people meet their first injury."
+        ]
+      }
+    ],
+    "closer": {
+      "lines": [
+        "Four sessions, held for a year,",
+        "beat seven held for a month."
+      ],
+      "points": [
+        "Pick the four you can keep in a bad week.",
+        "Keep the easy sessions genuinely easy.",
+        "Raise volume only when the current load feels routine."
+      ],
+      "cta": "Read the full protocol"
+    }
+  }
+}
