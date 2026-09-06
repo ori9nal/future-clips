@@ -1,0 +1,113 @@
+{
+  "id": "bedrock-form",
+  "brand": "BEDROCK",
+  "product": "bodyweight training app",
+  "niche": "calisthenics",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1.1,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 9000,
+    "budget_remaining_usd": 9000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@bedrock.form",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "medically proven",
+      "cures",
+      "steroid"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#151313",
+      "#D92B1F",
+      "#F2EADC"
+    ],
+    "mascot": null,
+    "character": {
+      "dir": "output/gen/character/poses",
+      "source": "gpt-image-2 sheet, cut into poses",
+      "poses": {
+        "1": "standing, arms crossed",
+        "2": "mid push-up",
+        "3": "squat",
+        "4": "flexing both arms"
+      },
+      "prompt": "Character model sheet for a fitness brand mascot, flat vector cel-shaded illustration. One single male figure repeated in four full-body poses, evenly spaced in one row, all identical in style, proportion and colour: charcoal grey muscular body with hard-edged cel shading, spiky black hair, blank glowing white eyes and no other facial features, plain black shorts, plain black trainers. Poses left to right: standing arms crossed, mid push-up, doing a squat, flexing both arms. Flat solid cream background, no shadows on the background, no text, no labels, no borders, thick clean outlines, limited flat colour palette, high contrast, sticker style."
+    },
+    "photos": {
+      "dir": "output/gym/1389931",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "bedrock",
+    "hook": {
+      "lines": [
+        "Hit every",
+        "muscle"
+      ],
+      "sub": [
+        "Four movements, zero equipment. This is the whole programme, not a teaser for one."
+      ],
+      "pose": 1
+    },
+    "ranked": [
+      {
+        "name": "Push",
+        "score": "3x weekly",
+        "lines": [
+          "Push ups — 4 x 15-20",
+          "Diamond push ups — 3 x max",
+          "Decline push ups — 3 x max",
+          "Dips on two chairs — 3 x max"
+        ],
+        "pose": 2
+      },
+      {
+        "name": "Pull",
+        "score": "3x weekly",
+        "lines": [
+          "Towel rows on a door — 4 x 12",
+          "Superman hold — 3 x 20 sec",
+          "Reverse snow angels — 3 x 15",
+          "Towel curls — 3 x 12"
+        ],
+        "pose": 4
+      },
+      {
+        "name": "Legs",
+        "score": "2x weekly",
+        "lines": [
+          "Bodyweight squats — 4 x 20",
+          "Bulgarian split squats — 3 x 10 each",
+          "Walking lunges — 3 x 12 each",
+          "Calf raises — 4 x 20"
+        ],
+        "pose": 3
+      }
+    ],
+    "closer": {
+      "lines": [
+        "Three days.",
+        "That is it."
+      ],
+      "cta": "Follow @bedrock.form",
+      "pose": 4
+    }
+  }
+}

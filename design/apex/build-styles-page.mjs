@@ -17,6 +17,7 @@ const slidesOf = (set) => fs.readdirSync(WEB)
 /* niche → the sets rendered for it. `cross` marks a style the niche does not
    usually run, which is exactly the point of showing it. */
 const NICHES = [
+  { niche: 'calisthenics', sets: [{ id: 'bedrock-form', style: 'bedrock', generated: true }] },
   { niche: 'fitness', sets: [
     { id: 'apex-strength', style: 'native' },
     { id: 'apex-strength', style: 'mascot' }] },
@@ -103,6 +104,7 @@ section{margin-bottom:clamp(2.8rem,6vw,4.4rem)}
 .badge{font-family:"JetBrains Mono",monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
   padding:.16rem .5rem;border-radius:4px;background:rgba(52,208,127,.15);color:var(--ok)}
 .badge.cross{background:rgba(255,90,31,.15);color:var(--accent)}
+.badge.gen{background:rgba(120,120,255,.18);color:#8f9bff}
 .set .meta{font-family:"JetBrains Mono",monospace;font-size:.64rem;color:var(--muted)}
 
 .row{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);gap:.6rem;
@@ -139,6 +141,7 @@ footer{border-top:1px solid var(--line);padding-top:1.2rem;color:var(--muted);
     <div class="fact"><dt>Sets</dt><dd>${NICHES.reduce((s, n) => s + n.sets.length, 0)}</dd></div>
     <div class="fact"><dt>Slides</dt><dd>${total}</dd></div>
     <div class="fact"><dt>Canvases</dt><dd>2</dd></div>
+    <div class="fact"><dt>Image spend</dt><dd>$0.61</dd></div>
   </dl>
 
   <section>
@@ -165,7 +168,8 @@ footer{border-top:1px solid var(--line);padding-top:1.2rem;color:var(--muted);
         return `<div class="set">
         <header>
           <h4>${c.brand} — ${st.label}</h4>
-          <span class="badge${cross ? ' cross' : ''}">${cross ? 'cross-style' : 'native fit'}</span>
+          <span class="badge${cross ? ' cross' : ''}${sets.find((x) => x.id === id && x.style === style)?.generated ? ' gen' : ''}">${
+            sets.find((x) => x.id === id && x.style === style)?.generated ? 'gpt-image-2 character' : cross ? 'cross-style' : 'native fit'}</span>
           <span class="meta">${ratio(st.canvas)} · ${slidesOf(`${id}-${style}`).length} slides · ${c.requirements.required_mention}</span>
         </header>
         ${row(`${id}-${style}`, st.canvas)}
@@ -190,8 +194,28 @@ footer{border-top:1px solid var(--line);padding-top:1.2rem;color:var(--muted);
   </section>
 
   <section>
+    <h2>The generated character</h2>
+    <p class="sectnote">One style in the library cannot be built from stock photography: it needs the same illustrated figure in many poses. That one is now real, made with <strong>gpt-image-2</strong> against a live key.</p>
+    <pre>probe first, because gpt-image-2 shipped after the model's training cutoff
+
+  returns        <b>b64_json only, no url</b>
+  1024x1536      low <b>158 tok  $0.0047   9s</b>
+                 med <b>1372 tok $0.0412  19s</b>
+                 high <b>5488 tok $0.1646  67s</b>
+  1024x1792      accepted, closer to 9:16 AND cheaper than 1024x1536
+
+consistency: draw every pose in ONE generation, then cut it up.
+one image cannot drift from itself.
+
+  3 sheets @ medium   <b>$0.126</b>
+  4 poses cut         <b>translucency 0.003 (limit 0.06) — all PASS</b>
+  every later render  <b>$0.00</b></pre>
+  </section>
+
+  <section>
     <h2>What broke building it</h2>
     <ul class="checks">
+      <li><b>A cache that charged twice</b><span>The generated-image cache put the caller's <em>label</em> in the filename, so the identical sheet requested by the CLI and by the studio missed each other's entry and was paid for twice. It is content-addressed now — the label is a ledger annotation, not identity. Cost $0.25 to find.</span></li>
       <li><b>I reintroduced the bug the engine exists to prevent</b><span>Two styles set a subline with bare <code>text()</code> at a fixed size instead of fitting it, and long copy ran straight off the frame. The fix was not just to fit it: <code>hook.sub</code> means a standfirst in one style and a one-line aside in another, so the kit now has an <code>aside()</code> that picks a size band from the copy length and wraps.</span></li>
       <li><b>A chip sized by guess</b><span>The pastel score pill was a fixed 178px wide, so "the usual cause" rendered as "e usual caus". It now measures the label against the real face and sizes to it.</span></li>
       <li><b>Fractional geometry</b><span>Layout maths produces fractional heights; sharp demands integers. Rounding inside <code>plate()</code> fixed it for every style rather than at each call site.</span></li>

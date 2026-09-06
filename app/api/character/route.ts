@@ -1,0 +1,54 @@
+import fs from "node:fs";
+import path from "node:path";
+import { pathToFileURL } from "node:url";
+import { getSpec } from "@/lib/specs";
+
+export const maxDuration = 800;
+
+/**
+ * Generate a character sheet for a campaign and cut it into poses.
+ *
+ * Image generation is the only step here that spends real money, so it is a
+ * deliberate, separate action rather than something a render triggers: a set
+ * re-renders for a fraction of a cent, and the character is bought once and
+ * reused by every set that campaign ever produces.
+ */
+export async function POST(req: Request) {
+  let body: any;
+  try { body = await req.json(); } catch { return Response.json({ error: "invalid JSON body" }, { status: 400 }); }
+
+  const { campaignId, quality = "medium", variants = 3 } = body || {};
+  if (!campaignId) return Response.json({ error: "campaignId is required" }, { status: 400 });
+  const spec = getSpec(campaignId);
+  if (!spec) return Response.json({ error: `no campaign "${campaignId}"` }, { status: 404 });
+
+  const dir = (spec as any).assets?.character?.dir;
+  if (!dir) return Response.json({ error: "campaign declares no assets.character.dir" }, { status: 400 });
+
+  const root = process.cwd();
+  const url = pathToFileURL(path.join(root, "engine", "providers", "image.mjs")).href;
+  const img: any = await import(/* webpackIgnore: true */ url);
+
+  const prompt = (spec as any).assets?.character?.prompt;
+  if (!prompt) return Response.json({ error: "campaign declares no assets.character.prompt" }, { status: 400 });
+
+  const cacheDir = path.join(root, "output/gen/cache");
+  const started = Date.now();
+  try {
+    const sheets: string[] = [];
+    for (let i = 0; i < Math.min(Number(variants) || 1, 5); i++) {
+      const r = await img.generate({
+        root, cacheDir, prompt, size: "1536x1024", quality, label: `sheet-${campaignId}`, variant: i,
+      });
+      sheets.push(r.file);
+    }
+    return Response.json({
+      sheets: sheets.map((f) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
+      cost: img.costReport(),
+      ms: Date.now() - started,
+      next: "cut the chosen sheet with tools/cut-character.mjs, then render",
+    });
+  } catch (e: any) {
+    return Response.json({ error: e?.message ?? "generation failed" }, { status: 502 });
+  }
+}
