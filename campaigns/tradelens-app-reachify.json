@@ -97,8 +97,9 @@
     ],
     "mascot": null,
     "photos": {
-      "dir": "output/niche/money",
-      "credit": "Pexels"
+      "dir": "output/subjects/trader",
+      "credit": "Pexels",
+      "subject": "one trader, one session"
     },
     "app_screen": "output/tradelens/app-analysis.png"
   },

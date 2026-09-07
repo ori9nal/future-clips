@@ -1,0 +1,173 @@
+{
+  "id": "vokabo-core-800-cycle-07",
+  "brand": "Vokabo Core 800",
+  "product": "Mobile language app that drills the ~800 highest-frequency words through 90-second spoken rounds with mic scoring and a conversation-coverage progress ring",
+  "niche": "language",
+  "advertiser": "Vokabo Learning Ltd.",
+  "agency": "Halfmoon Social",
+  "platforms": [
+    "tiktok",
+    "instagram"
+  ],
+  "payout": {
+    "rate_usd": 1.85,
+    "min_payout_usd": 20,
+    "max_payout_usd": 460,
+    "budget_total_usd": 22000,
+    "budget_remaining_usd": 22000,
+    "review_days": 14,
+    "platforms": [
+      "tiktok",
+      "instagram"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 9,
+    "aspect": "9:16",
+    "required_mention": null,
+    "must_show_app": true,
+    "app_placement": [
+      {
+        "when_slides": [
+          5,
+          5
+        ],
+        "on_slides": [
+          2,
+          5
+        ]
+      },
+      {
+        "when_slides": [
+          6,
+          6
+        ],
+        "on_slides": [
+          2,
+          6
+        ]
+      },
+      {
+        "when_slides": [
+          7,
+          7
+        ],
+        "on_slides": [
+          3,
+          5,
+          7
+        ]
+      },
+      {
+        "when_slides": [
+          8,
+          8
+        ],
+        "on_slides": [
+          3,
+          6,
+          8
+        ]
+      },
+      {
+        "when_slides": [
+          9,
+          9
+        ],
+        "on_slides": [
+          3,
+          6,
+          9
+        ]
+      }
+    ],
+    "first_slide_must_be_hook": true,
+    "language": "English",
+    "audience_tier1_pct": 60
+  },
+  "rules": {
+    "required_phrase": "Vokabo Core 800",
+    "never_bare": "Vokabo",
+    "banned_claims": [
+      "fluent in 30 days",
+      "fluent in three months",
+      "learn Spanish in a week",
+      "scientifically proven",
+      "neuroscience-backed",
+      "clinically tested",
+      "research shows you only need 800 words",
+      "replaces a tutor",
+      "replaces classes",
+      "you'll never need a teacher",
+      "free forever",
+      "guaranteed refund",
+      "better than",
+      "improves memory",
+      "prevents dementia"
+    ],
+    "banned_topics": [
+      "fluency-by-date promises",
+      "total mastery by timeframe",
+      "proof or research language for the 800-word figure",
+      "specific exams (DELE, DELF, JLPT, Goethe)",
+      "visa, citizenship or immigration language requirements",
+      "brain health, memory or cognitive benefits",
+      "pricing not on the current store listing",
+      "naming or parodying competitors",
+      "side-by-side with another app's UI",
+      "fake accents or ethnic caricature",
+      "AI voice cloning of real people",
+      "fabricated user quotes or fake DM screenshots",
+      "filming strangers without consent",
+      "undisclosed partnership (must use #ad in first caption line)",
+      "copyrighted music outside the platform commercial library",
+      "editing the progress-ring percentage or any in-app number"
+    ],
+    "tone": "Grounded, first-person and specific — show the failure then the mechanism, without hype or proof language.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "Open in the first 1.5 seconds, spoken and on screen, with a moment of failure — someone who studied a language and still couldn't function in it — before any explanation of the app.",
+    "angles": [
+      "Four years of Spanish and I couldn't order a coffee — school study vs. one real interaction",
+      "The 800 list reveal: read the first fifteen words aloud and let their boringness land",
+      "Textbook vs. street: course-book phrase vs. what people actually say (great for Japanese and French)",
+      "The percentage ring as a scoreboard: day 1 vs. day 11 with real numbers from your own account",
+      "I tested it on my flatmate/partner/coworker who actually speaks it (get consent on camera)",
+      "Trip countdown: nine days before a holiday, the highest-leverage thing to study"
+    ],
+    "notes": [
+      "Six and seven slides are the sweet spot; under five underperforms on watch-through and nines only work if slides 4-7 earn their place.",
+      "Target 22-38 seconds, vertical 9:16, burned-in captions, no letterboxing.",
+      "Explaining the app before the failure moment kills performance every time.",
+      "At least one app placement must be a real screen recording of a drill round with audio — no static screenshots or mockups.",
+      "The final app placement must show the progress ring with a visible percentage; hold each app frame at least 1.2 seconds.",
+      "Say 'Vokabo Core 800' out loud at least once and write it in full in the caption.",
+      "Faceless screen-record-plus-voiceover performs as well as talking head.",
+      "Generic TTS narration of your own script is allowed but must be disclosed in the caption.",
+      "You may say 'frequency lists suggest around 800 words cover most everyday conversation' but not upgrade it to proof language.",
+      "Avoid generic '5 apps you need' listicles and AI slideshow travel b-roll with robot voiceover.",
+      "Account eligibility: 1,000+ followers, 8+ posts in the last 30 days, account older than 30 days, no follower-purchase history.",
+      "Qualified views are organic 3+ second views from native analytics at day 14; paid promotion, bots, pods and repost farms void the post and account.",
+      "Submit every post link in #submissions within 24 hours of publishing or it will not be counted."
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#12263F",
+      "#2EC4B6",
+      "#FF7A5A"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/subjects/lexi-learner",
+      "credit": "Pexels",
+      "subject": "one person, Polina Tankilevitch"
+    },
+    "look": "sunlit"
+  },
+  "content": {
+    "style": "native"
+  }
+}

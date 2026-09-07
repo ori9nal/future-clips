@@ -1,0 +1,149 @@
+{
+  "id": "loadout-gym-app-work-with-what-youve-got",
+  "brand": "Loadout Gym App",
+  "product": "Workout builder that writes sessions around the equipment your gym actually has",
+  "niche": "fitness",
+  "advertiser": "Loadout Labs Ltd.",
+  "agency": "Northbank Creator Ops",
+  "platforms": [
+    "tiktok",
+    "instagram"
+  ],
+  "payout": {
+    "rate_usd": 1.15,
+    "min_payout_usd": 15,
+    "max_payout_usd": 340,
+    "budget_total_usd": 16500,
+    "budget_remaining_usd": 16500,
+    "review_days": 4,
+    "platforms": [
+      "tiktok",
+      "instagram"
+    ]
+  },
+  "requirements": {
+    "min_slides": 3,
+    "max_slides": 8,
+    "aspect": "9:16",
+    "required_mention": null,
+    "must_show_app": true,
+    "app_placement": [
+      {
+        "when_slides": [
+          3,
+          4
+        ],
+        "on_slides": [
+          2
+        ]
+      },
+      {
+        "when_slides": [
+          5,
+          6
+        ],
+        "on_slides": [
+          3,
+          6
+        ]
+      },
+      {
+        "when_slides": [
+          7,
+          8
+        ],
+        "on_slides": [
+          2,
+          5,
+          8
+        ]
+      }
+    ],
+    "first_slide_must_be_hook": true,
+    "language": "English",
+    "audience_tier1_pct": 60
+  },
+  "rules": {
+    "required_phrase": "Loadout Gym App",
+    "never_bare": "Loadout",
+    "banned_claims": [
+      "lose 10lb in 6 weeks",
+      "get shredded by summer",
+      "clinically proven",
+      "science-backed",
+      "physio-approved",
+      "certified by trainers",
+      "free forever",
+      "Loadout AI",
+      "The Loadout",
+      "Loadout Fitness"
+    ],
+    "banned_topics": [
+      "body composition promises",
+      "before/after weight or measurement results",
+      "injury, rehab or pain",
+      "back pain",
+      "joint issues",
+      "posture correction",
+      "hormones or testosterone",
+      "training around a medical condition",
+      "nutrition, calories or macros",
+      "protein or supplements",
+      "PEDs or natty discourse",
+      "invented pricing or features",
+      "fake or mocked-up app screens",
+      "borrowed screen recordings",
+      "other fitness apps named or shown",
+      "shirtless mirror openers",
+      "filming other gym members' faces",
+      "unlicensed music",
+      "home gym build content",
+      "physique competitor content",
+      "gym-shaming identifiable people"
+    ],
+    "tone": "Plain, grounded gym talk from a normal lifter describing a planning tool, never coaching or promising results.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "Open with the constraint in on-screen text before anyone speaks — name the broken or busy gym, not the app.",
+    "angles": [
+      "My gym is trash and I made it work — pan the gym, show what's missing, show the loadout it built",
+      "Travel / hotel gym — two saved gyms, wildly different plans, same tracking",
+      "Busy-hour reroute — station taken, app swaps the lift, you keep moving (highest converting)",
+      "Beginner walkthrough — 'I didn't know what to do in here' to an ordered session, descriptive not instructional",
+      "The switch — the screenshotted programme that assumed a full commercial gym and why it broke"
+    ],
+    "notes": [
+      "Five to six slides is the sweet spot; three reads as an ad, nine loses people before the payoff",
+      "Strongest structure: problem → attempt → app → session → result",
+      "Legible app screen means no speed ramp, no heavy filter, no sticker covering the equipment list; 1080x1920 minimum",
+      "Single-shot video with no slides: app on screen within the first 5 seconds for a cumulative 4s minimum",
+      "Paid partnership toggle on for both platforms and #ad in the first line of the caption",
+      "App footage must be the real app on your own phone",
+      "Only the free tier and Loadout Plus at £6.99/mo may be referenced",
+      "Avoid trending audio that crowds out the app screen and 'day in my life' formats where the product lands at second 40",
+      "Account minimum 2,000 followers plus a country-split analytics screenshot at registration",
+      "Submit every post in #submissions with platform link, slide count and 96-hour analytics screenshot; unsubmitted posts are not paid",
+      "Deleted, archived or caption-edited posts void the claim; payouts weekly on Thursdays, 14-day terms from approval",
+      "Ask edge cases in #loadout-brief before filming — pre-approvals are honoured",
+      "Live window 3 Feb – 16 Mar, campaign closes when the budget is spent"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#14181D",
+      "#E4572E",
+      "#F4F4F2"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/subjects/lifter",
+      "credit": "Pexels",
+      "subject": "one person, Ivan S"
+    },
+    "look": "steel"
+  },
+  "content": {
+    "style": "native"
+  }
+}
