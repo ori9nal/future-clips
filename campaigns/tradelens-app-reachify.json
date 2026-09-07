@@ -1,0 +1,108 @@
+{
+  "id": "tradelens-app-reachify",
+  "brand": "TradeLens App",
+  "product": "AI chart analysis iOS app that reads a chart screenshot and returns trend, patterns, support/resistance, a Long/Short/Hold signal with entry, stop-loss and target, plus news sentiment",
+  "niche": "trading",
+  "advertiser": "TradeLens",
+  "agency": "Reachify",
+  "platforms": [
+    "tiktok"
+  ],
+  "payout": {
+    "rate_usd": 1.5,
+    "min_payout_usd": 1.5,
+    "max_payout_usd": 400,
+    "budget_total_usd": 3000,
+    "budget_remaining_usd": 3000,
+    "review_days": null,
+    "platforms": [
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 5,
+    "max_slides": 10,
+    "aspect": "9:16",
+    "required_mention": null,
+    "must_show_app": true,
+    "app_placement": [
+      {
+        "when_slides": [
+          3,
+          4
+        ],
+        "on_slides": [
+          2,
+          3
+        ]
+      },
+      {
+        "when_slides": [
+          7,
+          99
+        ],
+        "on_slides": [
+          4,
+          5
+        ]
+      }
+    ],
+    "first_slide_must_be_hook": true,
+    "language": "English",
+    "audience_tier1_pct": 40
+  },
+  "rules": {
+    "required_phrase": "TradeLens App",
+    "never_bare": "TradeLens",
+    "banned_claims": [
+      "guaranteed profit",
+      "guaranteed profits",
+      "fake profit screenshots",
+      "financial advice"
+    ],
+    "banned_topics": [
+      "reposted content",
+      "spam",
+      "low-quality content"
+    ],
+    "tone": "Relatable trading storytelling that moves from struggle to clarity without promising returns.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "First slide or first second is a strong emotional hook about trading pain",
+    "angles": [
+      "bad entries and blown accounts",
+      "trading with no plan, then finding clarity",
+      "struggle to progress transformation",
+      "show the app doing the work: upload chart, get signal, entry / SL / target",
+      "AI trading mentor for crypto, stocks, forex and commodities"
+    ],
+    "notes": [
+      "Video or native TikTok photo slideshow both accepted",
+      "5 to 10 slides performs best, do not overdo it",
+      "Clean fonts and readable text",
+      "Real app footage converts better than mockups",
+      "For video posts show the app in the middle, not at the very end",
+      "Bio CTA required: 'Level up your trades with the TradeLens App' — may be reworded but must contain 'TradeLens App'",
+      "Minimum 1,000 views to qualify for payment",
+      "Submit within 30 minutes of posting with an analytics screenshot showing 40%+ Tier-1",
+      "Payments processed via Whop; campaign closes when budget is exhausted"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#0B1120",
+      "#16C784",
+      "#3B82F6"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/money",
+      "credit": "Pexels"
+    },
+    "app_screen": "output/tradelens/app-analysis.png"
+  },
+  "content": {
+    "style": "native"
+  }
+}

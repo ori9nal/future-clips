@@ -53,9 +53,20 @@ export type Spec = {
 
 const DIR = path.join(process.cwd(), "campaigns");
 
-/** Only files that carry the new spec shape — the folder also holds legacy briefs. */
+/**
+ * A campaign is a spec if it carries either authored content or enforceable
+ * rules.
+ *
+ * The original test demanded a written hook and ranked array, which was right
+ * when every campaign shipped its copy. Campaigns ingested from a brief have no
+ * copy at all — it is generated per request — so requiring it hid exactly the
+ * campaigns the admin flow creates.
+ */
 function isSpec(o: any): o is Spec {
-  return !!o && typeof o === "object" && o.content?.hook && Array.isArray(o.content?.ranked) && o.assets?.photos?.dir;
+  if (!o || typeof o !== "object" || !o.brand) return false;
+  const authored = !!(o.content?.hook && Array.isArray(o.content?.ranked));
+  const enforceable = !!(o.requirements && o.rules);
+  return authored || enforceable;
 }
 
 export function listSpecs(): Spec[] {

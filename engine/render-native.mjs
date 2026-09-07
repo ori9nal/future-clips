@@ -18,7 +18,7 @@ import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import { loadFace } from './fonts.mjs';
 import { fitLines, layoutWidth } from './fit-text.mjs';
-import { captionBlock, placementsFor } from './caption.mjs';
+import { captionBlock, placementsFor, breakToFit } from './caption.mjs';
 
 export const W = 1080, H = 1920;
 
@@ -81,15 +81,29 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
   // of THAT height. Scoring fixed bands first and letting the block overflow
   // them put a three-line hook across a face that sat below the quiet strip it
   // had been anchored in.
-  let probe = null;
+  let probe = null, use = lines;
   for (const cap of [max, Math.round(max * 0.82), Math.round(max * 0.68)]) {
     try {
-      probe = captionBlock(face, lines, { x: margin, y: zone[0], w: boxW, h: zone[1] - zone[0] },
+      probe = captionBlock(face, use, { x: margin, y: zone[0], w: boxW, h: zone[1] - zone[0] },
         { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min });
       break;
     } catch { /* smaller */ }
   }
+  if (!probe) {
+    // Generated copy arrives as sentences, not hand-broken lines, so a CTA can
+    // be one string too long for any readable size. Re-break it rather than
+    // refuse the set outright.
+    use = lines.flatMap((l) => breakToFit(face, l, boxW * 0.92, min * 1.25, { max: 3 }));
+    for (const cap of [max, Math.round(max * 0.8), Math.round(max * 0.66)]) {
+      try {
+        probe = captionBlock(face, use, { x: margin, y: zone[0], w: boxW, h: zone[1] - zone[0] },
+          { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min });
+        break;
+      } catch { /* smaller */ }
+    }
+  }
   if (!probe) throw new Error(`caption does not fit the zone at all: ${lines.join(' / ')}`);
+  lines = use;
 
   const blockH = Math.ceil(probe.height + probe.stroke);
   const spots = await placementsFor(plateFile, { w: W, h: H, sharp, zone, blockH, margin, avoid });
@@ -128,18 +142,47 @@ export async function nativeSlides(spec, root, outDir) {
     out.push(s.join(''));
   }
 
-  // ranked countdown — highest rank last so the swipe pays off
+  // Numbering is a content decision. A ranked countdown counts DOWN so the
+  // swipe pays off at the end; a story runs forwards and numbering it backwards
+  // reads as broken. 'none' leaves the headings bare.
+  const numbering = C.numbering ?? 'countdown';
   for (let i = 0; i < C.ranked.length; i++) {
     const item = C.ranked[i];
-    const rank = C.ranked.length - i;
-    const p = await plate(path.join(photoDir, `${item.photo}.jpg`), cache);
+    const rank = numbering === 'countdown' ? C.ranked.length - i : i + 1;
+    // A campaign can require the app to appear mid-set rather than at the end
+    // (TradeLens: slide 4 or 5 on a 7+ slide post), so a ranked item may carry
+    // its own screen instead of a photo.
+    const p = item.screen
+      ? path.join(root, item.screen)
+      : await plate(path.join(photoDir, `${item.photo}.jpg`), cache);
     const s = [embed(p)];
-    const head = [`${rank}. ${item.name}`];
+    // An app screenshot is dense UI everywhere, so the band-quietness solver
+    // has no genuinely quiet band to find — white stroked type landed straight
+    // across the levels rows. Reserve two bands with a scrim instead.
+    if (item.screen) {
+      s.push(`<defs><linearGradient id="ap${i}" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0" stop-color="rgba(0,0,0,0.88)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/>` +
+        `</linearGradient></defs><rect x="0" y="0" width="${W}" height="${Math.round(H * 0.30)}" fill="url(#ap${i})"/>`);
+      // near-solid under the copy band. A soft fade is not enough over a levels
+      // table: at the top of the fade the scrim is barely a third of its value,
+      // which is exactly where the first line of body copy sits.
+      s.push(`<defs><linearGradient id="ab${i}" x1="0" y1="0" x2="0" y2="1">` +
+        `<stop offset="0" stop-color="rgba(0,0,0,0)"/>` +
+        `<stop offset="0.22" stop-color="rgba(0,0,0,0.82)"/>` +
+        `<stop offset="1" stop-color="rgba(0,0,0,0.94)"/>` +
+        `</linearGradient></defs><rect x="0" y="${Math.round(H * 0.62)}" width="${W}" height="${Math.round(H * 0.38)}" fill="url(#ab${i})"/>`);
+    }
+    const head = [numbering === 'none' ? item.name : `${rank}. ${item.name}`];
     if (item.score) head.push(item.score);
-    const title = await place(p, head, { zone: [H * 0.10, H * 0.52], max: 84, min: 46 });
+    const title = await place(p, head, {
+      zone: item.screen ? [H * 0.03, H * 0.22] : [H * 0.10, H * 0.52], max: 84, min: 46,
+    });
     s.push(title.svg);
     const body = await place(p, item.lines, {
-      zone: [Math.max(title.box.y + title.height + 40, H * 0.56), H * 0.92], max: 60, min: 34, avoid: [title.box],
+      zone: item.screen
+        ? [H * 0.72, H * 0.95]
+        : [Math.max(title.box.y + title.height + 40, H * 0.56), H * 0.92],
+      max: 60, min: 34, avoid: [title.box],
     });
     s.push(body.svg);
     out.push(s.join(''));

@@ -83,6 +83,35 @@ export function captionBlock(face, lines, box, o = {}) {
 }
 
 /**
+ * Break one string into lines that fit a measure at a given size.
+ *
+ * Caption copy is normally hand-broken, but generated copy arrives as
+ * sentences — and a CTA written as a full sentence cannot fit one stroked line
+ * at any readable size. Rather than refuse it, re-break it: greedy wrap, then
+ * even out the last line so the block does not end on a single orphan word.
+ */
+export function breakToFit(face, s, width, size, { max = 3 } = {}) {
+  const words = String(s).trim().split(/\s+/).filter(Boolean);
+  const lines = [];
+  let cur = '';
+  for (const w of words) {
+    const next = cur ? `${cur} ${w}` : w;
+    if (layoutWidth(face, next, size) > width && cur) { lines.push(cur); cur = w; } else cur = next;
+  }
+  if (cur) lines.push(cur);
+  // pull a word back from the penultimate line when the last is an orphan
+  if (lines.length > 1 && lines[lines.length - 1].split(' ').length === 1) {
+    const prev = lines[lines.length - 2].split(' ');
+    if (prev.length > 2) {
+      const moved = prev.pop();
+      lines[lines.length - 2] = prev.join(' ');
+      lines[lines.length - 1] = `${moved} ${lines[lines.length - 1]}`;
+    }
+  }
+  return lines.slice(0, max);
+}
+
+/**
  * Pick where a caption block goes: the quietest band of the picture that is not
  * across the subject's face.
  *
