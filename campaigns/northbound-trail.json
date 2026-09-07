@@ -1,0 +1,97 @@
+{
+  "id": "northbound-trail",
+  "brand": "NORTHBOUND",
+  "product": "field guides",
+  "niche": "travel",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1.2,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 9000,
+    "budget_remaining_usd": 9000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 6,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@northbound.trail",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "overnight",
+      "secret hack"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#0A0A0B",
+      "#E8B44A",
+      "#F2F0EB"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/cine",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "rail",
+    "kicker": "SEP \u00a92026",
+    "hook": {
+      "photo": "36148199",
+      "quiet": "the ones you",
+      "loud": "REGRET",
+      "sub": [
+        "Four decisions that separate a trip you talk about from one you forget by November."
+      ]
+    },
+    "ranked": [
+      {
+        "photo": "34459452",
+        "quiet": "01 \u2014 the shortcut",
+        "loud": "COSTS MORE",
+        "lines": [
+          "The saved hour is spent twice over on the road you did not want to be on. Take the long way while it is still light."
+        ]
+      },
+      {
+        "photo": "11730639",
+        "quiet": "02 \u2014 booking",
+        "loud": "EVERYTHING",
+        "lines": [
+          "A fully booked week has no room for the thing you actually came for. Leave two days unplanned."
+        ]
+      },
+      {
+        "photo": "18416002",
+        "quiet": "03 \u2014 the camera",
+        "loud": "IN FRONT",
+        "lines": [
+          "You cannot photograph a place you have not looked at yet. Give it ten minutes before the lens comes out."
+        ]
+      },
+      {
+        "photo": "13736378",
+        "quiet": "04 \u2014 the list",
+        "loud": "IS NOT IT",
+        "lines": [
+          "Ticking sights is someone else's trip. The thing you remember will not have been on the list when you landed."
+        ]
+      }
+    ],
+    "closer": {
+      "photo": "5820306",
+      "quiet": "go",
+      "loud": "SLOWER",
+      "cta": "Follow @northbound.trail"
+    }
+  }
+}

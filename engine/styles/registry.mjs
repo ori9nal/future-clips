@@ -19,8 +19,9 @@ import pastel from './pastel.mjs';
 import nativeStyle from './native.mjs';
 import mascot from './mascot.mjs';
 import bedrock from './bedrock.mjs';
+import rail from './rail.mjs';
 
-export const STYLES = [nativeStyle, mascot, bedrock, clinical, editorial, documentStyle, poster, pastel];
+export const STYLES = [nativeStyle, mascot, bedrock, rail, clinical, editorial, documentStyle, poster, pastel];
 
 export const byId = (id) => STYLES.find((s) => s.id === id) ?? null;
 

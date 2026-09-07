@@ -1,0 +1,97 @@
+{
+  "id": "summit-craft",
+  "brand": "SUMMIT",
+  "product": "creative studio",
+  "niche": "design",
+  "status": "live",
+  "payout": {
+    "rate_usd": 1.2,
+    "min_payout_usd": 1,
+    "max_payout_usd": 500,
+    "budget_total_usd": 9000,
+    "budget_remaining_usd": 9000,
+    "review_days": 7,
+    "platforms": [
+      "instagram",
+      "tiktok"
+    ]
+  },
+  "requirements": {
+    "min_slides": 6,
+    "max_slides": 10,
+    "aspect": "4:5",
+    "required_mention": "@summit.craft",
+    "must_show_app": false
+  },
+  "rules": {
+    "banned_claims": [
+      "guaranteed",
+      "overnight",
+      "secret hack"
+    ]
+  },
+  "assets": {
+    "palette": [
+      "#0A0A0B",
+      "#FFFFFF",
+      "#F2F0EB"
+    ],
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/cine",
+      "credit": "Pexels"
+    }
+  },
+  "content": {
+    "style": "rail",
+    "kicker": "SEP ©2026",
+    "hook": {
+      "photo": "1666012",
+      "quiet": "nobody tells you",
+      "loud": "THE FIRST",
+      "sub": [
+        "Six things about creative work that only make sense after the first year. None of them are about software."
+      ]
+    },
+    "ranked": [
+      {
+        "photo": "13537060",
+        "quiet": "01 — taste",
+        "loud": "GAP",
+        "lines": [
+          "Your taste arrives years before your skill does. That gap is not failure, it is the only reliable sign you are going to be good."
+        ]
+      },
+      {
+        "photo": "5995687",
+        "quiet": "02 — volume",
+        "loud": "BEATS",
+        "lines": [
+          "Forty finished pieces teach more than four perfect ones. Finishing is the skill; polishing is the reward for having it."
+        ]
+      },
+      {
+        "photo": "13736378",
+        "quiet": "03 — the brief",
+        "loud": "IS THE WORK",
+        "lines": [
+          "Most bad work is a good execution of the wrong question. Spend the first hour on the question."
+        ]
+      },
+      {
+        "photo": "30765894",
+        "quiet": "04 — showing",
+        "loud": "EARLY",
+        "lines": [
+          "Show it at forty per cent. The feedback you get at ninety per cent is too late to use and too painful to hear."
+        ]
+      }
+    ],
+    "closer": {
+      "photo": "28210215",
+      "quiet": "so",
+      "loud": "START ROUGH",
+      "cta": "Follow @summit.craft"
+    }
+  }
+}

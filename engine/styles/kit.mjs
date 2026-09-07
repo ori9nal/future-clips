@@ -13,6 +13,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { loadFace } from '../fonts.mjs';
 import { fitLines, layoutWidth, hasGlyphs, requiredLineHeight } from '../fit-text.mjs';
+import { PAIRING_FACES } from '../pairings.mjs';
 
 /* ── faces ──────────────────────────────────────────────────────────────── */
 
@@ -42,6 +43,10 @@ export const FACES = {
   instrumentIt:   { file: 'InstrumentSerif-Italic',      family: 'Instrument Serif',        weight: 400, style: 'italic' },
   mono:           { file: 'JetBrainsMono-Medium',        family: 'JetBrains Mono',          weight: 500 },
   monoBold:       { file: 'JetBrainsMono-Bold',          family: 'JetBrains Mono',          weight: 700 },
+  monoMed:        { file: 'JetBrainsMono-Medium',        family: 'JetBrains Mono',          weight: 500 },
+  // every face a pairing can name, so a style can reference a pairing key
+  // directly instead of the kit and the pairing table drifting apart
+  ...PAIRING_FACES,
 };
 
 export function fontFiles(root) {
@@ -196,10 +201,14 @@ export const image = (file, x, y, w, h, { round, op } = {}) => {
 };
 
 /** A scrim so type stays legible over photography without flattening the shot. */
-export const scrim = (x, y, w, h, { from = 'rgba(0,0,0,0.78)', to = 'rgba(0,0,0,0)', id = 'g', dir = 'down' } = {}) => {
+export const scrim = (x, y, w, h, { from = 'rgba(0,0,0,0.78)', to = 'rgba(0,0,0,0)', mid, midAt = 0.5, id = 'g', dir = 'down' } = {}) => {
   const [x1, y1, x2, y2] = dir === 'down' ? [0, 0, 0, 1] : dir === 'up' ? [0, 1, 0, 0] : [0, 0, 1, 0];
+  // An optional middle stop, so a scrim can hold a floor across the band the
+  // type occupies and still fade out — a two-stop gradient starting partway
+  // down the frame leaves a visible hard edge where the rect begins.
+  const midStop = mid ? `<stop offset="${midAt}" stop-color="${mid}"/>` : '';
   return `<defs><linearGradient id="${id}" x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}">` +
-    `<stop offset="0" stop-color="${from}"/><stop offset="1" stop-color="${to}"/></linearGradient></defs>` +
+    `<stop offset="0" stop-color="${from}"/>${midStop}<stop offset="1" stop-color="${to}"/></linearGradient></defs>` +
     `<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="url(#${id})"/>`;
 };
 

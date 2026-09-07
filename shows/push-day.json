@@ -1,0 +1,123 @@
+{
+  "topic": "Why your push day is not working",
+  "style_profile": "flat_illustration",
+  "background_spec": "Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind.",
+  "character_spec": "A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering.",
+  "slide_count": 7,
+  "slides": [
+    {
+      "index": 1,
+      "role": "hook",
+      "pose_id": "arms-crossed-front",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering. He stands facing the viewer squarely with both arms folded across his chest, left forearm resting over right, weight even on both feet, chin slightly lifted, expression calm and certain. The upper 46 percent of the frame is open background with no subject and no detail of any kind, reserved for a text block. The figure occupies the lower half of the frame and is fully within the canvas with a small gap above the bottom edge. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, duplicate subject, gradient background, floor line, gym equipment",
+      "text_overlay": {
+        "lines": [
+          { "text": "YOUR PUSH DAY", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "IS NOT", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "WORKING", "weight": "black", "size": "xl", "color": "#FFD426", "shadow": true },
+          { "text": "and it is not the volume", "weight": "medium", "size": "s", "color": "#C8D2E4", "shadow": false }
+        ],
+        "block_position": "upper-center",
+        "alignment": "center"
+      }
+    },
+    {
+      "index": 2,
+      "role": "overview",
+      "pose_id": "neutral-standing-open-palms",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering. He stands facing the viewer in a relaxed neutral stance, both arms held loosely away from the body with both palms open and turned upward, both arms clearly separate, no merged limbs, no extra limbs, expression neutral and explanatory. His chest muscles are filled with the bright saturated colour #E23B3B confined to the chest region only and nowhere else. His front shoulder muscles are filled with the bright saturated colour #F2A93B confined to the shoulder region only and nowhere else. His upper arm backs are filled with the bright saturated colour #3BA55C confined to the triceps region only and nowhere else. The upper 40 percent of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, duplicate subject, colour bleeding between regions, gradient background",
+      "text_overlay": {
+        "lines": [
+          { "text": "THREE MUSCLES.", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "ONE IS DOING", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "ALL THE WORK", "weight": "black", "size": "l", "color": "#FFD426", "shadow": true }
+        ],
+        "block_position": "upper-center",
+        "alignment": "center"
+      }
+    },
+    {
+      "index": 3,
+      "role": "wrong-vs-right",
+      "pose_id": "bench-press-flared-vs-tucked",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. Two separate panels stacked vertically, divided by one thin horizontal white line across the middle of the frame. Top panel: a single stylised male figure drawn in flat cel-shaded vector style with warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features, lying on a plain dark grey flat bench seen from the side, holding a plain black barbell above his chest with both hands, both elbows flared wide out to the sides at ninety degrees from his torso, both arms clearly separate, no merged limbs. A bold red cross mark sits in the top right corner of this panel. Bottom panel: the identical figure with warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, lying on the same plain dark grey flat bench seen from the side, holding the same plain black barbell above his chest with both hands, both elbows tucked close to the ribcage at roughly forty five degrees, both arms clearly separate, no merged limbs. A bold green check mark sits in the bottom right corner of this panel. The upper 18 percent of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, three panels, text in image, gym background",
+      "text_overlay": {
+        "lines": [
+          { "text": "ELBOW ANGLE", "weight": "black", "size": "l", "color": "#FFD426", "shadow": true }
+        ],
+        "block_position": "top",
+        "alignment": "center"
+      }
+    },
+    {
+      "index": 4,
+      "role": "item-breakdown",
+      "pose_id": "grid-four-press-variations",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A two by two grid of four separate small full-body figures sitting directly on the background with generous even spacing and no boxes, no borders, no panels and no separating lines between them. Every figure is the same stylised male drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features. Top left figure: standing upright pressing a plain black barbell directly overhead with both hands, both arms fully extended and clearly separate. Top right figure: lying on a plain dark grey bench inclined upward, pressing two plain black dumbbells above the upper chest with both arms clearly separate. Bottom left figure: standing between two plain black parallel bars, supporting his body on both straight arms with his torso leaning slightly forward. Bottom right figure: in a push-up position on the floor with both palms flat and both arms straight, body in one straight line. The upper 16 percent of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, boxes, borders, panels, dividing lines, text in image",
+      "text_overlay": {
+        "lines": [
+          { "text": "FOUR PRESSES", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "PICK TWO", "weight": "black", "size": "l", "color": "#FFD426", "shadow": true }
+        ],
+        "block_position": "top",
+        "alignment": "center"
+      }
+    },
+    {
+      "index": 5,
+      "role": "sequential-step",
+      "pose_id": "seated-dumbbell-press-side",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering. He is seated on a plain dark grey upright bench seen from a three quarter angle, holding one plain black dumbbell in his left hand at shoulder height with the elbow bent, and one plain black dumbbell in his right hand pressed fully overhead with the arm straight, both arms clearly separate, no merged limbs, no extra limbs, each dumbbell a distinct separate object not merged with the hand, expression focused. The lower 22 percent of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, duplicate subject, both arms doing the same thing, gym background",
+      "text_overlay": {
+        "lines": [
+          { "text": "SLOW THE", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "WAY DOWN", "weight": "black", "size": "l", "color": "#FFD426", "shadow": true },
+          { "text": "three seconds, every rep", "weight": "medium", "size": "s", "color": "#C8D2E4", "shadow": false }
+        ],
+        "block_position": "lower-center",
+        "alignment": "center"
+      }
+    },
+    {
+      "index": 6,
+      "role": "summary",
+      "pose_id": "hands-on-hips-three-quarter",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering. He stands at a three quarter angle to the viewer on the right hand side of the frame at roughly thirty five percent of the canvas width, with his left hand resting on his left hip and his right arm hanging relaxed at his side, both arms clearly separate, no merged limbs, expression settled and confident. His head begins clearly below the top of the canvas with visible open space above it, and his feet end with a small gap above the bottom edge of the canvas. The entire left sixty percent of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, duplicate subject, figure filling the frame, text in image",
+      "text_overlay": {
+        "lines": [
+          { "text": "THE WHOLE FIX", "weight": "black", "size": "m", "color": "#FFD426", "shadow": true },
+          { "text": "TUCK THE ELBOWS", "weight": "bold", "size": "s", "color": "#FFFFFF", "shadow": false },
+          { "text": "TWO PRESSES, NOT FIVE", "weight": "bold", "size": "s", "color": "#FFFFFF", "shadow": false },
+          { "text": "THREE SECONDS DOWN", "weight": "bold", "size": "s", "color": "#FFFFFF", "shadow": false }
+        ],
+        "block_position": "upper-left",
+        "alignment": "left"
+      }
+    },
+    {
+      "index": 7,
+      "role": "close",
+      "pose_id": "direct-gaze-arms-relaxed-corner",
+      "image_prompt": "Flat cel-shaded vector illustration, solid colours, bold clean linework, 4:5 vertical canvas 1080x1350. Flat solid saturated background in the exact colour #1B2A4A, this precise shade only, not a lighter or darker variation, not an adjacent similar tone, completely even with no gradient, no texture, no pattern, no floor line, no horizon, no shadow cast on the background, no equipment or scenery of any kind. A single stylised male figure drawn in flat cel-shaded vector style: warm mid-brown skin, short black hair cropped tight at the sides, a plain sleeveless white training vest, plain charcoal shorts, plain white trainers, bold clean black outlines, simple flat facial features with no detailed rendering. He stands in the lower right corner of the frame at roughly forty two percent of the canvas width, facing the viewer with a direct steady gaze, both arms hanging relaxed at his sides and clearly separate, weight settled evenly, expression calm and conclusive. Directly behind him and offset slightly to the left sits one faded duplicate of the same figure in the same pose at twenty percent opacity, creating depth. The upper left area of the frame is open background with no subject and no detail, reserved for a text block. Nothing else in the frame, no additional props, no background details.",
+      "negative_prompt": "extra limbs, merged hands, deformed hands, extra fingers, watermark text, signature, blurry, cropped subject, three figures, text in image, gym background",
+      "text_overlay": {
+        "lines": [
+          { "text": "SAVE THIS", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "BEFORE", "weight": "black", "size": "l", "color": "#FFFFFF", "shadow": true },
+          { "text": "MONDAY", "weight": "black", "size": "xl", "color": "#FFD426", "shadow": true },
+          { "text": "@bedrock.form", "weight": "medium", "size": "s", "color": "#C8D2E4", "shadow": false }
+        ],
+        "block_position": "upper-left",
+        "alignment": "left"
+      }
+    }
+  ],
+  "caption": "The elbow angle is doing more damage than your volume ever did. Which one were you guilty of?",
+  "hashtags": ["#pushday", "#benchpressform", "#chestworkout", "#gymtechnique", "#lifting"]
+}
