@@ -8,10 +8,18 @@
 // only a passing set is rendered. Reviewers do not fix a non-compliant post,
 // they reject it, so shipping one is worse than spending another call.
 import { completeJson } from './providers/claude.mjs';
-import { check, constraintsFor } from './compliance.mjs';
+import { check, constraintsFor, repair, bareNameRx } from './compliance.mjs';
+
+/** Expand a bare product name inside one string, mirroring repair(). */
+function expandIn(text, spec) {
+  const def = bareNameRx(spec.rules ?? {});
+  if (text == null || !def) return text;
+  return String(text).replace(def.rx, spec.rules.required_phrase);
+}
 
 const SHAPE = `{
-  "hook":   { "lines": ["2-4 short lines, hand-broken"], "sub": ["one supporting line"] },
+  "subject": "one locked sentence describing the person in the set: age, hair, facial hair, one plain outfit. No names, no brands.",
+  "hook":   { "lines": ["2-4 short lines, hand-broken"], "sub": ["one supporting line"], "scene": "what the photo shows" },
   "ranked": [ { "name": "slide heading", "score": "optional short tag", "lines": ["1-3 short lines"],
                 "role": "body | app | proof", "showsApp": false } ],
   "numbering": "countdown | none",
@@ -43,6 +51,14 @@ How to write it:
 - "numbering": use "countdown" only when the middle slides are a genuine ranked list that pays
   off at the end. A story told in order gets "none" — numbering a narrative backwards reads as
   a mistake.
+- "subject" is written ONCE and describes the only person in the set. Every slide is the same
+  person, so it must be plain and specific enough to recognise: no accessories that come and go.
+- Every slide has a "scene": where the person is, what they are doing, how they are framed. One
+  sentence. Describe a real moment a phone camera would catch, not a stock-photo pose — no
+  thumbs up, no arms crossed smiling at the lens, no laptop-and-coffee cliché.
+- Scenes must differ from each other in place, time of day and framing. A set where every frame
+  is the same room reads as one photo repeated.
+- The app slide's scene is ignored (it renders the app screenshot), so keep it short.
 - Exactly 5 hashtags.`;
 
 /**
@@ -87,8 +103,26 @@ export async function generateContent({ root, spec, instruction, slideCount, att
       })),
       { index: (data.ranked?.length ?? 0) + 2, role: 'close', text: [...(data.closer?.lines ?? []), data.closer?.cta].filter(Boolean).join(' '), showsApp: false },
     ];
-    const verdict = check(spec, { slides, caption: data.caption, bio: data.bio });
-    last = { data, verdict, slides };
+    // repair the mechanical violations first, then judge what is left — a
+    // whole regeneration is too expensive to spend on a missing string
+    const { copy: repaired, notes } = repair(spec, { slides, caption: data.caption, bio: data.bio });
+    data.caption = repaired.caption;
+    data.bio = repaired.bio;
+    repaired.slides.forEach((s, n) => {
+      if (n === 0) { data.hook.lines = data.hook.lines.map((l) => expandIn(l, spec)); data.hook.sub = (data.hook.sub ?? []).map((l) => expandIn(l, spec)); }
+      else if (n <= (data.ranked?.length ?? 0)) {
+        const r = data.ranked[n - 1];
+        r.name = expandIn(r.name, spec);
+        r.lines = (r.lines ?? []).map((l) => expandIn(l, spec));
+      } else {
+        data.closer.lines = (data.closer.lines ?? []).map((l) => expandIn(l, spec));
+        data.closer.cta = expandIn(data.closer.cta, spec);
+      }
+    });
+
+    const verdict = check(spec, repaired);
+    verdict.repairs = notes;
+    last = { data, verdict, slides: repaired.slides };
 
     if (verdict.pass) return { content: data, verdict, usd: spent, attempts: i + 1 };
 

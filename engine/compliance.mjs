@@ -8,7 +8,21 @@
 //
 // So those are checked in code, before render, and a failure is an error rather
 // than a warning. Reviewers do not edit a non-compliant set, they bin it.
-const RX = (s) => new RegExp(s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi');
+const esc = (s) => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const RX = (s) => new RegExp(esc(s), 'gi');
+
+/**
+ * The bare product name where it is NOT followed by its completing word.
+ *
+ * One definition, used by both the checker and the repairer — two copies of
+ * this regex is two chances to disagree about what counts as a violation.
+ */
+export function bareNameRx(rules) {
+  if (!rules?.required_phrase || !rules?.never_bare) return null;
+  const tail = rules.required_phrase.slice(rules.never_bare.length).trim();
+  if (!tail) return null;
+  return { rx: new RegExp(`${esc(rules.never_bare)}(?!\\s*${esc(tail)})`, 'gi'), tail };
+}
 
 /**
  * Where the app has to appear, given how many slides the set has.
@@ -48,10 +62,9 @@ export function check(spec, copy) {
     const hits = (allText.match(RX(R.required_phrase)) ?? []).length;
     if (!hits) failures.push(`required phrase "${R.required_phrase}" appears nowhere in the copy`);
     // Every slide that names the product must name it in full
-    if (R.never_bare) {
-      // the bare term NOT followed by the completing word(s)
-      const tail = R.required_phrase.slice(R.never_bare.length).trim();
-      const bare = new RegExp(`${R.never_bare.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?!\\s*${tail.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
+    const bareDef = bareNameRx(R);
+    if (bareDef) {
+      const { rx: bare, tail } = bareDef;
       const found = [];
       slides.forEach((s) => { if (bare.test(s.text ?? '')) found.push(`slide ${s.index}`); bare.lastIndex = 0; });
       if (bare.test(copy.caption ?? '')) found.push('caption');
@@ -94,6 +107,52 @@ export function check(spec, copy) {
   if (words > 12) warnings.push(`hook is ${words} words — short hooks read at thumbnail size`);
 
   return { pass: failures.length === 0, failures, warnings };
+}
+
+/**
+ * Repair the violations that are mechanical rather than creative.
+ *
+ * "The bio must contain the product name" is not a judgement call — it is a
+ * string that is present or absent. Sending that back to the model costs a
+ * whole generation and often fails again on the same field, which is exactly
+ * what happened: three attempts, ten cents, same missing bio.
+ *
+ * Only rules with one correct answer are repaired here. A banned claim is NOT
+ * repaired, because removing it changes what the copy says and that is the
+ * writer's job.
+ */
+export function repair(spec, copy) {
+  const R = spec.rules ?? {};
+  const fixed = { ...copy, slides: copy.slides.map((s) => ({ ...s })) };
+  const notes = [];
+  if (!R.required_phrase) return { copy: fixed, notes };
+
+  const phrase = R.required_phrase;
+
+  // the bare name expanded wherever it appears without its completing word
+  const bareDef = bareNameRx(R);
+  if (bareDef) {
+    const expand = (t) => (t == null ? t : String(t).replace(bareDef.rx, phrase));
+    fixed.slides.forEach((s) => {
+      const before = s.text;
+      s.text = expand(s.text);
+      if (s.text !== before) notes.push(`expanded bare name on slide ${s.index}`);
+    });
+    for (const k of ['caption', 'bio']) {
+      const before = fixed[k];
+      fixed[k] = expand(fixed[k]);
+      if (fixed[k] !== before) notes.push(`expanded bare name in ${k}`);
+    }
+  }
+
+  // a bio that never names the product gets it appended rather than regenerated
+  if (fixed.bio != null && !RX(phrase).test(fixed.bio)) {
+    const sep = /[|·—-]\s*$/.test(fixed.bio.trim()) ? ' ' : ' | ';
+    fixed.bio = `${fixed.bio.trim()}${sep}${phrase}`;
+    notes.push('appended the required phrase to the bio');
+  }
+
+  return { copy: fixed, notes };
 }
 
 /** What the generator must satisfy, rendered as instructions for the model. */

@@ -120,14 +120,14 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
 
 export async function nativeSlides(spec, root, outDir) {
   const face = loadFace(FACE.cap.file);
-  const photoDir = path.join(root, spec.assets.photos.dir);
+  const photoDir = path.join(root, spec.assets?.photos?.dir ?? '.');
   const cache = path.join(outDir, '_plates');
   const C = spec.content;
   const out = [];
 
   // hook
   {
-    const p = await plate(path.join(photoDir, `${C.hook.photo}.jpg`), cache);
+    const p = await plate(path.isAbsolute(String(C.hook.photo)) ? String(C.hook.photo) : path.join(photoDir, `${C.hook.photo}.jpg`), cache);
     const s = [embed(p)];
     const title = await place(p, C.hook.lines, { zone: [H * 0.05, H * 0.58], max: 104, min: 58 });
     s.push(title.svg);
@@ -154,7 +154,8 @@ export async function nativeSlides(spec, root, outDir) {
     // its own screen instead of a photo.
     const p = item.screen
       ? path.join(root, item.screen)
-      : await plate(path.join(photoDir, `${item.photo}.jpg`), cache);
+      // a generated frame arrives as an absolute path; a sourced one as an id
+      : await plate(path.isAbsolute(String(item.photo)) ? String(item.photo) : path.join(photoDir, `${item.photo}.jpg`), cache);
     const s = [embed(p)];
     // An app screenshot is dense UI everywhere, so the band-quietness solver
     // has no genuinely quiet band to find — white stroked type landed straight
@@ -200,7 +201,7 @@ export async function nativeSlides(spec, root, outDir) {
     s.push(cta.svg);
     out.push(s.join(''));
   } else {
-    const p = await plate(path.join(photoDir, `${C.closer.photo}.jpg`), cache);
+    const p = await plate(path.isAbsolute(String(C.closer.photo)) ? String(C.closer.photo) : path.join(photoDir, `${C.closer.photo}.jpg`), cache);
     const s = [embed(p)];
     const c = await place(p, C.closer.lines, { zone: [H * 0.12, H * 0.56], max: 80, min: 44 });
     s.push(c.svg);

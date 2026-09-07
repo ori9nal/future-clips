@@ -2,6 +2,8 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { generateContent, toRenderable } from '../engine/generate.mjs';
+import { generateSet } from '../engine/art.mjs';
+import { costReport as imageCost } from '../engine/providers/image.mjs';
 import { render } from '../engine/styles/registry.mjs';
 import { costReport } from '../engine/providers/claude.mjs';
 
@@ -25,18 +27,46 @@ verdict.failures.forEach((f) => console.log(`    FAIL ${f}`));
 verdict.warnings.forEach((w) => console.log(`    warn ${w}`));
 if (failed) { console.error('  refusing to render a non-compliant set'); process.exit(2); }
 
-const photoDir = spec.assets?.photos?.dir ? path.join(ROOT, spec.assets.photos.dir) : null;
-const photos = photoDir && fs.existsSync(photoDir)
-  ? fs.readdirSync(photoDir).filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith('_')).map((f) => f.replace(/\.\w+$/, ''))
-  : [];
-const renderable = toRenderable(spec, content, { appScreen: args.screen ?? spec.assets?.app_screen, photos });
+const appScreen = args.screen ?? spec.assets?.app_screen;
+
+let photos = [];
+let artUsd = 0;
+if (args.art === 'ai') {
+  // Generate the imagery instead of sourcing it. Scenes come from the copy
+  // step, so the pictures illustrate the story rather than sitting beside it.
+  const scenes = [
+    content.hook?.scene,
+    ...(content.ranked ?? []).map((r) => r.scene),
+    content.closer?.scene,
+  ].map((s, i) => s || `the person, scene ${i + 1}`);
+  process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'}… `);
+  const art = await generateSet({
+    root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
+    subject: content.subject ?? 'A person in their late twenties, plain dark clothing.',
+    scenes, look: spec.assets?.look ?? 'cinematic',
+    quality: args.quality ?? 'medium', w: 1080, h: 1920, id,
+  });
+  artUsd = art.usd;
+  console.log(`$${art.usd.toFixed(4)} (${art.cached} cached)`);
+  // hand the renderer absolute paths rather than ids from a photo folder
+  photos = art.files;
+} else {
+  const photoDir = spec.assets?.photos?.dir ? path.join(ROOT, spec.assets.photos.dir) : null;
+  photos = photoDir && fs.existsSync(photoDir)
+    ? fs.readdirSync(photoDir).filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith('_')).map((f) => f.replace(/\.\w+$/, ''))
+    : [];
+}
+const renderable = toRenderable(spec, content, { appScreen, photos });
+if (args.art === 'ai') renderable.assets = { ...renderable.assets, photos: { dir: '.', credit: 'gpt-image-2' } };
 const outDir = path.join(ROOT, 'output/sets', `${id}-${styleId}`);
 const r = await render({ spec: renderable, root: ROOT, styleId, outDir });
 fs.writeFileSync(path.join(outDir, 'post.json'), JSON.stringify({
   caption: content.caption, bio: content.bio, hashtags: content.hashtags,
-  compliance: verdict, cost: { copy: +usd.toFixed(4) },
+  compliance: verdict,
+  cost: { copy: +usd.toFixed(4), art: +artUsd.toFixed(4), total: +(usd + artUsd).toFixed(4) },
 }, null, 2));
 console.log(`  ${r.files.length} slides · ${r.canvas.w}x${r.canvas.h} · ${((Date.now() - t) / 1000).toFixed(1)}s`);
 console.log(`  caption: ${content.caption}`);
 console.log(`  bio:     ${content.bio}`);
+console.log(`  cost: copy $${usd.toFixed(4)}${artUsd ? ` + art $${artUsd.toFixed(4)}` : ''} = $${(usd + artUsd).toFixed(4)}`);
 console.log(`  ${outDir}`);
