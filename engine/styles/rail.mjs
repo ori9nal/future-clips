@@ -120,11 +120,11 @@ export default {
      * the scrim is set from what is actually there.
      */
     async function scrimFor(file, y0, h) {
-      const { mean } = await scoreRegion(file, {
-        w: W, h: H, sharp, rect: { x: 0, y: Math.max(0, y0), w: W, h },
-      }).then((r) => ({ mean: r.range != null ? r.mean ?? null : null }))
-        .catch(() => ({ mean: null }));
-      const lum = mean ?? 128;
+      let lum = 128;
+      try {
+        const r = await scoreRegion(file, { w: W, h: H, sharp, rect: { x: 0, y: Math.max(0, y0), w: W, h } });
+        lum = r.mean ?? 128;
+      } catch { /* keep the default */ }
       // target: keep the band under ~95 mean luminance so white holds
       const need = Math.max(0, (lum - 70) / 185);
       return Math.min(0.86, 0.3 + need * 0.62);

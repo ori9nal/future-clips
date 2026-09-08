@@ -155,11 +155,18 @@ function scoreRect(data, info, frame, rect, skinWeight) {
       if (r > 95 && g > 40 && b > 20 && mx - mn > 15 && Math.abs(r - g) > 15 && r > g && r > b) skin++;
     }
   }
-  if (!n) return { range: 255, skin: 1, score: 1e6 };
+  if (!n) return { range: 255, skin: 1, mean: 128, score: 1e6 };
   lum.sort((a, b) => a - b);
   const p10 = lum[Math.floor(lum.length * 0.1)], p90 = lum[Math.floor(lum.length * 0.9)];
   const skinShare = skin / n;
-  return { range: Math.round(p90 - p10), skin: +skinShare.toFixed(3), score: +((p90 - p10) + skinShare * skinWeight).toFixed(1) };
+  // `mean` is returned as well as the spread. Callers that decide how dark a
+  // scrim needs to be want average brightness, not contrast range — and two
+  // styles were silently falling back to a default 128 because it was missing.
+  const mean = lum.reduce((s, v) => s + v, 0) / lum.length;
+  return {
+    range: Math.round(p90 - p10), skin: +skinShare.toFixed(3), mean: +mean.toFixed(1),
+    score: +((p90 - p10) + skinShare * skinWeight).toFixed(1),
+  };
 }
 
 /** Slide a window of a known height through a zone and rank the positions. */

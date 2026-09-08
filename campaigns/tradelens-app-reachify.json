@@ -97,13 +97,68 @@
     ],
     "mascot": null,
     "photos": {
-      "dir": "output/subjects/trader",
-      "credit": "Pexels",
-      "subject": "one trader, one session"
+      "dir": "output/aspire",
+      "credit": "gpt-image-2"
     },
-    "app_screen": "output/tradelens/app-analysis.png"
+    "app_screen": "output/tradelens/app-analysis.png",
+    "look": "cinematic"
   },
   "content": {
-    "style": "native"
+    "style": "feed",
+    "numbering": "countdown",
+    "hook": {
+      "photo": "car",
+      "lines": [
+        "4 trading apps I",
+        "will not uninstall"
+      ],
+      "sub": [
+        "saved me from a lot of bad entries"
+      ]
+    },
+    "ranked": [
+      {
+        "name": "Forex Factory",
+        "photo": "penthouse",
+        "icon": null,
+        "lines": [
+          "Every red folder news event, before it moves the market"
+        ]
+      },
+      {
+        "name": "TradingView",
+        "photo": "palms",
+        "icon": null,
+        "lines": [
+          "Cleanest charts out there, the setups just make sense"
+        ]
+      },
+      {
+        "name": "MetaTrader 5",
+        "photo": "boat",
+        "icon": null,
+        "lines": [
+          "Where the orders actually get placed, no fluff"
+        ]
+      },
+      {
+        "name": "TradeLens App",
+        "photo": "pool",
+        "icon": null,
+        "screen": "output/tradelens/app-analysis.png",
+        "showsApp": true,
+        "lines": [
+          "I screenshot the chart, it returns entry, stop and target"
+        ]
+      }
+    ],
+    "closer": {
+      "photo": "street",
+      "lines": [
+        "The chart gets read",
+        "before I click"
+      ],
+      "cta": "TradeLens App on iOS"
+    }
   }
 }
