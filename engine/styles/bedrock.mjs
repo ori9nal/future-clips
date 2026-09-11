@@ -1,139 +1,218 @@
-// BEDROCK — illustrated character over cream (the BEDROCK FORM reference).
+// BEDROCK — the @bedrock.form format, measured off the two reference sets.
 //
-// Cream ground, a badge lockup, a headline stacked black-over-accent with a
-// rule under it, a cel-shaded character, and a bullet list of the actual work.
+// Cream ground. A small badge. A headline in tall condensed caps at ~130px,
+// stacked BLACK over RED with a red rule under the red line. A cel-shaded
+// charcoal figure with glowing eyes filling most of the frame, doing the
+// exercise the slide teaches, with the working muscles tinted red. Under it a
+// bullet list of the actual work: "Push Ups — 4x15-20". Progression slides
+// are a 2x2 grid of LEVEL tags. The app slide is the figure holding a phone
+// beside a real phone with the app's own screen in it.
 //
-// This is the one style that cannot be built from stock photography: it needs a
-// single character in many poses. Those come from ONE generated sheet cut into
-// pieces (tools/make-character.mjs → cut-character.mjs), because a single
-// generation is self-consistent by construction — separate calls per pose is
-// exactly where character drift comes from.
+// The first build of this style had the headline at a third of that size and
+// the figure at a quarter, and read as a wireframe of the reference rather
+// than the reference. Every number below was taken off the real slides.
 //
-// The reference also tints the worked muscle group red. That is deliberately
-// not done here: an image model approximates anatomy, and a confidently wrong
-// muscle highlight on a fitness brand is worse than none.
+// The figure is GENERATED per slide (engine/character.mjs) from one reference
+// figure, so it does the movement named rather than a stock pose — that is
+// what makes the reference work: the character is always doing the thing.
 import fs from 'node:fs';
 import path from 'node:path';
-import { rect, line, text, stack, aside, list, image, grain, circle } from './kit.mjs';
+import { rect, line, text, image, grain, circle } from './kit.mjs';
+import { loadFace } from '../fonts.mjs';
+import { layoutWidth } from '../fit-text.mjs';
+import { FACES } from './kit.mjs';
+import { figure, figureRow } from '../character.mjs';
 
-/** Poses cut from the sheet, in filename order. */
-function poses(root, spec) {
-  const dir = spec.assets?.character?.dir;
-  if (!dir) return [];
-  const full = path.join(root, dir);
-  if (!fs.existsSync(full)) return [];
-  return fs.readdirSync(full).filter((f) => /^pose-\d+\.png$/.test(f))
-    .sort((a, b) => +a.match(/\d+/)[0] - +b.match(/\d+/)[0])
-    .map((f) => path.join(full, f));
-}
-
-/** Draw a cutout at a target height, preserving its own aspect. */
-function figure(sharpMeta, file, cx, bottom, targetH) {
-  const { width, height } = sharpMeta;
-  const h = targetH, w = Math.round((width / height) * h);
-  return image(file, Math.round(cx - w / 2), Math.round(bottom - h), w, h);
-}
+const W = 1080, H = 1350, M = 64;
 
 export default {
   id: 'bedrock',
   label: 'Bedrock',
-  canvas: { w: 1080, h: 1350 },
+  canvas: { w: W, h: H },
   niches: ['fitness', 'gym', 'calisthenics', 'supplements', 'health'],
-  blurb: 'Cream ground, badge lockup, black-over-accent headline and a cel-shaded character. Needs a generated character sheet.',
-  requires: ['assets.character.dir'],
+  blurb: 'Cream ground, huge condensed black-over-red headline, a cel-shaded character doing the exercise with the muscles tinted, sets x reps underneath.',
+  requires: ['assets.character.ref'],
 
   async slides(spec, ctx) {
-    const { sharp, root } = ctx;
+    const { sharp, root, outDir } = ctx;
     const C = spec.content;
-    const paper = '#F2EADC', ink = '#151313', muted = '#6E6660';
-    const acc = /^#[0-9a-f]{6}$/i.test(spec.assets.palette?.[1] ?? '') ? spec.assets.palette[1] : '#D92B1F';
-    const W = 1080, H = 1350, M = 66;
+    const paper = '#F3EBDD', ink = '#141212', muted = '#6B635C';
+    const acc = /^#[0-9a-f]{6}$/i.test(spec.assets?.palette?.[1] ?? '') ? spec.assets.palette[1] : '#E0261B';
+    const quality = spec.assets?.character?.quality ?? 'medium';
+    const cacheDir = path.join(root, 'output/gen/cache');
+    const figDir = path.join(outDir, 'figures');
+    fs.mkdirSync(figDir, { recursive: true });
 
-    const files = poses(root, spec);
-    if (!files.length) throw new Error(`bedrock needs a character: no poses under ${spec.assets?.character?.dir}`);
-    const metas = await Promise.all(files.map((f) => sharp(f).metadata()));
+    const refFile = path.join(root, spec.assets?.character?.ref ?? 'output/gen/character/ref.png');
+    if (!fs.existsSync(refFile)) throw new Error(`bedrock needs a reference figure at ${refFile} (tools/make-character.mjs)`);
+    let usd = 0;
 
-    const badge = () => circle(M + 20, 62, 20, { fill: ink })
-      + circle(M + 20, 56, 7, { fill: paper })
-      + rect(M + 12, 66, 16, 12, { r: 4, fill: paper })
-      + text('sansBold', M + 52, 71, spec.brand.toUpperCase(), { size: 22, fill: ink, ls: 2.4 });
+    const anton = loadFace(FACES.anton.file);
+    const widthOf = (s, size) => layoutWidth(anton, s, size);
 
-    const chrome = () => rect(0, 0, W, H, { fill: paper }) + grain(W, H, { op: 0.05 }) + badge();
+    /* ── chrome ─────────────────────────────────────────────────────── */
+    const badge = () => {
+      const name = (spec.brand ?? 'BRAND').toUpperCase();
+      return circle(M + 14, 58, 14, { fill: ink }) + circle(M + 14, 53, 5, { fill: paper }) + rect(M + 7, 61, 14, 9, { r: 3, fill: paper })
+        + text('sansBold', M + 40, 66, name, { size: 22, fill: ink, ls: 2 });
+    };
+    const chrome = () => rect(0, 0, W, H, { fill: paper }) + grain(W, H, { op: 0.045 }) + badge();
 
     /**
-     * Headline stacked black over accent with a rule under the accent line —
-     * the reference's signature move, and the reason the copy is written as
-     * two short lines rather than one long one.
+     * The headline. Lines are set in Anton caps, centred, the LAST line in
+     * the accent with a rule under it. Size is fitted to the widest line so
+     * "CALISTHENICS" and "PUSH DAY" both fill the measure; the reference runs
+     * 120–150px and never below about 96.
      */
-    const heading = (lines, y, max) => {
-      const h = stack('displayCondXB', lines.map((l) => l.toUpperCase()), { x: M, y, w: W - M * 2, h: 320 },
-        { max, min: 40, lineHeight: 1.0, fill: (_, i) => (i === lines.length - 1 ? acc : ink) });
-      const lastRow = h.rows[h.rows.length - 1];
-      const rule = line(M, Math.round(lastRow.y + h.size * 0.16), M + Math.min(lastRow.width, W - M * 2),
-        Math.round(lastRow.y + h.size * 0.16), { stroke: acc, sw: 6 });
-      return { svg: h.svg + rule, bottom: h.bottom + 14, size: h.size };
+    const headline = (lines, top, { max = 150, min = 84, accentLast = true, sub } = {}) => {
+      // a line past ~16 characters breaks at its last space — the model
+      // writes "DAY 6+7 — FULL BODY," and the size collapses to fit it
+      const L = lines.flatMap((l) => {
+        const u = String(l).toUpperCase().replace(/\s*[—–-]\s*$/, '');
+        if (u.length <= 16 || !u.includes(' ')) return [u];
+        const cut = u.lastIndexOf(' ', 16);
+        return cut > 3 ? [u.slice(0, cut), u.slice(cut + 1)] : [u];
+      }).slice(0, 3);
+      const measure = W - M * 2;
+      let size = max;
+      while (size > min && Math.max(...L.map((l) => widthOf(l, size))) > measure) size -= 2;
+      const lh = 0.98;
+      const cap = anton.capHeight / anton.upm;
+      let y = top + size * cap;
+      let svg = '';
+      L.forEach((l, i) => {
+        const isAcc = accentLast && i === L.length - 1 && L.length > 1;
+        svg += text('anton', W / 2, Math.round(y), l, { size, fill: isAcc ? acc : ink, anchor: 'middle' });
+        if (isAcc) {
+          const w = widthOf(l, size);
+          svg += line(Math.round(W / 2 - w / 2), Math.round(y + size * 0.14), Math.round(W / 2 + w / 2), Math.round(y + size * 0.14), { stroke: acc, sw: Math.max(6, Math.round(size * 0.055)) });
+        }
+        y += size * lh;
+      });
+      let bottom = top + L.length * size * lh;
+      if (sub) {
+        svg += text('sansSemi', W / 2, Math.round(bottom + 30), sub, { size: 30, fill: ink, anchor: 'middle' });
+        bottom += 46;
+      }
+      return { svg, bottom, size };
+    };
+
+    /** Bullet list, bold, accent dots — "Push Ups — 4x15-20". */
+    const bullets = (items, x, y, { size = 36, gap = 20, fill = ink } = {}) => {
+      let svg = '', yy = y;
+      for (const it of items) {
+        svg += circle(x + 10, Math.round(yy - size * 0.34), 9, { fill: ink });
+        svg += text('sansBold', x + 40, Math.round(yy), it, { size, fill });
+        yy += size + gap;
+      }
+      return { svg, bottom: yy };
+    };
+
+    /** A generated figure placed to fit a box, bottom-aligned, centred on cx. */
+    const place = async (fig, cx, bottom, maxH, maxW) => {
+      const sc = Math.min(maxH / fig.h, maxW / fig.w);
+      const w = Math.round(fig.w * sc), h = Math.round(fig.h * sc);
+      return image(fig.file, Math.round(cx - w / 2), Math.round(bottom - h), w, h);
+    };
+
+    const fig = async (n, pose, muscles) => {
+      const r = await figure({ root, cacheDir, refFile, pose, muscles, accent: acc, quality, outFile: path.join(figDir, `fig-${n}.png`), label: `${spec.id}-fig${n}` });
+      usd += r.usd;
+      return r;
     };
 
     const out = [];
-    // The campaign names the pose per slide (1-based). Round-robin put the
-    // flexing pose on the legs slide, which reads as carelessness on a fitness
-    // brand — the content knows which pose it wants, so let it say.
-    const pick = (want, fallback) => {
-      const n = Number(want);
-      return Number.isInteger(n) && n >= 1 && n <= files.length ? n - 1 : fallback % files.length;
-    };
+    const total = C.ranked.length + 2;
 
-    /* cover */
+    /* ── cover ──────────────────────────────────────────────────────── */
     {
       const s = [chrome()];
-      const h = heading(C.hook.lines, 150, 132);
+      const h = headline(C.hook.lines, 112, { sub: C.hook.sub?.[0] });
       s.push(h.svg);
-      if (C.hook.sub?.length) {
-        s.push(aside('sansMed', C.hook.sub[0], M, h.bottom + 30, W - M * 2 - 120,
-          { big: 34, mid: 30, small: 26, fill: muted }).svg);
-      }
-      const i = pick(C.hook.pose, 0);
-      s.push(figure(metas[i], files[i], W / 2, H - 40, 720));
+      const f = await fig(1, C.hook.pose ?? 'standing facing the viewer, one hand raised open toward the camera', C.hook.muscles);
+      s.push(await place(f, W / 2, H - 30, H - h.bottom - 60, W - M * 2));
       out.push(s.join(''));
     }
 
-    /* body */
-    C.ranked.forEach((item, n) => {
+    /* ── body ───────────────────────────────────────────────────────── */
+    for (let i = 0; i < C.ranked.length; i++) {
+      const item = C.ranked[i];
       const s = [chrome()];
-      const words = item.name.split(' ');
-      const lines = words.length > 2
-        ? [words.slice(0, Math.ceil(words.length / 2)).join(' '), words.slice(Math.ceil(words.length / 2)).join(' ')]
-        : [item.name];
-      const h = heading(lines, 132, 104);
-      s.push(h.svg);
+      const lines = item.headline ?? (item.name.split(' ').length > 2
+        ? [item.name.split(' ').slice(0, -2).join(' '), item.name.split(' ').slice(-2).join(' ')]
+        : [item.name]);
 
-      const i = pick(item.pose, n + 1);
-      // the figure sits right, the work sits left — the reference never centres
-      // a body slide, because the list is the payload
-      s.push(figure(metas[i], files[i], W * 0.71, H - 30, 640));
-      const l = list('sansSemi', item.lines, M, h.bottom + 40, W * 0.52, {
-        size: 27, fill: ink, marker: '•', markerFill: acc, markerSize: 30, gap: 20, indent: 34, lineHeight: 1.4,
-      });
-      s.push(l.svg);
-      if (item.score) {
-        s.push(rect(M, l.bottom + 34, 168, 58, { r: 6, fill: acc }));
-        s.push(text('sansBold', M + 84, l.bottom + 73, item.score, { size: 27, fill: '#FFFFFF', anchor: 'middle' }));
+      if (item.screen) {
+        // the app: headline, a short line, the figure holding a phone at left
+        // and a real phone at right with the app's own screen in it
+        const h = headline(lines, 112, { max: 132 });
+        s.push(h.svg);
+        let y = h.bottom + 26;
+        for (const l of (item.lines ?? []).slice(0, 3)) { s.push(text('sansMed', M, Math.round(y), l, { size: 28, fill: ink })); y += 38; }
+        const f = await fig(i + 2, item.pose ?? 'standing, holding a phone up and looking at it', item.muscles);
+        s.push(await place(f, W * 0.30, H - 60, H - y - 90, W * 0.5));
+        const src = path.join(root, item.screen);
+        const meta = await sharp(src).metadata();
+        const ph = Math.round(H - y - 110), pw = Math.round(ph * (meta.width / meta.height));
+        const px = Math.round(W * 0.92 - pw), py = Math.round(y + 20);
+        const bez = 16;
+        s.push(rect(px - bez, py - bez, pw + bez * 2, ph + bez * 2, { r: 64, fill: ink }));
+        s.push(`<g clip-path="inset(0 round 48px)">${image(src, px, py, pw, ph)}</g>`);
+        s.push(rect(px + pw / 2 - 90, py + 14, 180, 34, { r: 17, fill: ink }));
+        out.push(s.join(''));
+        continue;
       }
-      out.push(s.join(''));
-    });
 
-    /* closer */
-    {
-      const s = [chrome()];
-      const h = heading(C.closer.lines, 150, 124);
+      if (item.layout === 'grid' && (item.levels ?? item.lines)?.length >= 4) {
+        // progression: LEVEL 1-4, each a small figure with a caption
+        const h = headline(lines, 112, { max: 132 });
+        s.push(h.svg);
+        const lv = (item.levels ?? item.lines).slice(0, 4);
+        const poses = lv.map((l) => (typeof l === 'string' ? l : l.pose ?? l.name));
+        const captions = lv.map((l) => (typeof l === 'string' ? l : `${l.name} — ${l.reps ?? ''}`.trim()));
+        const row = await figureRow({ root, cacheDir, refFile, poses: poses.map((p) => `doing ${p.replace(/\s*[—-]\s*\d.*$/, '')}`), muscles: item.muscles, accent: acc, quality, outDir: path.join(figDir, `grid-${i + 2}`), label: `${spec.id}-grid${i + 2}` });
+        usd += row.usd;
+        const gy = h.bottom + 30, gh = H - gy - 40;
+        const cw = (W - M * 2) / 2, ch = gh / 2;
+        for (let k = 0; k < 4; k++) {
+          const cx = M + cw * (k % 2) + cw / 2, cy = gy + ch * Math.floor(k / 2);
+          s.push(rect(Math.round(cx - cw / 2 + 10), Math.round(cy + 6), 118, 36, { r: 4, fill: ink }));
+          s.push(text('sansBold', Math.round(cx - cw / 2 + 69), Math.round(cy + 32), `LEVEL ${k + 1}`, { size: 20, fill: paper, anchor: 'middle', ls: 1 }));
+          const p = row.parts[k];
+          if (p) s.push(await place(p, cx, Math.round(cy + ch - 56), ch - 110, cw - 40));
+          s.push(text('sansBold', Math.round(cx), Math.round(cy + ch - 18), captions[k], { size: 22, fill: ink, anchor: 'middle' }));
+        }
+        out.push(s.join(''));
+        continue;
+      }
+
+      // list: headline, the figure big in the middle, the work underneath
+      const h = headline(lines, 112, { max: 140 });
       s.push(h.svg);
-      const i = pick(C.closer.pose, C.ranked.length + 1);
-      s.push(figure(metas[i], files[i], W / 2, H - 150, 640));
-      s.push(rect(M, H - 130, W - M * 2, 78, { r: 8, fill: ink }));
-      s.push(text('sansBold', W / 2, H - 79, C.closer.cta, { size: 30, fill: paper, anchor: 'middle' }));
+      const items = (item.lines ?? []).slice(0, 5);
+      const listH = items.length ? items.length * 56 + 24 : 0;
+      const f = await fig(i + 2, item.pose ?? `doing ${item.name.toLowerCase()}`, item.muscles);
+      const figBottom = H - listH - 40;
+      s.push(await place(f, W / 2, figBottom, figBottom - h.bottom - 30, W - M * 2));
+      if (items.length) s.push(bullets(items, M + 40, figBottom + 56).svg);
+      if (item.score && !items.length) s.push(text('sansBold', W / 2, H - 70, item.score, { size: 30, fill: acc, anchor: 'middle' }));
       out.push(s.join(''));
     }
 
+    /* ── closer ─────────────────────────────────────────────────────── */
+    {
+      const s = [chrome()];
+      const h = headline(C.closer.lines?.length ? C.closer.lines : ['FOLLOW', 'FOR MORE'], 112, { max: 150 });
+      s.push(h.svg);
+      s.push(text('sansSemi', M, Math.round(h.bottom + 34), 'SAVE THIS FOR LATER', { size: 22, fill: muted, ls: 2 }));
+      const f = await fig(total, C.closer.pose ?? 'standing, flexing both arms, front double biceps', C.closer.muscles ?? 'biceps and shoulders');
+      s.push(await place(f, W / 2, H - 130, H - h.bottom - 200, W - M * 2));
+      s.push(rect(M, H - 108, W - M * 2, 68, { r: 8, fill: ink }));
+      s.push(text('sansBold', W / 2, H - 64, C.closer.cta ?? `Follow @${spec.requirements?.required_mention?.replace('@', '') ?? spec.brand}`, { size: 28, fill: paper, anchor: 'middle' }));
+      out.push(s.join(''));
+    }
+
+    ctx.artUsd = usd;
     return out;
   },
 };

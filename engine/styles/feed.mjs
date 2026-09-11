@@ -87,6 +87,13 @@ export default {
 
     const capFace = loadFace(FACES[HEAD].file);
 
+    // Stroke weight varies by set: set 08 is a hairline, the GYM-niche example
+    // is a fat CapCut stroke. Both are native; a brand can pin one.
+    const seedHash = [...`${spec.id}:${(C.hook?.lines ?? []).join(' ')}`].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 9973, 7);
+    const strokeMode = spec.assets?.stroke ?? (T > 1 && seedHash % 2 ? 'heavy' : 'thin');
+    const OUTLINE_W = strokeMode === 'heavy' ? 0.11 : OUTLINE;
+    spec.content.stroke = strokeMode;
+
     /**
      * A caption block, centred, small, thinly outlined.
      *
@@ -104,7 +111,7 @@ export default {
       // The outline thickens on a bright ground. A single thin outline is right
       // over a dark car and disappears entirely over a sunset sky, which is
       // exactly where the first pass lost three slides.
-      const sw = +(size * (OUTLINE + boost)).toFixed(2);
+      const sw = +(size * (OUTLINE_W + boost)).toFixed(2);
       let y = cy + size * (ff.capHeight / ff.upm);
       let svg = '';
       for (const l of wrapped) {
@@ -183,13 +190,32 @@ export default {
     const total = C.ranked.length + 2;
     const numbering = C.numbering ?? 'countdown';
 
-    /* hook — one short line high in the frame, nothing else */
+    /**
+     * The quietest of a few bands for a caption block. A fixed top put the
+     * hook straight over the face in every mirror selfie; the reference
+     * hooks sit across the chest or the mid-frame, wherever the picture is
+     * calm. Busy (range) matters more than bright — bright gets a scrim.
+     */
+    const quietBand = async (f, fracs, bandH) => {
+      let top = Math.round(H * fracs[0]), best = Infinity;
+      for (const frac of fracs) {
+        const y = Math.round(H * frac);
+        try {
+          const r = await scoreRegion(f, { w: W, h: H, sharp, rect: { x: 0, y, w: W, h: bandH } });
+          const cost = r.range + Math.max(0, r.mean - 110) * 0.6 + (r.skin ?? 0) * 120;
+          if (cost < best) { best = cost; top = y; }
+        } catch { /* keep the default */ }
+      }
+      return top;
+    };
+
+    /* hook — one short block wherever the frame is calm, nothing else */
     {
       const f = await frame(C.hook.photo, 1);
       const s = [image(f, 0, 0, W, H)];
-      const top = Math.round(H * 0.08);
+      const top = await quietBand(f, [0.08, 0.30, 0.42, 0.54], Math.round(H * 0.22));
       const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.22));
-      if (scrim) s.push(rect(0, 0, W, Math.round(H * 0.32), { fill: '#000000', op: scrim }));
+      if (scrim) s.push(rect(0, Math.max(0, top - 60), W, Math.round(H * 0.32), { fill: '#000000', op: scrim }));
       const hk = caption(C.hook.lines, top, { size: 46, boost });
       s.push(hk.svg);
       if (C.hook.sub?.length) {
@@ -250,16 +276,7 @@ export default {
         // Three candidate bands; take the quietest. A fixed 30% put the
         // MetaTrader caption straight across a wall of glowing monitors.
         const bandH = Math.round(H * 0.26);
-        let top = Math.round(H * 0.30), best = Infinity;
-        for (const frac of [0.22, 0.34, 0.50]) {
-          const y = Math.round(H * frac);
-          try {
-            const r = await scoreRegion(f, { w: W, h: H, sharp, rect: { x: 0, y, w: W, h: bandH } });
-            // busy (range) matters more than bright here; bright is fixable with a scrim
-            const cost = r.range + Math.max(0, r.mean - 110) * 0.6;
-            if (cost < best) { best = cost; top = y; }
-          } catch { /* keep the default */ }
-        }
+        const top = await quietBand(f, [0.10, 0.22, 0.34, 0.50], bandH);
         const { boost, scrim } = await contrastAt(f, top - 20, bandH);
         if (scrim) {
           s.push(`<defs><linearGradient id="fs${i}" x1="0" y1="0" x2="0" y2="1">` +
@@ -294,9 +311,9 @@ export default {
       } else {
         const f = await frame(C.closer.photo, total);
         const s = [image(f, 0, 0, W, H)];
-        const top = Math.round(H * 0.34);
+        const top = await quietBand(f, [0.12, 0.34, 0.46, 0.58], Math.round(H * 0.24));
         const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.24));
-        if (scrim) s.push(rect(0, Math.round(H * 0.22), W, Math.round(H * 0.40), { fill: '#000000', op: scrim }));
+        if (scrim) s.push(rect(0, Math.max(0, top - 80), W, Math.round(H * 0.40), { fill: '#000000', op: scrim }));
         const closerLines = C.closerRank && C.closer.lines.length
           ? [`${C.closerRank}. ${C.closer.lines[0]}`, ...C.closer.lines.slice(1)]
           : C.closer.lines;

@@ -21,6 +21,14 @@ const clamp = (v) => (v < 0 ? 0 : v > 255 ? 255 : v);
 export const LOOKS = {
   none: null,
 
+  /** No grade. A touch of grain and a hair of contrast, which is what a phone JPEG has. */
+  phone: {
+    lift: [0, 0, 0], gain: [1.0, 1.0, 1.0], gamma: [1.0, 1.0, 1.0],
+    contrast: 0.04, saturation: 1.0,
+    split: { shadows: [0, 0, 0], highlights: [0, 0, 0] },
+    vignette: 0, grain: 5,
+  },
+
   /** Warm highlights, cool shadows, slightly crushed black. The default film look. */
   cinematic: {
     lift: [0.045, 0.040, 0.062], gain: [1.02, 1.00, 0.96], gamma: [1.0, 1.0, 1.02],

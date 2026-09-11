@@ -87,5 +87,5 @@ export async function render({ spec, root, styleId, outDir }) {
     }).render().asPng());
     files.push(file);
   });
-  return { files, canvas: style.canvas, style: style.id };
+  return { files, canvas: style.canvas, style: style.id, artUsd: ctx.artUsd ?? 0 };
 }

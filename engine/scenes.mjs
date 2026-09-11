@@ -48,10 +48,38 @@ export const WORLDS = {
 };
 
 /**
- * Gym worlds. The reference gym sets are one gym, one session — that is their
- * coherence — so the world here is a LOCATION described once and appended to
- * every frame. Three gyms so consecutive sets are not the same room, and two
- * of the three are bright, because "always dark" was the complaint.
+ * The gym reference is NOT one session. Set 08 runs a black tee, a maroon
+ * tee, a grey hoodie, a white tee and a bedroom mirror across seven frames;
+ * the GYM-niche examples go gym mirror → locker room → shirtless on a boat.
+ * The coherence is ONE PERSON — same face, same build — across many days of
+ * his life. Round two's "same outfit, same gym, same hour" read as staged,
+ * which is exactly what "too AI" means. So a gym frame is a DAY: a place, an
+ * outfit, a light, all different from the frame before.
+ */
+export const DAYS = [
+  { kind: 'gym-hoodie',  scene: 'Gym mirror selfie, phone held up at chest height, face visible, wearing a black oversized hoodie, a busy commercial gym behind with other people blurred.' },
+  { kind: 'locker',      scene: 'Shirtless mirror selfie in a gym locker room, phone in one hand, lockers and a bench behind, harsh overhead fluorescent light.' },
+  { kind: 'boat',        scene: 'Shirtless, sat on the edge of a small boat on open blue water, sunglasses, midday sun, shot by a friend from a few feet away.' },
+  { kind: 'gym-tank',    scene: 'Gym mirror selfie in a grey stringer tank top, phone held low, black rubber floor and a dumbbell rack behind.' },
+  { kind: 'car',         scene: 'Sat in the driver seat of a car after training, white t-shirt, seatbelt off, phone held up, evening light through the windscreen.' },
+  { kind: 'home-mirror', scene: 'Bedroom mirror flex, shirtless, one arm flexed, phone in the other hand, a plain bedroom behind, warm lamp light.' },
+  { kind: 'arm',         scene: 'Tight close-up of his forearm and bicep mid dumbbell curl, veins visible, the sleeve of a black t-shirt, gym blurred behind, no face.' },
+  { kind: 'back',        scene: 'Shirtless back from behind in a gym mirror, lats flared, phone visible over the shoulder, no face.' },
+  { kind: 'beach',       scene: 'Shirtless on a beach, walking toward the camera, phone in hand, bright sun, sea behind, shot by a friend.' },
+  { kind: 'hotel-gym',   scene: 'Mirror selfie in a small hotel gym, compression t-shirt, treadmills behind, big window with daylight.' },
+  { kind: 'outdoor-bar', scene: 'Hanging from an outdoor pull-up bar in a park, black shorts, no shirt, overcast daylight, shot from below by a friend.' },
+  { kind: 'stairs',      scene: 'Sat on the gym stairs between sets, black hoodie half-zipped, headphones on, looking at his phone, shot by a friend.' },
+];
+
+/**
+ * Anatomy frames are the same person too, but for these the outfit is whatever
+ * sleeve is in shot. The phone-photo look is appended to every frame.
+ */
+export const PHONE_LOOK = 'Amateur iPhone photo, not a photoshoot: slightly grainy, slightly soft, harsh or mixed lighting, unretouched real skin, imperfect framing, real cluttered surroundings, no studio look, no colour grading.';
+
+/**
+ * Gym worlds — kept for the `session` mode a brand can ask for by name, but
+ * the default gym set is DAYS, not a gym.
  */
 export const GYMS = {
   bright: {
@@ -229,20 +257,37 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
   const world = worldFor(niche, seed);
 
   if (bank === BANK.fitness) {
-    // One lifter, one gym, one session. The hook is the mirror selfie (it is
-    // also the anchor the other frames are edited from, so it must show the
-    // outfit); every ranked frame is the muscle its heading names; the closer
-    // is a second mirror frame, sat down. Kinds repeat on purpose.
-    const mirror = bank.find((b) => b.kind === 'mirror').scene;
+    // One person, many days. The hook is a gym mirror selfie with the face in
+    // it — that is the anchor every other frame is edited from, so it has to
+    // show who he is. From there the set alternates between a DAY (a new
+    // place and a new outfit) and an anatomy close-up of the muscle the
+    // heading names, so the swipe reads as his camera roll: a curl, the
+    // locker room, a back shot, the boat. Never the same room twice in a row.
+    const days = [...DAYS.filter((d) => !/^gym-hoodie|^back|^arm/.test(d.kind))];
+    let dc = hash(seed + '|day') % days.length;
+    const nextDay = () => { const d = days.splice(dc % days.length, 1)[0]; dc = hash(seed + d.kind) % Math.max(1, days.length); return d.scene; };
+    // Set 08's five arm close-ups are five different days too — a black tee,
+    // a maroon tee, a grey hoodie sleeve, a white tee — so an anatomy frame
+    // rotates its sleeve and its room the same way a day frame does.
+    const SLEEVES = ['the sleeve of a black t-shirt', 'the sleeve of a grey hoodie pushed up', 'shirtless', 'the sleeve of a white t-shirt', 'a navy compression top', 'a maroon t-shirt'];
+    const ROOMS = ['in a busy commercial gym', 'in a garage home gym', 'in a dark gym with red LED strips', 'in a small hotel gym with daylight', 'in an old-school iron gym'];
+    let ac = hash(seed + '|anat');
     const out = scenes.map((scene, i) => {
       let s;
-      if (i === 0) s = mirror;
-      else if (i === scenes.length - 1) s = 'A gym mirror selfie sat on a bench between sets, phone in front of the face, the gym behind.';
-      else s = anatomyFor(headings[i - 1]) ?? anatomyFor(scene) ?? anatomyFor(headings[i - 1], { fallback: true })
-        ?? PHYSIQUE[(i - 1 + hash(seed)) % PHYSIQUE.length];
-      return `${s} ${world.prompt}`;
+      if (i === 0) s = DAYS[0].scene;
+      else if (i === scenes.length - 1) s = nextDay();
+      else {
+        // a heading that names an exercise or a muscle shows it; any other
+        // heading ("Sleep", "Writing every set down") is a day in his life
+        const anat = anatomyFor(headings[i - 1]) ?? anatomyFor(scene);
+        if (anat) {
+          const k = (ac++) % SLEEVES.length;
+          s = `${anat.replace(/,? no face\.?$/i, '')}, wearing ${SLEEVES[k]}, ${ROOMS[k % ROOMS.length]}, a different day from the reference, no face.`;
+        } else s = nextDay();
+      }
+      return `${s} ${PHONE_LOOK}`;
     });
-    return { scenes: out, world, replaced: out.map((_, i) => i) };
+    return { scenes: out, world: { id: 'life', label: 'his camera roll', look: 'phone' }, replaced: out.map((_, i) => i) };
   }
 
   const eligible = bank.filter((b) => b.worlds.includes(world.time));

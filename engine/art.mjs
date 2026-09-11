@@ -17,6 +17,7 @@ import { generate, sizeFor } from './providers/image.mjs';
 
 /** Photographic direction shared by every frame, so the set grades as one. */
 const LOOK = {
+  phone: 'Amateur iPhone photo. Slightly grainy, slightly soft, harsh mixed lighting, no retouching, no colour grade, candid, imperfect framing, a real cluttered place.',
   cinematic: 'Cinematic phone photo, 35mm, natural light, shallow depth of field, muted film grade, fine grain.',
   steel: 'Cinematic photo, cool blue-grey grade, hard directional light, deep shadows, high contrast, fine grain.',
   sunlit: 'Warm natural photo, golden window light, soft shadows, gentle contrast, airy and clean.',
@@ -100,9 +101,17 @@ export async function generateSet(o) {
     // mirror selfie four times. So a close-up keeps the person by skin, build
     // and clothing, and is told outright that the face is not in the frame.
     const closeUp = /close-up|no face|from behind|from the waist down|neck down/i.test(scenes[i]);
-    const keep = closeUp
-      ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scenes[i]} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
-      : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scenes[i]}`;
+    // `days` mode: the person is the constant, everything else changes. The
+    // scene names its own outfit and place, and the model is told the
+    // reference's clothing and room are NOT to be kept — otherwise it copies
+    // the anchor's hoodie into the boat shot.
+    const keep = o.days
+      ? (closeUp
+        ? `Same person as the reference image — same skin tone, same build, same body hair — photographed on a DIFFERENT day in a DIFFERENT place. Do not copy the reference's clothing, room or lighting. ${scenes[i]} The face is not in the frame; the body part named fills the frame.`
+        : `The SAME PERSON as the reference image — same face, same hair, same build, same skin tone — photographed on a DIFFERENT day. Different clothes, different place, different light from the reference; do not copy the reference's outfit or room. ${scenes[i]}`)
+      : closeUp
+        ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scenes[i]} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
+        : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scenes[i]}`;
     const r = await generate({
       root, cacheDir, size, quality, label: `${id}-${i}`,
       refs: [anchor.file],

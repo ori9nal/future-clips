@@ -29,13 +29,32 @@ const SHAPE = `{
   "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
 }`;
 
-const SYSTEM = `You write carousel copy for a paid creator campaign.
+/**
+ * The BEDROCK shape. The format direction in the user turn described these
+ * fields and the model ignored every one of them, because the system prompt
+ * said "exactly this shape" and meant it. A format that needs fields puts
+ * them in the shape, not in an aside.
+ */
+const SHAPE_BEDROCK = `{
+  "subject": "none",
+  "hook":   { "headline": ["TWO OR THREE", "SHORT CAPS LINES"], "lines": [], "sub": ["one short line, e.g. zero equipment needed"],
+              "pose": "what the character is doing, one clause", "muscles": "working muscles, e.g. chest and triceps", "scene": "none" },
+  "ranked": [ { "name": "headline joined with a space", "headline": ["MONDAY", "PUSH DAY"], "score": "",
+                "layout": "list | grid",
+                "lines": ["Push Ups — 4x15-20", "Pike Push Ups — 3x10", "Diamond Push Ups — 3x max reps"],
+                "levels": [ { "name": "Incline Push Ups", "reps": "3x15", "pose": "push-up with hands on a box" } ],
+                "pose": "mid push-up, arms bent, chest near the floor", "muscles": "chest and triceps",
+                "role": "body | app", "showsApp": false, "scene": "none" } ],
+  "numbering": "none",
+  "closer": { "headline": ["FOLLOW", "FOR MORE"], "lines": [], "pose": "standing, flexing both arms", "muscles": "biceps and shoulders", "cta": "the call to action" },
+  "caption": "one short line for the post caption",
+  "bio": "the profile bio line",
+  "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
+}`;
 
-Return ONE JSON object in exactly this shape, no prose and no code fence:
+const SHAPES = { bedrock: SHAPE_BEDROCK };
 
-${SHAPE}
-
-How to write it:
+const RULES_NATIVE = `How to write it:
 - Slide 1 is the hook. It has to stop a scroll on its own, at thumbnail size, with no context.
 - Lines are hand-broken for a slide, not sentences. Short. No line longer than about six words
   unless it is body copy.
@@ -61,7 +80,35 @@ How to write it:
 - Scenes must differ from each other in place, time of day and framing. A set where every frame
   is the same room reads as one photo repeated.
 - The app slide's scene is ignored (it renders the app screenshot), so keep it short.
+- Exactly 5 hashtags./^How to write it:`;
+
+const RULES_BEDROCK = `How to write it (BEDROCK format — an illustrated character teaches a programme):
+- INSTRUCTIONAL, not first person. No story, no "I". The character does the work; the copy states it.
+- "headline": two short CAPS lines that stack, at most 14 characters each: ["MONDAY","PUSH DAY"],
+  ["CHEST","PROGRESSION"], ["HIT EVERY","MUSCLE"]. The second line is the punch. A hook may have three.
+- "lines" on a "list" slide are the actual work, one exercise per line, EXACTLY like
+  "Push Ups — 4x15-20" or "Superman Hold — 3x20 sec". Three to five lines. No sentences.
+- "layout": "grid" on at most two slides — a progression of ONE movement through four "levels"
+  from easiest to hardest, each {"name","reps","pose"}; a grid slide has empty "lines".
+- "pose" is physical and specific: "mid push-up, arms bent, chest near the floor", "hanging from a bar
+  at the top of a pull-up", "bottom of a squat, arms out front". "muscles" names what that works.
+- Exactly one ranked entry has "role": "app" and "showsApp": true at the position you are told; its
+  "pose" is "standing, holding a phone up and looking at it" and its lines are two short statements.
+- The set is ONE programme: a weekly split, a muscle progression, a plan. Every slide is a day or a
+  movement. hook + ranked + closer must total the slide count, so ranked has (count - 2) entries.
+- "name" is the headline joined with a space. "score" is "". No emoji anywhere.
 - Exactly 5 hashtags.`;
+
+const systemFor = (styleId) => `You write carousel copy for a paid creator campaign.
+
+Return ONE JSON object in exactly this shape, no prose and no code fence:
+
+${SHAPES[styleId] ?? SHAPE}
+
+${styleId === 'bedrock' ? RULES_BEDROCK : RULES_NATIVE}`;
+
+/** Kept for callers that import it; the real prompt is built per style. */
+const SYSTEM = systemFor('native');
 
 /**
  * @param {object} o
@@ -110,19 +157,49 @@ const SCENE_DIRECTION = {
     'brand voice. Lowercase "lol" energy is fine; exclamation marks are not.',
     'The HOOK is a count plus a promise: "Top 5 PEAK exercises for BICEPS", "7 muscles I regret',
     'skipping", "4 things that actually moved my lifts". Two short lines.',
-    'The "subject" field IS used: one lifter, described once — build, hair, skin tone, one outfit',
-    '(top, shorts, shoes), no logos. He appears in every frame, so keep it plain and specific.',
+    'The "subject" field IS used: one lifter, described once — age, build, hair, skin tone, facial',
+    'hair. NO clothing: he is photographed across many different days and wears something different',
+    'in every frame. Just the person.',
   ].join(' '),
   native: 'Scenes are real gym or lifestyle moments a phone would catch. Vary the place and framing every slide.',
+  // The @bedrock.form format: an illustrated character teaches a programme.
+  // No photography, no person, no story — a headline, a figure doing the
+  // movement, and the sets x reps. Extra fields ride along on each item.
+  bedrock: [
+    'This is the BEDROCK format: an illustrated cel-shaded character on a cream page teaches a',
+    'programme. There is NO photograph and NO real person, so "scene" and "subject" are unused —',
+    'write "none". Instead every slide carries these EXTRA fields:',
+    '"headline": two very short lines in CAPS that stack, e.g. ["MONDAY","PUSH DAY"], ["CHEST","PROGRESSION"],',
+    '["HIT EVERY","MUSCLE"] — at most 14 characters per line, the second line is the punch.',
+    '"pose": what the character is physically doing in one clause, e.g. "mid push-up, arms bent, chest',
+    'near the floor" or "hanging from a pull-up bar at the top of a pull-up" or "standing, arms crossed".',
+    '"muscles": the working muscles as a short list, e.g. "chest and triceps", "lats and biceps".',
+    '"layout": "list" for a headline + character + bullet list, or "grid" for a 2x2 progression of four',
+    'levels of one movement (use "grid" for at most two slides).',
+    'For "list" slides, "lines" are the actual work, one exercise per line in this exact form:',
+    '"Push Ups — 4x15-20", "Pull Ups — 4x max reps", "Superman Hold — 3x20 sec". Three to five lines.',
+    'For "grid" slides, "levels" is an array of four {"name","reps","pose"} from easiest to hardest, e.g.',
+    '{"name":"Incline Push Ups","reps":"3x15","pose":"push-up with hands on a box"}, and "lines" is empty.',
+    'The hook has "headline" (two lines, e.g. ["THE 7-DAY","CALISTHENICS"] then a third short line is',
+    'allowed), "sub" one short line like "zero equipment needed", "pose" and "muscles" as well.',
+    'The closer has "headline" ["FOLLOW","FOR MORE"] or similar, "pose" (a flex) and the CTA.',
+    '"name" on each item is the headline joined with a space. Ratings/"score" are unused; write "".',
+    'The whole set is ONE programme or ONE lesson: a weekly split, a muscle progression, a plan.',
+    'Bold, instructional, no first-person story. No emoji.',
+  ].join(' '),
 };
 
 const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|nutrition|health|muscle/i;
 
-export async function generateContent({ root, spec, instruction, slideCount, attempts = 3, model = 'claude-opus-5' }) {
+export async function generateContent({ root, spec, instruction, slideCount, attempts = 3, model = 'claude-opus-5', styleId: wanted }) {
   const constraints = constraintsFor(spec, slideCount);
-  const styleId = spec.content?.style ?? 'native';
+  // The style the CALLER is rendering, not the one the campaign file happens
+  // to default to. Every gym feed round wrote its copy under the "native"
+  // direction because the APEX file says native and make-set said feed.
+  const styleId = wanted ?? spec.content?.style ?? 'native';
   const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(spec.niche ?? '') && SCENE_DIRECTION['feed:fitness'])
     || SCENE_DIRECTION[styleId] || SCENE_DIRECTION.native;
+  const wantsHeadlines = styleId === 'bedrock';
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
     spec.niche ? `Niche: ${spec.niche}` : null,
@@ -142,7 +219,7 @@ export async function generateContent({ root, spec, instruction, slideCount, att
   for (let i = 0; i < attempts; i++) {
     const { data, usd } = await completeJson({
       root, model, label: `generate:${spec.id}${i ? `:retry${i}` : ''}`, maxTokens: 8000,
-      system: SYSTEM,
+      system: systemFor(styleId),
       user: `${brief}\n\nWhat the clipper asked for: ${instruction}\nSlide count: ${slideCount}\n${feedback}`,
     });
     spent += usd;
@@ -249,6 +326,8 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     // the gym-feed convention. So feed + icon → icon slide; otherwise screen.
     const useIcon = showsApp && styleId === 'feed' && appIcon;
     return {
+      // format-specific fields (bedrock: headline, pose, muscles, layout, levels) ride along
+      ...r,
       name: r.name, score: cleanScore(r.score, rank), lines: r.lines ?? [],
       rank: hand, role: r.role, showsApp,
       icon: useIcon ? appIcon : undefined,
@@ -268,7 +347,7 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
   // number one, say so structurally: the closer takes rank 1 and the ranked
   // items above it count down from n+1, never reaching 1 themselves.
   const ONE = /^\s*(#|no\.?|number)?\s*(1|one)\s*[—–:.\-]\s*/i;
-  const closer = { ...content.closer, lines: [...(content.closer?.lines ?? [])] };
+  const closer = { ...content.closer, lines: [...((content.closer?.headline?.length ? content.closer.headline : content.closer?.lines) ?? [])] };
   let closerRank = 0;
   if (closer.lines[0] && ONE.test(closer.lines[0])) {
     closer.lines[0] = closer.lines[0].replace(ONE, '');
@@ -281,7 +360,7 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     content: {
       style: spec.content?.style ?? 'native',
       numbering: content.numbering === 'none' && !handNumbered ? 'none' : 'countdown',
-      hook: { ...content.hook, photo: hookPhoto },
+      hook: { ...content.hook, lines: content.hook?.headline?.length ? content.hook.headline : content.hook?.lines, photo: hookPhoto },
       ranked,
       closerRank,
       closer: appAlreadyShown

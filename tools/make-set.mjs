@@ -20,7 +20,7 @@ const styleId = args.style ?? spec.content?.style ?? 'native';
 console.log(`\n▸ ${spec.brand} — "${instruction}" (${slides} slides, ${styleId})`);
 const t = Date.now();
 const { content, verdict, usd, attempts, failed } = await generateContent({
-  root: ROOT, spec, instruction, slideCount: slides,
+  root: ROOT, spec, instruction, slideCount: slides, styleId,
 });
 console.log(`  copy: ${attempts} attempt${attempts > 1 ? 's' : ''} · $${usd.toFixed(4)} · ${verdict.pass ? 'COMPLIANT' : 'NON-COMPLIANT'}`);
 verdict.failures.forEach((f) => console.log(`    FAIL ${f}`));
@@ -70,9 +70,11 @@ if (args.art === 'ai') {
   process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'} (${mode})… `);
   const art = await generateSet({
     root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
-    subject: content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, black fitted t-shirt, grey shorts, black training shoes.',
+    subject: content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.',
     scenes, look,
     quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode,
+    // the gym feed is one person across many days — hold the face, not the clothes
+    days: styleId === 'feed' && isGym && world?.id === 'life',
   });
   artUsd = art.usd;
   console.log(`$${art.usd.toFixed(4)} (${art.cached} cached)`);
@@ -89,6 +91,8 @@ renderable.assets = { ...renderable.assets, look, ...(args.pairing ? { pairing: 
 if (args.art === 'ai') renderable.assets.photos = { dir: '.', credit: 'gpt-image-2' };
 const outDir = path.join(ROOT, 'output/sets', `${id}-${styleId}`);
 const r = await render({ spec: renderable, root: ROOT, styleId, outDir });
+// a style that generates its own art (bedrock's figures) reports what it spent
+if (r.artUsd) { artUsd += r.artUsd; console.log(`  figures: $${r.artUsd.toFixed(4)}`); }
 // the model's copy and the frames it was given, so a bad round can be read
 fs.writeFileSync(path.join(outDir, 'content.json'), JSON.stringify({ content, photos }, null, 2));
 const pairing = renderable.content.pairing ?? null;
