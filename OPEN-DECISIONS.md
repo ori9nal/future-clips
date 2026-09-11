@@ -52,3 +52,25 @@ the default view because that is what the table specifies.
 
 **Decide:** keep the yearly option at 10× (or drop the toggle). Phase 5 creates
 the annual products; it is one line to remove.
+
+## 5. Allowances in slides, "priority" instead of "queued / instant" — decided by the owner
+
+2026-09-12: the owner asked for the page to show slides, not sets, and to drop
+the words "queued" and "instant". Done, and the database plans were re-metered
+to match: **Solo 350 slides/mo, Grind 840 + 84 priority, Agency 4,200 + 350
+priority**; extras $0.06 per slide / $0.10 per priority slide; HD +$0.35 per
+slide on Grind, +$0.30 on Agency.
+
+**How the numbers were derived:** the pricing table's set counts × 7, the
+measured average set (and the number every per-set COGS figure was built on).
+Per-slide COGS is $0.025 on the batch path and $0.05 realtime, so the monthly
+COGS allowances are unchanged ($8.75 / $25.20 / $122.50). Metering per slide is
+also *safer* than per set: 350 five-slide slideshows cost less to render than
+50 ten-slide ones. Internally the two lanes are still `queued` and `instant`
+(`sets.mode`); "priority" is the customer word only.
+
+**Still open:** × 7 means a customer who always makes 10-slide slideshows
+gets 35 of them on Solo, not the table's 50. The alternative (× 10 = 500
+slides) drops Solo to ~37% gross at full quota. Say if you want the higher
+number and the margin hit that comes with it.
+
