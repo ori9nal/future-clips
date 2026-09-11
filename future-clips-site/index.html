@@ -194,7 +194,7 @@
     <p style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · Free tier: one ready-made set per live campaign</p>
   </div>
 
-  <div class="fc-stagewrap"><div class="fc-stage"><figure class="fc-card" style="--x:-405px;--r:-13deg;--d:.10s;--w:190px;z-index:0"><img src="carousels/golden-six.webp" alt="Longevity carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:-208px;--r:-6.5deg;--d:.20s;--w:200px;z-index:1"><img src="carousels/running.webp" alt="Running carousel" width="500" height="625"></figure><figure class="fc-card fc-card-lead" style="--x:0px;--r:0deg;--d:.30s;--w:286px;z-index:3"><img src="carousels/finance-rules.webp" alt="Finance carousel" width="500" height="625"><span class="fc-idx">01 / 09</span><span class="fc-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></figure><figure class="fc-card" style="--x:208px;--r:6.5deg;--d:.40s;--w:200px;z-index:1"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:405px;--r:13deg;--d:.50s;--w:190px;z-index:0"><img src="carousels/not-ugly.webp" alt="Habits carousel" width="500" height="625"></figure><div class="fc-badge"><span class="fc-dot"></span><div><b>5–10</b><span>Slides per set</span></div></div></div></div>
+  <div class="fc-stagewrap"><div class="fc-stage"><figure class="fc-card" style="--x:-405px;--r:-13deg;--d:.10s;--w:190px;z-index:0"><img src="carousels/golden-six.webp" alt="Longevity carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:-208px;--r:-6.5deg;--d:.20s;--w:200px;z-index:1"><img src="carousels/running.webp" alt="Running carousel" width="500" height="625"></figure><figure class="fc-card fc-card-lead" style="--x:0px;--r:0deg;--d:.30s;--w:286px;z-index:3"><img src="carousels/finance-rules.webp" alt="Finance carousel" width="500" height="625"><span class="fc-idx">01 / 09</span><span class="fc-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></figure><figure class="fc-card" style="--x:208px;--r:6.5deg;--d:.40s;--w:200px;z-index:1"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:405px;--r:13deg;--d:.50s;--w:190px;z-index:0"><img src="carousels/not-ugly.webp" alt="Habits carousel" width="500" height="625"></figure><div class="fc-badge"><span class="fc-dot"></span><div><b id="fcViews">0</b><span>Views</span></div></div></div></div>
 </section>
 
 <section class="fc-sec" id="features" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
@@ -652,7 +652,7 @@
 </div>
 <script>
 
-var FC_URL = "https://waipwmyncpsgoglmkhdz.supabase.co", FC_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT";
+var FC_TARGET = 1304895, FC_URL = "https://waipwmyncpsgoglmkhdz.supabase.co", FC_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT";
 var fcCycleState = "monthly", fcRef = "";
 
 var FC_PRICES = {
@@ -684,6 +684,23 @@ function fcCycle(c){
     if(el) el.textContent=vals[k];
   });
 }
+
+/* the counter rolls up from zero, holds, then runs again */
+(function(){
+  var el=document.getElementById("fcViews"); if(!el) return;
+  var fmt=function(n){ return n.toLocaleString("en-US"); };
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(FC_TARGET); return; }
+  var DUR=4200, HOLD=2600, start=null;
+  function tick(t){
+    if(start===null) start=t;
+    var e=t-start;
+    if(e<=DUR){ el.textContent=fmt(Math.round(FC_TARGET*(1-Math.pow(1-e/DUR,3)))); }
+    else if(e<DUR+HOLD){ el.textContent=fmt(FC_TARGET); }
+    else { start=t; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 /* reveal sections on scroll */
 (function(){

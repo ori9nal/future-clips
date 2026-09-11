@@ -12,8 +12,8 @@ class the design runtime resolves. A browser can't run any of that, so this:
   * rewires the events (burger, pricing cycle, form) as plain JS
   * wires the waitlist to Supabase directly (anon key, RLS is insert-only)
 
-Then it adds what was asked for: the hero cards drop in and fan out, and
-sections reveal on scroll.
+Then it adds what was asked for: the hero cards drop in and fan out, the view
+counter rolls up from zero, and sections reveal on scroll.
 """
 import io, os, re, json, shutil
 
@@ -23,6 +23,10 @@ DIST = os.path.join(os.path.dirname(HERE), "future-clips-site")
 
 SUPA_URL = "https://waipwmyncpsgoglmkhdz.supabase.co"
 SUPA_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT"
+# The hero badge rolls up to this figure. It is the owner's number, restored at
+# the owner's request on 2026-09-11 after being removed; it is not a measured
+# view count (see OPEN-DECISIONS.md #2).
+VIEWS_TARGET = 1304895
 
 s = io.open(SRC, encoding="utf-8").read()
 
@@ -140,10 +144,8 @@ for i, (img, alt, x, r, d, w, z) in enumerate(CARDS):
         % (" fc-card-lead" if i == 2 else "", x, r, d, w, z, img, alt, chrome))
 
 stage = ('<div class="fc-stage">' + "".join(cards_html) +
-         # No view counter: Future Clips has no measured view figure to show,
-         # and the example posts are other creators' work. A spec fact instead.
          '<div class="fc-badge"><span class="fc-dot"></span><div>'
-         '<b>5–10</b><span>Slides per set</span></div></div></div>')
+         '<b id="fcViews">0</b><span>Views</span></div></div></div>')
 
 hero = re.search(r'<div style="position:relative;width:100%;max-width:1240px;margin-inline:auto;'
                  r'padding-inline:clamp\(18px,4vw,36px\);margin-top:clamp\(40px,7vw,64px\)">.*?\n  </div>',
@@ -259,7 +261,7 @@ EXTRA_CSS = """
 """
 
 SCRIPT = """
-var FC_URL = "%s", FC_KEY = "%s";
+var FC_TARGET = %d, FC_URL = "%s", FC_KEY = "%s";
 var fcCycleState = "monthly", fcRef = "";
 
 var FC_PRICES = {
@@ -291,6 +293,23 @@ function fcCycle(c){
     if(el) el.textContent=vals[k];
   });
 }
+
+/* the counter rolls up from zero, holds, then runs again */
+(function(){
+  var el=document.getElementById("fcViews"); if(!el) return;
+  var fmt=function(n){ return n.toLocaleString("en-US"); };
+  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(FC_TARGET); return; }
+  var DUR=4200, HOLD=2600, start=null;
+  function tick(t){
+    if(start===null) start=t;
+    var e=t-start;
+    if(e<=DUR){ el.textContent=fmt(Math.round(FC_TARGET*(1-Math.pow(1-e/DUR,3)))); }
+    else if(e<DUR+HOLD){ el.textContent=fmt(FC_TARGET); }
+    else { start=t; }
+    requestAnimationFrame(tick);
+  }
+  requestAnimationFrame(tick);
+})();
 
 /* reveal sections on scroll */
 (function(){
@@ -349,7 +368,7 @@ function fcSubmit(e){
   }).catch(function(){ msg.textContent="Couldn't save that. Try again in a second."; });
   return false;
 }
-""" % (SUPA_URL, SUPA_KEY)
+""" % (VIEWS_TARGET, SUPA_URL, SUPA_KEY)
 
 TITLE = "The Future Clips — Turn any idea into a viral slideshow"
 DESC = ("The Future Clips turns any idea into a scroll-stopping slideshow in minutes. "

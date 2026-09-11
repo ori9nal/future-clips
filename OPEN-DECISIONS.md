@@ -15,20 +15,22 @@ the code today.
 is $249 the entire relationship? If a share exists, it needs a ledger, a
 payout method, and tax handling — a separate phase, not a toggle.
 
-## 2. View counter — removed
+## 2. View counter — removed, then restored at the owner's request
 
-The hero badge rolled up to a pinned `1,304,895` views. Future Clips has no
-measured view figure: the example carousels are other creators' posts shown
-with permission, and the product has shipped no sets to a public account. A
-payment-provider reviewer would read the counter as a claim.
+The hero badge rolls up to a pinned `1,304,895` views (`VIEWS_TARGET` in
+`design/build_site.py`). Future Clips has no measured view figure: the example
+carousels are other creators' posts shown with permission, and the product has
+shipped no sets to a public account. A payment-provider reviewer may read the
+counter as a claim about results.
 
-**Done (2026-09-11):** the counter is gone. The badge now says `5–10 · slides
-per set`, which is a spec fact from the table. `VIEWS_TARGET` is removed from
-`design/build_site.py`.
+**Timeline (2026-09-11):** removed in the pricing redeploy (badge said `5–10
+slides per set`); the owner asked for it back the same day, so it is back as
+it was (`index-v5.html`, `dpl_J1u43vodRCgvSjFVhrfLvy4QPzNg`).
 
-**Decide:** whether to restore a counter once there is a measured figure
-(e.g. views on sets rendered by paying customers, reported by them), or leave
-the badge as a spec fact.
+**Decided by the owner:** keep the counter. **Still open:** what the number
+means. If a reviewer asks, the honest answer today is "an aspirational figure".
+The cheap fix, when there is one, is a label under the number that says what
+it counts ("views on posts like these", "views reported by customers").
 
 ## 3. Marketing copy that contradicted the table — changed
 
