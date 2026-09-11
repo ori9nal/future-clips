@@ -182,8 +182,20 @@ export default {
         const lock = iconLockup(item.icon, label, (item.lines ?? [])[0], Math.round(H * 0.14));
         s.push(lock.svg);
       } else {
-        const top = Math.round(H * 0.30);
-        const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.26));
+        // Three candidate bands; take the quietest. A fixed 30% put the
+        // MetaTrader caption straight across a wall of glowing monitors.
+        const bandH = Math.round(H * 0.26);
+        let top = Math.round(H * 0.30), best = Infinity;
+        for (const frac of [0.22, 0.34, 0.50]) {
+          const y = Math.round(H * frac);
+          try {
+            const r = await scoreRegion(f, { w: W, h: H, sharp, rect: { x: 0, y, w: W, h: bandH } });
+            // busy (range) matters more than bright here; bright is fixable with a scrim
+            const cost = r.range + Math.max(0, r.mean - 110) * 0.6;
+            if (cost < best) { best = cost; top = y; }
+          } catch { /* keep the default */ }
+        }
+        const { boost, scrim } = await contrastAt(f, top - 20, bandH);
         if (scrim) {
           s.push(`<defs><linearGradient id="fs${i}" x1="0" y1="0" x2="0" y2="1">` +
             `<stop offset="0" stop-color="rgba(0,0,0,0)"/>` +

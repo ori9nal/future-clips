@@ -27,6 +27,14 @@ const LOOK = {
 const GUARD = 'Photograph, not an illustration. No text, no logos, no watermarks, no captions anywhere in the image. One person only.';
 
 /**
+ * The aspirational guard is different in kind: it forbids the thing that made
+ * round one fail. No face, no emotional pose, no person as the subject — the
+ * subject is the place or the object, shot the way a phone catches it.
+ */
+const ASPIRE_GUARD = 'Candid phone photograph, not staged, not a stock photo. No visible face, no person as the subject, ' +
+  'no one posing or emoting. No text, no logos, no watermarks. The subject is the place or the object itself.';
+
+/**
  * Generate imagery for a set.
  *
  * @param {object} o
@@ -44,9 +52,30 @@ export async function generateSet(o) {
   const {
     root, cacheDir, subject, scenes, look = 'cinematic',
     quality = 'medium', w = 1080, h = 1920, id = 'set', anchorTries = 1,
+    mode = 'subject',
   } = o;
   const size = sizeFor(w, h);
   const style = LOOK[look] ?? LOOK.cinematic;
+
+  // Aspirational mode: every frame is its own generation with no reference
+  // image and no recurring person. Coherence comes from the shared LOOK, not
+  // from a face — which is how the reference sets are actually built. Round
+  // one of the gauntlet put one man with his hand over his face on five of six
+  // slides, because "hold the subject" was the only mode there was.
+  if (mode === 'aspirational') {
+    const files = [];
+    let usd = 0, cached = 0;
+    for (let i = 0; i < scenes.length; i++) {
+      const r = await generate({
+        root, cacheDir, size, quality, label: `${id}-a${i}`,
+        prompt: `${style} ${scenes[i]} ${ASPIRE_GUARD}`,
+      });
+      files.push(r.file);
+      usd += r.usd ?? 0;
+      if (r.cached) cached++;
+    }
+    return { files, usd: +usd.toFixed(4), cached, size, quality, anchor: null, mode };
+  }
 
   // The anchor carries the whole set's likeness, so it is drawn from the scene
   // that shows the face most plainly rather than from slide 1, which is often

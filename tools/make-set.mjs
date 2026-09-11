@@ -28,23 +28,36 @@ verdict.warnings.forEach((w) => console.log(`    warn ${w}`));
 if (failed) { console.error('  refusing to render a non-compliant set'); process.exit(2); }
 
 const appScreen = args.screen ?? spec.assets?.app_screen;
+const appIcon = args.icon ?? spec.assets?.app_icon;
 
 let photos = [];
 let artUsd = 0;
 if (args.art === 'ai') {
   // Generate the imagery instead of sourcing it. Scenes come from the copy
   // step, so the pictures illustrate the story rather than sitting beside it.
-  const scenes = [
+  let scenes = [
     content.hook?.scene,
     ...(content.ranked ?? []).map((r) => r.scene),
     content.closer?.scene,
   ].map((s, i) => s || `the person, scene ${i + 1}`);
+
+  if (styleId === 'feed') {
+    // The model does not get to pick between a Porsche and a train seat. A
+    // dreary or repeated scene is swapped for one from the bank, in code.
+    const appIndex = 1 + (content.ranked ?? []).findIndex((r) => r.showsApp);
+    const { enforce } = await import('../engine/scenes.mjs');
+    const e = enforce(scenes, { niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed: id });
+    if (e.replaced.length) console.log(`  scenes: replaced ${e.replaced.length} of ${scenes.length} (slides ${e.replaced.map((i) => i + 1).join(', ')})`);
+    scenes = e.scenes;
+  }
   process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'}… `);
   const art = await generateSet({
     root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
     subject: content.subject ?? 'A person in their late twenties, plain dark clothing.',
     scenes, look: spec.assets?.look ?? 'cinematic',
     quality: args.quality ?? 'medium', w: 1080, h: 1920, id,
+    // feed has no recurring person by design; everything else holds one
+    mode: args.mode ?? (styleId === 'feed' ? 'aspirational' : 'subject'),
   });
   artUsd = art.usd;
   console.log(`$${art.usd.toFixed(4)} (${art.cached} cached)`);
@@ -56,7 +69,7 @@ if (args.art === 'ai') {
     ? fs.readdirSync(photoDir).filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith('_')).map((f) => f.replace(/\.\w+$/, ''))
     : [];
 }
-const renderable = toRenderable(spec, content, { appScreen, photos });
+const renderable = toRenderable(spec, content, { appScreen, appIcon, photos });
 if (args.art === 'ai') renderable.assets = { ...renderable.assets, photos: { dir: '.', credit: 'gpt-image-2' } };
 const outDir = path.join(ROOT, 'output/sets', `${id}-${styleId}`);
 const r = await render({ spec: renderable, root: ROOT, styleId, outDir });

@@ -101,7 +101,8 @@
       "credit": "gpt-image-2"
     },
     "app_screen": "output/tradelens/app-analysis.png",
-    "look": "cinematic"
+    "look": "cinematic",
+    "app_icon": "output/tradelens/icon.png"
   },
   "content": {
     "style": "feed",

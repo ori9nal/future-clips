@@ -64,6 +64,11 @@ export async function render({ spec, root, styleId, outDir }) {
   if (!style) throw new Error(`unknown style "${styleId}"`);
   const { w, h } = style.canvas;
   fs.mkdirSync(outDir, { recursive: true });
+  // A shorter set rendered over a longer one leaves the old tail behind, and a
+  // stale slide-7 then ships with a six-slide post. Clear the slides first.
+  for (const f of fs.readdirSync(outDir)) {
+    if (/^slide-\d+\.png$/.test(f)) fs.unlinkSync(path.join(outDir, f));
+  }
 
   const ctx = {
     root, sharp, outDir,

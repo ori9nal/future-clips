@@ -39,7 +39,9 @@ How to write it:
 - Slide 1 is the hook. It has to stop a scroll on its own, at thumbnail size, with no context.
 - Lines are hand-broken for a slide, not sentences. Short. No line longer than about six words
   unless it is body copy.
-- Write like a person who did the thing, first person, specific. Not like a brand.
+- Write like a person who actually uses this, first person, specific. Not like a brand. That does NOT
+  mean a struggle story — "the four apps I open every morning" is first person too. Match the clipper's
+  ask; do not turn a list into a confession.
 - The "ranked" array is the middle of the set. hook + ranked + closer must total the slide count
   you are given, so ranked has (count - 2) entries.
 - Exactly one ranked entry has "role": "app" and "showsApp": true, at the position you are told.
@@ -69,13 +71,42 @@ How to write it:
  * @param {number} o.slideCount
  * @param {number} [o.attempts]
  */
+/**
+ * Scene direction per format. The reference feed sets are built on aspirational
+ * places and objects, not on a person emoting — the generator has to be told
+ * that or it writes a sad-man-in-a-room story every time.
+ */
+const SCENE_DIRECTION = {
+  feed: [
+    'This is the TikTok slideshow format. Its whole appeal is ASPIRATION: the imagery is the life the',
+    'viewer wants, not the viewer\'s current mood. Every scene must be one of these kinds of shot, and no',
+    'two scenes the same kind: a dark supercar on a wet street at night; a hotel pool lit from below with',
+    'palms; a penthouse window at golden hour over a city; a trading desk with three monitors glowing in a',
+    'dim room; a yacht deck at dusk; a first-class window seat; the interior of a luxury car at night from',
+    'the driver\'s seat; a rooftop at blue hour; a watch and a phone on a marble table. Warm, rich,',
+    'expensive. NEVER: rain on a window, a bus, a train, a bedroom, a café, an office, anything grey or',
+    'dreary, any person\'s face, anyone sitting sadly. The set should make someone want the life.',
+    'When the ask is about apps or tools, NAME real, well-known ones — TradingView, MetaTrader 5, Forex',
+    'Factory, Webull — alongside the campaign product. Vague headings like "the charting one" are a failure.',
+    'The HOOK for this format is a count plus a promise, never a confession: "4 trading apps I will never',
+    'uninstall", "Top 3 apps I wish I had earlier", "The only 4 I still open". Two short lines. Do not',
+    'open with "I blew my account" — that is a story hook, and this is a list post.',
+    'The "subject" field is unused for this format; write "none".',
+  ].join(' '),
+  native: 'Scenes are real gym or lifestyle moments a phone would catch. Vary the place and framing every slide.',
+};
+
 export async function generateContent({ root, spec, instruction, slideCount, attempts = 3, model = 'claude-opus-5' }) {
   const constraints = constraintsFor(spec, slideCount);
+  const styleId = spec.content?.style ?? 'native';
+  const sceneDirection = SCENE_DIRECTION[styleId] ?? SCENE_DIRECTION.native;
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
     spec.niche ? `Niche: ${spec.niche}` : null,
     spec.guidance?.hook_style ? `Hook style: ${spec.guidance.hook_style}` : null,
     spec.guidance?.angles?.length ? `Angles that work: ${spec.guidance.angles.join('; ')}` : null,
+    '',
+    `FORMAT: ${styleId}. ${sceneDirection}`,
     '',
     'HARD RULES — a set that breaks any of these is rejected outright:',
     ...constraints.map((c) => `- ${c}`),
@@ -142,37 +173,64 @@ export async function generateContent({ root, spec, instruction, slideCount, att
  * from the campaign's folder here, one per slide with no repeats, because a set
  * that reuses a frame reads as padding.
  */
-export function toRenderable(spec, content, { appScreen, photos = [] } = {}) {
-  const pool = [...photos];
-  let p = 0;
-  const nextPhoto = () => (pool.length ? pool[p++ % pool.length] : undefined);
+export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } = {}) {
+  const styleId = spec.content?.style ?? 'native';
+  const n = (content.ranked ?? []).length;
 
-  const ranked = (content.ranked ?? []).map((r) => {
+  // Photos are dealt BY SLIDE INDEX, never by call order. The generated frames
+  // arrive in scene order — hook first, then each ranked item, closer last —
+  // and the first version dealt them with a sequential nextPhoto() while
+  // mapping `ranked` before `hook`. So the ranked items took frames 0..n-1 and
+  // the hook got frame n: the enforced hook scene (a garage supercar) rendered
+  // on slide 2 and the hook wore the app slide's throwaway frame. Six gauntlet
+  // rounds of "why is the hook still a bus window" came down to this.
+  const photoAt = (i) => (photos.length ? photos[i % photos.length] : undefined);
+  const hookPhoto = photoAt(0);
+  const closerPhoto = photoAt(n + 1);
+
+  // A rank is not a score. The model kept writing "#4" into `score` on a slide
+  // already headed "4. Forex Factory", which rendered as a double number. Keep
+  // a score only when it reads as a rating or a tag, never as the rank again.
+  const cleanScore = (s, rank) => {
+    if (s == null) return undefined;
+    const t = String(s).trim();
+    // "#4", "4", "4.", "No. 4", "No.4", "number 4", "rank 4" — every way the
+    // model has found to restate the rank in the score field
+    if (!t || /^(#|no\.?|number|rank)?\s*\d+\.?$/i.test(t) || t === String(rank)) return undefined;
+    return t;
+  };
+
+  const ranked = (content.ranked ?? []).map((r, i, all) => {
     const showsApp = !!r.showsApp;
+    const rank = all.length - i;
+    // The trading feed shows an app as an icon on a pill over a lifestyle
+    // frame — that is the reference format (sets 01, 04, 14). A screenshot is
+    // the gym-feed convention. So feed + icon → icon slide; otherwise screen.
+    const useIcon = showsApp && styleId === 'feed' && appIcon;
     return {
-      name: r.name, score: r.score, lines: r.lines ?? [],
+      name: r.name, score: cleanScore(r.score, rank), lines: r.lines ?? [],
       role: r.role, showsApp,
-      // the app slide renders the real screen; everything else takes a still
-      screen: showsApp && appScreen ? appScreen : undefined,
-      photo: showsApp && appScreen ? undefined : nextPhoto(),
+      icon: useIcon ? appIcon : undefined,
+      screen: showsApp && !useIcon && appScreen ? appScreen : undefined,
+      photo: showsApp && !useIcon && appScreen ? undefined : photoAt(i + 1),
     };
   });
 
   // Only fall back to putting the app on the closer when no slide already
   // shows it — otherwise the app appears twice and the placement rule the
   // brief states for slide 4/5 is quietly broken by the last slide.
-  const appAlreadyShown = ranked.some((r) => r.screen);
+  const appAlreadyShown = ranked.some((r) => r.screen || r.icon);
 
   return {
     ...spec,
     content: {
       style: spec.content?.style ?? 'native',
       numbering: content.numbering === 'none' ? 'none' : 'countdown',
-      hook: { ...content.hook, photo: nextPhoto() },
+      hook: { ...content.hook, photo: hookPhoto },
       ranked,
       closer: appAlreadyShown
-        ? { ...content.closer, photo: nextPhoto() }
-        : { ...content.closer, screen: appScreen ?? undefined, photo: appScreen ? undefined : nextPhoto() },
+        ? { ...content.closer, photo: closerPhoto }
+        : { ...content.closer, screen: appScreen ?? undefined, photo: appScreen ? undefined : closerPhoto },
       caption: content.caption, bio: content.bio, hashtags: content.hashtags,
     },
   };
