@@ -10,7 +10,6 @@
     "prebuild": "node tools/fetch-fonts.mjs"
   },
   "dependencies": {
-    "@imgly/background-removal-node": "^1.4.5",
     "@resvg/resvg-js": "^2.6.2",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.116.0",
@@ -18,7 +17,6 @@
     "opentype.js": "^2.0.0",
     "react": "19.1.1",
     "react-dom": "19.1.1",
-    "satori": "^0.33.4",
     "sharp": "^0.34.5"
   },
   "devDependencies": {
