@@ -91,7 +91,7 @@
       "dir": "output/gym/1389931",
       "credit": "Pexels"
     },
-    "app_screen": "output/apex/app-progress.png"
+    "app_screen": "assets/campaigns/apex/app-progress.png"
   },
   "content": {
     "style": "native",
@@ -148,7 +148,7 @@
       }
     ],
     "closer": {
-      "screen": "output/apex/app-progress.png",
+      "screen": "assets/campaigns/apex/app-progress.png",
       "lines": [
         "Two years of guessing.",
         "Twelve months of writing it down."

@@ -12,10 +12,10 @@ import { fileURLToPath } from 'node:url';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import sharp from 'sharp';
-import { keyFor, memo, readJson, writeJson, sha } from '../engine/source/cache.mjs';
+import { keyFor, memo, readJson, writeJson, sha } from '../engine/_attic/source/cache.mjs';
 
 const run = promisify(execFile);
-const WORKER = fileURLToPath(new URL('../engine/source/matte-worker.mjs', import.meta.url));
+const WORKER = fileURLToPath(new URL('../engine/_attic/source/matte-worker.mjs', import.meta.url));
 
 /** Untrimmed matte, cached. Runs in its own process (ONNX vs libvips). */
 async function matteFull(file) {

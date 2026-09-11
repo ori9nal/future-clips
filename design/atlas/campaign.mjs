@@ -16,7 +16,7 @@ import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import { loadFace } from '../../engine/fonts.mjs';
 import { fitLines, fitText, layoutWidth } from '../../engine/fit-text.mjs';
-import { projectUV } from '../../engine/screen-warp.mjs';
+import { projectUV } from '../../engine/_attic/screen-warp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const OUT = path.join(ROOT, 'output/atlas/campaign');

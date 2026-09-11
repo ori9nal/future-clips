@@ -43,7 +43,7 @@ export default {
     const figDir = path.join(outDir, 'figures');
     fs.mkdirSync(figDir, { recursive: true });
 
-    const refFile = path.join(root, spec.assets?.character?.ref ?? 'output/gen/character/ref.png');
+    const refFile = path.join(root, spec.assets?.character?.ref ?? 'assets/campaigns/character/ref.png');
     if (!fs.existsSync(refFile)) throw new Error(`bedrock needs a reference figure at ${refFile} (tools/make-character.mjs)`);
     let usd = 0;
 

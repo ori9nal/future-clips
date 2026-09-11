@@ -21,7 +21,7 @@ import { Resvg } from '@resvg/resvg-js';
 import sharp from 'sharp';
 import { loadFace } from '../../engine/fonts.mjs';
 import { fitLines, fitText, layoutWidth } from '../../engine/fit-text.mjs';
-import { scoreBoxes, candidatesFor, scrimFor } from '../../engine/negative-space.mjs';
+import { scoreBoxes, candidatesFor, scrimFor } from '../../engine/_attic/negative-space.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const SHOOT = path.join(ROOT, 'output/shoots/80197256');

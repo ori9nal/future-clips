@@ -100,9 +100,9 @@
       "dir": "output/aspire",
       "credit": "gpt-image-2"
     },
-    "app_screen": "output/tradelens/app-analysis.png",
+    "app_screen": "assets/campaigns/tradelens/app-analysis.png",
     "look": "cinematic",
-    "app_icon": "output/tradelens/icon.png"
+    "app_icon": "assets/campaigns/tradelens/icon.png"
   },
   "content": {
     "style": "feed",

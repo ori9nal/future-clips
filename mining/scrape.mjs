@@ -9,7 +9,7 @@
 //   node --env-file=.env.local mining/scrape.mjs --handle papanca.io --limit 24
 import fs from 'node:fs';
 import path from 'node:path';
-import { keyFor, memo } from '../engine/source/cache.mjs';
+import { keyFor, memo } from '../engine/_attic/source/cache.mjs';
 
 const ACTOR = 'apify~instagram-scraper';
 const API = 'https://api.apify.com/v2';

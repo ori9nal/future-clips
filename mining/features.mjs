@@ -10,7 +10,7 @@
 // which is a heuristic and is labelled as such wherever it surfaces. Caption
 // fields (word count, hook text) come from the scrape, not from pixels.
 import sharp from 'sharp';
-import { rgbToLab, CHROMA_MIN } from '../gauntlet/pixels.mjs';
+import { rgbToLab, CHROMA_MIN } from '../engine/_attic/gauntlet/pixels.mjs';
 
 const SAMPLE = 240;
 
