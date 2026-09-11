@@ -6,11 +6,14 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "prebuild": "node tools/fetch-fonts.mjs"
   },
   "dependencies": {
     "@imgly/background-removal-node": "^1.4.5",
     "@resvg/resvg-js": "^2.6.2",
+    "@supabase/ssr": "^0.6.1",
+    "@supabase/supabase-js": "^2.116.0",
     "next": "15.5.24",
     "opentype.js": "^2.0.0",
     "react": "19.1.1",

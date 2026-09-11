@@ -1,20 +1,22 @@
-import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { isAdminRequest } from "@/lib/admin";
+import { viewerForRequest } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { saveSpec } from "@/lib/db/campaigns";
 
 export const maxDuration = 300;
 
 /**
  * Turn a pasted brief into a campaign spec.
  *
- * Admin only: this both spends model tokens and writes a campaign that every
- * clipper then generates against, so it is not something a clipper triggers.
+ * Platform owners only: this both spends model tokens and writes a campaign
+ * that every clipper then generates against. The role is read from the
+ * database (lib/auth), not from a shared secret.
  */
 export async function POST(req: Request) {
-  if (!isAdminRequest(req)) {
-    return Response.json({ error: "admin only" }, { status: 403 });
-  }
+  const viewer = await viewerForRequest();
+  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only" }, { status: 403 });
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: "invalid JSON body" }, { status: 400 }); }
 
@@ -28,14 +30,8 @@ export async function POST(req: Request) {
   try {
     const { spec, usd } = await ingestBrief({ root, brief });
     if (body?.save) {
-      const id = String(spec.id).replace(/[^a-z0-9-]/gi, "-").toLowerCase();
-      spec.id = id;
-      fs.mkdirSync(path.join(root, "campaigns"), { recursive: true });
-      fs.writeFileSync(path.join(root, "campaigns", `${id}.json`), JSON.stringify(spec, null, 2));
-      // keep the source brief next to the campaign; the extraction is lossy and
-      // the original is the only way to check what it dropped
-      fs.mkdirSync(path.join(root, "briefs"), { recursive: true });
-      fs.writeFileSync(path.join(root, "briefs", `${id}.md`), brief);
+      const sb = await createClient();
+      await saveSpec(sb, spec);
     }
     return Response.json({ spec, usd: +usd.toFixed(4), saved: !!body?.save });
   } catch (e: any) {

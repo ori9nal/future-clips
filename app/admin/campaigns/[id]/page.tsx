@@ -1,38 +1,33 @@
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getCampaign, libraryFor } from "@/lib/campaigns";
+import { requirePlatformOwner } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { getCampaign } from "@/lib/db/campaigns";
 import AppShell from "@/components/AppShell";
-import { updateCampaign, uploadLogo, uploadVisuals, removeCampaign } from "../../actions";
+import { updateCampaign, uploadLogo, removeCampaign } from "../../actions";
 
 export const dynamic = "force-dynamic";
 
-export default async function CampaignEditor({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
+/** Brand-kit editor. Platform owners only; writes go through RLS as well. */
+export default async function CampaignEditor({ params }: { params: Promise<{ id: string }> }) {
+  const viewer = await requirePlatformOwner();
   const { id } = await params;
-  const c = getCampaign(id);
+  const sb = await createClient();
+  const c = await getCampaign(sb, id);
   if (!c) notFound();
 
-  const lib = libraryFor(c.niche, "people");
   const accents = Object.entries(c.brand.colors.accents);
   const save = updateCampaign.bind(null, id);
   const doLogo = uploadLogo.bind(null, id);
-  const doVisuals = uploadVisuals.bind(null, id);
   const doRemove = removeCampaign.bind(null, id);
 
   return (
-    <AppShell active="admin">
+    <AppShell active="admin" viewer={viewer}>
       <header className="fc-head">
-        <div>
-          <p className="fc-eyebrow">
-            <Link href="/admin">Admin</Link> / {c.id}
-          </p>
-          <h1>{c.name}</h1>
-          <p className="fc-sub">{c.brand.handle}</p>
-        </div>
+        <p className="fc-eyebrow"><Link href="/admin">Admin</Link> / {c.id}</p>
+        <h1>{c.name}</h1>
+        <p className="fc-sub">{c.brand.handle}</p>
       </header>
 
       <form action={save} className="fc-card fc-form">
@@ -53,10 +48,7 @@ export default async function CampaignEditor({
 
         <fieldset className="fc-card">
           <legend>Accent colours</legend>
-          <p className="fc-note">
-            Leave these matching ink for the monochrome format the top-performing
-            references use. Every extra hue is a chromatic cluster the validator counts.
-          </p>
+          <p className="fc-note">Leave these matching ink for the monochrome format the top-performing references use.</p>
           {[0, 1, 2].map((i) => {
             const [label, hex] = accents[i] || ["", "#111111"];
             return (
@@ -69,11 +61,11 @@ export default async function CampaignEditor({
         </fieldset>
 
         <h2>Rules</h2>
-        <p className="fc-note">Enforced as a hard validator before packaging. A carousel that fails is never delivered.</p>
+        <p className="fc-note">Enforced as a hard validator before packaging. A slideshow that fails is never delivered.</p>
         <div className="fc-row">
           <label><span>Min slides</span><input name="min_slides" type="number" min={1} max={20} defaultValue={c.rules.min_slides} /></label>
           <label><span>Max slides</span><input name="max_slides" type="number" min={1} max={20} defaultValue={c.rules.max_slides} /></label>
-          <label><span>Canvas</span><input name="canvas" defaultValue={c.rules.canvas} /></label>
+          <label><span>Canvas</span><input name="canvas" defaultValue={String(c.rules.canvas)} /></label>
         </div>
         <label><span>Banned claims <em>(one per line)</em></span>
           <textarea name="banned_claims" rows={3} defaultValue={c.rules.banned_claims.join("\n")} /></label>
@@ -91,8 +83,8 @@ export default async function CampaignEditor({
         </div>
 
         <h2>Source</h2>
-        <label><span>Source video URL or path <em>(frames are scene-detected from this)</em></span>
-          <input name="source_video" defaultValue={c.source.video || ""} placeholder="https:// or ./media/campaign.mp4" /></label>
+        <label><span>Source video URL or path</span>
+          <input name="source_video" defaultValue={c.source.video || ""} placeholder="https://" /></label>
 
         <button type="submit" className="fc-btn">Save campaign</button>
       </form>
@@ -100,49 +92,13 @@ export default async function CampaignEditor({
       <section className="fc-card">
         <h2>Logo</h2>
         {c.brand.logo ? (
-          <div className="fc-thumb" style={{maxWidth:180}}><Image src={c.brand.logo} alt="" width={160} height={80} unoptimized /></div>
+          <div className="fc-thumb" style={{ maxWidth: 180 }}><Image src={c.brand.logo} alt="" width={160} height={80} unoptimized /></div>
         ) : <p className="fc-note">No logo uploaded.</p>}
         <form action={doLogo} className="fc-form">
-          <label><span>Upload logo <em>(png, jpg, webp, svg)</em></span>
+          <label><span>Upload logo <em>(png, jpg, webp, svg — under 2 MB)</em></span>
             <input type="file" name="logo" accept=".png,.jpg,.jpeg,.webp,.svg" required /></label>
           <button type="submit" className="fc-btn" data-variant="ghost">Upload logo</button>
         </form>
-      </section>
-
-      <section className="fc-card">
-        <h2>Source visuals</h2>
-        <p className="fc-note">
-          Each upload is matted, cleaned and gated on halo, stray blobs and subject tone, then
-          added to the <strong>{c.niche}</strong> library. Anything that fails is rejected with the
-          measured reason rather than quietly accepted. Matting is ~5s per image.
-        </p>
-        <form action={doVisuals} className="fc-form">
-          <label><span>Upload visuals <em>(multiple allowed)</em></span>
-            <input type="file" name="visuals" accept="image/*" multiple required /></label>
-          <button type="submit" className="fc-btn" data-variant="ghost">Upload and matte</button>
-        </form>
-      </section>
-
-      <section className="fc-card">
-        <h2>Cutout library <span className="fc-tag">{lib.items.length}</span></h2>
-        {lib.items.length ? (
-          <ul className="fc-lib">
-            {lib.items.map((it: any) => (
-              <li key={it.id}>
-                <div className="fc-thumb">
-                  <Image src={"/api/library/" + String(it.bwFile || it.file).replace(/^assets\/library\//, "")} alt="" width={110} height={150} unoptimized />
-                </div>
-                <p className="fc-note">{it.provider}</p>
-                <p className="fc-note">{it.credit?.author || it.credit?.license || "—"}</p>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p className="fc-note">
-            No cutouts yet. Upload visuals above, or build a stock library with{" "}
-            <code>node --env-file=.env.local tools/build-library.mjs --niche {c.niche}</code>.
-          </p>
-        )}
       </section>
 
       <section className="fc-card">

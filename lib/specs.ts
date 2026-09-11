@@ -1,15 +1,10 @@
 /**
- * Campaign spec store.
+ * The engine's campaign spec — the shape `campaigns.data` holds when
+ * `kind = 'spec'`, and the shape the render engine consumes directly.
  *
- * A spec is the single representation: the render engine consumes it directly
- * (engine/render-native.mjs `renderCampaign({ spec })`), the studio lists from
- * it, and the admin form writes it. There is no second shape to keep in sync.
- * Swapping the file store for Postgres is a change to the four functions at the
- * bottom, not to the type.
+ * The store is lib/db/campaigns.ts (Supabase). The files under campaigns/
+ * are the seed and the CLI's fixtures; the app never reads them.
  */
-import fs from "node:fs";
-import path from "node:path";
-
 export type Ranked = { photo: number | string; name: string; score?: string; lines: string[] };
 
 export type Spec = {
@@ -36,7 +31,10 @@ export type Spec = {
     required_mention: string;
     must_show_app?: boolean;
   };
-  rules: { banned_claims: string[]; banned_topics?: string[]; tone?: string; disclosure?: string };
+  rules: {
+    banned_claims: string[]; banned_topics?: string[]; tone?: string; disclosure?: string;
+    required_phrase?: string | null; never_bare?: string | null; no_exclamation?: boolean;
+  };
   assets: {
     palette: string[];
     mascot: string | null;
@@ -51,8 +49,6 @@ export type Spec = {
   };
 };
 
-const DIR = path.join(process.cwd(), "campaigns");
-
 /**
  * A campaign is a spec if it carries either authored content or enforceable
  * rules.
@@ -62,54 +58,9 @@ const DIR = path.join(process.cwd(), "campaigns");
  * copy at all — it is generated per request — so requiring it hid exactly the
  * campaigns the admin flow creates.
  */
-function isSpec(o: any): o is Spec {
+export function isSpec(o: any): o is Spec {
   if (!o || typeof o !== "object" || !o.brand) return false;
   const authored = !!(o.content?.hook && Array.isArray(o.content?.ranked));
   const enforceable = !!(o.requirements && o.rules);
   return authored || enforceable;
-}
-
-export function listSpecs(): Spec[] {
-  if (!fs.existsSync(DIR)) return [];
-  const out: Spec[] = [];
-  for (const f of fs.readdirSync(DIR)) {
-    if (!f.endsWith(".json")) continue;
-    try {
-      const o = JSON.parse(fs.readFileSync(path.join(DIR, f), "utf8"));
-      if (isSpec(o)) out.push({ ...o, id: f.replace(/\.json$/, "") });
-    } catch {
-      /* a malformed file must not take the whole list down */
-    }
-  }
-  return out.sort((a, b) => a.brand.localeCompare(b.brand));
-}
-
-export function getSpec(id: string): Spec | null {
-  const f = path.join(DIR, `${path.basename(id)}.json`);
-  if (!fs.existsSync(f)) return null;
-  try {
-    const o = JSON.parse(fs.readFileSync(f, "utf8"));
-    return isSpec(o) ? { ...o, id } : null;
-  } catch {
-    return null;
-  }
-}
-
-export function saveSpec(spec: Spec): Spec {
-  const id = spec.id.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "");
-  if (!id) throw new Error("campaign id is required");
-  fs.mkdirSync(DIR, { recursive: true });
-  const out = { ...spec, id };
-  fs.writeFileSync(path.join(DIR, `${id}.json`), JSON.stringify(out, null, 2));
-  return out;
-}
-
-/** Photos available to a campaign, so the studio can offer real choices. */
-export function photosFor(spec: Spec): string[] {
-  const dir = path.join(process.cwd(), spec.assets.photos.dir);
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => /\.(jpe?g|png)$/i.test(f) && !f.startsWith("_"))
-    .map((f) => f.replace(/\.\w+$/, ""));
 }

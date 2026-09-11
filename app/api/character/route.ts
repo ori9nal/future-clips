@@ -1,7 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { getSpec } from "@/lib/specs";
+import { viewerForRequest } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { getSpec } from "@/lib/db/campaigns";
 
 export const maxDuration = 800;
 
@@ -14,12 +16,15 @@ export const maxDuration = 800;
  * reused by every set that campaign ever produces.
  */
 export async function POST(req: Request) {
+  const viewer = await viewerForRequest();
+  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only" }, { status: 403 });
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: "invalid JSON body" }, { status: 400 }); }
 
   const { campaignId, quality = "medium", variants = 3 } = body || {};
   if (!campaignId) return Response.json({ error: "campaignId is required" }, { status: 400 });
-  const spec = getSpec(campaignId);
+  const spec = await getSpec(await createClient(), campaignId);
   if (!spec) return Response.json({ error: `no campaign "${campaignId}"` }, { status: 404 });
 
   const dir = (spec as any).assets?.character?.dir;

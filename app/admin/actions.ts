@@ -1,23 +1,22 @@
 "use server";
 
-import fs from "node:fs";
-import path from "node:path";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import {
-  type Campaign,
-  emptyCampaign,
-  getCampaign,
-  saveCampaign,
-  deleteCampaign,
-  slugify,
-} from "@/lib/campaigns";
+import { requirePlatformOwner } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { type Campaign, emptyCampaign, slugify } from "@/lib/campaigns";
+import { getCampaign, saveCampaign, deleteCampaign } from "@/lib/db/campaigns";
+
+/**
+ * Admin mutations. Each one re-checks that the caller is a platform owner
+ * (the page did too, but a server action is a URL) and then writes through
+ * the caller's own Supabase client, so RLS is the second lock: a user who
+ * is not a platform owner cannot write a platform campaign even if this
+ * check were somehow skipped.
+ */
 
 const list = (v: FormDataEntryValue | null) =>
-  String(v ?? "")
-    .split(/[\n,]/)
-    .map((s) => s.trim())
-    .filter(Boolean);
+  String(v ?? "").split(/[\n,]/).map((s) => s.trim()).filter(Boolean);
 
 /** Build a campaign from the admin form. */
 function fromForm(fd: FormData, base: Campaign): Campaign {
@@ -31,7 +30,6 @@ function fromForm(fd: FormData, base: Campaign): Campaign {
     const hex = String(fd.get(`accent_hex_${m[1]}`) || "").trim();
     if (label && /^#[0-9a-fA-F]{6}$/.test(hex)) accents[label] = hex.toUpperCase();
   }
-
   return {
     ...base,
     id: base.id || slugify(name),
@@ -77,85 +75,93 @@ function fromForm(fd: FormData, base: Campaign): Campaign {
 }
 
 export async function createCampaign(fd: FormData) {
+  await requirePlatformOwner();
+  const sb = await createClient();
   const name = String(fd.get("name") || "").trim();
   if (!name) throw new Error("campaign needs a name");
   const c = fromForm(fd, emptyCampaign());
   if (!c.id) throw new Error("could not derive an id from the name");
-  if (getCampaign(c.id)) throw new Error(`campaign "${c.id}" already exists`);
-  saveCampaign(c);
+  if (await getCampaign(sb, c.id)) throw new Error(`campaign "${c.id}" already exists`);
+  await saveCampaign(sb, c);
   revalidatePath("/admin");
   redirect(`/admin/campaigns/${c.id}`);
 }
 
 export async function updateCampaign(id: string, fd: FormData) {
-  const base = getCampaign(id);
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const base = await getCampaign(sb, id);
   if (!base) throw new Error(`no campaign "${id}"`);
-  saveCampaign(fromForm(fd, base));
+  await saveCampaign(sb, fromForm(fd, base));
   revalidatePath(`/admin/campaigns/${id}`);
   revalidatePath("/admin");
 }
 
 export async function removeCampaign(id: string) {
-  deleteCampaign(id);
+  await requirePlatformOwner();
+  const sb = await createClient();
+  await deleteCampaign(sb, id);
   revalidatePath("/admin");
   redirect("/admin");
 }
 
 /**
- * Logo upload. Written under public/ so the admin UI and any future rendered
- * furniture can both reference it by URL.
+ * Logo upload → the public `assets` bucket (brand/<id>/logo.<ext>). Storage
+ * policy: platform owners only. The public URL goes on the campaign record.
  */
 export async function uploadLogo(id: string, fd: FormData) {
+  await requirePlatformOwner();
   const file = fd.get("logo") as File | null;
   if (!file || !file.size) return;
-  const c = getCampaign(id);
+  const sb = await createClient();
+  const c = await getCampaign(sb, id);
   if (!c) throw new Error(`no campaign "${id}"`);
 
   const ext = (file.name.split(".").pop() || "png").toLowerCase();
   if (!["png", "jpg", "jpeg", "webp", "svg"].includes(ext)) {
     throw new Error(`unsupported logo format ".${ext}" — use png, jpg, webp or svg`);
   }
-  const dir = path.join(process.cwd(), "public", "brand", id);
-  fs.mkdirSync(dir, { recursive: true });
-  const rel = `/brand/${id}/logo.${ext}`;
-  fs.writeFileSync(path.join(dir, `logo.${ext}`), Buffer.from(await file.arrayBuffer()));
-
-  saveCampaign({ ...c, brand: { ...c.brand, logo: rel } });
+  if (file.size > 2 * 1024 * 1024) throw new Error("logo is over 2 MB");
+  const key = `brand/${id}/logo.${ext}`;
+  const { error } = await sb.storage.from("assets").upload(key, Buffer.from(await file.arrayBuffer()), {
+    contentType: file.type || `image/${ext === "svg" ? "svg+xml" : ext}`,
+    upsert: true,
+  });
+  if (error) throw new Error(`upload failed: ${error.message}`);
+  const { data } = sb.storage.from("assets").getPublicUrl(key);
+  await saveCampaign(sb, { ...c, brand: { ...c.brand, logo: data.publicUrl } });
   revalidatePath(`/admin/campaigns/${id}`);
 }
 
-/**
- * Source visuals. Each upload is matted and added to the campaign's niche
- * library, so it becomes available to the renderer exactly like a stock cutout.
- *
- * Matting is ~5s of CPU per image and runs inline here because an admin
- * onboarding a campaign is a deliberate, low-frequency action. When this moves
- * behind the pg-boss queue the call site does not change — only the await does.
- */
-export async function uploadVisuals(id: string, fd: FormData) {
-  const c = getCampaign(id);
-  if (!c) throw new Error(`no campaign "${id}"`);
-  const files = fd.getAll("visuals").filter((f): f is File => f instanceof File && f.size > 0);
-  if (!files.length) return;
+/* ── invites: who may sign in while the product is invite-only ─────────── */
 
-  const { ingestUpload } = await import("@/lib/ingest");
-  const added: string[] = [];
-  const rejected: string[] = [];
-  for (const f of files) {
-    const buf = Buffer.from(await f.arrayBuffer());
-    const r = await ingestUpload(buf, { niche: c.niche, kind: "people", label: f.name });
-    if (r.ok) added.push(r.id!);
-    else rejected.push(`${f.name}: ${r.reason}`);
-  }
+export async function addInvite(fd: FormData) {
+  const viewer = await requirePlatformOwner();
+  const sb = await createClient();
+  const email = String(fd.get("email") || "").trim().toLowerCase();
+  if (!/^[^@\s]+@[^@\s.]+\.[^@\s]+$/.test(email)) throw new Error("that is not an email address");
+  const scope = String(fd.get("scope") || "customer");
+  const platform = viewer.memberships.find((m) => m.org.is_platform)?.org;
+  const row: any = { email, note: String(fd.get("note") || "").trim() || null, invited_by: viewer.user.id };
+  if (scope === "platform_owner" && platform) { row.org_id = platform.id; row.role = "owner"; }
+  const { error } = await sb.from("allowed_emails").insert(row);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/invites");
+}
 
-  saveCampaign({
-    ...c,
-    source: { ...c.source, uploads: [...(c.source.uploads || []), ...added] },
-  });
-  revalidatePath(`/admin/campaigns/${id}`);
-  if (rejected.length) {
-    // Surfaced rather than swallowed: a silently dropped upload looks like a bug
-    // to whoever onboarded the campaign.
-    throw new Error(`rejected ${rejected.length} of ${files.length}: ${rejected.join(" · ")}`);
-  }
+export async function removeInvite(email: string) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("allowed_emails").delete().eq("email", email);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/invites");
+}
+
+export async function setSignupMode(fd: FormData) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const mode = String(fd.get("mode")) === "open" ? "open" : "invite";
+  const { error } = await sb.from("app_settings").update({ value: { mode }, updated_at: new Date().toISOString() }).eq("key", "signup");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/invites");
 }

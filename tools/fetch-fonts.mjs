@@ -1,4 +1,6 @@
 // Downloads static TTFs from the Google Fonts CSS API into assets/fonts/.
+// Runs as `prebuild` on Vercel, where the 6 MB of fonts are not in the source
+// payload; locally it is a no-op because the tracked files already exist.
 // Legacy UA => Google serves .ttf (satori cannot read woff2).
 // Variable families are requested at a specific axis tuple; Google instances them server-side.
 import fs from 'node:fs';
@@ -41,6 +43,41 @@ const REQUESTS = [
   ['JetBrainsMono-Regular',      'family=JetBrains+Mono:ital,wght@0,400'],
   ['JetBrainsMono-Medium',       'family=JetBrains+Mono:ital,wght@0,500'],
   ['JetBrainsMono-Bold',         'family=JetBrains+Mono:ital,wght@0,700'],
+
+  // the pairing faces (engine/pairings.mjs) and the caption faces, folded in
+  // from the one-off fetch tools so a fresh host can rebuild all 56
+  ['AbrilFatface-Regular','family=Abril+Fatface'],
+  ['BebasNeue-Regular','family=Bebas+Neue:wght@400'],
+  ['BricolageGrotesque-Bold','family=Bricolage+Grotesque:opsz,wdth,wght@96,100,700'],
+  ['BricolageGrotesque-ExtraBold','family=Bricolage+Grotesque:opsz,wdth,wght@96,100,800'],
+  ['BricolageGrotesque-Medium','family=Bricolage+Grotesque:opsz,wdth,wght@14,100,500'],
+  ['Caveat-Bold','family=Caveat:wght@700'],
+  ['CormorantGaramond-Bold','family=Cormorant+Garamond:ital,wght@0,700'],
+  ['CormorantGaramond-Italic','family=Cormorant+Garamond:ital,wght@1,400'],
+  ['DMSerifDisplay-Italic','family=DM+Serif+Display:ital@1'],
+  ['DMSerifDisplay-Regular','family=DM+Serif+Display:ital@0'],
+  ['FamiljenGrotesk-Bold','family=Familjen+Grotesk:wght@700'],
+  ['Fraunces-Black','family=Fraunces:ital,opsz,wght@0,9..144,900'],
+  ['Fraunces-BlackItalic','family=Fraunces:ital,opsz,wght@1,9..144,900'],
+  ['InstrumentSerif-Italic','family=Instrument+Serif:ital@1'],
+  ['InstrumentSerif-Regular','family=Instrument+Serif:ital@0'],
+  ['LibreBaskerville-Italic','family=Libre+Baskerville:ital,wght@1,400'],
+  ['LibreBaskerville-Regular','family=Libre+Baskerville:ital,wght@0,400'],
+  ['Manrope-ExtraBold','family=Manrope:wght@800'],
+  ['Manrope-Medium','family=Manrope:wght@500'],
+  ['Newsreader-Italic','family=Newsreader:ital,opsz,wght@1,6..72,400'],
+  ['Newsreader-MediumItalic','family=Newsreader:ital,opsz,wght@1,6..72,500'],
+  ['Newsreader-Regular','family=Newsreader:ital,opsz,wght@0,6..72,400'],
+  ['Newsreader-SemiBold','family=Newsreader:ital,opsz,wght@0,6..72,600'],
+  ['Oswald-Bold','family=Oswald:wght@700'],
+  ['Outfit-Black','family=Outfit:wght@900'],
+  ['Outfit-Medium','family=Outfit:wght@500'],
+  ['Poppins-Bold','family=Poppins:ital,wght@0,700'],
+  ['Poppins-SemiBold','family=Poppins:ital,wght@0,600'],
+  ['SpaceGrotesk-Bold','family=Space+Grotesk:wght@700'],
+  ['SpaceGrotesk-Medium','family=Space+Grotesk:wght@500'],
+  ['Syne-ExtraBold','family=Syne:wght@800'],
+  ['Unbounded-Black','family=Unbounded:wght@900'],
 ];
 
 async function css(query) {

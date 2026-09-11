@@ -30,7 +30,7 @@ function HardRules({ spec }: { spec: Spec }) {
   );
 }
 
-export function AdminClient({ campaigns, gateOn }: { campaigns: Spec[]; gateOn: boolean }) {
+export function AdminClient({ campaigns }: { campaigns: Spec[] }) {
   const [brief, setBrief] = useState("");
   const [busy, setBusy] = useState(false);
   const [spec, setSpec] = useState<Spec | null>(null);
@@ -58,12 +58,6 @@ export function AdminClient({ campaigns, gateOn }: { campaigns: Spec[]; gateOn: 
 
   return (
     <>
-      {!gateOn && (
-        <p className="error" role="alert">
-          <strong>FC_ADMIN_SECRET is not set.</strong> The admin gate is off, so these pages are
-          open to anyone who can reach the server. Set it before deploying.
-        </p>
-      )}
 
       <section className="panel col">
         <div className="field">

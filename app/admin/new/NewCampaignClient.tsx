@@ -103,8 +103,9 @@ export function NewCampaignClient({ photoDirs }: { photoDirs: string[] }) {
         <legend>Assets</legend>
         <div className="grid">
           <label>
-            Photo folder
-            <select value={f.photosDir} onChange={set("photosDir")}>
+            Photo folder <em>(local only — hosted campaigns render with AI art)</em>
+            <select value={f.photosDir} onChange={set("photosDir")} disabled={!photoDirs.length}>
+              {!photoDirs.length && <option value="">none · art=ai</option>}
               {photoDirs.map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
           </label>

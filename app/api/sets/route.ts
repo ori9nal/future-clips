@@ -1,7 +1,9 @@
 import path from "node:path";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { getSpec } from "@/lib/specs";
+import { viewerForRequest } from "@/lib/auth";
+import { createClient } from "@/lib/supabase/server";
+import { getSpec } from "@/lib/db/campaigns";
 
 export const maxDuration = 300;
 
@@ -14,6 +16,9 @@ export const maxDuration = 300;
  * seconds of cold start for nothing.
  */
 export async function POST(req: Request) {
+  const viewer = await viewerForRequest();
+  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only" }, { status: 403 });
   let body: any;
   try {
     body = await req.json();
@@ -23,7 +28,7 @@ export async function POST(req: Request) {
   const { campaignId, style = "native" } = body || {};
   if (!campaignId) return Response.json({ error: "campaignId is required" }, { status: 400 });
 
-  const spec = getSpec(campaignId);
+  const spec = await getSpec(await createClient(), campaignId);
   if (!spec) return Response.json({ error: `no campaign "${campaignId}"` }, { status: 404 });
   if (style === "mascot" && !spec.assets.mascot) {
     return Response.json({ error: "this campaign has no mascot asset" }, { status: 400 });
