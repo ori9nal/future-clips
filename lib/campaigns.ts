@@ -86,19 +86,32 @@ export function emptyCampaign(): Campaign {
   };
 }
 
+/**
+ * campaigns/ holds two shapes. This one (brand kit object, admin-authored) and
+ * the engine's spec (brand as a string, authored content — see lib/specs.ts
+ * `isSpec`). The admin form rebuilds the whole object on save, so letting a
+ * spec through here would let /admin silently overwrite its brief and content.
+ * Mirror of `isSpec`: each loader only returns its own shape.
+ */
+function isCampaign(o: any): o is Campaign {
+  return !!(o && typeof o === "object" && o.brand && typeof o.brand === "object" && o.brand.colors);
+}
+
 export function listCampaigns(): Campaign[] {
   if (!fs.existsSync(DIR)) return [];
   return fs
     .readdirSync(DIR)
     .filter((f) => f.endsWith(".json"))
-    .map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), "utf8")) as Campaign)
+    .map((f) => JSON.parse(fs.readFileSync(path.join(DIR, f), "utf8")))
+    .filter(isCampaign)
     .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""));
 }
 
 export function getCampaign(id: string): Campaign | null {
-  const f = path.join(DIR, `${id}.json`);
+  const f = path.join(DIR, `${path.basename(id)}.json`);
   if (!fs.existsSync(f)) return null;
-  return JSON.parse(fs.readFileSync(f, "utf8")) as Campaign;
+  const o = JSON.parse(fs.readFileSync(f, "utf8"));
+  return isCampaign(o) ? o : null;
 }
 
 export function saveCampaign(c: Campaign): Campaign {

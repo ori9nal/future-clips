@@ -19,7 +19,7 @@ import io, os, re, json, shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "Main.dc.html")
-DIST = os.path.join(os.path.dirname(HERE), "dist")
+DIST = os.path.join(os.path.dirname(HERE), "future-clips-site")
 
 SUPA_URL = "https://waipwmyncpsgoglmkhdz.supabase.co"
 SUPA_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT"
@@ -396,8 +396,8 @@ io.open(os.path.join(DIST, "index.html"), "w", encoding="utf-8").write(out2)
 kb = os.path.getsize(os.path.join(DIST, "index.html")) / 1024
 imgkb = sum(os.path.getsize(os.path.join(DIST, "carousels", f))
             for f in os.listdir(os.path.join(DIST, "carousels"))) / 1024
-print("dist/index.html  %.0f KB" % kb)
-print("dist/carousels   %d files, %.0f KB" % (len(used), imgkb))
+print("future-clips-site/index.html  %.0f KB" % kb)
+print("future-clips-site/carousels   %d files, %.0f KB" % (len(used), imgkb))
 print("data: old=%d new=%d features=%d faqs=%d" % (len(OLD), len(NEW), len(FEATURES), len(FAQS)))
 print("holes left: %s" % sorted(set(re.findall(r'\{\{[^}]*\}\}', out2))))
 print("sc-for left: %d" % out2.count("<sc-for"))
