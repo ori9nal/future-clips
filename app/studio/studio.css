@@ -1,8 +1,13 @@
+/* The root layout paints no ground, so the studio paints its own — the
+   marketing light-grey body the old globals.css forced under these dark
+   cards is gone. */
+html:has(main.studio){background:#0B0B0C;color-scheme:dark}
+@media (prefers-color-scheme:light){html:has(main.studio){background:#F5F3EF;color-scheme:light}}
 .studio{
   --ground:#0B0B0C; --surface:#141518; --line:#26282D;
   --text:#F2F0EB; --muted:#8A8F97; --accent:#FF5A1F; --ok:#34D07F; --bad:#FF5A5A;
   max-width:1180px;margin:0 auto;padding:2.6rem 1.4rem 5rem;color:var(--text);
-  font-family:"Poppins",system-ui,-apple-system,sans-serif;
+  font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
 }
 @media (prefers-color-scheme:light){
   .studio{--ground:#F5F3EF;--surface:#fff;--line:#DEDAD2;--text:#131316;--muted:#61666E;--accent:#D8410B}

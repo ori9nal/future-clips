@@ -1,14 +1,27 @@
 /* ══════════════════════════════════════════════════════════
    FUTURE CLIPS — app shell.
 
+   Loaded by the root layout on every route. The first block is
+   the element reset every surface wants; everything after it is
+   the product design language (.fc). The old globals.css carried
+   the marketing page's Poppins body font, its light ground and
+   its purple focus ring into every route — those are gone.
+
    Tokens read directly off the production site rather than
    eyeballed: bg #FAF9F6, ink #0E0E10, lime #D8FF47, body
    Manrope, headlines Archivo 700 at -0.03em tracking.
-
-   The product surface has to look like the product. The
-   previous admin was a different design language entirely,
-   which is exactly the "make it an actual website" note.
    ══════════════════════════════════════════════════════════ */
+
+/* ── element reset (every route) ───────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+h1, h2, h3, h4, h5, p, figure { margin: 0; }
+ul { margin: 0; padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img { max-width: 100%; }
+button, input, select, textarea { font: inherit; }
+:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
 
 :root {
   --fc-bg:      #FAF9F6;
