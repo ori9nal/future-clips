@@ -32,6 +32,8 @@ const appIcon = args.icon ?? spec.assets?.app_icon;
 
 let photos = [];
 let artUsd = 0;
+let look = args.look ?? spec.assets?.look ?? 'cinematic';
+let world = null;
 if (args.art === 'ai') {
   // Generate the imagery instead of sourcing it. Scenes come from the copy
   // step, so the pictures illustrate the story rather than sitting beside it.
@@ -41,23 +43,36 @@ if (args.art === 'ai') {
     content.closer?.scene,
   ].map((s, i) => s || `the person, scene ${i + 1}`);
 
+  // Feed imagery is enforced in code, and the set is locked to ONE world —
+  // one time of day and palette, or for gym one location — which is what
+  // makes six separate generations read as one post rather than six. The
+  // world also picks the grade, so a bright midday set is not then crushed
+  // into a night look by a hard-coded "cinematic".
+  const { enforce, bankFor, BANK } = await import('../engine/scenes.mjs');
+  const isGym = bankFor(spec.niche) === BANK.fitness;
   if (styleId === 'feed') {
-    // The model does not get to pick between a Porsche and a train seat. A
-    // dreary or repeated scene is swapped for one from the bank, in code.
     const appIndex = 1 + (content.ranked ?? []).findIndex((r) => r.showsApp);
-    const { enforce } = await import('../engine/scenes.mjs');
-    const e = enforce(scenes, { niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed: id });
-    if (e.replaced.length) console.log(`  scenes: replaced ${e.replaced.length} of ${scenes.length} (slides ${e.replaced.map((i) => i + 1).join(', ')})`);
+    // the seed carries the ask, so two sets from one campaign land in
+    // different worlds instead of the same one every time
+    const e = enforce(scenes, {
+      niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed: args.seed ?? `${id}|${instruction}`,
+      headings: (content.ranked ?? []).map((r) => r.name),
+    });
     scenes = e.scenes;
+    world = e.world;
+    if (!args.look) look = world.look ?? look;
+    console.log(`  world: ${world.label} · grade: ${look}`);
   }
-  process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'}… `);
+  // The trading feed has no recurring person (a car, a pool, a window). The
+  // gym feed IS one person — one lifter, one session — so it holds the
+  // subject across frames exactly as the reference sets do.
+  const mode = args.mode ?? (styleId === 'feed' && !isGym ? 'aspirational' : 'subject');
+  process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'} (${mode})… `);
   const art = await generateSet({
     root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
-    subject: content.subject ?? 'A person in their late twenties, plain dark clothing.',
-    scenes, look: spec.assets?.look ?? 'cinematic',
-    quality: args.quality ?? 'medium', w: 1080, h: 1920, id,
-    // feed has no recurring person by design; everything else holds one
-    mode: args.mode ?? (styleId === 'feed' ? 'aspirational' : 'subject'),
+    subject: content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, black fitted t-shirt, grey shorts, black training shoes.',
+    scenes, look,
+    quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode,
   });
   artUsd = art.usd;
   console.log(`$${art.usd.toFixed(4)} (${art.cached} cached)`);
@@ -70,12 +85,18 @@ if (args.art === 'ai') {
     : [];
 }
 const renderable = toRenderable(spec, content, { appScreen, appIcon, photos });
-if (args.art === 'ai') renderable.assets = { ...renderable.assets, photos: { dir: '.', credit: 'gpt-image-2' } };
+renderable.assets = { ...renderable.assets, look, ...(args.pairing ? { pairing: args.pairing } : {}) };
+if (args.art === 'ai') renderable.assets.photos = { dir: '.', credit: 'gpt-image-2' };
 const outDir = path.join(ROOT, 'output/sets', `${id}-${styleId}`);
 const r = await render({ spec: renderable, root: ROOT, styleId, outDir });
+// the model's copy and the frames it was given, so a bad round can be read
+fs.writeFileSync(path.join(outDir, 'content.json'), JSON.stringify({ content, photos }, null, 2));
+const pairing = renderable.content.pairing ?? null;
+if (pairing) console.log(`  fonts: ${pairing.id} (${pairing.head} / ${pairing.body})`);
 fs.writeFileSync(path.join(outDir, 'post.json'), JSON.stringify({
   caption: content.caption, bio: content.bio, hashtags: content.hashtags,
   compliance: verdict,
+  world: world ? { id: world.id, label: world.label } : null, look, pairing,
   cost: { copy: +usd.toFixed(4), art: +artUsd.toFixed(4), total: +(usd + artUsd).toFixed(4) },
 }, null, 2));
 console.log(`  ${r.files.length} slides · ${r.canvas.w}x${r.canvas.h} · ${((Date.now() - t) / 1000).toFixed(1)}s`);

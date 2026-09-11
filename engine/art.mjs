@@ -94,14 +94,22 @@ export async function generateSet(o) {
   let usd = anchor.usd ?? 0, cached = anchor.cached ? 1 : 0;
 
   for (let i = 1; i < scenes.length; i++) {
+    // A close-up is asked for by the scene, and "keep the same face" pulls
+    // the model straight back to the anchor's full-body framing — round one
+    // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
+    // mirror selfie four times. So a close-up keeps the person by skin, build
+    // and clothing, and is told outright that the face is not in the frame.
+    const closeUp = /close-up|no face|from behind|from the waist down|neck down/i.test(scenes[i]);
+    const keep = closeUp
+      ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scenes[i]} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
+      : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scenes[i]}`;
     const r = await generate({
       root, cacheDir, size, quality, label: `${id}-${i}`,
       refs: [anchor.file],
       // Naming what must NOT change does more work than describing the person
       // again — the reference already carries the likeness, and re-describing
       // it invites the model to reinterpret rather than preserve.
-      prompt: `${style} Keep the SAME PERSON from the reference image: same face, same hair, same clothing. ` +
-        `Do not restyle or age them. New scene: ${scenes[i]} ${GUARD}`,
+      prompt: `${style} ${keep} ${GUARD}`,
     });
     files.push(r.file);
     usd += r.usd ?? 0;

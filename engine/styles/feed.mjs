@@ -23,9 +23,35 @@ import { layoutWidth } from '../fit-text.mjs';
 import { breakToFit } from '../caption.mjs';
 import { grade } from '../grade.mjs';
 import { scoreRegion } from '../caption.mjs';
+import { pickPairing } from '../pairings.mjs';
 
 /** Thin outline, sized off the type. The reference is nowhere near a slab. */
 const OUTLINE = 0.045;
+
+/**
+ * Faces that hold up as a thin-outlined caption over a photo. Every pairing's
+ * loud face is here; the two that are not (Unbounded, Abril) go wide or
+ * spindly at caption size. A set draws ONE heading face and ONE body face from
+ * its pairing and keeps them for every slide — the nine trading rounds all
+ * came out in Poppins because this file hard-coded it.
+ */
+const CAPTION_SAFE = new Set([
+  'sansBlack', 'displayCond', 'anton', 'bebas', 'oswald', 'syne', 'serifFat',
+  'serifDisplay', 'serifDisplayIt', 'frauncesBlack', 'playfairBlack', 'manrope',
+  'grotesk', 'outfitBlack', 'poppinsBold', 'familjen',
+]);
+
+/**
+ * Faces differ enormously in how much line a given size buys: Bebas at 44px
+ * is a whisper, Archivo Black at 44px is a wall. Sizes in this file are set
+ * for Poppins, so each face is scaled to the same lowercase run as Poppins.
+ */
+function sizeScale(faceKey) {
+  const f = loadFace(FACES[faceKey].file), p = loadFace(FACES.poppinsBold.file);
+  const run = 'the quick brown fox jumps over the lazy dog';
+  const r = layoutWidth(p, run, 100) / layoutWidth(f, run, 100);
+  return Math.min(1.35, Math.max(0.82, Math.pow(r, 0.75)));
+}
 
 export default {
   id: 'feed',
@@ -41,19 +67,39 @@ export default {
     const M = 56;
     const look = spec.assets?.look ?? 'cinematic';
 
-    const capFace = loadFace(FACES.poppinsBold.file);
-    const bodyFace = loadFace(FACES.poppinsSemi.file);
+    // One pairing per set. The loud face heads every slide, the body face
+    // carries the lines under it. `spec.assets.pairing` pins one for a brand
+    // with a house style; otherwise it rotates, remembering recent picks.
+    const pairing = pickPairing({
+      root, seed: `${spec.id}:${(C.hook?.lines ?? []).join(' ')}`,
+      moods: [spec.niche, C.mood].filter(Boolean), force: spec.assets?.pairing,
+      // only pairings whose loud face survives as a caption — otherwise the
+      // pick falls back to Archivo Black and two sets in a row look the same
+      allow: (p) => CAPTION_SAFE.has(p.loud),
+    });
+    const HEAD = CAPTION_SAFE.has(pairing.loud) ? pairing.loud : 'sansBlack';
+    const BODY = ['sans', 'sansMed', 'bookSerif'].includes(pairing.body) ? pairing.body : 'sansMed';
+    // The gym reference runs a size up on the trading reference (set 08
+    // heads at ~48px and bodies at ~40px; set 01 heads at 44 and bodies at 36).
+    const T = /gym|fitness|supplement|nutrition|muscle/i.test(spec.niche ?? '') ? 1.12 : 1;
+    const headScale = sizeScale(HEAD) * T, bodyScale = sizeScale(BODY) * T;
+    spec.content.pairing = { id: pairing.id, head: HEAD, body: BODY };
+
+    const capFace = loadFace(FACES[HEAD].file);
 
     /**
      * A caption block, centred, small, thinly outlined.
      *
      * Sizes are absolute rather than fitted-to-fill: the reference keeps the
      * same modest scale whatever the copy is, and lets the block grow taller
-     * instead of the type growing bigger.
+     * instead of the type growing bigger. `face` is a ROLE — head or body —
+     * resolved through the set's pairing, never a font name.
      */
-    const caption = (lines, cy, { size = 40, face = 'poppinsBold', fill = '#FFFFFF', lh = 1.24, boost = 0 } = {}) => {
-      const f = FACES[face];
+    const caption = (lines, cy, { size = 40, face = 'head', fill = '#FFFFFF', lh = 1.24, boost = 0 } = {}) => {
+      const key = face === 'body' ? BODY : HEAD;
+      const f = FACES[key];
       const ff = loadFace(f.file);
+      size = Math.round(size * (face === 'body' ? bodyScale : headScale));
       const wrapped = lines.flatMap((l) => breakToFit(ff, l, W - M * 2 - 40, size, { max: 4 }));
       // The outline thickens on a bright ground. A single thin outline is right
       // over a dark car and disappears entirely over a sunset sky, which is
@@ -64,7 +110,7 @@ export default {
       for (const l of wrapped) {
         const esc = String(l).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         svg += `<text x="${W / 2}" y="${Math.round(y)}" text-anchor="middle" ` +
-          `font-family="${f.family}" font-weight="${f.weight}" font-size="${size}" ` +
+          `font-family="${f.family}" font-weight="${f.weight}"${f.style ? ` font-style="${f.style}"` : ""} font-size="${size}" ` +
           `fill="${fill}" stroke="#000000" stroke-width="${sw}" stroke-opacity="${(0.8 + boost * 3).toFixed(2)}" ` +
           `stroke-linejoin="round" paint-order="stroke fill">${esc}</text>`;
         y += size * lh;
@@ -83,7 +129,7 @@ export default {
       } else {
         // a placeholder that still reads as an app tile rather than a gap
         svg += rect(x, top, S, S, { r: Math.round(S * 0.225), fill: '#1B1F27' });
-        svg += text('poppinsBold', W / 2, top + S / 2 + 20, (label.match(/[A-Za-z]/) ?? [''])[0].toUpperCase(),
+        svg += text(HEAD, W / 2, top + S / 2 + 20, (label.match(/[A-Za-z]/) ?? [''])[0].toUpperCase(),
           { size: 72, fill: '#FFFFFF', anchor: 'middle' });
       }
       // the white pill, overlapping the icon's lower edge exactly as the
@@ -92,10 +138,10 @@ export default {
       const pw = Math.ceil(layoutWidth(capFace, label, pt)) + 56;
       const py = top + S - Math.round(pt * 0.5);
       svg += rect(Math.round((W - pw) / 2), py, pw, pt + 28, { r: (pt + 28) / 2, fill: '#FFFFFF' });
-      svg += text('poppinsBold', W / 2, py + pt + 4, label, { size: pt, fill: '#111111', anchor: 'middle' });
+      svg += text(HEAD, W / 2, py + pt + 4, label, { size: pt, fill: '#111111', anchor: 'middle' });
       let bottom = py + pt + 28;
       if (sub) {
-        const c = caption([sub], bottom + 18, { size: 32, face: 'poppinsSemi' });
+        const c = caption([sub], bottom + 18, { size: 32, face: 'body' });
         svg += c.svg;
         bottom = c.bottom;
       }
@@ -144,18 +190,29 @@ export default {
       const top = Math.round(H * 0.08);
       const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.22));
       if (scrim) s.push(rect(0, 0, W, Math.round(H * 0.32), { fill: '#000000', op: scrim }));
-      s.push(caption(C.hook.lines, top, { size: 46, boost }).svg);
+      const hk = caption(C.hook.lines, top, { size: 46, boost });
+      s.push(hk.svg);
       if (C.hook.sub?.length) {
-        s.push(caption(C.hook.sub, top + 130, { size: 32, face: 'poppinsSemi', boost }).svg);
+        // under the block, not at a fixed offset — a three-line hook in a
+        // tall face ran straight through "Top five only" on gym round two
+        s.push(caption(C.hook.sub, hk.bottom + 14, { size: 32, face: 'body', boost }).svg);
       }
       out.push(s.join(''));
     }
 
     /* body */
+    // The app slide is not a ranked item and gets no number — set 08 runs
+    // 5, 4, 3, 2, PRO TIP, 1. Ranks count only the real items, and start one
+    // higher when the closer is the number one.
+    const rankable = C.ranked.filter((r) => !(r.screen || r.icon));
+    let remaining = rankable.length + (C.closerRank ? 1 : 0);
     for (let i = 0; i < C.ranked.length; i++) {
       const item = C.ranked[i];
-      const rank = numbering === 'countdown' ? C.ranked.length - i : i + 1;
-      const label = numbering === 'none' ? item.name : `${rank}. ${item.name}`;
+      const isApp = !!(item.screen || item.icon);
+      // a hand-numbered set uses the model's numbers and nothing else
+      const hand = C.ranked.some((r) => r.rank != null);
+      const rank = hand ? item.rank : isApp ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;
+      const label = (numbering === 'none' && !hand) || isApp || !rank ? item.name : `${rank}. ${item.name}`;
 
       if (item.screen) {
         // The screen is 9:16 and the canvas is 3:4, so cover-cropping it cuts
@@ -169,7 +226,15 @@ export default {
         const sx = Math.round((W - sw2) / 2), sy = Math.round(H * 0.16);
         const s = [rect(0, 0, W, H, { fill: '#08090C' })];
         s.push(`<g clip-path="inset(0 round 28px)">${image(src, sx, sy, sw2, availH)}</g>`);
-        s.push(caption([label], Math.round(H * 0.045), { size: 44 }).svg);
+        // heading above the phone, the verdict line under it — the reference
+        // app slide is "PRO TIP … / stop guessing and start tracking", not a
+        // bare heading over a screenshot
+        const hd = caption([label], Math.round(H * 0.035), { size: 44 });
+        s.push(hd.svg);
+        if (item.lines?.length) {
+          const bl = caption(item.lines, Math.round(H * 0.16 + availH) + 18, { size: 34, face: 'body' });
+          s.push(bl.svg);
+        }
         out.push(s.join(''));
         continue;
       }
@@ -212,7 +277,7 @@ export default {
           y = sc.bottom;
         }
         if (item.lines?.length) {
-          s.push(caption(item.lines, y + 22, { size: 36, face: 'poppinsSemi', boost }).svg);
+          s.push(caption(item.lines, y + 22, { size: 36, face: 'body', boost }).svg);
         }
       }
       out.push(s.join(''));
@@ -224,7 +289,7 @@ export default {
         const s = [image(path.join(root, C.closer.screen), 0, 0, W, H)];
         s.push(rect(0, 0, W, Math.round(H * 0.20), { fill: '#000000', op: 0.6 }));
         s.push(caption(C.closer.lines, Math.round(H * 0.04), { size: 40 }).svg);
-        s.push(caption([C.closer.cta], Math.round(H * 0.04) + 110, { size: 34, face: 'poppinsSemi' }).svg);
+        s.push(caption([C.closer.cta], Math.round(H * 0.04) + 110, { size: 34, face: 'body' }).svg);
         out.push(s.join(''));
       } else {
         const f = await frame(C.closer.photo, total);
@@ -232,9 +297,12 @@ export default {
         const top = Math.round(H * 0.34);
         const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.24));
         if (scrim) s.push(rect(0, Math.round(H * 0.22), W, Math.round(H * 0.40), { fill: '#000000', op: scrim }));
-        const c = caption(C.closer.lines, top, { size: 44, boost });
+        const closerLines = C.closerRank && C.closer.lines.length
+          ? [`${C.closerRank}. ${C.closer.lines[0]}`, ...C.closer.lines.slice(1)]
+          : C.closer.lines;
+        const c = caption(closerLines, top, { size: 44, boost });
         s.push(c.svg);
-        s.push(caption([C.closer.cta], c.bottom + 24, { size: 34, face: 'poppinsSemi', boost }).svg);
+        s.push(caption([C.closer.cta], c.bottom + 24, { size: 34, face: 'body', boost }).svg);
         out.push(s.join(''));
       }
     }

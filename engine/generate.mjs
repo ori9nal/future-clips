@@ -93,13 +93,36 @@ const SCENE_DIRECTION = {
     'open with "I blew my account" — that is a story hook, and this is a list post.',
     'The "subject" field is unused for this format; write "none".',
   ].join(' '),
+  // The gym feed is a different animal from the trading feed: it IS one
+  // person — one lifter, one gym, one session — shot as anatomy close-ups, and
+  // every item carries a rating out of ten. Measured off reference sets 08 and
+  // 13: "Top 5 PEAK exercises for BICEPS", "7 muscles I regret skipping".
+  'feed:fitness': [
+    'This is the TikTok gym slideshow format. One lifter, one gym, one session. The frames are',
+    'ANATOMY close-ups of that lifter — a bicep mid-curl, a back at the cable station, quads at the',
+    'bottom of a squat, a shoulder at the top of a raise — shot on a phone in the gym mirror or by a',
+    'training partner. Never a face straight to camera; a mirror selfie with the phone in front of the',
+    'face is the only full-body frame allowed. NEVER: a bedroom, a kitchen, a café, a street, a sad',
+    'mood, a stock pose, a thumbs up.',
+    'Every ranked item is a specific EXERCISE or a specific MUSCLE, named plainly ("Incline dumbbell',
+    'curl", "Rear delts"), with "score" as a rating out of ten like "8/10", and one or two lines of',
+    'blunt lifter-to-lifter verdict — why it is rated that, what it does, what it does not. Not a',
+    'brand voice. Lowercase "lol" energy is fine; exclamation marks are not.',
+    'The HOOK is a count plus a promise: "Top 5 PEAK exercises for BICEPS", "7 muscles I regret',
+    'skipping", "4 things that actually moved my lifts". Two short lines.',
+    'The "subject" field IS used: one lifter, described once — build, hair, skin tone, one outfit',
+    '(top, shorts, shoes), no logos. He appears in every frame, so keep it plain and specific.',
+  ].join(' '),
   native: 'Scenes are real gym or lifestyle moments a phone would catch. Vary the place and framing every slide.',
 };
+
+const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|nutrition|health|muscle/i;
 
 export async function generateContent({ root, spec, instruction, slideCount, attempts = 3, model = 'claude-opus-5' }) {
   const constraints = constraintsFor(spec, slideCount);
   const styleId = spec.content?.style ?? 'native';
-  const sceneDirection = SCENE_DIRECTION[styleId] ?? SCENE_DIRECTION.native;
+  const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(spec.niche ?? '') && SCENE_DIRECTION['feed:fitness'])
+    || SCENE_DIRECTION[styleId] || SCENE_DIRECTION.native;
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
     spec.niche ? `Niche: ${spec.niche}` : null,
@@ -200,16 +223,34 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     return t;
   };
 
+  // "No.5 — Barbell curl" as a heading with numbering "none" is the model
+  // numbering by hand. Strip the prefix and let the renderer number, so the
+  // style is consistent and there is never a "5. No.5 —" double.
+  // When the model numbers by hand, its numbers WIN. Round six of the gym
+  // gauntlet had myths 5, 4, 3, 2, an unnumbered "what I actually take", then
+  // myth 1 — a mechanical 6→1 countdown over that produced "6. … myth 5".
+  // So a hand rank is lifted off the name or the score and rendered as-is,
+  // and an item the model left unnumbered stays unnumbered.
+  const NUM = /^\s*(no\.?|#|number)?\s*(\d+)\s*[—–:.\-]\s*/i;
+  const SCORE_RANK = /^\s*#?(\d+)\s*[·•\-–—:|]\s*(?=\S)/;
+  const SCORE_ONLY = /^\s*(myth|reason|thing|tip|rule|mistake|lesson|step|no\.?|#|number|rank)?\s*(\d+)\s*$/i;
+  let handNumbered = false;
   const ranked = (content.ranked ?? []).map((r, i, all) => {
     const showsApp = !!r.showsApp;
     const rank = all.length - i;
+    let hand;
+    let m;
+    if ((m = NUM.exec(r.name ?? ''))) { hand = +m[2]; r = { ...r, name: String(r.name).replace(NUM, '') }; }
+    if ((m = SCORE_RANK.exec(r.score ?? ''))) { hand = hand ?? +m[1]; r = { ...r, score: String(r.score).replace(SCORE_RANK, '') }; }
+    else if ((m = SCORE_ONLY.exec(r.score ?? ''))) { hand = hand ?? +m[2]; r = { ...r, score: undefined }; }
+    if (hand != null) handNumbered = true;
     // The trading feed shows an app as an icon on a pill over a lifestyle
     // frame — that is the reference format (sets 01, 04, 14). A screenshot is
     // the gym-feed convention. So feed + icon → icon slide; otherwise screen.
     const useIcon = showsApp && styleId === 'feed' && appIcon;
     return {
       name: r.name, score: cleanScore(r.score, rank), lines: r.lines ?? [],
-      role: r.role, showsApp,
+      rank: hand, role: r.role, showsApp,
       icon: useIcon ? appIcon : undefined,
       screen: showsApp && !useIcon && appScreen ? appScreen : undefined,
       photo: showsApp && !useIcon && appScreen ? undefined : photoAt(i + 1),
@@ -221,16 +262,31 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
   // brief states for slide 4/5 is quietly broken by the last slide.
   const appAlreadyShown = ranked.some((r) => r.screen || r.icon);
 
+  // The reference countdown pays off ON the last slide: "1. Snake curls
+  // 1000/10" is set 08's closer. The model writes it the same way — "1 —
+  // Weighted chin-up" as the closer's first line — so when the closer is the
+  // number one, say so structurally: the closer takes rank 1 and the ranked
+  // items above it count down from n+1, never reaching 1 themselves.
+  const ONE = /^\s*(#|no\.?|number)?\s*(1|one)\s*[—–:.\-]\s*/i;
+  const closer = { ...content.closer, lines: [...(content.closer?.lines ?? [])] };
+  let closerRank = 0;
+  if (closer.lines[0] && ONE.test(closer.lines[0])) {
+    closer.lines[0] = closer.lines[0].replace(ONE, '');
+    closerRank = 1;
+    handNumbered = true;
+  }
+
   return {
     ...spec,
     content: {
       style: spec.content?.style ?? 'native',
-      numbering: content.numbering === 'none' ? 'none' : 'countdown',
+      numbering: content.numbering === 'none' && !handNumbered ? 'none' : 'countdown',
       hook: { ...content.hook, photo: hookPhoto },
       ranked,
+      closerRank,
       closer: appAlreadyShown
-        ? { ...content.closer, photo: closerPhoto }
-        : { ...content.closer, screen: appScreen ?? undefined, photo: appScreen ? undefined : closerPhoto },
+        ? { ...closer, photo: closerPhoto }
+        : { ...closer, screen: appScreen ?? undefined, photo: appScreen ? undefined : closerPhoto },
       caption: content.caption, bio: content.bio, hashtags: content.hashtags,
     },
   };

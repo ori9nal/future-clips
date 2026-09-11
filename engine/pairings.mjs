@@ -93,7 +93,7 @@ function remember(root, id) {
  * @param {string[]} [o.moods]
  * @param {string} [o.force]  pin a pairing by id (a brand with a house style)
  */
-export function pickPairing({ root, seed = '', moods = [], force, record = true }) {
+export function pickPairing({ root, seed = '', moods = [], force, record = true, allow = () => true }) {
   if (force) {
     const p = PAIRINGS.find((x) => x.id === force);
     if (!p) throw new Error(`unknown pairing "${force}" — have: ${PAIRINGS.map((x) => x.id).join(', ')}`);
@@ -103,12 +103,16 @@ export function pickPairing({ root, seed = '', moods = [], force, record = true 
   const recent = history(root);
   const wanted = moods.map((m) => String(m).toLowerCase());
 
-  const scored = PAIRINGS.map((p) => {
+  const scored = PAIRINGS.filter(allow).map((p) => {
     let score = 0;
     if (wanted.length && p.moods.some((m) => wanted.includes(m))) score += 100;
-    // the more recently a pairing was used, the harder it is pushed down
+    // the more recently a pairing was used, the harder it is pushed down —
+    // and so is any pairing that shares its LOUD face, because "switzer"
+    // after "epic" is Archivo Black after Archivo Black to the viewer
     const age = recent.indexOf(p.id);
     if (age >= 0) score -= (recent.length - age) * 30;
+    const faceAge = recent.findIndex((id) => PAIRINGS.find((x) => x.id === id)?.loud === p.loud);
+    if (faceAge >= 0 && faceAge !== age) score -= (recent.length - faceAge) * 24;
     // a stable per-seed jitter, so the pick varies between sets without being
     // random from run to run
     const h = crypto.createHash('sha256').update(`${seed}:${p.id}`).digest();
