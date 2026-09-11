@@ -12,8 +12,8 @@ class the design runtime resolves. A browser can't run any of that, so this:
   * rewires the events (burger, pricing cycle, form) as plain JS
   * wires the waitlist to Supabase directly (anon key, RLS is insert-only)
 
-Then it adds what was asked for: the hero cards drop in and fan out, the view
-counter rolls up from zero, and sections reveal on scroll.
+Then it adds what was asked for: the hero cards drop in and fan out, and
+sections reveal on scroll.
 """
 import io, os, re, json, shutil
 
@@ -23,7 +23,6 @@ DIST = os.path.join(os.path.dirname(HERE), "future-clips-site")
 
 SUPA_URL = "https://waipwmyncpsgoglmkhdz.supabase.co"
 SUPA_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT"
-VIEWS_TARGET = 1304895
 
 s = io.open(SRC, encoding="utf-8").read()
 
@@ -98,8 +97,8 @@ swaps = [
     ('style="{{ burgerMidStyle }}"',  ''),
     ('style="{{ burgerBotStyle }}"',  ''),
     ('style="{{ mobileMenuStyle }}"', 'class="fc-mobile" id="fcMobile"'),
-    ('style="{{ monthlyStyle }}"',    'class="fc-pill" id="fcMonthly"'),
-    ('style="{{ yearlyStyle }}"',     'class="fc-pill fc-on" id="fcYearly"'),
+    ('style="{{ monthlyStyle }}"',    'class="fc-pill fc-on" id="fcMonthly"'),
+    ('style="{{ yearlyStyle }}"',     'class="fc-pill" id="fcYearly"'),
     ('aria-expanded="{{ menuOpen }}"','aria-expanded="false"'),
     ('onClick="{{ toggleMenu }}"',    'onclick="fcToggle()"'),
     ('onClick="{{ closeMenu }}"',     'onclick="fcClose()"'),
@@ -108,10 +107,12 @@ swaps = [
     ('onSubmit="{{ submit }}"',       'onsubmit="return fcSubmit(event)"'),
     ('{{ msg }}',                     '<span id="fcMsg">Founding price locked when you join.</span>'),
 ]
-for k in ("clipper", "pro", "studio"):
-    for part, dflt in (("Price", {"clipper": "$16", "pro": "$32", "studio": "$79"}[k]),
-                       ("Billing", {"clipper": "$192", "pro": "$384", "studio": "$948"}[k] + " a year · 2 months free"),
-                       ("Per", {"clipper": "≈40¢", "pro": "≈53¢", "studio": "≈40¢"}[k] + " per slideshow")):
+# Pricing holes. The table is priced monthly, so monthly is the default state
+# and the yearly toggle (2 months free = 10x monthly) is the alternative.
+D = "·"
+for k, mo in (("solo", "$19"), ("grind", "$59"), ("agency", "$249")):
+    for part, dflt in (("Price", mo), ("Suffix", "/mo"),
+                       ("Billing", "Billed monthly %s cancel anytime" % D)):
         swaps.append(("{{ %s%s }}" % (k, part), '<span data-p="%s%s">%s</span>' % (k, part, dflt)))
 
 for old, new in swaps:
@@ -139,8 +140,10 @@ for i, (img, alt, x, r, d, w, z) in enumerate(CARDS):
         % (" fc-card-lead" if i == 2 else "", x, r, d, w, z, img, alt, chrome))
 
 stage = ('<div class="fc-stage">' + "".join(cards_html) +
+         # No view counter: Future Clips has no measured view figure to show,
+         # and the example posts are other creators' work. A spec fact instead.
          '<div class="fc-badge"><span class="fc-dot"></span><div>'
-         '<b id="fcViews">0</b><span>Views</span></div></div></div>')
+         '<b>5–10</b><span>Slides per set</span></div></div></div>')
 
 hero = re.search(r'<div style="position:relative;width:100%;max-width:1240px;margin-inline:auto;'
                  r'padding-inline:clamp\(18px,4vw,36px\);margin-top:clamp\(40px,7vw,64px\)">.*?\n  </div>',
@@ -185,6 +188,14 @@ EXTRA_CSS = """
 /* ── pricing toggle ───────────────────────────────────────────────── */
 .fc-pill { border:0; background:transparent; color:#6E6B63; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.07em; text-transform:uppercase; padding:12px 16px; min-height:46px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:background .18s, color .18s; }
 .fc-pill.fc-on { background:#0E0E10; color:#fff; }
+
+/* ── pricing: the spec rows inside each tier card ─────────────────── */
+.fc-rows { margin:18px 0 0; padding:0; display:flex; flex-direction:column; }
+.fc-rows > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:9px 0; border-top:1px solid #EFECE4; }
+.fc-rows dt { margin:0; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#8A867C; white-space:nowrap; }
+.fc-rows dd { margin:0; font-size:14px; font-weight:600; color:#0E0E10; text-align:right; }
+.fc-rows dd.fc-no { color:#B9B5AB; font-weight:400; }
+@media (min-width:1100px) { .fc-tiers { grid-template-columns:repeat(4,1fr) !important; } }
 
 /* ── hero: the deck drops in and spreads ──────────────────────────── */
 .fc-stagewrap { position:relative; width:100%; margin-top:clamp(36px,6vw,60px); overflow:hidden; padding-bottom:clamp(64px,9vw,92px); }
@@ -248,16 +259,16 @@ EXTRA_CSS = """
 """
 
 SCRIPT = """
-var FC_TARGET = %d, FC_URL = "%s", FC_KEY = "%s";
-var fcCycleState = "yearly", fcRef = "";
+var FC_URL = "%s", FC_KEY = "%s";
+var fcCycleState = "monthly", fcRef = "";
 
 var FC_PRICES = {
-  yearly:  { clipperPrice:"$16", clipperBilling:"$192 a year \\u00b7 2 months free", clipperPer:"\\u224840\\u00a2 per slideshow",
-             proPrice:"$32", proBilling:"$384 a year \\u00b7 2 months free", proPer:"\\u224853\\u00a2 per slideshow",
-             studioPrice:"$79", studioBilling:"$948 a year \\u00b7 2 months free", studioPer:"\\u224840\\u00a2 per slideshow" },
-  monthly: { clipperPrice:"$20", clipperBilling:"Billed monthly \\u00b7 cancel anytime", clipperPer:"\\u224850\\u00a2 per slideshow",
-             proPrice:"$39", proBilling:"Billed monthly \\u00b7 cancel anytime", proPer:"\\u224865\\u00a2 per slideshow",
-             studioPrice:"$99", studioBilling:"Billed monthly \\u00b7 cancel anytime", studioPer:"\\u224850\\u00a2 per slideshow" }
+  monthly: { soloPrice:"$19",  soloSuffix:"/mo", soloBilling:"Billed monthly \u00b7 cancel anytime",
+             grindPrice:"$59", grindSuffix:"/mo", grindBilling:"Billed monthly \u00b7 cancel anytime",
+             agencyPrice:"$249", agencySuffix:"/mo", agencyBilling:"Billed monthly \u00b7 cancel anytime" },
+  yearly:  { soloPrice:"$190",  soloSuffix:"/yr", soloBilling:"2 months free \u00b7 billed yearly",
+             grindPrice:"$590", grindSuffix:"/yr", grindBilling:"2 months free \u00b7 billed yearly",
+             agencyPrice:"$2,490", agencySuffix:"/yr", agencyBilling:"2 months free \u00b7 billed yearly" }
 };
 
 function fcToggle(){
@@ -280,23 +291,6 @@ function fcCycle(c){
     if(el) el.textContent=vals[k];
   });
 }
-
-/* the counter rolls up from zero, holds, then runs again */
-(function(){
-  var el=document.getElementById("fcViews"); if(!el) return;
-  var fmt=function(n){ return n.toLocaleString("en-US"); };
-  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(FC_TARGET); return; }
-  var DUR=4200, HOLD=2600, start=null;
-  function tick(t){
-    if(start===null) start=t;
-    var e=t-start;
-    if(e<=DUR){ el.textContent=fmt(Math.round(FC_TARGET*(1-Math.pow(1-e/DUR,3)))); }
-    else if(e<DUR+HOLD){ el.textContent=fmt(FC_TARGET); }
-    else { start=t; }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-})();
 
 /* reveal sections on scroll */
 (function(){
@@ -355,7 +349,7 @@ function fcSubmit(e){
   }).catch(function(){ msg.textContent="Couldn't save that. Try again in a second."; });
   return false;
 }
-""" % (VIEWS_TARGET, SUPA_URL, SUPA_KEY)
+""" % (SUPA_URL, SUPA_KEY)
 
 TITLE = "The Future Clips — Turn any idea into a viral slideshow"
 DESC = ("The Future Clips turns any idea into a scroll-stopping slideshow in minutes. "

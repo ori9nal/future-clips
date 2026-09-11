@@ -59,6 +59,14 @@
 .fc-pill { border:0; background:transparent; color:#6E6B63; font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.07em; text-transform:uppercase; padding:12px 16px; min-height:46px; border-radius:8px; cursor:pointer; white-space:nowrap; transition:background .18s, color .18s; }
 .fc-pill.fc-on { background:#0E0E10; color:#fff; }
 
+/* ── pricing: the spec rows inside each tier card ─────────────────── */
+.fc-rows { margin:18px 0 0; padding:0; display:flex; flex-direction:column; }
+.fc-rows > div { display:flex; justify-content:space-between; align-items:baseline; gap:12px; padding:9px 0; border-top:1px solid #EFECE4; }
+.fc-rows dt { margin:0; font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.08em; text-transform:uppercase; color:#8A867C; white-space:nowrap; }
+.fc-rows dd { margin:0; font-size:14px; font-weight:600; color:#0E0E10; text-align:right; }
+.fc-rows dd.fc-no { color:#B9B5AB; font-weight:400; }
+@media (min-width:1100px) { .fc-tiers { grid-template-columns:repeat(4,1fr) !important; } }
+
 /* ── hero: the deck drops in and spreads ──────────────────────────── */
 .fc-stagewrap { position:relative; width:100%; margin-top:clamp(36px,6vw,60px); overflow:hidden; padding-bottom:clamp(64px,9vw,92px); }
 .fc-stage { position:relative; height:clamp(300px,44vw,430px); display:flex; align-items:center; justify-content:center; }
@@ -183,10 +191,10 @@
       <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#26262A">Start free</a>
       <a href="#examples" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#F2F0EA">See examples</a>
     </div>
-    <p style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
+    <p style="margin-top:18px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · Free tier: one ready-made set per live campaign</p>
   </div>
 
-  <div class="fc-stagewrap"><div class="fc-stage"><figure class="fc-card" style="--x:-405px;--r:-13deg;--d:.10s;--w:190px;z-index:0"><img src="carousels/golden-six.webp" alt="Longevity carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:-208px;--r:-6.5deg;--d:.20s;--w:200px;z-index:1"><img src="carousels/running.webp" alt="Running carousel" width="500" height="625"></figure><figure class="fc-card fc-card-lead" style="--x:0px;--r:0deg;--d:.30s;--w:286px;z-index:3"><img src="carousels/finance-rules.webp" alt="Finance carousel" width="500" height="625"><span class="fc-idx">01 / 09</span><span class="fc-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></figure><figure class="fc-card" style="--x:208px;--r:6.5deg;--d:.40s;--w:200px;z-index:1"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:405px;--r:13deg;--d:.50s;--w:190px;z-index:0"><img src="carousels/not-ugly.webp" alt="Habits carousel" width="500" height="625"></figure><div class="fc-badge"><span class="fc-dot"></span><div><b id="fcViews">0</b><span>Views</span></div></div></div></div>
+  <div class="fc-stagewrap"><div class="fc-stage"><figure class="fc-card" style="--x:-405px;--r:-13deg;--d:.10s;--w:190px;z-index:0"><img src="carousels/golden-six.webp" alt="Longevity carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:-208px;--r:-6.5deg;--d:.20s;--w:200px;z-index:1"><img src="carousels/running.webp" alt="Running carousel" width="500" height="625"></figure><figure class="fc-card fc-card-lead" style="--x:0px;--r:0deg;--d:.30s;--w:286px;z-index:3"><img src="carousels/finance-rules.webp" alt="Finance carousel" width="500" height="625"><span class="fc-idx">01 / 09</span><span class="fc-dots"><i class="on"></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></span></figure><figure class="fc-card" style="--x:208px;--r:6.5deg;--d:.40s;--w:200px;z-index:1"><img src="carousels/hit-muscle.webp" alt="Calisthenics carousel" width="500" height="625"></figure><figure class="fc-card" style="--x:405px;--r:13deg;--d:.50s;--w:190px;z-index:0"><img src="carousels/not-ugly.webp" alt="Habits carousel" width="500" height="625"></figure><div class="fc-badge"><span class="fc-dot"></span><div><b>5–10</b><span>Slides per set</span></div></div></div></div>
 </section>
 
 <section class="fc-sec" id="features" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
@@ -222,7 +230,7 @@
 <div class="fc-feat fc-reveal" style="--i:4">
           <span class="fc-rule"></span>
           <h3 style="margin:20px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Minutes, not evenings</h3>
-          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">A full slideshow generates in about two minutes. Regenerate any slide on its own.</p>
+          <p style="margin-top:10px;font-size:clamp(15px,3.2vw,16px)">A queued set is ready in about an hour; an instant set in about five minutes. Re-render any set for free.</p>
         </div>
 <div class="fc-feat fc-reveal" style="--i:5">
           <span class="fc-rule"></span>
@@ -292,7 +300,7 @@
               <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Rebuild every layout in Canva by hand</span>
             </li>
 <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #EBE8E0;font-size:clamp(15px,3.2vw,16px);color:#6E6B63">
-              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>Hours per slideshow.</span>
+              <span style="flex:0 0 auto;color:#A9A59B;font-size:14px;line-height:1.6">✕</span><span>An evening per slideshow.</span>
             </li>
         </ul>
       </div>
@@ -318,7 +326,7 @@
               <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Post-ready for TikTok, IG &amp; YouTube</span>
             </li>
 <li style="display:flex;gap:12px;align-items:flex-start;padding:15px 0;border-bottom:1px solid #F1F3E4;font-size:clamp(15px,3.2vw,16px);color:#0E0E10;font-weight:500">
-              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>About 2 minutes.</span>
+              <span style="flex:0 0 auto;color:#0E0E10;font-size:14px;line-height:1.6;font-weight:700">✓</span><span>Queued in about an hour, instant in about five minutes.</span>
             </li>
         </ul>
       </div>
@@ -400,91 +408,141 @@
 
 <section class="fc-sec" id="pricing" style="padding:clamp(74px,13vw,132px) 0 0;scroll-margin-top:90px">
   <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
-    <div style="text-align:center;max-width:44ch;margin-inline:auto">
+    <div style="text-align:center;max-width:46ch;margin-inline:auto">
       <span style="display:inline-flex;align-items:center;gap:9px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,12px);letter-spacing:.14em;text-transform:uppercase;color:#6E6B63">
         <span style="width:7px;height:7px;background:#D8FF47;border-radius:2px"></span>Pricing
       </span>
-      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Two free. Then pick a plan.</h2>
+      <h2 style="margin:16px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.65rem,5.6vw,2.9rem);line-height:1.06;letter-spacing:-.025em;text-wrap:balance">Start free. Pay for sets, not seats.</h2>
+      <p style="margin:14px auto 0;max-width:52ch;font-size:clamp(15px,3.2vw,16px);color:#56544E">Every paid set is written to the campaign brief, checked for compliance before it renders, and re-renders for free. Queued sets are ready in about an hour; instant sets in about five minutes.</p>
     </div>
     <div style="display:flex;justify-content:center;margin-top:clamp(24px,4vw,34px)">
       <div style="display:inline-flex;gap:4px;background:#fff;border:1px solid #E6E3DB;border-radius:12px;padding:5px;max-width:100%">
-        <button type="button" onclick="fcCycle('monthly')" class="fc-pill" id="fcMonthly">Monthly</button>
-        <button type="button" onclick="fcCycle('yearly')" class="fc-pill fc-on" id="fcYearly">Yearly · 2 months free</button>
+        <button type="button" onclick="fcCycle('monthly')" class="fc-pill fc-on" id="fcMonthly">Monthly</button>
+        <button type="button" onclick="fcCycle('yearly')" class="fc-pill" id="fcYearly">Yearly · 2 months free</button>
       </div>
     </div>
-    <div style="display:grid;gap:clamp(14px,2vw,20px);margin-top:clamp(26px,4vw,36px);grid-template-columns:repeat(auto-fit,minmax(min(300px,100%),1fr));align-items:stretch">
-      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+    <div class="fc-tiers" style="display:grid;gap:clamp(12px,1.6vw,18px);margin-top:clamp(26px,4vw,36px);grid-template-columns:repeat(auto-fit,minmax(min(255px,100%),1fr));align-items:stretch">
+
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(22px,3.5vw,28px);display:flex;flex-direction:column">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
-          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Clipper</h3>
-          
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Free</h3>
         </div>
-        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="clipperPrice">$16</span></b>
-          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        <p style="margin:18px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(34px,7vw,42px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1">$0</b>
+          <span style="font-size:15px;color:#6E6B63">forever</span>
         </p>
-        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="clipperBilling">$192 a year · 2 months free</span></p>
-        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="clipperPer">≈40¢ per slideshow</span></p>
-        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For getting started.</p>
-        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>40 slideshows a month</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Viral hook library</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Same character, every slide</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>No AI watermark</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>TikTok, Instagram &amp; YouTube exports</span></li>
-        </ul>
-        <div style="margin-top:auto;padding-top:30px">
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required</p>
+        <p style="margin:18px 0 0;font-size:15px;color:#6E6B63">Download the ready-made set for any live campaign.</p>
+        <dl class="fc-rows">
+          <div><dt>Sets / month</dt><dd>1 ready-made per live campaign</dd></div>
+          <div><dt>Speed</dt><dd>Instant download</dd></div>
+          <div><dt>Quality</dt><dd>Standard</dd></div>
+          <div><dt>Slides / set</dt><dd>As made</dd></div>
+          <div><dt>Own creator</dt><dd class="fc-no">—</dd></div>
+          <div><dt>@handle</dt><dd class="fc-no">—</dd></div>
+          <div><dt>Fonts &amp; style</dt><dd>Fixed</dd></div>
+          <div><dt>Re-renders</dt><dd class="fc-no">—</dd></div>
+          <div><dt>Seats</dt><dd>1</dd></div>
+          <div><dt>Extra sets</dt><dd class="fc-no">—</dd></div>
+          <div><dt>Compliance</dt><dd>✓ Checked</dd></div>
+        </dl>
+        <div style="margin-top:auto;padding-top:26px">
           <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
         </div>
       </div>
-      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.40) 0%, rgba(216,255,71,.10) 34%, rgba(255,255,255,0) 62%), linear-gradient(180deg,#FFFFFF 0%,#FCFBF6 100%);border:1px solid #E4E7CE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column;box-shadow:0 24px 60px -34px rgba(150,180,40,.45)">
+
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(22px,3.5vw,28px);display:flex;flex-direction:column">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
-          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Pro</h3>
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Solo</h3>
+        </div>
+        <p style="margin:18px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(34px,7vw,42px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="soloPrice">$19</span></b>
+          <span style="font-size:15px;color:#6E6B63"><span data-p="soloSuffix">/mo</span></span>
+        </p>
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="soloBilling">Billed monthly · cancel anytime</span></p>
+        <p style="margin:18px 0 0;font-size:15px;color:#6E6B63">For one clipper posting every day.</p>
+        <dl class="fc-rows">
+          <div><dt>Sets / month</dt><dd>50 queued</dd></div>
+          <div><dt>Speed</dt><dd>Ready in ~1 hour</dd></div>
+          <div><dt>Quality</dt><dd>Standard</dd></div>
+          <div><dt>Slides / set</dt><dd>5–10</dd></div>
+          <div><dt>Own creator</dt><dd>✓</dd></div>
+          <div><dt>@handle</dt><dd>✓</dd></div>
+          <div><dt>Fonts &amp; style</dt><dd>Rotates · pin yours</dd></div>
+          <div><dt>Re-renders</dt><dd>✓ Free</dd></div>
+          <div><dt>Seats</dt><dd>1</dd></div>
+          <div><dt>Extra sets</dt><dd>$0.40 queued · $0.70 instant</dd></div>
+          <div><dt>Compliance</dt><dd>✓ Checked</dd></div>
+        </dl>
+        <div style="margin-top:auto;padding-top:26px">
+          <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
+        </div>
+      </div>
+
+      <div style="background:radial-gradient(120% 100% at 100% 0%, rgba(216,255,71,.40) 0%, rgba(216,255,71,.10) 34%, rgba(255,255,255,0) 62%), linear-gradient(180deg,#FFFFFF 0%,#FCFBF6 100%);border:1px solid #E4E7CE;border-radius:18px;padding:clamp(22px,3.5vw,28px);display:flex;flex-direction:column;box-shadow:0 24px 60px -34px rgba(150,180,40,.45)">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Grind</h3>
           <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#0E0E10;color:#D8FF47;white-space:nowrap">Most popular</span>
         </div>
-        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="proPrice">$32</span></b>
-          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        <p style="margin:18px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(34px,7vw,42px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="grindPrice">$59</span></b>
+          <span style="font-size:15px;color:#6E6B63"><span data-p="grindSuffix">/mo</span></span>
         </p>
-        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="proBilling">$384 a year · 2 months free</span></p>
-        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F7E4;border:1px solid #E7EDCB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="proPer">≈53¢ per slideshow</span></p>
-        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For posting every day.</p>
-        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Clipper +</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>60 slideshows a month</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Saved characters &amp; brand kits</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Priority generation queue</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Bulk export</span></li>
-        </ul>
-        <div style="margin-top:auto;padding-top:30px">
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="grindBilling">Billed monthly · cancel anytime</span></p>
+        <p style="margin:18px 0 0;font-size:15px;color:#6E6B63">For volume, with instant sets when a trend will not wait.</p>
+        <dl class="fc-rows">
+          <div><dt>Sets / month</dt><dd>120 queued + 12 instant</dd></div>
+          <div><dt>Speed</dt><dd>~1 hour · instant ~5 min</dd></div>
+          <div><dt>Quality</dt><dd>Standard · HD +$2.50/set</dd></div>
+          <div><dt>Slides / set</dt><dd>5–10</dd></div>
+          <div><dt>Own creator</dt><dd>✓</dd></div>
+          <div><dt>@handle</dt><dd>✓</dd></div>
+          <div><dt>Fonts &amp; style</dt><dd>Rotates · pin yours</dd></div>
+          <div><dt>Re-renders</dt><dd>✓ Free</dd></div>
+          <div><dt>Seats</dt><dd>1</dd></div>
+          <div><dt>Extra sets</dt><dd>$0.40 queued · $0.70 instant</dd></div>
+          <div><dt>Compliance</dt><dd>✓ Checked</dd></div>
+        </dl>
+        <div style="margin-top:auto;padding-top:26px">
           <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#26262A">Start free</a>
         </div>
       </div>
-      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(24px,4.5vw,32px);display:flex;flex-direction:column">
+
+      <div style="background:#fff;border:1px solid #E9E6DE;border-radius:18px;padding:clamp(22px,3.5vw,28px);display:flex;flex-direction:column">
         <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:30px">
-          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Studio</h3>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#F4F2EC;color:#56544E;white-space:nowrap">Teams</span>
+          <h3 style="margin:0;color:#0E0E10;font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:500;letter-spacing:.12em;text-transform:uppercase">Agency</h3>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;border-radius:6px;padding:5px 9px;background:#F4F2EC;color:#56544E;white-space:nowrap">10 seats</span>
         </div>
-        <p style="margin:20px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
-          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(36px,8vw,44px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="studioPrice">$79</span></b>
-          <span style="font-size:15px;color:#6E6B63">/mo</span>
+        <p style="margin:18px 0 0;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap">
+          <b style="font-family:'Archivo',sans-serif;font-stretch:112%;font-size:clamp(34px,7vw,42px);font-weight:700;color:#0E0E10;letter-spacing:-.035em;line-height:1"><span data-p="agencyPrice">$249</span></b>
+          <span style="font-size:15px;color:#6E6B63"><span data-p="agencySuffix">/mo</span></span>
         </p>
-        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="studioBilling">$948 a year · 2 months free</span></p>
-        <p style="margin:14px 0 0;display:inline-flex;align-self:flex-start;align-items:center;gap:7px;background:#F4F2EC;border:1px solid #E6E3DB;border-radius:8px;padding:6px 10px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.05em;color:#0E0E10"><span data-p="studioPer">≈40¢ per slideshow</span></p>
-        <p style="margin:20px 0 0;font-size:15px;color:#6E6B63">For agencies &amp; teams.</p>
-        <ul style="margin:20px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:12px">
-          <li style="display:flex;gap:11px;font-size:16px;font-weight:600;color:#0E0E10"><span style="color:#0E0E10;font-weight:700">✓</span><span>Everything in Pro +</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>200 slideshows a month</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Multi-account tracking</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Seats for your whole roster</span></li>
-          <li style="display:flex;gap:11px;font-size:16px"><span style="color:#0E0E10;font-weight:700">✓</span><span>Shared character library</span></li>
-        </ul>
-        <div style="margin-top:auto;padding-top:30px">
+        <p style="margin:9px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63"><span data-p="agencyBilling">Billed monthly · cancel anytime</span></p>
+        <p style="margin:18px 0 0;font-size:15px;color:#6E6B63">For a roster, locked to the brand.</p>
+        <dl class="fc-rows">
+          <div><dt>Sets / month</dt><dd>600 queued + 50 instant</dd></div>
+          <div><dt>Speed</dt><dd>~1 hour · instant ~5 min</dd></div>
+          <div><dt>Quality</dt><dd>Standard · HD +$2.00/set</dd></div>
+          <div><dt>Slides / set</dt><dd>5–10</dd></div>
+          <div><dt>Own creator</dt><dd>✓ Brand-locked</dd></div>
+          <div><dt>@handle</dt><dd>✓</dd></div>
+          <div><dt>Fonts &amp; style</dt><dd>Brand-locked</dd></div>
+          <div><dt>Re-renders</dt><dd>✓ Free</dd></div>
+          <div><dt>Seats</dt><dd>10</dd></div>
+          <div><dt>Extra sets</dt><dd>$0.40 queued · $0.70 instant</dd></div>
+          <div><dt>Compliance</dt><dd>✓ + review notes</dd></div>
+        </dl>
+        <div style="margin-top:auto;padding-top:26px">
           <a href="#start" style="display:flex;align-items:center;justify-content:center;width:100%;min-height:54px;border-radius:10px;background:#FAF9F6;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:16px 20px" style-hover="background:#F2F0EA">Start free</a>
         </div>
       </div>
+
     </div>
-    <p style="text-align:center;margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,11px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">No card required · 2 free slideshows</p>
-    <p style="text-align:center;margin-top:24px;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">Founding price held for the first 500 accounts</p>
+    <div style="max-width:860px;margin:clamp(22px,3.5vw,30px) auto 0;background:#fff;border:1px solid #E9E6DE;border-radius:14px;padding:18px clamp(18px,3vw,24px);display:grid;gap:10px 28px;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr))">
+      <p style="margin:0;font-size:14px;color:#56544E"><b style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#0E0E10;margin-bottom:4px">Extra sets</b>$0.40 per queued set · $0.70 per instant set, on any paid plan. Billed as you go.</p>
+      <p style="margin:0;font-size:14px;color:#56544E"><b style="display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:#0E0E10;margin-bottom:4px">HD add-on</b>Sharper frames for the sets that matter: +$2.50 per set on Grind, +$2.00 per set on Agency.</p>
+    </div>
+    <p style="text-align:center;margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:clamp(10px,2.6vw,11px);letter-spacing:.06em;text-transform:uppercase;color:#6E6B63">A queued set uses one queued credit · an instant set uses one instant credit</p>
   </div>
 </section>
 
@@ -508,7 +566,7 @@
         </details>
 <details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
           <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">How do the monthly limits work?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
-          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">One slideshow of up to ten slides counts as one. Regenerating a single slide is free, and unused slideshows roll over for one month. Limits reset on your billing date.</p>
+          <p style="margin:0;padding:0 clamp(18px,3.5vw,26px) 22px;font-size:clamp(15px,3.2vw,16px);max-width:66ch">One set of five to ten slides counts as one. Re-rendering a set — new fonts, a different grade, a numbering fix — is free and does not count. Past your monthly allowance, extra sets are $0.40 queued or $0.70 instant. Allowances reset on your billing date.</p>
         </details>
 <details style="background:#fff;border:1px solid #E9E6DE;border-radius:14px">
           <summary style="cursor:pointer;display:flex;align-items:center;gap:14px;padding:20px clamp(18px,3.5vw,26px);font-size:clamp(16px,3.6vw,17px);font-weight:600;color:#0E0E10;min-height:56px">Is my output unique to me?<span class="pm" style="margin-left:auto;color:#6E6B63;font-size:22px;line-height:1;transition:transform .18s">+</span></summary>
@@ -539,8 +597,8 @@
 <section class="fc-sec" id="start" style="padding:clamp(74px,13vw,132px) 0 clamp(70px,12vw,120px);text-align:center;scroll-margin-top:90px">
   <div style="width:100%;max-width:1240px;margin-inline:auto;padding-inline:clamp(18px,4vw,36px)">
     <div style="max-width:44ch;margin-inline:auto">
-      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.8rem,6.4vw,3.2rem);line-height:1.04;letter-spacing:-.03em">Make two, then decide.</h2>
-      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Two slideshows, no card, no call.</p>
+      <h2 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.8rem,6.4vw,3.2rem);line-height:1.04;letter-spacing:-.03em">Start free. Upgrade when it pays.</h2>
+      <p style="margin-top:16px;font-size:clamp(16px,3.4vw,18px)">Every live campaign has a ready-made set you can download today. No card, no call.</p>
     </div>
     <form onsubmit="return fcSubmit(event)" style="margin-top:clamp(24px,4.5vw,36px)">
       <div style="display:flex;gap:10px;max-width:480px;margin:0 auto;flex-wrap:wrap;justify-content:center">
@@ -594,16 +652,16 @@
 </div>
 <script>
 
-var FC_TARGET = 1304895, FC_URL = "https://waipwmyncpsgoglmkhdz.supabase.co", FC_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT";
-var fcCycleState = "yearly", fcRef = "";
+var FC_URL = "https://waipwmyncpsgoglmkhdz.supabase.co", FC_KEY = "sb_publishable_2umi_LTrNfOy9baqGUXgog_ID60SYNT";
+var fcCycleState = "monthly", fcRef = "";
 
 var FC_PRICES = {
-  yearly:  { clipperPrice:"$16", clipperBilling:"$192 a year \u00b7 2 months free", clipperPer:"\u224840\u00a2 per slideshow",
-             proPrice:"$32", proBilling:"$384 a year \u00b7 2 months free", proPer:"\u224853\u00a2 per slideshow",
-             studioPrice:"$79", studioBilling:"$948 a year \u00b7 2 months free", studioPer:"\u224840\u00a2 per slideshow" },
-  monthly: { clipperPrice:"$20", clipperBilling:"Billed monthly \u00b7 cancel anytime", clipperPer:"\u224850\u00a2 per slideshow",
-             proPrice:"$39", proBilling:"Billed monthly \u00b7 cancel anytime", proPer:"\u224865\u00a2 per slideshow",
-             studioPrice:"$99", studioBilling:"Billed monthly \u00b7 cancel anytime", studioPer:"\u224850\u00a2 per slideshow" }
+  monthly: { soloPrice:"$19",  soloSuffix:"/mo", soloBilling:"Billed monthly · cancel anytime",
+             grindPrice:"$59", grindSuffix:"/mo", grindBilling:"Billed monthly · cancel anytime",
+             agencyPrice:"$249", agencySuffix:"/mo", agencyBilling:"Billed monthly · cancel anytime" },
+  yearly:  { soloPrice:"$190",  soloSuffix:"/yr", soloBilling:"2 months free · billed yearly",
+             grindPrice:"$590", grindSuffix:"/yr", grindBilling:"2 months free · billed yearly",
+             agencyPrice:"$2,490", agencySuffix:"/yr", agencyBilling:"2 months free · billed yearly" }
 };
 
 function fcToggle(){
@@ -626,23 +684,6 @@ function fcCycle(c){
     if(el) el.textContent=vals[k];
   });
 }
-
-/* the counter rolls up from zero, holds, then runs again */
-(function(){
-  var el=document.getElementById("fcViews"); if(!el) return;
-  var fmt=function(n){ return n.toLocaleString("en-US"); };
-  if(window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches){ el.textContent=fmt(FC_TARGET); return; }
-  var DUR=4200, HOLD=2600, start=null;
-  function tick(t){
-    if(start===null) start=t;
-    var e=t-start;
-    if(e<=DUR){ el.textContent=fmt(Math.round(FC_TARGET*(1-Math.pow(1-e/DUR,3)))); }
-    else if(e<DUR+HOLD){ el.textContent=fmt(FC_TARGET); }
-    else { start=t; }
-    requestAnimationFrame(tick);
-  }
-  requestAnimationFrame(tick);
-})();
 
 /* reveal sections on scroll */
 (function(){
