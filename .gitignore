@@ -26,3 +26,7 @@ output/
 
 # generated from future-clips-site/ on demand
 future-clips-site.zip
+
+# production env (values live in Vercel / password manager)
+.env.production
+.env*.production
