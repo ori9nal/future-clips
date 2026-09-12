@@ -36,7 +36,11 @@ const INCLUDE = [
 for (const p of INCLUDE) if (!fs.existsSync(p)) throw new Error(`missing ${p}`);
 
 // tracked files only, under the include roots
-const tracked = execFileSync('git', ['ls-files', '-z', '--', ...INCLUDE], { cwd: ROOT }).toString().split('\0').filter(Boolean);
+// package.json and vercel.json travel as plain files (Vercel reads them
+// before install), so they must NOT also be in the tarball: `tar xzf` would
+// put the tracked package.json - prebuild and all - back over the one we sent
+const tracked = execFileSync('git', ['ls-files', '-z', '--', ...INCLUDE], { cwd: ROOT }).toString().split('\0')
+  .filter((f) => f && f !== 'package.json' && f !== 'vercel.json');
 const list = path.join(OUT, 'files.txt');
 fs.writeFileSync(list, tracked.join('\n') + '\n');
 
