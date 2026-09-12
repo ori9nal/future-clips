@@ -11,7 +11,11 @@ const ROOT = process.cwd();
 const args = Object.fromEntries(process.argv.slice(2).map((a) => {
   const i = a.indexOf('='); return i < 0 ? [a.replace(/^--/, ''), true] : [a.slice(0, i).replace(/^--/, ''), a.slice(i + 1)];
 }));
-const id = args.campaign, instruction = args.ask, slides = Number(args.slides ?? 8);
+const id = args.campaign, instruction = args.ask;
+// slides=7 means exactly seven; slides=6-8 (or 6..8) is a range the model picks inside
+const slidesArg = String(args.slides ?? 8);
+const rangeM = slidesArg.match(/^(\d+)\s*(?:-|\.\.)\s*(\d+)$/);
+const slides = rangeM ? { min: +rangeM[1], max: +rangeM[2] } : Number(slidesArg);
 if (!id || !instruction) { console.error('usage: make-set campaign=<id> ask="..." [slides=8] [style=native]'); process.exit(1); }
 
 const spec = JSON.parse(fs.readFileSync(path.join(ROOT, 'campaigns', `${id}.json`), 'utf8'));
@@ -19,10 +23,10 @@ const styleId = args.style ?? spec.content?.style ?? 'native';
 
 console.log(`\n▸ ${spec.brand} — "${instruction}" (${slides} slides, ${styleId})`);
 const t = Date.now();
-const { content, verdict, usd, attempts, failed } = await generateContent({
-  root: ROOT, spec, instruction, slideCount: slides, styleId,
+const { content, verdict, usd, attempts, failed, count } = await generateContent({
+  root: ROOT, spec, instruction, slides, styleId, model: args.model,
 });
-console.log(`  copy: ${attempts} attempt${attempts > 1 ? 's' : ''} · $${usd.toFixed(4)} · ${verdict.pass ? 'COMPLIANT' : 'NON-COMPLIANT'}`);
+console.log(`  copy: ${attempts} attempt${attempts > 1 ? 's' : ''} · $${usd.toFixed(4)} · ${verdict.pass ? 'COMPLIANT' : 'NON-COMPLIANT'} · ${count} slides`);
 verdict.failures.forEach((f) => console.log(`    FAIL ${f}`));
 verdict.warnings.forEach((w) => console.log(`    warn ${w}`));
 if (failed) { console.error('  refusing to render a non-compliant set'); process.exit(2); }

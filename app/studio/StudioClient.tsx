@@ -62,7 +62,7 @@ export function StudioClient({ campaigns }: { campaigns: Spec[] }) {
   async function render() {
     setBusy(true); setError(null); setResult(null);
     try {
-      const r = await fetch("/api/sets", {
+      const r = await fetch("/api/studio/render", {
         method: "POST",
         headers: { "content-type": "application/json" },
         body: JSON.stringify({ campaignId: id, style }),

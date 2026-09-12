@@ -22,6 +22,7 @@ export type Org = {
   seat_limit: number;
   is_platform: boolean;
   billing_status: string;
+  current_period_start: string | null;
   current_period_end: string | null;
 };
 
@@ -43,7 +44,7 @@ export async function getViewer(): Promise<Viewer | null> {
 
   const { data: rows } = await supabase
     .from("members")
-    .select("role, org:orgs(id, name, plan, seat_limit, is_platform, billing_status, current_period_end)")
+    .select("role, org:orgs(id, name, plan, seat_limit, is_platform, billing_status, current_period_start, current_period_end)")
     .order("created_at", { ascending: true });
 
   const memberships: Membership[] = (rows ?? [])

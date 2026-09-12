@@ -36,7 +36,62 @@ const ASPIRE_GUARD = 'Candid phone photograph, not staged, not a stock photo. No
   'no one posing or emoting. No text, no logos, no watermarks. The subject is the place or the object itself.';
 
 /**
- * Generate imagery for a set.
+ * The prompt for every frame of a set, without spending anything.
+ *
+ * Returned as a plan so the same words go out whichever lane runs them: the
+ * realtime executor below calls the API frame by frame; the batch lane
+ * (engine/providers/openai-batch.mjs) submits the anchor as one batch and,
+ * when it lands, the remaining frames as a second batch conditioned on it.
+ * Frames after the anchor need the anchor's FILE (the edit endpoint takes the
+ * pixels), so `frames(anchorFile)` is a function of it rather than a list.
+ */
+export function planSet(o) {
+  const {
+    subject, scenes, look = 'cinematic', quality = 'medium', w = 1080, h = 1920, id = 'set',
+    mode = 'subject', days = false,
+  } = o;
+  const size = sizeFor(w, h);
+  const style = LOOK[look] ?? LOOK.cinematic;
+
+  if (mode === 'aspirational') {
+    return {
+      mode, size, quality, anchor: null,
+      frames: () => scenes.map((scene, i) => ({
+        i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}`,
+      })),
+    };
+  }
+
+  const anchor = { i: 0, label: `${id}-anchor`, refs: [], prompt: `${style} ${subject} ${scenes[0]} ${GUARD}` };
+  const frames = (anchorFile) => scenes.slice(1).map((scene, n) => {
+    const i = n + 1;
+    // A close-up is asked for by the scene, and "keep the same face" pulls
+    // the model straight back to the anchor's full-body framing — round one
+    // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
+    // mirror selfie four times. So a close-up keeps the person by skin, build
+    // and clothing, and is told outright that the face is not in the frame.
+    const closeUp = /close-up|no face|from behind|from the waist down|neck down/i.test(scene);
+    // `days` mode: the person is the constant, everything else changes. The
+    // scene names its own outfit and place, and the model is told the
+    // reference's clothing and room are NOT to be kept — otherwise it copies
+    // the anchor's hoodie into the boat shot.
+    const keep = days
+      ? (closeUp
+        ? `Same person as the reference image — same skin tone, same build, same body hair — photographed on a DIFFERENT day in a DIFFERENT place. Do not copy the reference's clothing, room or lighting. ${scene} The face is not in the frame; the body part named fills the frame.`
+        : `The SAME PERSON as the reference image — same face, same hair, same build, same skin tone — photographed on a DIFFERENT day. Different clothes, different place, different light from the reference; do not copy the reference's outfit or room. ${scene}`)
+      : closeUp
+        ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scene} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
+        : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scene}`;
+    // Naming what must NOT change does more work than describing the person
+    // again — the reference already carries the likeness, and re-describing
+    // it invites the model to reinterpret rather than preserve.
+    return { i, label: `${id}-${i}`, refs: [anchorFile], prompt: `${style} ${keep} ${GUARD}` };
+  });
+  return { mode, size, quality, anchor, frames };
+}
+
+/**
+ * Generate imagery for a set, realtime: the plan above, run frame by frame.
  *
  * @param {object} o
  * @param {string} o.root
@@ -50,13 +105,9 @@ const ASPIRE_GUARD = 'Candid phone photograph, not staged, not a stock photo. No
  * @param {number} [o.anchorTries] how many anchors to draw before picking one
  */
 export async function generateSet(o) {
-  const {
-    root, cacheDir, subject, scenes, look = 'cinematic',
-    quality = 'medium', w = 1080, h = 1920, id = 'set', anchorTries = 1,
-    mode = 'subject',
-  } = o;
-  const size = sizeFor(w, h);
-  const style = LOOK[look] ?? LOOK.cinematic;
+  const { root, cacheDir, anchorTries = 1 } = o;
+  const plan = planSet(o);
+  const { size, quality, mode } = plan;
 
   // Aspirational mode: every frame is its own generation with no reference
   // image and no recurring person. Coherence comes from the shared LOOK, not
@@ -66,11 +117,8 @@ export async function generateSet(o) {
   if (mode === 'aspirational') {
     const files = [];
     let usd = 0, cached = 0;
-    for (let i = 0; i < scenes.length; i++) {
-      const r = await generate({
-        root, cacheDir, size, quality, label: `${id}-a${i}`,
-        prompt: `${style} ${scenes[i]} ${ASPIRE_GUARD}`,
-      });
+    for (const f of plan.frames()) {
+      const r = await generate({ root, cacheDir, size, quality, label: f.label, prompt: f.prompt });
       files.push(r.file);
       usd += r.usd ?? 0;
       if (r.cached) cached++;
@@ -81,51 +129,21 @@ export async function generateSet(o) {
   // The anchor carries the whole set's likeness, so it is drawn from the scene
   // that shows the face most plainly rather than from slide 1, which is often
   // a wide or a detail shot.
-  const anchorScene = scenes[0];
   let anchor = null;
   for (let i = 0; i < Math.max(1, anchorTries); i++) {
-    const r = await generate({
-      root, cacheDir, size, quality, label: `${id}-anchor`, variant: i,
-      prompt: `${style} ${subject} ${anchorScene} ${GUARD}`,
-    });
+    const r = await generate({ root, cacheDir, size, quality, label: plan.anchor.label, variant: i, prompt: plan.anchor.prompt });
     if (!anchor) anchor = r;
   }
 
   const files = [anchor.file];
   let usd = anchor.usd ?? 0, cached = anchor.cached ? 1 : 0;
-
-  for (let i = 1; i < scenes.length; i++) {
-    // A close-up is asked for by the scene, and "keep the same face" pulls
-    // the model straight back to the anchor's full-body framing — round one
-    // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
-    // mirror selfie four times. So a close-up keeps the person by skin, build
-    // and clothing, and is told outright that the face is not in the frame.
-    const closeUp = /close-up|no face|from behind|from the waist down|neck down/i.test(scenes[i]);
-    // `days` mode: the person is the constant, everything else changes. The
-    // scene names its own outfit and place, and the model is told the
-    // reference's clothing and room are NOT to be kept — otherwise it copies
-    // the anchor's hoodie into the boat shot.
-    const keep = o.days
-      ? (closeUp
-        ? `Same person as the reference image — same skin tone, same build, same body hair — photographed on a DIFFERENT day in a DIFFERENT place. Do not copy the reference's clothing, room or lighting. ${scenes[i]} The face is not in the frame; the body part named fills the frame.`
-        : `The SAME PERSON as the reference image — same face, same hair, same build, same skin tone — photographed on a DIFFERENT day. Different clothes, different place, different light from the reference; do not copy the reference's outfit or room. ${scenes[i]}`)
-      : closeUp
-        ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scenes[i]} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
-        : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scenes[i]}`;
-    const r = await generate({
-      root, cacheDir, size, quality, label: `${id}-${i}`,
-      refs: [anchor.file],
-      // Naming what must NOT change does more work than describing the person
-      // again — the reference already carries the likeness, and re-describing
-      // it invites the model to reinterpret rather than preserve.
-      prompt: `${style} ${keep} ${GUARD}`,
-    });
+  for (const f of plan.frames(anchor.file)) {
+    const r = await generate({ root, cacheDir, size, quality, label: f.label, refs: f.refs, prompt: f.prompt });
     files.push(r.file);
     usd += r.usd ?? 0;
     if (r.cached) cached++;
   }
-
-  return { files, usd: +usd.toFixed(4), cached, size, quality, anchor: anchor.file };
+  return { files, usd: +usd.toFixed(4), cached, size, quality, anchor: anchor.file, mode };
 }
 
 export { LOOK };

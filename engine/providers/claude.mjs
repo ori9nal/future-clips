@@ -38,7 +38,7 @@ function loadEnv(root) {
 }
 
 /** The outermost balanced {...}, so a stray preamble does not break parsing. */
-function extractJson(text) {
+export function extractJson(text) {
   const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
   const body = fence ? fence[1] : text;
   const start = body.indexOf('{');

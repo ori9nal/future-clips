@@ -1,70 +1,79 @@
-import path from "node:path";
-import fs from "node:fs";
-import { pathToFileURL } from "node:url";
-import { engineAvailable, engineUnavailable } from "@/lib/engine";
+import { after } from "next/server";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { getSpec } from "@/lib/db/campaigns";
+import { listSets, reserveSet, ReserveError, type Lane } from "@/lib/sets";
+import { hasServiceRole } from "@/lib/supabase/admin";
+import { engineAvailable } from "@/lib/engine";
 
 export const maxDuration = 300;
 
+const LANES: Lane[] = ["batch", "priority"];
+const STYLES = new Set(["native", "feed", "bedrock", "mascot", "clinical", "poster", "editorial", "pastel", "document", "rail"]);
+
+/** The org's sets, newest first. */
+export async function GET() {
+  const viewer = await viewerForRequest();
+  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  const sb = await createClient();
+  return Response.json({ sets: await listSets(sb, viewer.org.id) });
+}
+
 /**
- * Render a set for the studio.
+ * Create a set. The database reserves the slides (or refuses) in one call;
+ * a priority set then starts rendering in the background of this request
+ * and the client polls GET /api/sets/:id. A batch set waits for the poller.
  *
- * The engine is ESM and pulls in sharp, so it is imported lazily by absolute
- * file URL — a relative specifier would resolve against .next/server, and
- * dragging sharp into every request that merely paints the shell would cost
- * seconds of cold start for nothing.
+ * Body: { campaign, ask, style?, slides: number | {min,max}, lane, hd? }
  */
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
-  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only" }, { status: 403 });
   let body: any;
   try {
     body = await req.json();
   } catch {
     return Response.json({ error: "invalid JSON body" }, { status: 400 });
   }
-  const { campaignId, style = "native" } = body || {};
-  if (!campaignId) return Response.json({ error: "campaignId is required" }, { status: 400 });
+  const campaign = String(body?.campaign ?? "").trim();
+  const ask = String(body?.ask ?? "").trim();
+  const style = String(body?.style ?? "native");
+  const lane = String(body?.lane ?? "batch") as Lane;
+  const hd = !!body?.hd;
+  const sl = body?.slides;
+  const min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
+  const max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
 
-  const spec = await getSpec(await createClient(), campaignId);
-  if (!spec) return Response.json({ error: `no campaign "${campaignId}"` }, { status: 404 });
-  if (style === "mascot" && !spec.assets.mascot) {
-    return Response.json({ error: "this campaign has no mascot asset" }, { status: 400 });
+  if (!campaign) return Response.json({ error: "pick a campaign" }, { status: 400 });
+  if (ask.length < 3) return Response.json({ error: "say what the set is about" }, { status: 400 });
+  if (ask.length > 400) return Response.json({ error: "keep the ask under 400 characters" }, { status: 400 });
+  if (!STYLES.has(style)) return Response.json({ error: `unknown style "${style}"` }, { status: 400 });
+  if (!LANES.includes(lane)) return Response.json({ error: "lane must be batch or priority" }, { status: 400 });
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 5 || max > 10 || min > max) {
+    return Response.json({ error: "slides must be a count or range between 5 and 10" }, { status: 400 });
   }
 
-  const root = process.cwd();
-  if (!engineAvailable()) return engineUnavailable();
-  const registryUrl = pathToFileURL(path.join(root, "engine", "styles", "registry.mjs")).href;
-  const nativeUrl = pathToFileURL(path.join(root, "engine", "render-native.mjs")).href;
-  const judgeUrl = pathToFileURL(path.join(root, "engine", "judge.mjs")).href;
-  const registry: any = await import(/* webpackIgnore: true */ registryUrl);
-  const engine: any = await import(/* webpackIgnore: true */ nativeUrl);
-  const { logicCheck }: any = await import(/* webpackIgnore: true */ judgeUrl);
-
-  const rel = path.join("output", "sets", `${campaignId}-${style}`);
-  const outDir = path.join(root, rel);
-
-  const started = Date.now();
+  const sb = await createClient();
+  let id: string;
   try {
-    const logic = logicCheck(engine.copyOf(spec));
-    const { files, canvas } = await registry.render({ spec, root, styleId: style, outDir });
-    return Response.json({
-      style,
-      canvas,
-      ms: Date.now() - started,
-      logic,
-      slides: files.map((f: string) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
-    });
+    id = await reserveSet(sb, { orgId: viewer.org.id, campaignId: campaign, ask, style, min, max, lane, hd });
   } catch (e: any) {
-    // Render failures here are almost always copy that will not fit. Say which
-    // line, because "render failed" tells the operator nothing actionable.
-    return Response.json({ error: e?.message ?? "render failed" }, { status: 422 });
-  } finally {
-    if (fs.existsSync(outDir)) {
-      /* plates are cached under _plates and reused across renders */
+    if (e instanceof ReserveError) {
+      const status = e.code === "FC_QUOTA" || e.code === "FC_SPEND_CAP" || e.code === "FC_NO_PLAN" || e.code === "FC_NO_HD" ? 402 : e.code === "FC_NOT_MEMBER" ? 403 : 400;
+      return Response.json({ error: e.message, code: e.code, detail: e.detail }, { status });
     }
+    return Response.json({ error: e?.message ?? "could not create the set" }, { status: 500 });
   }
+
+  // A priority set is rendered now, in the background of this request; the
+  // response returns at once with the id to poll. Without the engine or the
+  // service role on this host the row still exists and the poller (or the
+  // next host that has them) picks it up.
+  const canRunHere = engineAvailable() && hasServiceRole();
+  if (lane === "priority" && canRunHere) {
+    after(async () => {
+      const { runWorker } = await import("@/lib/worker");
+      await runWorker({ ids: [id] });
+    });
+  }
+  return Response.json({ id, lane, started: lane === "priority" && canRunHere }, { status: 201 });
 }

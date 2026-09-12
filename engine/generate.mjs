@@ -24,7 +24,7 @@ const SHAPE = `{
                 "role": "body | app | proof", "showsApp": false } ],
   "numbering": "countdown | none",
   "closer": { "lines": ["1-2 short lines"], "cta": "the call to action" },
-  "caption": "one short line for the post caption",
+  "caption": "the post caption: one short natural line in the same voice as the slides, with 2-3 emojis that fit the topic woven in, never a row of emojis at the end",
   "bio": "the profile bio line",
   "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
 }`;
@@ -47,7 +47,7 @@ const SHAPE_BEDROCK = `{
                 "role": "body | app", "showsApp": false, "scene": "none" } ],
   "numbering": "none",
   "closer": { "headline": ["FOLLOW", "FOR MORE"], "lines": [], "pose": "standing, flexing both arms", "muscles": "biceps and shoulders", "cta": "the call to action" },
-  "caption": "one short line for the post caption",
+  "caption": "the post caption: one short natural line in the same voice as the slides, with 2-3 emojis that fit the topic woven in, never a row of emojis at the end",
   "bio": "the profile bio line",
   "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
 }`;
@@ -80,6 +80,9 @@ const RULES_NATIVE = `How to write it:
 - Scenes must differ from each other in place, time of day and framing. A set where every frame
   is the same room reads as one photo repeated.
 - The app slide's scene is ignored (it renders the app screenshot), so keep it short.
+- The caption is under 20 words, first person, and carries 2-3 fitting emojis placed naturally.
+- Slide count: if you are given a RANGE, choose the count the topic genuinely needs inside it -
+  never pad with filler slides and never exceed it. If you are given ONE number, return exactly that.
 - Exactly 5 hashtags./^How to write it:`;
 
 const RULES_BEDROCK = `How to write it (BEDROCK format — an illustrated character teaches a programme):
@@ -96,7 +99,11 @@ const RULES_BEDROCK = `How to write it (BEDROCK format — an illustrated charac
   "pose" is "standing, holding a phone up and looking at it" and its lines are two short statements.
 - The set is ONE programme: a weekly split, a muscle progression, a plan. Every slide is a day or a
   movement. hook + ranked + closer must total the slide count, so ranked has (count - 2) entries.
-- "name" is the headline joined with a space. "score" is "". No emoji anywhere.
+- "name" is the headline joined with a space. "score" is "". No emoji on the slides themselves.
+- The caption is under 20 words and carries 2-3 fitting emojis placed naturally - the caption is the
+  one place emoji belong in this format.
+- Slide count: if you are given a RANGE, choose the count the programme genuinely needs inside it -
+  never pad and never exceed it. If you are given ONE number, return exactly that.
 - Exactly 5 hashtags.`;
 
 const systemFor = (styleId) => `You write carousel copy for a paid creator campaign.
@@ -191,15 +198,38 @@ const SCENE_DIRECTION = {
 
 const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|nutrition|health|muscle/i;
 
-export async function generateContent({ root, spec, instruction, slideCount, attempts = 3, model = 'claude-opus-5', styleId: wanted }) {
-  const constraints = constraintsFor(spec, slideCount);
+/** Any emoji (pictographs, symbols, flags, keycaps); the caption must carry some. */
+export const EMOJI_RX = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u;
+
+/**
+ * Normalise the slide ask. A number means exactly that many; {min,max} is a
+ * range the model picks inside. Either way it is intersected with what the
+ * brief allows, so a 5-10 ask on a brief that caps at 8 becomes 5-8.
+ */
+export function slideRange(spec, slides) {
+  const Q = spec.requirements ?? {};
+  let min = typeof slides === 'number' ? slides : Number(slides?.min ?? 5);
+  let max = typeof slides === 'number' ? slides : Number(slides?.max ?? min);
+  if (Q.min_slides) min = Math.max(min, Q.min_slides);
+  if (Q.max_slides) max = Math.min(max, Q.max_slides);
+  if (min > max) max = min;
+  return { min, max, exact: min === max };
+}
+
+/**
+ * The copy request for one attempt - pure, so the same text goes to the
+ * realtime API and into a Message Batch. `feedback` is the previous
+ * attempt's failures, verbatim.
+ */
+export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, feedback = '' }) {
+  const range = slideRange(spec, slides);
+  const constraints = constraintsFor(spec, range.max);
   // The style the CALLER is rendering, not the one the campaign file happens
   // to default to. Every gym feed round wrote its copy under the "native"
   // direction because the APEX file says native and make-set said feed.
   const styleId = wanted ?? spec.content?.style ?? 'native';
   const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(spec.niche ?? '') && SCENE_DIRECTION['feed:fitness'])
     || SCENE_DIRECTION[styleId] || SCENE_DIRECTION.native;
-  const wantsHeadlines = styleId === 'bedrock';
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
     spec.niche ? `Niche: ${spec.niche}` : null,
@@ -210,60 +240,99 @@ export async function generateContent({ root, spec, instruction, slideCount, att
     '',
     'HARD RULES — a set that breaks any of these is rejected outright:',
     ...constraints.map((c) => `- ${c}`),
+    range.exact
+      ? `- The set is EXACTLY ${range.min} slides (hook + ranked + closer).`
+      : `- The set is between ${range.min} and ${range.max} slides (hook + ranked + closer). Pick the count the topic needs.`,
+    '- The caption contains 2-3 emojis that fit the topic.',
   ].filter(Boolean).join('\n');
+  const count = range.exact ? String(range.min) : `${range.min} to ${range.max} (choose)`;
+  return {
+    styleId, range,
+    system: systemFor(styleId),
+    user: `${brief}\n\nWhat the clipper asked for: ${instruction}\nSlide count: ${count}\n${feedback}`,
+    maxTokens: 8000,
+  };
+}
 
+/**
+ * Judge one attempt's JSON: mechanical repairs first, then the brief's
+ * rules, then the ask's own rules (count in range, emoji in the caption).
+ * Pure: returns the repaired content and a verdict, spends nothing.
+ */
+export function judgeCopy({ spec, data, range }) {
+  // fold the generated content into the shape compliance expects
+  const slides = [
+    { index: 1, role: 'hook', text: [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' '), showsApp: false },
+    ...(data.ranked ?? []).map((r, n) => ({
+      index: n + 2, role: r.role ?? 'body',
+      text: [r.name, r.score, ...(r.lines ?? [])].filter(Boolean).join(' '),
+      showsApp: !!r.showsApp,
+    })),
+    { index: (data.ranked?.length ?? 0) + 2, role: 'close', text: [...(data.closer?.lines ?? []), data.closer?.cta].filter(Boolean).join(' '), showsApp: false },
+  ];
+  // repair the mechanical violations first, then judge what is left — a
+  // whole regeneration is too expensive to spend on a missing string
+  const { copy: repaired, notes } = repair(spec, { slides, caption: data.caption, bio: data.bio });
+  data.caption = repaired.caption;
+  data.bio = repaired.bio;
+  repaired.slides.forEach((s, n) => {
+    if (n === 0) { data.hook.lines = (data.hook.lines ?? []).map((l) => expandIn(l, spec)); data.hook.sub = (data.hook.sub ?? []).map((l) => expandIn(l, spec)); }
+    else if (n <= (data.ranked?.length ?? 0)) {
+      const r = data.ranked[n - 1];
+      r.name = expandIn(r.name, spec);
+      r.lines = (r.lines ?? []).map((l) => expandIn(l, spec));
+    } else {
+      data.closer.lines = (data.closer.lines ?? []).map((l) => expandIn(l, spec));
+      data.closer.cta = expandIn(data.closer.cta, spec);
+    }
+  });
+
+  const verdict = check(spec, repaired);
+  verdict.repairs = notes;
+  // The ask's slide count is a hard rule, not advice: the model returned 8
+  // for slides=7 twice in the bedrock rounds and it was only ever logged.
+  const n = slides.length;
+  if (range && (n < range.min || n > range.max)) {
+    verdict.failures.push(range.exact
+      ? `${n} slides returned; the ask is exactly ${range.min} (hook + ${range.min - 2} ranked + closer)`
+      : `${n} slides returned; the ask is between ${range.min} and ${range.max}`);
+  }
+  if (!EMOJI_RX.test(String(data.caption ?? ''))) {
+    verdict.failures.push('the caption has no emoji; it must carry 2-3 that fit the topic');
+  }
+  verdict.pass = verdict.failures.length === 0;
+  return { data, verdict, slides: repaired.slides, count: n };
+}
+
+/** Failures handed back verbatim - a general "try again" repeats the violation. */
+export const feedbackFor = (verdict) =>
+  `\nYour previous attempt was REJECTED for these reasons. Fix every one:\n` + verdict.failures.map((f) => `- ${f}`).join('\n');
+
+/**
+ * Realtime copy: the compliance loop against the Messages API.
+ * `slides` is a number or {min,max}. Returns the passing content, or the
+ * last attempt with `failed: true`.
+ */
+export async function generateContent({ root, spec, instruction, slideCount, slides, attempts = 3, model = 'claude-opus-5', styleId: wanted }) {
   let feedback = '';
   let last = null;
   let spent = 0;
+  const ask = slides ?? slideCount ?? 8;
 
   for (let i = 0; i < attempts; i++) {
+    const req = buildCopyRequest({ spec, instruction, slides: ask, styleId: wanted, feedback });
     const { data, usd } = await completeJson({
-      root, model, label: `generate:${spec.id}${i ? `:retry${i}` : ''}`, maxTokens: 8000,
-      system: systemFor(styleId),
-      user: `${brief}\n\nWhat the clipper asked for: ${instruction}\nSlide count: ${slideCount}\n${feedback}`,
+      root, model, label: `generate:${spec.id}${i ? `:retry${i}` : ''}`, maxTokens: req.maxTokens,
+      system: req.system, user: req.user,
     });
     spent += usd;
-
-    // fold the generated content into the shape compliance expects
-    const slides = [
-      { index: 1, role: 'hook', text: [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' '), showsApp: false },
-      ...(data.ranked ?? []).map((r, n) => ({
-        index: n + 2, role: r.role ?? 'body',
-        text: [r.name, r.score, ...(r.lines ?? [])].filter(Boolean).join(' '),
-        showsApp: !!r.showsApp,
-      })),
-      { index: (data.ranked?.length ?? 0) + 2, role: 'close', text: [...(data.closer?.lines ?? []), data.closer?.cta].filter(Boolean).join(' '), showsApp: false },
-    ];
-    // repair the mechanical violations first, then judge what is left — a
-    // whole regeneration is too expensive to spend on a missing string
-    const { copy: repaired, notes } = repair(spec, { slides, caption: data.caption, bio: data.bio });
-    data.caption = repaired.caption;
-    data.bio = repaired.bio;
-    repaired.slides.forEach((s, n) => {
-      if (n === 0) { data.hook.lines = data.hook.lines.map((l) => expandIn(l, spec)); data.hook.sub = (data.hook.sub ?? []).map((l) => expandIn(l, spec)); }
-      else if (n <= (data.ranked?.length ?? 0)) {
-        const r = data.ranked[n - 1];
-        r.name = expandIn(r.name, spec);
-        r.lines = (r.lines ?? []).map((l) => expandIn(l, spec));
-      } else {
-        data.closer.lines = (data.closer.lines ?? []).map((l) => expandIn(l, spec));
-        data.closer.cta = expandIn(data.closer.cta, spec);
-      }
-    });
-
-    const verdict = check(spec, repaired);
-    verdict.repairs = notes;
-    last = { data, verdict, slides: repaired.slides };
-
-    if (verdict.pass) return { content: data, verdict, usd: spent, attempts: i + 1 };
-
-    // hand the model its own failures verbatim; a general "try again" produces
-    // a different set with the same violation
-    feedback = `\nYour previous attempt was REJECTED for these reasons. Fix every one:\n` +
-      verdict.failures.map((f) => `- ${f}`).join('\n');
+    const judged = judgeCopy({ spec, data, range: req.range });
+    last = judged;
+    if (judged.verdict.pass) return { content: judged.data, verdict: judged.verdict, usd: spent, attempts: i + 1, count: judged.count };
+    feedback = feedbackFor(judged.verdict);
   }
 
-  return { content: last.data, verdict: last.verdict, usd: spent, attempts, failed: true };
+  return { content: last.data, verdict: last.verdict, usd: spent, attempts, failed: true, count: last.count };
 }
 
 /**

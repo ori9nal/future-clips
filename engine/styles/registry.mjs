@@ -8,6 +8,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
+import { assertClean } from '../clean.mjs';
 import sharp from 'sharp';
 import { fontFiles } from './kit.mjs';
 
@@ -87,5 +88,8 @@ export async function render({ spec, root, styleId, outDir }) {
     }).render().asPng());
     files.push(file);
   });
+  // Pixels only: no C2PA manifest, no EXIF, no text chunks. Throws if a
+  // renderer ever starts leaking provider metadata into a slide.
+  assertClean(files);
   return { files, canvas: style.canvas, style: style.id, artUsd: ctx.artUsd ?? 0 };
 }
