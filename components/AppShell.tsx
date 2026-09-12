@@ -1,6 +1,7 @@
 import Link from "next/link";
 import type { Viewer } from "@/lib/auth";
 import { engineAvailable } from "@/lib/engine";
+import { LegalFooter } from "@/components/LegalFooter";
 
 const PLAN_LABEL: Record<string, string> = { free: "Free", solo: "Solo", grind: "Grind", agency: "Agency" };
 
@@ -51,7 +52,10 @@ export default function AppShell({
           </div>
         </details>
       </nav>
-      <div className="fc-wrap">{children}</div>
+      <div className="fc-wrap">
+        {children}
+        <LegalFooter />
+      </div>
     </div>
   );
 }

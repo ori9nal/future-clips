@@ -17,6 +17,8 @@ const PUBLIC = [
   /^\/api\/keepalive$/,
   /^\/api\/webhooks\//,
   /^\/api\/health$/,
+  // the five Trust and Legal pages: a policy behind a login is not published
+  /^\/(terms|privacy|acceptable-use|refunds|accessibility)$/,
 ];
 
 export async function middleware(request: NextRequest) {

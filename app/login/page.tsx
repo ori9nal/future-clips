@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LoginForm } from "./LoginForm";
+import { LegalFooter } from "@/components/LegalFooter";
 
 export const metadata: Metadata = { title: "Sign in" };
 export const dynamic = "force-dynamic";
@@ -26,6 +27,7 @@ export default async function LoginPage({
           We email you a link. No password. Access is by invite while we are in private beta.
         </p>
         <LoginForm next={next ?? "/app"} initialError={error ?? null} googleEnabled={process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1"} />
+        <LegalFooter />
       </div>
     </main>
   );

@@ -290,3 +290,31 @@ button, input, select, textarea { font: inherit; }
   .fc-card { padding: 16px; border-radius: 16px; }
   .fc-table { display: block; overflow-x: auto; white-space: nowrap; }
 }
+
+/* ── Trust and Legal (public pages + the footer strip) ─── */
+.fc-legal { max-width: 760px; margin: 0 auto; padding: 18px 18px 60px; }
+.fc-legal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0 4px; }
+.fc-legal-nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 26px 0 10px; }
+.fc-legal-nav a { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--fc-muted); padding: 6px 0; border-bottom: 2px solid transparent; }
+.fc-legal-nav a[aria-current] { color: var(--fc-ink); border-bottom-color: var(--fc-lime); }
+.fc-legal-body { color: var(--fc-body); font-size: 16px; line-height: 1.6; }
+.fc-legal-body h1 { color: var(--fc-ink); font-size: clamp(30px, 6vw, 44px); line-height: 1.05; letter-spacing: -.03em; margin: 8px 0 6px; }
+.fc-legal-body h2 { color: var(--fc-ink); font-size: clamp(19px, 3.6vw, 24px); line-height: 1.2; letter-spacing: -.02em; margin: 36px 0 10px; scroll-margin-top: 24px; }
+.fc-legal-body h3 { color: var(--fc-ink); font-size: 17px; margin: 26px 0 8px; }
+.fc-legal-body p { margin: 0 0 14px; }
+.fc-legal-body strong { color: var(--fc-ink); }
+.fc-legal-body .fc-effective { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--fc-muted); margin: 0 0 26px; }
+.fc-legal-body ul, .fc-legal-body ol { padding-left: 22px; margin: 0 0 16px; }
+.fc-legal-body ul { list-style: disc; }
+.fc-legal-body ol { list-style: decimal; }
+.fc-legal-body li { margin: 6px 0; }
+.fc-legal-body table { border-collapse: collapse; width: 100%; margin: 8px 0 20px; font-size: 15px; display: block; overflow-x: auto; }
+.fc-legal-body th, .fc-legal-body td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--fc-line); vertical-align: top; }
+.fc-legal-body th { font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--fc-muted); font-weight: 500; }
+.fc-legal-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 44px; padding: 18px 0 0; border-top: 1px solid var(--fc-line); font-family: "IBM Plex Mono", ui-monospace, monospace; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--fc-muted); }
+.fc-legal-foot nav { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+.fc-legal-foot a:hover { color: var(--fc-ink); }
+.fc-legal-foot-copy { margin-left: auto; }
+.fc-wrap > .fc-legal-foot { margin-top: 56px; }
+.fc-login-card .fc-legal-foot { margin-top: 26px; font-size: 10px; }
+.fc-login-card .fc-legal-foot-copy { display: none; }
