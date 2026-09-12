@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { engineAvailable, engineUnavailable } from "@/lib/engine";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSpec } from "@/lib/db/campaigns";
@@ -31,6 +32,7 @@ export async function POST(req: Request) {
   if (!dir) return Response.json({ error: "campaign declares no assets.character.dir" }, { status: 400 });
 
   const root = process.cwd();
+  if (!engineAvailable()) return engineUnavailable();
   const url = pathToFileURL(path.join(root, "engine", "providers", "image.mjs")).href;
   const img: any = await import(/* webpackIgnore: true */ url);
 

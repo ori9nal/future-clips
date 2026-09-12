@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requirePlatformOwner } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { engineAvailable } from "@/lib/engine";
 import { listCampaigns, listSpecs } from "@/lib/db/campaigns";
 import AppShell from "@/components/AppShell";
 import { createCampaign } from "./actions";
@@ -23,7 +24,10 @@ export default async function AdminHome() {
           and <b>brand kits</b> (the older admin-authored shape). They are stored apart and never overwrite each other.
         </p>
         <p className="fc-note" style={{ marginTop: 10 }}>
-          <Link href="/admin/campaigns">Briefs &amp; ingest</Link> · <Link href="/admin/invites">Invites &amp; access</Link> · <Link href="/studio">Studio</Link>
+          <Link href="/admin/invites">Invites &amp; access</Link>
+          {engineAvailable()
+            ? <> · <Link href="/admin/campaigns">Briefs &amp; ingest</Link> · <Link href="/studio">Studio</Link></>
+            : <> · <span className="fc-note">Briefs ingest and the studio arrive with the render engine.</span></>}
         </p>
       </header>
 

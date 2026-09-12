@@ -1,5 +1,6 @@
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { engineAvailable, engineUnavailable } from "@/lib/engine";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { saveSpec } from "@/lib/db/campaigns";
@@ -24,6 +25,7 @@ export async function POST(req: Request) {
   if (brief.length < 80) return Response.json({ error: "paste the full brief — that is too short to extract from" }, { status: 400 });
 
   const root = process.cwd();
+  if (!engineAvailable()) return engineUnavailable();
   const url = pathToFileURL(path.join(root, "engine", "ingest.mjs")).href;
   const { ingestBrief }: any = await import(/* webpackIgnore: true */ url);
 

@@ -1,6 +1,7 @@
 import path from "node:path";
 import fs from "node:fs";
 import { pathToFileURL } from "node:url";
+import { engineAvailable, engineUnavailable } from "@/lib/engine";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSpec } from "@/lib/db/campaigns";
@@ -35,6 +36,7 @@ export async function POST(req: Request) {
   }
 
   const root = process.cwd();
+  if (!engineAvailable()) return engineUnavailable();
   const registryUrl = pathToFileURL(path.join(root, "engine", "styles", "registry.mjs")).href;
   const nativeUrl = pathToFileURL(path.join(root, "engine", "render-native.mjs")).href;
   const judgeUrl = pathToFileURL(path.join(root, "engine", "judge.mjs")).href;

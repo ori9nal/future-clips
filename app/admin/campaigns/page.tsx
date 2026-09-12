@@ -1,4 +1,5 @@
 import { requirePlatformOwner } from "@/lib/auth";
+import { engineAvailable, ENGINE_MISSING } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 import { listSpecs } from "@/lib/db/campaigns";
 import { AdminClient } from "./AdminClient";
@@ -15,6 +16,17 @@ export const dynamic = "force-dynamic";
  */
 export default async function AdminCampaignsPage() {
   await requirePlatformOwner();
+  if (!engineAvailable()) {
+    return (
+      <main className="studio">
+        <header>
+          <p className="eyebrow">Future Clips</p>
+          <h1>Briefs</h1>
+          <p className="lede">This surface needs the render engine, and {ENGINE_MISSING}. <a href="/admin">Back to admin</a></p>
+        </header>
+      </main>
+    );
+  }
   const sb = await createClient();
   const specs = await listSpecs(sb);
   return (

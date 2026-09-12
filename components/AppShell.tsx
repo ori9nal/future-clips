@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { Viewer } from "@/lib/auth";
+import { engineAvailable } from "@/lib/engine";
 
 const PLAN_LABEL: Record<string, string> = { free: "Free", solo: "Solo", grind: "Grind", agency: "Agency" };
 
@@ -32,7 +33,7 @@ export default function AppShell({
           <Link href="/app/usage" data-on={active === "usage" ? "1" : "0"}>Usage</Link>
           {viewer.isPlatformOwner && (
             <>
-              <Link href="/studio" data-on={active === "studio" ? "1" : "0"}>Studio</Link>
+              {engineAvailable() && <Link href="/studio" data-on={active === "studio" ? "1" : "0"}>Studio</Link>}
               <Link href="/admin" data-on={active === "admin" ? "1" : "0"}>Admin</Link>
             </>
           )}
