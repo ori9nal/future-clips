@@ -372,7 +372,7 @@ function fcSubmit(e){
 
 TITLE = "The Future Clips — Turn any idea into a viral slideshow"
 DESC = ("The Future Clips turns any idea into a scroll-stopping slideshow in minutes. "
-        "Consistent character, viral hooks, no AI watermark.")
+        "Consistent character, viral hooks, no visible watermark.")
 
 out = (
     '<!doctype html>\n<html lang="en">\n<head>\n'

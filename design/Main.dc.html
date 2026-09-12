@@ -9,7 +9,7 @@
 <x-dc>
 <helmet>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="The Future Clips turns any idea into a scroll-stopping slideshow in minutes. Consistent character, viral hooks, no AI watermark.">
+<meta name="description" content="The Future Clips turns any idea into a scroll-stopping slideshow in minutes. Consistent character, viral hooks, no visible watermark.">
 <title>The Future Clips — Turn any idea into a viral slideshow</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -110,7 +110,7 @@
       <b style="background:#D8FF47;color:#0E0E10;border-radius:9999px;padding:4px 10px;font-size:.92em;font-weight:500;letter-spacing:.08em">New</b> Slideshows, generated in minutes
     </span>
     <h1 style="margin:0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(2.05rem,7.4vw,4.4rem);line-height:1.03;letter-spacing:-.03em;max-width:20ch;margin-inline:auto;text-wrap:balance">Turn any idea into a <span style="background:#D8FF47;padding:0 .12em;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone">scroll-stopping</span> slideshow</h1>
-    <p style="margin:clamp(18px,3.5vw,28px) auto 0;max-width:54ch;font-size:clamp(16px,3.6vw,19px);line-height:1.55">Built on proven viral hooks, with the same character and style across every slide. Export ready to post to TikTok, Instagram and YouTube — no AI watermark.</p>
+    <p style="margin:clamp(18px,3.5vw,28px) auto 0;max-width:54ch;font-size:clamp(16px,3.6vw,19px);line-height:1.55">Built on proven viral hooks, with the same character and style across every slide. Export ready to post to TikTok, Instagram and YouTube — no visible watermark, nothing to crop.</p>
     <div style="margin-top:clamp(24px,4.5vw,36px);display:flex;flex-wrap:wrap;gap:12px;justify-content:center">
       <a href="#start" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#0E0E10;color:#fff;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#26262A">Start free</a>
       <a href="#examples" style="display:inline-flex;align-items:center;justify-content:center;border-radius:10px;background:#fff;color:#0E0E10;border:1px solid #E0DCD2;font-size:16px;font-weight:600;padding:17px 30px;min-height:54px" style-hover="background:#F2F0EA">See examples</a>
@@ -179,7 +179,7 @@
       <div style="background:#fff;border:1px solid #E9E6DE;border-radius:16px;padding:clamp(22px,4vw,32px)">
         <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:#0E0E10;background:#D8FF47;border-radius:6px;padding:5px 9px">03</span>
         <h3 style="margin:22px 0 0;color:#0E0E10;font-family:'Archivo',sans-serif;font-stretch:108%;font-weight:600;font-size:clamp(18px,4vw,21px);letter-spacing:-.015em">Generate &amp; export ready-to-post slides</h3>
-        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Sized for each platform, watermark-free, downloadable in one tap.</p>
+        <p style="margin-top:11px;font-size:clamp(15px,3.2vw,16px)">Sized for each platform, nothing stamped on the image, downloadable in one tap.</p>
       </div>
     </div>
   </div>
@@ -650,7 +650,7 @@ class Component extends DCLogic {
       newWay: [
         "One idea in, full slideshow out",
         "Same character, every single slide",
-        "Ships clean — no AI watermark, ever",
+        "Ships clean — no visible watermark, nothing to crop",
         "Proven viral hooks built in",
         "Post-ready for TikTok, IG & YouTube",
         "About an hour. Five minutes on priority."
@@ -659,7 +659,7 @@ class Component extends DCLogic {
       features: [
         { icon: "◈", title: "The same character, every slide", body: "Lock a character once and it holds its face, outfit and style across the whole slideshow." },
         { icon: "↗", title: "Built-in viral hook library", body: "Openers that already perform, grouped by niche, so slide one earns the swipe." },
-        { icon: "◎", title: "No AI watermark", body: "Clean exports. Nothing on the image says a tool made it." },
+        { icon: "◎", title: "No visible watermark", body: "Clean exports: nothing stamped, no badge, no corner mark, no metadata tag. Nothing to crop." },
         { icon: "▤", title: "TikTok, Instagram, YouTube", body: "Every slideshow exports at the right size and safe area for each platform." },
         { icon: "⚡", title: "Minutes, not evenings", body: "A slideshow is ready in about an hour; a priority slideshow in about five minutes. Re-render any slideshow for free." },
         { icon: "✦", title: "Unique output every time", body: "Layout, crop and palette are seeded to your account, so no two creators post the same slideshow." }
@@ -667,7 +667,7 @@ class Component extends DCLogic {
 
       faqs: [
         { q: "How does character consistency work?", a: "You pick or upload a character once. We hold its features, outfit and rendering style as fixed inputs for every slide in the slideshow, so slide eight looks like slide one instead of a cousin of it." },
-        { q: "Is there an AI watermark on the output?", a: "No. Exports are clean images with no badge, corner mark or metadata stamp. What you download is what you post." },
+        { q: "Is there a visible watermark on the output?", a: "No. Exports are clean images with no badge, corner mark or metadata stamp — the provider's content-credential manifest is stripped before you download. What you download is what you post." },
         { q: "Which platforms does it export for?", a: "TikTok photo mode, Instagram carousels and YouTube community posts. Each export is sized and safe-area-checked per platform, so captions and UI never cover your text." },
         { q: "How do the monthly limits work?", a: "Every slideshow is five to ten slides, and each slide it contains comes off your monthly slide allowance. Re-rendering a slideshow — new fonts, a different grade, a numbering fix — is free and does not count. Past your allowance, extra slides are $0.06 each, or $0.10 on priority. Allowances reset on your billing date." },
         { q: "Is my output unique to me?", a: "Yes. Layout, crop, palette and hook variation are seeded to your account, so two creators entering the same topic get different slideshows." }
