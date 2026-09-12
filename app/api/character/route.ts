@@ -6,7 +6,7 @@ import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSpec } from "@/lib/db/campaigns";
 
-export const maxDuration = 800;
+export const maxDuration = 300;
 
 /**
  * Generate a character sheet for a campaign and cut it into poses.
