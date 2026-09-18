@@ -37,3 +37,8 @@
 .studio .tag.hard{color:var(--accent);border-color:var(--accent)}
 .studio .tag.go{color:var(--text);text-decoration:none}
 .studio .tag.go:hover{border-color:var(--accent)}
+
+/* the payout facts under the brand name: four cells, label over value */
+.studio .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,max-content));gap:.6rem 2rem;margin:0 0 1.2rem}
+.studio .facts dt{font-size:.68rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.studio .facts dd{margin:.15rem 0 0;font-size:1.05rem;font-weight:600}

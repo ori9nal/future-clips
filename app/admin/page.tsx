@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { engineAvailable } from "@/lib/engine";
 import { listCampaigns, listSpecs } from "@/lib/db/campaigns";
 import AppShell from "@/components/AppShell";
-import { createCampaign } from "./actions";
+import { createCampaign, setBriefStatus, removeBrief } from "./actions";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export default async function AdminHome() {
           and <b>brand kits</b> (the older admin-authored shape). They are stored apart and never overwrite each other.
         </p>
         <p className="fc-note" style={{ marginTop: 10 }}>
-          <Link href="/admin/invites">Invites &amp; access</Link>
+          <Link href="/admin/invites">Invites &amp; access</Link> · <Link href="/admin/partners">Partners</Link>
           {engineAvailable()
             ? <> · <Link href="/admin/campaigns">Briefs &amp; ingest</Link> · <Link href="/studio">Studio</Link></>
             : <> · <span className="fc-note">Briefs ingest and the studio arrive with the render engine.</span></>}
@@ -34,15 +34,23 @@ export default async function AdminHome() {
       <section className="fc-card">
         <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>
         <table className="fc-table">
-          <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Status</th></tr></thead>
+          <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Status</th><th /></tr></thead>
           <tbody>
             {specs.map((s) => (
-              <tr key={s.id}>
+              <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
                 <td><b>{s.brand}</b> <span className="fc-note">{s.id}</span></td>
                 <td>{s.niche}</td>
                 <td>{s.content?.style ?? "—"}</td>
                 <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
                 <td>{s.status}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <form action={setBriefStatus.bind(null, s.id, s.status === "live" ? "paused" : "live")} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit">{s.status === "live" ? "Pause" : "Go live"}</button>
+                  </form>{" "}
+                  <form action={removeBrief.bind(null, s.id)} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit">Delete</button>
+                  </form>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -49,7 +49,7 @@ const REASONS: Record<string, string> = {
   FC_BAD_LANE: "Unknown lane.",
   FC_BAD_RANGE: "Slide range must be between 5 and 10.",
   FC_NO_CAMPAIGN: "That campaign is not live.",
-  FC_NO_PLAN: "Generating needs a paid plan. The Free tier gets one ready-made slideshow per live campaign.",
+  FC_NO_PLAN: "This workspace has no plan yet. Choose a plan to start generating.",
   FC_NO_HD: "HD export is on Grind and Agency.",
   FC_QUOTA: "Not enough slides left this period.",
   FC_SPEND_CAP: "This workspace has reached its spend cap for the period. Email team@thefutureclips.com to raise it.",
@@ -121,6 +121,8 @@ export async function cancelSet(sb: SupabaseClient, id: string): Promise<boolean
 export function stageLabel(s: Pick<SetRow, "status" | "stage" | "lane">): string {
   if (s.status === "done") return "Ready";
   if (s.status === "failed") return "Failed";
+  // fc_reserve_set seeds stage = 'copy:submit'; the worker flips status to 'rendering' before it does anything
+  if (s.status === "queued") return s.lane === "priority" ? "Starting" : "In the queue";
   const st = s.stage ?? "";
   if (st.startsWith("copy")) return "Writing the slides";
   if (st.startsWith("art:anchor")) return "Drawing the first frame";

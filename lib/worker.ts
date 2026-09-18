@@ -16,22 +16,14 @@ import "server-only";
  */
 import fs from "node:fs";
 import path from "node:path";
-import os from "node:os";
 import { pathToFileURL } from "node:url";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { adminClient } from "@/lib/supabase/admin";
-import { engineAvailable } from "@/lib/engine";
+import { engineAvailable, workDirs } from "@/lib/engine";
 import { SET_COLS, type SetRow } from "@/lib/sets";
 
 const ROOT = process.cwd();
 const LOCK_MS = 6 * 60 * 1000; // a tick cannot outlive the 300 s function ceiling
-
-/** Where the engine keeps its working files on this host. */
-export function workDirs() {
-  // Vercel functions may only write under /tmp; a laptop keeps output/ in the repo.
-  const base = process.env.VERCEL ? path.join(os.tmpdir(), "fc") : path.join(ROOT, "output");
-  return { cacheDir: path.join(base, "gen", "cache"), setsDir: path.join(base, "hosted-sets") };
-}
 
 async function engine() {
   const url = (f: string) => pathToFileURL(path.join(ROOT, "engine", f)).href;
@@ -89,7 +81,7 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
     return { id: row.id, before: row.stage ?? "", after: "failed", ok: true, note: "cancelled" };
   }
 
-  let s = row.state_json && row.state_json.stage
+  const s = row.state_json && row.state_json.stage
     ? row.state_json
     : lanes.newState({
         id: row.id, spec, instruction: row.ask,
@@ -120,9 +112,11 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
     }
   } catch (e) {
     // the worker's fault (a database or storage error), not the set's:
-    // keep the progress made, drop the lock, let the next tick retry
+    // keep the progress made, drop the lock, let the next tick retry. The set
+    // has started, so it stays "rendering": "queued" means nothing has been
+    // spent yet and a member may still cancel it.
     s.lock = 0;
-    await sb.from("sets").update({ state_json: s, status: "queued", stage: s.stage }).eq("id", row.id);
+    await sb.from("sets").update({ state_json: s, status: "rendering", stage: s.stage }).eq("id", row.id);
     throw e;
   }
   s.lock = 0;
@@ -152,7 +146,8 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
     await sb.from("sets").update({ state_json: s }).eq("id", row.id);
     return { id: row.id, before, after: "failed", ok: false, note: s.error };
   }
-  await sb.from("sets").update({ state_json: s, status: "queued", stage: s.stage }).eq("id", row.id);
+  // waiting on a provider batch: still "rendering" (money is committed, cancel is closed); the lock is free
+  await sb.from("sets").update({ state_json: s, status: "rendering", stage: s.stage }).eq("id", row.id);
   return { id: row.id, before, after: s.stage, ok: true };
 }
 

@@ -1,4 +1,5 @@
 import { requirePlatformOwner } from "@/lib/auth";
+import Link from "next/link";
 import { engineAvailable, ENGINE_MISSING } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 import { listSpecs } from "@/lib/db/campaigns";
@@ -20,7 +21,7 @@ export default async function StudioPage() {
         <header>
           <p className="eyebrow">Future Clips</p>
           <h1>Studio</h1>
-          <p className="lede">This surface needs the render engine, and {ENGINE_MISSING}. <a href="/admin">Back to admin</a></p>
+          <p className="lede">This surface needs the render engine, and {ENGINE_MISSING}. <Link href="/admin">Back to admin</Link></p>
         </header>
       </main>
     );
@@ -34,7 +35,7 @@ export default async function StudioPage() {
         <h1>Pick a campaign. Render the set.</h1>
         <p className="lede">
           The brief decides the format, the mention and the banned claims. You pick the style and
-          hit render. <a href="/admin/new">Add a campaign</a> · <a href="/app">Back to the app</a>
+          hit render. <Link href="/admin/new">Add a campaign</Link> · <Link href="/app">Back to the app</Link>
         </p>
       </header>
       <StudioClient campaigns={campaigns as any} />

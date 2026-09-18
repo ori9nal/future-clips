@@ -24,6 +24,12 @@ export type Org = {
   billing_status: string;
   current_period_start: string | null;
   current_period_end: string | null;
+  /** 0006: purchased and welcome slides, carried across periods (absent before the migration) */
+  slide_balance?: number;
+  /** 0005 */
+  referral_code?: string;
+  /** 0008: an affiliate-only workspace — refers, never generates */
+  is_partner?: boolean;
 };
 
 export type Membership = { org: Org; role: "owner" | "member" };
@@ -44,7 +50,7 @@ export async function getViewer(): Promise<Viewer | null> {
 
   const { data: rows } = await supabase
     .from("members")
-    .select("role, org:orgs(id, name, plan, seat_limit, is_platform, billing_status, current_period_start, current_period_end)")
+    .select("role, org:orgs(*)")
     .order("created_at", { ascending: true });
 
   const memberships: Membership[] = (rows ?? [])

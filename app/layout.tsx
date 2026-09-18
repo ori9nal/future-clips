@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Archivo, Manrope } from "next/font/google";
 import "./app.css";
+import "./dashboard.css";
 
 // The product surface uses Archivo for headlines and Manrope for body — the
 // same pairing as the live site, read off its computed styles rather than
@@ -31,7 +32,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className={`${archivo.variable} ${manrope.variable}`}>
+    <html lang="en" className={`${archivo.variable} ${manrope.variable}`} suppressHydrationWarning>
+      <head>
+        {/* the theme before first paint: the saved choice, else the system's; the toggle writes the same key */}
+        <script dangerouslySetInnerHTML={{ __html: `(function(){try{var t=localStorage.getItem('fc.theme');if(t!=='light'&&t!=='dark'){t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light'}document.documentElement.dataset.theme=t}catch(e){document.documentElement.dataset.theme='light'}})()` }} />
+      </head>
       <body>{children}</body>
     </html>
   );

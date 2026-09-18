@@ -1,4 +1,5 @@
 import { requirePlatformOwner } from "@/lib/auth";
+import Link from "next/link";
 import { engineAvailable, ENGINE_MISSING } from "@/lib/engine";
 import { createClient } from "@/lib/supabase/server";
 import { listSpecs } from "@/lib/db/campaigns";
@@ -22,7 +23,7 @@ export default async function AdminCampaignsPage() {
         <header>
           <p className="eyebrow">Future Clips</p>
           <h1>Briefs</h1>
-          <p className="lede">This surface needs the render engine, and {ENGINE_MISSING}. <a href="/admin">Back to admin</a></p>
+          <p className="lede">This surface needs the render engine, and {ENGINE_MISSING}. <Link href="/admin">Back to admin</Link></p>
         </header>
       </main>
     );
@@ -35,7 +36,7 @@ export default async function AdminCampaignsPage() {
         <p className="eyebrow">Future Clips — Admin</p>
         <h1>Briefs</h1>
         <p className="lede">
-          Paste a brief once. Clippers then generate against it from the app. <a href="/admin">Back to admin</a>
+          Paste a brief once. Clippers then generate against it from the app. <Link href="/admin">Back to admin</Link>
         </p>
       </header>
       <AdminClient campaigns={specs as any[]} />

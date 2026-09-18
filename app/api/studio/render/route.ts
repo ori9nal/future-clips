@@ -1,7 +1,6 @@
 import path from "node:path";
-import fs from "node:fs";
 import { pathToFileURL } from "node:url";
-import { engineAvailable, engineUnavailable } from "@/lib/engine";
+import { engineAvailable, engineUnavailable, workDirs } from "@/lib/engine";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSpec } from "@/lib/db/campaigns";
@@ -44,27 +43,24 @@ export async function POST(req: Request) {
   const engine: any = await import(/* webpackIgnore: true */ nativeUrl);
   const { logicCheck }: any = await import(/* webpackIgnore: true */ judgeUrl);
 
-  const rel = path.join("output", "sets", `${campaignId}-${style}`);
-  const outDir = path.join(root, rel);
+  // the same <campaign>-<style> folder the CLI renders into on a laptop; /tmp on a host
+  const { base, studioDir, cacheDir } = workDirs();
+  const outDir = path.join(studioDir, `${campaignId}-${style}`);
 
   const started = Date.now();
   try {
     const logic = logicCheck(engine.copyOf(spec));
-    const { files, canvas } = await registry.render({ spec, root, styleId: style, outDir });
+    const { files, canvas } = await registry.render({ spec, root, styleId: style, outDir, cacheDir });
     return Response.json({
       style,
       canvas,
       ms: Date.now() - started,
       logic,
-      slides: files.map((f: string) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
+      slides: files.map((f: string) => `/api/file/${path.relative(base, f).split(path.sep).join("/")}`),
     });
   } catch (e: any) {
     // Render failures here are almost always copy that will not fit. Say which
     // line, because "render failed" tells the operator nothing actionable.
     return Response.json({ error: e?.message ?? "render failed" }, { status: 422 });
-  } finally {
-    if (fs.existsSync(outDir)) {
-      /* plates are cached under _plates and reused across renders */
-    }
   }
 }

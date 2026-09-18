@@ -165,3 +165,87 @@ export async function setSignupMode(fd: FormData) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin/invites");
 }
+
+/* ── the agency referral programme (migration 0005) ─────────────────────── */
+
+/** Settle a commission row: the money went out by bank/PayPal, mark it paid. RLS: platform owner. */
+export async function markCommissionPaid(id: number) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("commissions").update({ status: "paid", paid_at: new Date().toISOString() }).eq("id", id).eq("status", "pending");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/partners");
+}
+
+export async function voidCommission(id: number) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("commissions").update({ status: "void" }).eq("id", id).eq("status", "pending");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/partners");
+}
+
+/** The tier table: min referred accounts → rate. The ceiling is 30% (a CHECK in the database). */
+export async function saveTier(fd: FormData) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const min = Number(fd.get("min_referred")), rate = Number(fd.get("rate")) / 100;
+  if (!Number.isInteger(min) || min < 0) throw new Error("min referred must be a whole number");
+  if (!(rate > 0 && rate <= 0.30)) throw new Error("rate must be between 1% and 30%");
+  const { error } = await sb.from("referral_tiers").upsert({ min_referred: min, rate });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/partners");
+}
+
+export async function removeTier(min: number) {
+  await requirePlatformOwner();
+  if (min === 0) throw new Error("the base tier stays");
+  const sb = await createClient();
+  const { error } = await sb.from("referral_tiers").delete().eq("min_referred", min);
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/partners");
+}
+
+/**
+ * Record a referred account's revenue for a period by hand — what the billing
+ * webhook will do in phase 5. fc_record_commission is service-role only, so
+ * this needs the key on the host; the page says so when it is missing.
+ */
+export async function recordCommission(fd: FormData) {
+  await requirePlatformOwner();
+  const { hasServiceRole, adminClient } = await import("@/lib/supabase/admin");
+  if (!hasServiceRole()) throw new Error("SUPABASE_SERVICE_ROLE_KEY is not set on this host");
+  const referred = String(fd.get("referred_org_id") || "").trim();
+  const period = String(fd.get("period_start") || "").trim();
+  const revenue = Number(fd.get("revenue_usd"));
+  if (!/^[0-9a-f-]{36}$/.test(referred)) throw new Error("pick a referred workspace");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(period)) throw new Error("period must be a date");
+  if (!(revenue >= 0)) throw new Error("revenue must be a number");
+  const { error } = await adminClient().rpc("fc_record_commission", { p_referred: referred, p_period: period, p_revenue: revenue, p_note: String(fd.get("note") || "").trim() || "recorded by hand" });
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin/partners");
+}
+
+/* ── briefs (engine specs): pause / resume / remove ──────────────────────── */
+
+/** A paused brief disappears from every customer's picker; sets already made stay. */
+export async function setBriefStatus(id: string, status: "live" | "paused") {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("campaigns").update({ status, updated_at: new Date().toISOString() }).eq("id", id).eq("kind", "spec");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/app");
+}
+
+/** Remove a brief for good. Refused while sets reference it (they keep the id for their history). */
+export async function removeBrief(id: string) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { count } = await sb.from("sets").select("id", { count: "exact", head: true }).eq("campaign_id", id);
+  if (count) throw new Error(`${count} set(s) were made against "${id}" — pause it instead of deleting`);
+  const { error } = await sb.from("campaigns").delete().eq("id", id).eq("kind", "spec");
+  if (error) throw new Error(error.message);
+  revalidatePath("/admin");
+  revalidatePath("/app");
+}

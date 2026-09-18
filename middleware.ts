@@ -19,6 +19,10 @@ const PUBLIC = [
   /^\/api\/health$/,
   // the five Trust and Legal pages: a policy behind a login is not published
   /^\/(terms|privacy|acceptable-use|refunds|accessibility)$/,
+  // the design preview (dev only; the page itself 404s in production), and
+  // the slide images it shows, which come through /api/file with no session
+  /^\/design-preview$/,
+  ...(process.env.NODE_ENV !== "production" && process.env.FC_DEMO_PREVIEW === "1" ? [/^\/api\/file\//] : []),
 ];
 
 export async function middleware(request: NextRequest) {
@@ -65,10 +69,22 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // ?ref=CODE (the agency referral link) survives the magic-link round trip as
+  // a cookie; /auth/callback claims it on first sign-in. Only the code's
+  // alphabet is accepted, so nothing else from the query reaches the database.
+  const ref = request.nextUrl.searchParams.get("ref");
+  if (ref && /^[A-Za-z0-9]{4,16}$/.test(ref) && !request.cookies.get("fc_ref")) {
+    response.cookies.set("fc_ref", ref.toUpperCase(), { maxAge: 30 * 86400, path: "/", sameSite: "lax", httpOnly: true, secure: process.env.NODE_ENV === "production" });
+  }
+
   return response;
 }
 
 export const config = {
-  // everything except Next's own assets and static files
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|svg|ico|txt|woff2?)$).*)"],
+  // every API route, whatever its extension (a slide URL ends in .png and must
+  // still be gated), then every page except Next's own assets and static files
+  matcher: [
+    "/api/:path*",
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:png|jpg|jpeg|webp|svg|ico|txt|woff2?)$).*)",
+  ],
 };

@@ -12,8 +12,13 @@ export function LoginForm({ next, initialError, googleEnabled }: { next: string;
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
 
-  const callback = () =>
-    `${window.location.origin}/auth/callback?next=${encodeURIComponent(next.startsWith("/") ? next : "/app")}`;
+  // The redirect URL carries no query so it matches an exact allow-list entry in
+  // Supabase; where the member wanted to land rides in a short-lived cookie.
+  const callback = () => {
+    const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/app";
+    document.cookie = `fc_next=${encodeURIComponent(dest)}; max-age=3600; path=/; samesite=lax${window.location.protocol === "https:" ? "; secure" : ""}`;
+    return `${window.location.origin}/auth/callback`;
+  };
 
   async function sendLink(e: React.FormEvent) {
     e.preventDefault();
@@ -27,7 +32,9 @@ export function LoginForm({ next, initialError, googleEnabled }: { next: string;
     if (error) {
       setError(INVITE_REFUSED.test(error.message)
         ? "That email is not on the invite list. Ask whoever runs your workspace to add it."
-        : error.message);
+        : /rate limit/i.test(error.message)
+          ? "Too many sign-in emails in the last hour. Use the link already in your inbox, or try again in a little while."
+          : error.message);
       return;
     }
     setSent(true);

@@ -1,7 +1,6 @@
-import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { engineAvailable, engineUnavailable } from "@/lib/engine";
+import { engineAvailable, engineUnavailable, workDirs } from "@/lib/engine";
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getSpec } from "@/lib/db/campaigns";
@@ -39,7 +38,7 @@ export async function POST(req: Request) {
   const prompt = (spec as any).assets?.character?.prompt;
   if (!prompt) return Response.json({ error: "campaign declares no assets.character.prompt" }, { status: 400 });
 
-  const cacheDir = path.join(root, "output/gen/cache");
+  const { base, cacheDir } = workDirs();
   const started = Date.now();
   try {
     const sheets: string[] = [];
@@ -50,7 +49,7 @@ export async function POST(req: Request) {
       sheets.push(r.file);
     }
     return Response.json({
-      sheets: sheets.map((f) => `/api/file/${path.relative(root, f).split(path.sep).join("/")}`),
+      sheets: sheets.map((f) => `/api/file/${path.relative(base, f).split(path.sep).join("/")}`),
       cost: img.costReport(),
       ms: Date.now() - started,
       next: "cut the chosen sheet with tools/cut-character.mjs, then render",

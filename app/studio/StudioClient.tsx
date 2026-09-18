@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import type { Spec } from "@/lib/specs";
 
 type Logic = { pass: boolean; failures: string[]; warnings: string[] };
@@ -77,7 +78,7 @@ export function StudioClient({ campaigns }: { campaigns: Spec[] }) {
   }
 
   if (!campaigns.length) {
-    return <p className="empty">No campaigns yet. <a href="/admin/new">Create one</a>.</p>;
+    return <p className="empty">No campaigns yet. <Link href="/admin/new">Create one</Link>.</p>;
   }
 
   return (
@@ -98,9 +99,16 @@ export function StudioClient({ campaigns }: { campaigns: Spec[] }) {
             })}
           </select>
         </div>
-        <button className="primary" onClick={render} disabled={busy || !style}>
-          {busy ? "Rendering…" : `Render ${(spec?.content.ranked.length ?? 0) + 2} slides`}
-        </button>
+        {/* an ingested brief has rules but no copy until a set is generated; the studio renders stored copy only */}
+        {spec && !spec.content?.ranked?.length ? (
+          <p className="ok" style={{ background: "rgba(255,180,60,.12)", color: "#e2a33c" }}>
+            This brief has no copy yet — generate a set from the app (Create → {spec.brand}) and it will render here.
+          </p>
+        ) : (
+          <button className="primary" onClick={render} disabled={busy || !style || !spec}>
+            {busy ? "Rendering…" : `Render ${(spec?.content?.ranked?.length ?? 0) + 2} slides`}
+          </button>
+        )}
       </section>
 
       <section className="styles">

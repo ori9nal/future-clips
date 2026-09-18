@@ -1,4 +1,5 @@
 import { requirePlatformOwner } from "@/lib/auth";
+import Link from "next/link";
 import { NewCampaignClient } from "./NewCampaignClient";
 import "../../studio/studio.css";
 import "./admin.css";
@@ -18,7 +19,7 @@ export default async function NewCampaignPage() {
         <h1>Onboard a campaign</h1>
         <p className="lede">
           Everything an agency hands over once: terms, rules, assets and the ranked payload. Saved to the database
-          as the same JSON the render engine reads. <a href="/admin">Back to admin</a>
+          as the same JSON the render engine reads. <Link href="/admin">Back to admin</Link>
         </p>
       </header>
       <NewCampaignClient photoDirs={[]} />

@@ -2,8 +2,7 @@ import Link from "next/link";
 import type { Viewer } from "@/lib/auth";
 import { engineAvailable } from "@/lib/engine";
 import { LegalFooter } from "@/components/LegalFooter";
-
-const PLAN_LABEL: Record<string, string> = { free: "Free", solo: "Solo", grind: "Grind", agency: "Agency" };
+import { planLabel } from "@/lib/plans";
 
 /**
  * The product shell: floating pill nav over the warm gradient ground.
@@ -30,8 +29,9 @@ export default function AppShell({
           </span>
         </Link>
         <div className="fc-links">
-          <Link href="/app" data-on={active === "app" ? "1" : "0"}>Campaigns</Link>
-          <Link href="/app/usage" data-on={active === "usage" ? "1" : "0"}>Usage</Link>
+          <Link href="/app" data-on={active === "app" ? "1" : "0"}>App</Link>
+          <Link href="/app?page=settings&tab=plan" data-on={active === "usage" ? "1" : "0"}>Usage</Link>
+          <Link href="/admin/partners">Partners</Link>
           {viewer.isPlatformOwner && (
             <>
               {engineAvailable() && <Link href="/studio" data-on={active === "studio" ? "1" : "0"}>Studio</Link>}
@@ -41,7 +41,7 @@ export default function AppShell({
         </div>
         <details className="fc-who">
           <summary>
-            <span className="fc-tag">{PLAN_LABEL[viewer.org.plan] ?? viewer.org.plan}</span>
+            <span className="fc-tag">{planLabel({ id: viewer.org.plan })}</span>
             <span className="fc-who-email">{viewer.user.email}</span>
           </summary>
           <div className="fc-who-menu">

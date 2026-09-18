@@ -14,7 +14,8 @@ function HardRules({ spec }: { spec: Spec }) {
   if (R.required_phrase) rows.push(["Must always write", R.required_phrase]);
   if (R.never_bare) rows.push(["Never write bare", R.never_bare]);
   if (Q.must_show_app) {
-    const p = (Q.app_placement ?? []).map((x: any) => `${x.when_slides.join("–")} slides → slide ${x.on_slides.join(" or ")}`);
+    const span = (a: number[], one: (n: number) => string, many: (r: string) => string) => (a[0] === a[1] ? one(a[0]) : many(a.join("–")));
+    const p = (Q.app_placement ?? []).map((x: any) => `${span(x.when_slides, (n) => `${n} slides`, (r) => `${r} slides`)} → ${span(x.on_slides, (n) => `slide ${n}`, (r) => `slides ${r}`)}`);
     rows.push(["App must appear", p.length ? p.join(" · ") : "somewhere in the set"]);
   }
   if (Q.min_slides || Q.max_slides) rows.push(["Slide count", `${Q.min_slides ?? "?"}–${Q.max_slides ?? "?"}`]);
