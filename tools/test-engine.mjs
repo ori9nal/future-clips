@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { inspectPng, stripPng, assertClean } from '../engine/clean.mjs';
-import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable } from '../engine/generate.mjs';
+import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable, liftedFrom } from '../engine/generate.mjs';
 import { enforce, direct, SHOTS } from '../engine/scenes.mjs';
 import { planSet } from '../engine/art.mjs';
 import { deslop, strengthFor } from '../engine/deslop.mjs';
@@ -156,7 +156,7 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   const e3 = enforce(new Array(6).fill('x'), { niche: 'fitness', appIndex: -1, seed: 'q', headings: ['Seated cable row', 'Kroc rows', 'Cable curl', 'Barbell row'] });
   ok(e3.shots[1] !== 'pov' && /back from behind mid row/.test(e3.scenes[1]), `"Seated cable row" draws the back (${e3.shots[1]})`);
   const e4 = enforce(['mirror, gym', 'crop', 'crop', 'mirror, back to the glass', 'crop', 'outdoors'], { niche: 'fitness', appIndex: -1, seed: 'q', headings: ['Kroc rows', 'Lat pulldown', 'Barbell row', 'Cable curl'] });
-  ok(e4.shots[3] === 'mirror' && /back to the mirror, the phone held up over one shoulder/.test(e4.scenes[3]), `a row heading in a mirror shot is taken over the shoulder with the back to the glass (${e4.shots.join(' ')})`);
+  ok(e4.shots[3] !== 'mirror' && e4.shots[3] !== 'pov' && /back from behind mid row/.test(e4.scenes[3]), `a row heading never takes the mirror or the POV, even when the model hints mirror (${e4.shots.join(' ')})`);
   ok(/mid cable curl/.test(e4.scenes[4]), 'a cable curl still maps to the curl anatomy');
   // F17: the subject-mode anchor names ordinary imperfections; the edits inherit the face and do not repeat it
   const sp = planSet({ subject: 'a man', scenes: ['mirror', 'crop no face'], mode: 'subject', days: true, id: 's' });
@@ -181,6 +181,18 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   const wf = ap.frames('/x/hook.png');
   ok(wf[0].refs.length === 0 && wf[1].refs[0] === '/x/hook.png' && /SAME CAR/.test(wf[1].prompt), 'the second car frame references the hook; the desk frame stays independent');
   ok(planSet({ subject: 'none', scenes: ['a pool at night', 'a matte black Lamborghini parked'], mode: 'aspirational', id: 'w2' }).anchor === null, 'no car in the hook: no anchor, every frame independent');
+}
+
+// 9. F23: a slide line lifted from a reference example is rejected; digits and the hook are exempt
+{
+  ok(liftedFrom('every red folder event before it moves the market') === 'before it moves the market', 'a 4-word run from set-01 is a lift');
+  ok(liftedFrom('smooth, customizable, just elite') !== null, 'a short verbatim phrase is a lift');
+  ok(liftedFrom('i check it 8am, before london, no entries 15 mins either side') === null, 'an original line is not');
+  ok(liftedFrom('- Lat Pulldown 3 x 10 twice a week') === null, 'a sets-x-reps line with digits is not');
+  const tspec = { ...spec, niche: 'trading', rules: {}, requirements: {} };
+  const lift = { hook: { lines: ['3 trading apps i wish i had in year one'], sub: [] }, ranked: [{ name: 'Forex Factory', lines: ['every red folder event', 'before it moves the market'] }, { name: 'TradingView', lines: ['2-4 pairs, 4h then 15m'] }, { name: 'x', lines: ['1% risk'] }], closer: { lines: ['z'], cta: 'go' }, caption: 'x 📈 ☕', bio: '', hashtags: [] };
+  const jl = judgeCopy({ spec: tspec, data: JSON.parse(JSON.stringify(lift)), range: slideRange(tspec, 5), styleId: 'feed' });
+  ok(jl.verdict.failures.some((f) => /slide 2 repeats a reference post/.test(f)) && !jl.verdict.failures.some((f) => /slide 1 repeats/.test(f)), 'the judge rejects the lifted item line and leaves the formulaic hook alone');
 }
 
 // 8. a tag line in "score" is repaired away; an x/10 rating is kept (2026-09-18)

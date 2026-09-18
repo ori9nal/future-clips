@@ -98,6 +98,8 @@ const RULES_NATIVE = `How to write it:
 - The caption is under 20 words, first person, and carries 2-3 fitting emojis placed naturally.
 - Slide count: if you are given a RANGE, choose the count the topic genuinely needs inside it -
   never pad with filler slides and never exceed it. If you are given ONE number, return exactly that.
+- The example lines in the format notes show the VOICE. Never reuse their words: a slide that
+  repeats four words in a row from an example is rejected.
 - Exactly 5 hashtags./^How to write it:`;
 
 const RULES_BEDROCK = `How to write it (BEDROCK format — an illustrated character teaches a programme):
@@ -269,6 +271,23 @@ const SCENE_DIRECTION = {
 };
 
 const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|creatine|muscle|lifting/i;
+
+/**
+ * F23 (round 9, 2026-09-18): the examples above show the voice, and the model
+ * lifted "before it moves the market" and "smooth, customizable, just elite"
+ * word for word from set-01 — lines a clipper cannot post. Every 4-word run of
+ * every quoted example (digits excluded, so "3 x 10 rows" stays free) is a
+ * fingerprint; a slide line that repeats one is rejected and rewritten.
+ */
+const words = (s) => String(s ?? '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').split(/\s+/).filter(Boolean);
+const grams4 = (w) => { const out = []; for (let i = 0; i + 4 <= w.length; i++) { const g = w.slice(i, i + 4); if (!g.some((x) => /\d/.test(x))) out.push(g.join(' ')); } return out; };
+const EXAMPLE_GRAMS = (() => {
+  const all = new Set();
+  for (const text of Object.values(SCENE_DIRECTION)) for (const m of text.matchAll(/["„]([^"]{16,})"/g)) for (const g of grams4(words(m[1]))) all.add(g);
+  return all;
+})();
+/** The first 4-word run `text` shares with a reference example, or null. */
+export const liftedFrom = (text) => grams4(words(text)).find((g) => EXAMPLE_GRAMS.has(g)) ?? null;
 const FOOD_NICHE = /food|meal|nutrition|kitchen|cook|recipe|diet/i;
 
 /**
@@ -407,6 +426,11 @@ export function judgeCopy({ spec, data, range, styleId }) {
     for (const sl of slides) {
       const m = BRAND_SPEAK.exec(sl.text ?? '');
       if (m) verdict.failures.push(`slide ${sl.index} says "${m[0]}" — a brand word no real post uses; rewrite it plainly`);
+    }
+    // a reference line repeated word for word (F23); the hook is a formula and is exempt
+    for (const sl of slides.slice(1)) {
+      const g = liftedFrom(sl.text);
+      if (g) verdict.failures.push(`slide ${sl.index} repeats a reference post word for word ("${g}"); the examples show the voice, not the words — say it your own way with your own numbers`);
     }
     // numbering direction (docs/QUALITY.md §4, DECISIONS D-103): of the 12
     // numbered reference sets, 9 count up and the 3 countdowns are rated

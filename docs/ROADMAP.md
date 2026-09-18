@@ -82,8 +82,12 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | Product: round 3, gym, F6 (behind parts never POV) | 84 vs set-08 | Claude $0.0746 + image $0.3953 |
 | 2026-09-18 | Product: round 4, trading, one car across the set, pill at the reference size, tag lines repaired | 82 vs set-01; 85 after the $0 re-render (rank on the app slide, pill on every app) | Claude $0.0819 + image $0.2830 |
 | 2026-09-18 | Product: `output/` arranged (README, `_attic/`, dated `gauntlet/` folders, `COSTS.md` rebuilt from `output/lanes`); `tools/_gauntlet.mjs` runner; two growithalex carousels saved to `reference/growithalex/ig/` | — | $0 |
+| 2026-09-18 | Product: round 5, gym, cable row = row, mirror-from-behind | 86 vs set-08 | Claude $0.0912 + image $0.3446 |
+| 2026-09-18 | Product: round 6, trading, no ratings on apps, mistakes on their kinds, pill on every app | 84 vs set-01; 86 after the $0 re-render (promised count numbers the apps) | Claude $0.1826 (two attempts) + image $0.2834 |
+| 2026-09-18 | Product: round 7, gym lessons, ordinary face on the anchor; the model chose numbering up on its own (D-033 verified) | 87 vs set-08 | Claude $0.0691 + image $0.3951 |
+| 2026-09-18 | Product: five growithalex carousels saved to `reference/growithalex/ig/` (43 slides, captions); the family's two page grammars written into QUALITY.md §3.4 | — | $0 |
 
-Spend: Engineering $0. Product 2026-09-18: $1.65 through round 4 (rounds 5 and 6 running); every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
+Spend: Engineering $0. Product 2026-09-18: $3.02 through round 7 (rounds 8 and 9 running); every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
 
 ## Requests: Product → Engineering
 

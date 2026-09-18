@@ -493,7 +493,9 @@ function enforceGym(scenes, { appIndex, seed, headings, closerIsOne, world }) {
       // chest mid press) cannot be a POV of one's own body: round 0 (2026-09-18)
       // asked for "looking down at his own back from behind mid row" and the
       // model drew a thigh. Those parts go to a crop or a friend shot.
-      if (anat?.noPov && type === 'pov') type = prev === 'crop' ? 'friend' : 'crop';
+      // the mirror variant with the back to the glass was ignored too (round 8
+      // slide 7 drew a front selfie for "rows"): a behind part is a crop or a friend shot, full stop
+      if (anat?.noPov && (type === 'pov' || type === 'mirror')) type = prev === 'crop' ? 'friend' : 'crop';
       if (anat?.thing) { type = 'object'; line = SHOTS.object.frame({ thing: anat.thing }); }
       else if (type === 'object') line = SHOTS.object.frame({ thing: thing() });
       else if (type === 'friend') line = SHOTS.friend.frame({ move: anat?.move, outfit: outfit(), room: room() });
