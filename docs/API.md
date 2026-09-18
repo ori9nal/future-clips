@@ -26,7 +26,7 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/api/billing/portal` | POST | member | `{ url }` for Dodo's customer portal; `404` without a subscription | Dodo env |
 | `/api/webhooks/dodo` | POST | Dodo (Standard Webhooks signature) | applies subscription and payment events; idempotent on `webhook-id` (`billing_events`) | service role, migration 0007 |
 | `/api/partner/payout` | POST | org owner | payout details (dormant feature; needs migration 0008) | – |
-| `/auth/callback` | GET | public | exchanges the magic-link code for a session, claims a referral cookie, redirects to `next` (same-host paths only) | – |
+| `/auth/callback` | GET | public | `?code=` (the PKCE code from the emailed link) or `?token_hash=&type=` (a server-verified token: Supabase's server-side template shape, and what `tools/dev-login.mjs` mints) → session cookie, referral claim, redirect to `next` (same-host paths only) | – |
 | `/auth/signout` | POST | public | signs out, 303 to `/login` | – |
 
 Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove, sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.
@@ -45,6 +45,7 @@ Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each
 | `FC_READ_ONLY` | `sets_member_update_guard` | a member changed anything but `cancel_requested` | – |
 | `FC_NO_SET` | `fc_commit_set`, `fc_release_set` | unknown set id | – |
 | `FC_INVITE_ONLY` | `gate_new_user` | email not on the invite list (sign-up refused) | – |
+| `FC_NO_PACK`, `FC_FORBIDDEN` | `fc_credit_pack` | unknown pack; caller is not the service role | – |
 
 Add codes; never rename one silently. New codes appear here and in `lib/sets.ts REASONS` (Product writes the sentence).
 

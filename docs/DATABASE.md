@@ -17,7 +17,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0007_billing_events.sql` | – | **no** | applied with the Dodo work (M5) |
 | `0008_partner_accounts.sql` | – | **no** | dormant feature |
 | `0009_m0_security_hardening.sql` | `m0_security_hardening` (2026-09-18) | yes | S2, S5, S6, S7 from the audit |
-| `0010_no_free_tier_site_pricing.sql` | – | planned (M2) | prices 16/32/79, allowances 200/500/1500, packs, labels, `welcome_slides = 0`, `free` row = "no plan"; priority and HD numbers per `docs/DECISIONS.md` |
+| `0010_no_free_tier_site_pricing.sql` | `no_free_tier_site_pricing` (2026-09-18) | yes | prices 16/32/79, allowances 200/500/1,500, priority 50/150 and HD ×3 (D-012 default), packs, `plans.label`, `welcome_slides = 0`, the `free` row is "No plan", `orgs.slide_balance`, `sets.from_balance`, balance-aware gate functions, `fc_credit_pack`, advisor fixes (duplicate index, seven FK indexes, `members_owner_remove`) |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 
@@ -31,13 +31,14 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | `app_settings` | `signup {mode: invite|open}`, `keepalive {at}` | platform owner, keepalive | platform owner |
 | `allowed_emails` | the invite list (citext), optional org and role | platform owner, org owners | same |
 | `campaigns` | `id` slug, `org_id` (null = platform-wide), `kind spec|campaign`, `data` jsonb, `status live|paused|closed`, `art_mode`, `photo_dir_available`, `brief_hash` | platform owner (ingest, admin), org owners | platform rows to every signed-in user, own rows to members |
-| `sets` | one row per generation: ask, range, lane, quality, `status`, `stage`, `state_json` (lane state), `files_json`, `content_json`, `compliance_json`, `cost_*`, `cancel_requested` | `fc_reserve_set` (insert), the worker (state), `fc_commit_set` / `fc_release_set` | members; members may UPDATE only `cancel_requested` on `queued` rows (`sets_member_update_guard`) |
+| `sets` | one row per generation: ask, range, lane, quality, `status`, `stage`, `state_json` (lane state), `files_json`, `content_json`, `compliance_json`, `cost_*`, `from_balance`, `cancel_requested` | `fc_reserve_set` (insert), the worker (state), `fc_commit_set` / `fc_release_set` | members; members may UPDATE only `cancel_requested` on `queued` rows (`sets_member_update_guard`) |
 | `usage` | per org per period counters and `reserved_usd`, `cogs_usd` | the gate functions | members |
 | `spend_ledger` | `reserve | commit | release` rows per set | the gate functions | members |
+| `packs` | the slide packs on sale: `p100` 100/$8, `p250` 250/$18, `p600` 600/$40 | migrations, later Dodo | any signed-in user |
 | `signups` | the old waitlist (3 rows); no code reads or writes it | – | nobody (anon insert policy dropped in 0009) |
 | `creators`, `brand_kits`, `pairing_history`, `jobs` | schema for own-creator, brand lock, pairing rotation, a generic queue; unused by code | – | own org (jobs: no policies) |
 
-Live plan rows (2026-09-18): `free` 0 slides; `solo` $19, 350 slides; `grind` $59, 840 + 84 priority, HD $0.35; `agency` $249, 4,200 + 350 priority, HD $0.30, 10 seats. These are the 0003 numbers and do not match the site; `0010` reconciles them.
+Live plan rows after 0010 (2026-09-18): `free` "No plan", 0 slides; `solo` "Clipper" $16, 200 slides; `grind` "Pro" $32, 500 slides + 50 priority, HD included (an HD slide draws 3), 1 seat; `agency` "Studio" $79, 1,500 slides + 150 priority, HD included, 5 seats. `packs`: p100 $8, p250 $18, p600 $40. `orgs.slide_balance` holds purchased slides (spent after the allowance, never expire); `sets.from_balance` records how many a set drew from it.
 
 ## Functions
 
@@ -48,6 +49,7 @@ Live plan rows (2026-09-18): `free` 0 slides; `solo` $19, 350 slides; `grind` $5
 | `fc_commit_set(p_set, p_made, p_cost, p_caption, p_files, p_content, p_compliance, p_cost_json, p_storage_prefix)` | definer | service role | charge slides made, give back the rest, record real cost |
 | `fc_release_set(p_set, p_error, p_cost)` | definer | service role | fail the set, return every reserved slide, record partial cost |
 | `fc_period_start(uuid)`, `fc_reserve_rate(lane, hd)` | definer / invoker | service role | billing period; $0.03 batch, $0.06 priority, ×3 HD |
+| `fc_credit_pack(p_org, p_pack, p_note) → integer` | definer | service role (the webhook; the admin by hand) | adds a pack's slides to `orgs.slide_balance`, ledger `credit` |
 | `gate_new_user()`, `handle_new_user()` | definer | trigger only | invite-only sign-up; personal org + owner membership + invited memberships |
 | `invites_respect_seats()`, `orgs_protect_billing()`, `sets_member_update_guard()` | trigger only | – | seat limit on invites; members cannot change plan/billing fields; members may change only `cancel_requested` on a set (generic row comparison since 0009) |
 
@@ -72,8 +74,8 @@ Live plan rows (2026-09-18): `free` 0 slides; `solo` $19, 350 slides; `grind` $5
 
 ## Advisors (2026-09-18)
 
-Open: `jobs` has RLS with no policies (INFO); the four SECURITY DEFINER helpers are callable by `authenticated` (by design); leaked-password protection is off (owner, Auth settings); seven unindexed foreign keys, the duplicate index pair `sets_org_created` = `sets_org_recent_idx`, `members_owner_remove` re-evaluating `auth.uid()` per row, multiple permissive policies on `campaigns` and `brand_kits`. These go into `0010` or a `0011_advisor_fixes`.
+After 0010: `jobs` has RLS with no policies (INFO, dormant table); the four SECURITY DEFINER helpers are callable by `authenticated` (by design); leaked-password protection is off (owner, Auth settings); multiple permissive policies on `campaigns` and `brand_kits` (cosmetic). Fixed in 0010: the seven unindexed foreign keys, the duplicate `sets` index, `members_owner_remove`.
 
-## Reconciliation plan (`0010`, milestone M2)
+## Still to come
 
-Prices 16/32/79 and allowances 200/500/1,500 (the site's figures; note the site shows them under a yearly toggle with $20/$39/$99 monthly, D-013); packs 100/$8, 250/$18, 600/$40 in a `packs` table with `orgs.slide_balance` and `sets.from_balance` as 0006 designed; `plans.label` and `welcome_slides` with every welcome balance 0 (no free tier); the `free` row relabelled "No plan"; priority 50/150 and HD ×3 unless `docs/DECISIONS.md` says otherwise; the `fc_reserve_set` / `fc_commit_set` / `fc_release_set` balance logic from 0006; `orgs_protect_billing` rewritten without the referral columns unless 0005 is applied first; `billing_events` from 0007 when Dodo goes live; advisor fixes. `sets.instructions jsonb` and a private per-org uploads bucket come with the instructions feature (M4).
+`billing_events` (0007) with the Dodo work; `sets.instructions jsonb` and a private per-org uploads bucket with the instructions feature (M4); an admin "set plan" path (service role) for D-011; the dormant tables and buckets decision (D-017 and the list above). If the owner changes D-012 or D-013, the plan rows are one `update` each.

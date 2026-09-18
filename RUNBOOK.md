@@ -125,6 +125,10 @@ owner's `deslop.py` numbers (`KNOBS`); strength per look in `strengthFor`;
 `assets.deslop` on a campaign pins it (0 = off). Seeded from the set, so
 `tools/rerender.mjs` reproduces a set byte-for-byte. `npm test` covers it.
 
+## A sign-in link for a tester (laptops only)
+
+`node tools/dev-login.mjs email=<invited email> [next=/app] [app=http://localhost:3000]` mints a magic-link token with the service role (`SUPABASE_SERVICE_ROLE_KEY` in `.env.local`, OWNER-ACTIONS 1) and prints `/auth/callback?token_hash=…&type=magiclink` for this machine's app. The callback verifies the token server-side, so no PKCE verifier is needed. A new email must be on `allowed_emails` while sign-up is invite-only; it gets a personal workspace with no plan (set one with SQL or, later, from `/admin`). Never on a host; the script refuses when `VERCEL` or `NODE_ENV=production` is set.
+
 ## Files a host may write
 
 `lib/engine.ts workDirs()`: `output/` on a laptop, `/tmp/fc` on Vercel (frame cache, per-set render dirs, studio renders, the pairing rotation state). `/api/file/<path>` serves files relative to that base to signed-in members only (and to the dev design preview when `FC_DEMO_PREVIEW=1`). `/tmp` on Vercel is per function instance, so anything a customer must see goes to Storage and comes back as a signed URL.
