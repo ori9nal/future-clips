@@ -125,6 +125,16 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   const five = { ...none4, ranked: [...none4.ranked, { name: 'how i actually use them', lines: ['6am news'] }, { name: 'a routine', lines: ['x'] }] };
   const rb = toRenderable(spec, JSON.parse(JSON.stringify(five))).content.ranked;
   ok(!rb[0].bonus && !rb[3].bonus && rb[4].bonus, `after a "4 apps" hook the fifth item is a bonus (${rb.map((r) => r.bonus ? 'b' : 'n').join('')})`);
+  // F25 (round 11): hand numbers past the promised count are dropped too; an apps hook must count its apps
+  const hand5 = { ...five, hook: { lines: ['3 apps i check', 'before every session'], sub: [] }, ranked: five.ranked.map((r, i) => ({ ...r, name: `${i + 1}. ${r.name}` })) };
+  const rh = toRenderable(spec, JSON.parse(JSON.stringify(hand5))).content.ranked;
+  ok(rh[2].rank === 3 && rh[3].bonus && rh[3].rank == null && rh[4].rank == null, `hand numbers past "3 apps" are dropped (${rh.map((r) => r.rank ?? '-').join(' ')})`);
+  const tsp = { ...spec, niche: 'trading', rules: {}, requirements: {} };
+  const mism = { hook: { lines: ['3 apps i check', 'before every session'], sub: [] }, ranked: [{ name: 'Forex Factory', lines: ['8:30am'] }, { name: 'TradingView', lines: ['4h then 15m'] }, { name: 'MetaTrader 5', lines: ['1% risk'] }, { name: 'TradeLens App', lines: ['1 screenshot'], showsApp: true }, { name: 'my 15 min routine', lines: ['news at 8'] }], closer: { lines: ['z'], cta: 'go' }, caption: 'x 📈 ☕', bio: '', hashtags: [] };
+  const jm = judgeCopy({ spec: tsp, data: JSON.parse(JSON.stringify(mism)), range: slideRange(tsp, 7), styleId: 'feed' });
+  ok(jm.verdict.failures.some((f) => /promises 3 apps but 4 are listed/.test(f)), 'the judge rejects a "3 apps" hook over four apps');
+  const match4 = { ...mism, hook: { lines: ['4 apps i check', 'before every session'], sub: [] } };
+  ok(!judgeCopy({ spec: tsp, data: JSON.parse(JSON.stringify(match4)), range: slideRange(tsp, 7), styleId: 'feed' }).verdict.failures.some((f) => /promises/.test(f)), 'a "4 apps" hook over four apps passes');
 }
 
 // 7. scene enforcement: shot types rotate, the app slot is the phone shot, the closer is a lifestyle beat
@@ -175,6 +185,9 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   const so = planSet({ subject: 'a man', scenes: ['mirror', 'A shaker bottle on a bench, nobody in the frame.', 'crop no face'], mode: 'subject', days: true, id: 'o' });
   const sof = so.frames('/x/a.png');
   ok(sof[0].refs.length === 0 && /No person in the frame/.test(sof[0].prompt) && sof[1].refs[0] === '/x/a.png', 'the object frame is its own generation; the crop still references the anchor');
+  // F24 (round 10): "grip" no longer routes pull-ups and pulldowns to the hammer curl
+  const e7 = enforce(new Array(6).fill('x'), { niche: 'fitness', appIndex: -1, seed: 'g', headings: ['Wide grip pull ups', 'Wide grip lat pulldown', 'Grip work', 'Cable curl'] });
+  ok(/chin-up/.test(e7.scenes[1]) && /mid cable row|back from behind mid row/.test(e7.scenes[2]) && e7.shots[2] !== 'pov' && /hammer curl/.test(e7.scenes[3]), `pull ups → chin-up, lat pulldown → a row from behind, grip work → forearm (${e7.shots.slice(1, 4).join(' ')})`);
   // F12 (2026-09-18): when the hook names the life's car, later car frames are edits of the hook frame
   const ap = planSet({ subject: 'none', scenes: ['a matte black Lamborghini parked on a street', 'a desk with two monitors', 'a matte black Lamborghini in an underground car park'], mode: 'aspirational', id: 'w' });
   ok(ap.anchor && ap.anchor.i === 0 && ap.anchor.refs.length === 0, 'aspirational plan takes the car hook as its anchor');

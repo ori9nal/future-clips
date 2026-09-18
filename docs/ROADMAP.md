@@ -31,7 +31,7 @@ Both chats keep this file current. Read it at the start of every session after `
 
 ### Now (2026-09-18, the gauntlet loop)
 
-- Run paid rounds one family at a time, one or two named fixes per round, each verifiable on the sheet; log Claude $ and image $ per run in `output/gauntlet/COSTS.md` (rebuilt from `output/lanes/*.json`) and the score in `docs/QUALITY.md` §7. Stop to ask at $15 this session (D-018 note).
+- Continue the gauntlet loop one family at a time (gym 89, trading 87 at the end of 2026-09-18): verify F24 (grip regex) and F25 (apps-count rule) on the next paid rounds; then the remaining tells are model obedience on friend-shot moves and the hook face. Log Claude $ and image $ per run in `output/gauntlet/COSTS.md` and the score in `docs/QUALITY.md` §7; $5 a session unless D-018 says otherwise.
 - Gym: F6 (a from-behind body part asked for as a POV shot), skin and room mess in the frames; trading: the app pill at the reference size (cap ≈ 60 px), one car across the set (the car frames edited from the first car frame), no tag line under an app name; food: outfit dealer, the app photographed on a phone.
 - Read the signed-in instagram.com/growithalex posts into QUALITY.md §3.4 (the cookies arrived 2026-09-18).
 - Verify the numbering rule (D-033) and the no-plan state on the real app once the service role key exists (OWNER-ACTIONS 1) with `tools/dev-login.mjs`.
@@ -86,8 +86,12 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | Product: round 6, trading, no ratings on apps, mistakes on their kinds, pill on every app | 84 vs set-01; 86 after the $0 re-render (promised count numbers the apps) | Claude $0.1826 (two attempts) + image $0.2834 |
 | 2026-09-18 | Product: round 7, gym lessons, ordinary face on the anchor; the model chose numbering up on its own (D-033 verified) | 87 vs set-08 | Claude $0.0691 + image $0.3951 |
 | 2026-09-18 | Product: five growithalex carousels saved to `reference/growithalex/ig/` (43 slides, captions); the family's two page grammars written into QUALITY.md §3.4 | — | $0 |
+| 2026-09-18 | Product: round 8, gym mistakes, object frames without the person, bedroom-mirror closer | 89 vs set-08 | Claude $0.0562 + image $0.3324 |
+| 2026-09-18 | Product: round 9, trading, promised count numbers the apps, extras unnumbered, countdown repaired without a retry | 87 vs set-01 | Claude $0.1074 + image $0.2833 |
+| 2026-09-18 | Product: round 10, gym rated back list, behind parts never in a mirror | 88 vs set-08 | Claude $0.0782 + image $0.3449 |
+| 2026-09-18 | Product: round 11, trading, lifted reference lines rejected | 87 vs set-01 | Claude $0.0613 + image $0.2831 |
 
-Spend: Engineering $0. Product 2026-09-18: $3.02 through round 7 (rounds 8 and 9 running); every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
+Spend: Engineering $0. Product 2026-09-18: $4.57 over eleven paid rounds (Claude $0.95 + image $3.62), stopped under the $5 session default; every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
 
 ## Requests: Product → Engineering
 

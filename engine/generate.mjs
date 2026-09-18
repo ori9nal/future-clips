@@ -427,6 +427,14 @@ export function judgeCopy({ spec, data, range, styleId }) {
       const m = BRAND_SPEAK.exec(sl.text ?? '');
       if (m) verdict.failures.push(`slide ${sl.index} says "${m[0]}" — a brand word no real post uses; rewrite it plainly`);
     }
+    const hookText = [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' ');
+    // an apps list: the hook's count must equal the apps listed (set-01 "4 trading apps" = 4 apps;
+    // round 11, 2026-09-18, promised 3 and listed 4 plus a routine)
+    const promisedN = promisedCount(data);
+    if (promisedN && /\bapps?\b/i.test(hookText)) {
+      const appish = (data.ranked ?? []).filter((r) => !r.showsApp || true).filter((r) => /^[A-Z0-9]/.test(String(r.name ?? '').replace(/^\s*(?:no\.?|#)?\s*\d+\s*[.:\-–—]\s*/i, '')) && String(r.name).trim().split(/\s+/).length <= 4);
+      if (appish.length !== promisedN) verdict.failures.push(`the hook promises ${promisedN} apps but ${appish.length} are listed (${appish.map((r) => r.name).join(', ')}); make the hook's number match the apps, counting the campaign's app`);
+    }
     // a reference line repeated word for word (F23); the hook is a formula and is exempt
     for (const sl of slides.slice(1)) {
       const g = liftedFrom(sl.text);
@@ -436,7 +444,6 @@ export function judgeCopy({ spec, data, range, styleId }) {
     // numbered reference sets, 9 count up and the 3 countdowns are rated
     // rankings. A countdown with nothing rated and no ranking in the hook is
     // the model numbering a list of habits backwards.
-    const hookText = [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' ');
     const scored = (data.ranked ?? []).some((r) => /-?\d+\s*\/\s*10/.test(String(r.score ?? '')));
     const ranking = /\b(top|rank|ranked|ranking|best|worst|peak|tier|tiers)\b/i.test(hookText);
     const nums = (data.ranked ?? []).filter((r) => !r.showsApp).map((r) => { const m = /^\s*(?:no\.?|#)?\s*(\d+)\s*[.:\-\u2013\u2014]/i.exec(String(r.name ?? '')); return m ? +m[1] : null; });
@@ -592,9 +599,9 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
   // extras past the promised count are bonus tips and carry no number (round
   // 6b, 2026-09-18 rendered "5. how i actually use them" beside set-01)
   const promised = promisedCount(content);
-  if (promised && !handNumbered) {
+  if (promised) {
     let seen = 0;
-    for (const r of ranked) { if (r.screen) continue; seen++; if (seen > promised) r.bonus = true; }
+    for (const r of ranked) { if (r.screen) continue; seen++; if (seen > promised) { r.bonus = true; r.rank = undefined; } }
   }
 
   return {

@@ -231,7 +231,8 @@ export const GYMS = {
  * shoulder in the gym, the mirror.
  */
 const ANATOMY = [
-  { rx: /hammer|forearm|wrist|grip/i,                 body: 'forearm and bicep mid hammer curl, the dumbbell held neutral', move: 'mid hammer curl with a dumbbell' },
+  // "grip" alone matched "Wide grip pull ups" and "Wide grip lat pulldown" (round 10, 2026-09-18)
+  { rx: /hammer|forearm|wrist|\bgrip (?:strength|work|training)\b/i, body: 'forearm and bicep mid hammer curl, the dumbbell held neutral', move: 'mid hammer curl with a dumbbell' },
   { rx: /preacher/i,                                  body: 'bicep at the top of a preacher curl, arm on the pad', move: 'on the preacher curl bench mid rep' },
   { rx: /incline|dumbbell curl|db curl/i,             body: 'bicep mid incline dumbbell curl, the arm hanging back', move: 'on an incline bench mid dumbbell curl' },
   // "cable" alone matched "Seated cable row" ahead of the row entry (round 3, 2026-09-18)
