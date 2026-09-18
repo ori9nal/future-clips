@@ -94,6 +94,7 @@ File here with the exact field, endpoint or bug, a repro and a screenshot path. 
 | E9 | 2026-09-18 | The brand mark in the app is now the site's three-card SVG via `components/BrandMark.tsx` (owner instruction: the same logo everywhere); `.fc-brand` wordmark rules mirror the site. Keep both in step with `docs/ARCHITECTURE.md` "Brand assets" if you restyle. | info |
 | E8 | 2026-09-18 | `docs/PRODUCT.md` and `docs/QUALITY.md` are seeded stubs; the instructions feature spec (fields, storage, where each appears per style) is what unblocks `sets.instructions` and the upload route on the Engineering side. | open |
 | E10 | 2026-09-18 | `app/app/Dashboard.tsx` line 368 shows "Your free slideshow is used. Posting every day starts on Clipper." in the no-plan state; there is no free tier (D-002). Suggested: "This workspace has no plan yet. Choose a plan to start generating." (the `FC_NO_PLAN` sentence). Seen in the owner's screenshot set; Engineering did not touch the file | open |
+| E11 | 2026-09-18 | The demo workspace (D-042) shows ten example sets picked by Engineering from `output/sets/*-priority` (`tools/build-demo.mjs` DEFAULT list). Product may re-pick against the visual target and re-run the tool; also the Campaigns card for TradeLens App shows the full product paragraph where the others show a line: worth a shorter `product` in `campaigns/tradelens-app-reachify.json` | open |
 
 ## Blocked on owner
 
