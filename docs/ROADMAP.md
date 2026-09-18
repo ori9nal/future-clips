@@ -55,6 +55,7 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | Site source without the Free card, Free column and free-trial claims; `future-clips-site/index.html` is the verbatim copy; `future-clips-site/README.txt` rewritten | `60e06de` (not yet deployed: OWNER-ACTIONS 13) |
 | 2026-09-18 | `.env.example` complete; `New reference stuff/` ignored; `docs/` created; superseded banners on `HANDOFF-*.md`, `OPEN-DECISIONS.md`, `COST.md`; `README.md`, `RUNBOOK.md`, `OWNER-ACTIONS.md` rewritten | docs commit |
 | 2026-09-18 | Checks on the committed tree: `npx tsc --noEmit` 0 errors, `npm test` 31/31, `npm run lint` 0 errors, `npm run build` success | `scratchpad/build2.log` |
+| 2026-09-18 | Local route smoke on `npm run dev`: `/api/health` 503 `{ok:false, ready:{db:true, engine:true, serviceRole:false, cronSecret:false, …}}`; `/api/file/sets/…/slide-1.png` 401; `/api/nope.png` 401 (matcher covers every `/api/*`); `/api/keepalive` 200; `/terms` 200; `/api/styles` and `/api/sets` 401; `/` 307 → `/login`; `/login` 200 | curl, 2026-09-18 03:02 UTC |
 
 Spend this session: $0 (no paid generation).
 
