@@ -79,6 +79,9 @@ The project's decision record. Both chats append; only the owner settles an OPEN
 | ID | Date | Context | Decision | Status |
 |---|---|---|---|---|
 | D-042 | 2026-09-18 | Head-out-of-frame crops | The owner removed one such slide from a set. Keep the `crop` shot type (20 % of the reference gym family, the device that makes the sets read as a camera roll) unless the owner says the objection is general. | OPEN (owner) |
+| D-043 | 2026-09-18 | Which niches matter | The owner (2026-09-18): "most of the niches are not needed and would never come in any carousel clipping campaign". The campaigns that exist or are coming: **trading apps** (TradeLens and the like), **gym / strength apps** (APEX), **GLP-1 / peptide trackers** (Poky, Spanish-speaking audience). Product stops spending on the other 13 seeded campaigns (fashion, language, travel, design, marketing, longevity, finance, skincare, mindset, nutrition, supplements, calisthenics, the second gym app); they stay as engine fixtures. Every prompt and style rule from here on is measured against the gym, trading and GLP-1 references. | PROPOSED |
+| D-044 | 2026-09-18 | The single-image post | A second deliverable next to the slideshow: **one 9:16 frame with the hook on it plus a long description** (the owner's Poky examples: 689 words, 8 numbered items × 3 bullets, the app named three times, a save line, a comment question, 4 hashtags; the same description reused across posts with a different image). Costs about a tenth of a slideshow in images. Spec in PRODUCT.md §2.7; needs a copy shape, a `format` field on the set and a UI choice — filed as R12. | PROPOSED |
+| D-045 | 2026-09-18 | Language | Copy is written in the campaign's language (`requirements.language` from the brief); the Poky family is Spanish end to end. | PROPOSED |
 
 ## Product notes on the open items (2026-09-18)
 

@@ -49,6 +49,13 @@ No sentence anywhere says "free".
 ### 2.6 Out of slides
 Meter at 0 turns the bar empty; the cost line says "You have 0 slides left this period. Add a pack or wait for {renew date}." with "Add a pack" → Settings → Plan.
 
+### 2.7 The single-image post (D-044)
+A second thing a clipper can make, next to the slideshow: **one image plus the description**. The composer gets a format choice above Slides: **Slideshow** (5–10 slides) or **Single image**. With Single image the slides control disappears, the cost line reads "Uses 1 slide", and the result card shows one tile, the hook, and the description in full with a copy button. The zip carries `image.png` and `post.txt`.
+
+What the engine makes (from the Poky reference, QUALITY.md §3.7): a 9:16 selfie-style frame in the campaign's family with the hook on it in two lines (white or the campaign accent with a white outline) at the top third; a description of 500–700 words in the campaign's language with the hook line, N numbered items (✅) each with a one-line personal reason and three 👉 bullets, the app named two or three times with its full name and where to get it, a save line, a question to the comments, and 3–5 hashtags. The same description can be reused with a different image: "Make another" keeps the description and draws a new frame ($0.04).
+
+Engineering needs: `sets.format` (`slideshow` | `single`), `slides = 1` allowed by the gate for that format, and the download route's zip naming (R12).
+
 ## 3. Instructions on a set (D-037, request R3)
 
 The composer gets a fourth block, **Instructions** (collapsed by default, "Add your logo, avatar or handle"):
