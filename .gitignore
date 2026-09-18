@@ -30,4 +30,8 @@ future-clips-site.zip
 # production env (values live in Vercel / password manager)
 .env.production
 .env*.production
-deploy/
+deploy/*
+!deploy/site/
+
+# downloaded reference posts (other creators' work; 4 MB of zips)
+New reference stuff/

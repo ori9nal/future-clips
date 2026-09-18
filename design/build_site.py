@@ -15,6 +15,10 @@ class the design runtime resolves. A browser can't run any of that, so this:
 Then it adds what was asked for: the hero cards drop in and fan out, the view
 counter rolls up from zero, and sections reveal on scroll.
 """
+import os as _os, sys as _sys
+if _os.environ.get("FC_OLD_SITE") != "1":
+    _sys.exit("build_site.py is superseded: the homepage is design/site.html, copied verbatim to "
+              "future-clips-site/index.html (see README). Set FC_OLD_SITE=1 to build the old design anyway.")
 import io, os, re, json, shutil
 
 HERE = os.path.dirname(os.path.abspath(__file__))

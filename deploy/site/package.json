@@ -1,0 +1,1 @@
+{ "name": "the-future-clips", "private": true, "scripts": { "build": "node build.js" } }

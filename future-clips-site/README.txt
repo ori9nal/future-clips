@@ -1,22 +1,17 @@
 The Future Clips — website
 ==========================
 
-This folder is the complete static marketing site, byte-for-byte what is
-served at https://the-future-clips.vercel.app
+This folder is the complete static marketing site as served at
+https://www.thefutureclips.com
 
-  index.html      the page (all CSS and JS inline)
-  logo.png        logo + favicon
-  carousels/      the 14 example slideshow covers (WebP)
+  index.html              the homepage: a VERBATIM copy of ../design/site.html (never hand-edit this copy)
+  terms/ privacy/ acceptable-use/ refunds/ accessibility/
+                          the five Trust and Legal pages, generated from ../legal/*.md by
+                          `node design/build_legal.mjs`
+  logo.png og.png         logo/favicon and the link-preview image
+  carousels/              example covers (other creators' posts, shown with permission)
+  vercel.json             /login and /signup redirect to the app host
 
-Open index.html directly in a browser to preview, or upload the whole folder
-to any static host. No build step, no server, no dependencies at runtime.
-
-Do not edit index.html by hand — it is GENERATED. The source is
-../design/Main.dc.html (a Claude Design component) and the converter is
-../design/build_site.py, which writes straight into this folder:
-
-    python design/build_site.py        # from the repo root
-
-Fonts load from Google Fonts. The "Start free" form posts to the Supabase
-waitlist table using the public (anon) key with an insert-only policy, so the
-site works from any domain. Deploy details, env, and hazards: ../HANDOFF-SITE.md
+To change the homepage: edit ../design/site.html, then `cp design/site.html future-clips-site/index.html`.
+To change a policy: edit ../legal/<slug>.md, then `node design/build_legal.mjs`.
+Deploy: see ../RUNBOOK.md (git-connected Vercel project once OWNER-ACTIONS B is done).
