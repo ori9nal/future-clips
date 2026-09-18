@@ -562,6 +562,11 @@ export function direct({ spec, content, styleId, seed = '', look: wantLook, mode
     // camera roll, and the de-slop pass supplies the phone's own artefacts
     if (!wantLook) look = 'phone';
   }
+  // the rail style draws the Grow with Alex family: cinematic editorial
+  // photographs with no recurring person and no phone-photo pass
+  if (styleId === 'rail') {
+    return { scenes, world: { id: 'editorial', label: 'editorial', look: 'alex' }, look: wantLook ?? 'alex', mode: 'editorial', days: false, subject: 'none', shots: null, life: null, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood };
+  }
   const mode = wantMode ?? (phone && !isGym ? 'aspirational' : 'subject');
   // one person across many days is the rule for every phone format that
   // holds a subject — the same outfit across a set was rated "too AI"

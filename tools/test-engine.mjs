@@ -9,6 +9,7 @@ import path from 'node:path';
 import { inspectPng, stripPng, assertClean } from '../engine/clean.mjs';
 import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable, liftedFrom } from '../engine/generate.mjs';
 import { enforce, direct, SHOTS } from '../engine/scenes.mjs';
+import { systemFor } from '../engine/generate.mjs';
 import { planSet } from '../engine/art.mjs';
 import { deslop, strengthFor } from '../engine/deslop.mjs';
 import sharp from 'sharp';
@@ -223,6 +224,25 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
     const bad = t2.scenes.findIndex((sc, i) => /traffic cone/.test(sc) && !/^(car|behind|street|garage|petrol)$/.test(t2.shots[i]));
     ok(bad < 0, `seed ${seed}: no traffic cone away from the street (${t2.shots.join(' ')})`);
   }
+}
+
+// 10. the rail style (Grow with Alex): its own shape, an editorial art mode, the pair fields kept
+{
+  const sys = systemFor('rail');
+  ok(/"verdict"/.test(sys) && /"tags"/.test(sys) && /"quiet"/.test(sys) && /named thing/i.test(sys), 'the rail shape carries loud/quiet, notes, verdict and tags');
+  const rspec = { ...spec, id: 'summit-craft', niche: 'design', content: { style: 'rail' }, rules: {}, requirements: {}, assets: {} };
+  const rc = { hook: { loud: 'layouts', quiet: 'steal my', lines: ['steal my layouts'], sub: [], tags: ['a', 'b', 'c'], scene: 'a red hut on a blue plain' }, ranked: [{ name: 'The Stack', quiet: 'the safe one', lines: ['one', 'two', 'three'], verdict: 'use it when unsure', scene: 'a stack of cards on sand' }, { name: 'The Band', quiet: 'a room for words', lines: ['a', 'b', 'c'], verdict: 'when the photo is busy', scene: 'a lighthouse' }], closer: { loud: 'STACK', quiet: 'comment', lines: ['drop STACK below for the full set'], cta: 'follow for more', scene: 'a horse in fog' }, caption: 'x 📈 ☕', bio: '', hashtags: [], numbering: 'up' };
+  const d = direct({ spec: rspec, content: rc, styleId: 'rail', seed: 't' });
+  ok(d.mode === 'editorial' && d.look === 'alex' && !d.days && d.scenes.length === 4 && /red hut/.test(d.scenes[0]), `rail direction: editorial mode, alex look, the model's scenes kept (${d.mode}/${d.look})`);
+  const plan = planSet({ subject: 'none', scenes: d.scenes, look: d.look, mode: d.mode, id: 'p' });
+  const fr = plan.frames();
+  ok(plan.anchor === null && fr.length === 4 && fr.every((f) => f.refs.length === 0) && /cinematic editorial photograph/.test(fr[0].prompt) && /No text, no letters/.test(fr[0].prompt), 'editorial frames are independent generations under the alex look and the editorial guard');
+  const r = toRenderable({ ...rspec }, JSON.parse(JSON.stringify(rc)));
+  ok(r.content.hook.loud === 'layouts' && r.content.hook.tags.length === 3 && r.content.ranked[0].verdict === 'use it when unsure' && r.content.ranked[0].quiet === 'the safe one' && r.content.closer.loud === 'STACK', 'toRenderable keeps the rail fields');
+  const jr = judgeCopy({ spec: rspec, data: JSON.parse(JSON.stringify(rc)), range: slideRange(rspec, 4), styleId: 'rail' });
+  ok(jr.verdict.pass, `a rail set passes the judge (${jr.verdict.failures.join('; ') || 'no failures'})`);
+  const lifted = { ...rc, closer: { ...rc.closer, lines: ['comment LAYOUT and i will send you all eight'] } };
+  ok(!judgeCopy({ spec: rspec, data: JSON.parse(JSON.stringify(lifted)), range: slideRange(rspec, 4), styleId: 'rail' }).verdict.pass, 'a rail closer lifted from the family\'s post is rejected');
 }
 
 console.log(failed ? `\n${failed} failed` : '\nall passed');

@@ -52,7 +52,28 @@ const SHAPE_BEDROCK = `{
   "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
 }`;
 
-const SHAPES = { bedrock: SHAPE_BEDROCK };
+/**
+ * The RAIL shape (the Grow with Alex family, docs/QUALITY.md §3.4, read
+ * signed-in 2026-09-18): every body slide is a NAMED thing with a quiet
+ * qualifier, three notes and a verdict bar; the cover is a loud/quiet pair over
+ * a cinematic photograph; the closer is an ask ("comment WORD").
+ */
+const SHAPE_RAIL = `{
+  "subject": "none",
+  "hook":   { "loud": "one or two words, the big line, e.g. carousel", "quiet": "two or three small words that frame it, e.g. steal my", "lines": ["the whole title in one line, e.g. steal my carousel layouts"], "sub": ["one plain line under the title, under 12 words"],
+              "tags": ["three tiny footer cells of 2-3 words each", "e.g. eight layouts", "one cover"],
+              "scene": "the cover photograph: one subject small in a vast place, or one hero object close, a lot of sky or open ground, cinematic, surreal is fine" },
+  "ranked": [ { "name": "The Stack", "quiet": "a qualifier under six words, e.g. the one that always works", "lines": ["note one, under eight words", "note two, under eight words", "note three, under eight words"],
+                "verdict": "one rule for the orange bar, under nine words", "score": "", "role": "body | app", "showsApp": false,
+                "scene": "the card photograph for this item: a real scene or object that shows the point, cinematic, no text" } ],
+  "numbering": "up",
+  "closer": { "loud": "ONE WORD in caps, the comment keyword, e.g. LAYOUT", "quiet": "comment", "lines": ["comment LAYOUT and i'll send you all eight"], "cta": "follow for the next one", "scene": "the closer photograph: a place at dusk, one small figure or none" },
+  "caption": "the post caption: a thesis line first, then the method in plain sentences, with 2-3 emojis that fit woven in, never a row of emojis at the end",
+  "bio": "the profile bio line",
+  "hashtags": ["#five", "#of", "#them", "#exactly", "#five"]
+}`;
+
+const SHAPES = { bedrock: SHAPE_BEDROCK, rail: SHAPE_RAIL };
 
 const RULES_NATIVE = `How to write it:
 - Slide 1 is the hook. It has to stop a scroll on its own, at thumbnail size, with no context.
@@ -123,13 +144,29 @@ const RULES_BEDROCK = `How to write it (BEDROCK format — an illustrated charac
   never pad and never exceed it. If you are given ONE number, return exactly that.
 - Exactly 5 hashtags.`;
 
-const systemFor = (styleId) => `You write carousel copy for a paid creator campaign.
+const RULES_RAIL = `How to write it (the RAIL format: a designed carousel, one named thing per slide):
+- The cover title is a loud/quiet pair: two or three small words ("steal my", "the six", "why your") and one
+  or two big words ("carousel", "font pairings", "covers flop"). "lines" is the two joined. Under 7 words total.
+- Every ranked item is a NAMED thing in Title Case, two or three words: "The Stack", "Cold Open", "Infrared".
+  A qualifier under six words, lowercase. EXACTLY three notes, each under eight words, no full stops needed.
+  A verdict under nine words that tells the reader when to use it or what it does.
+- Not first person, not a story. Declarative. Numbers where they exist (percentages, counts, seconds).
+- The closer is an ask: "comment WORD and i'll send …" with the WORD as "loud" in caps.
+- "tags" are three footer cells of two or three words that summarise the post ("eight layouts", "same cover", "one rule").
+- Scenes describe a PHOTOGRAPH, not a graphic: a place or an object, one subject, cinematic light, no text in it.
+- hook + ranked + closer must total the slide count you are given, so ranked has (count - 2) entries.
+- Exactly one ranked entry has "role": "app" and "showsApp": true at the position you are told, if the brief has an app; otherwise none.
+- No emoji on the slides. The caption carries 2-3 emojis that fit.
+- Slide count: a RANGE means choose the count the topic needs inside it; ONE number means exactly that.
+- Exactly 5 hashtags.`;
+
+export const systemFor = (styleId) => `You write carousel copy for a paid creator campaign.
 
 Return ONE JSON object in exactly this shape, no prose and no code fence:
 
 ${SHAPES[styleId] ?? SHAPE}
 
-${styleId === 'bedrock' ? RULES_BEDROCK : RULES_NATIVE}`;
+${styleId === 'bedrock' ? RULES_BEDROCK : styleId === 'rail' ? RULES_RAIL : RULES_NATIVE}`;
 
 /** Kept for callers that import it; the real prompt is built per style. */
 const SYSTEM = systemFor('native');
@@ -242,6 +279,24 @@ const SCENE_DIRECTION = {
     'The "subject" is one person described once — age, build, hair, skin tone. No clothing.',
     '"scene": one of plate | containers | pan | fridge | board | scale | cook | hands | car | oven | bag,',
     'then a clause.',
+  ].join(' '),
+  // The Grow with Alex family (docs/QUALITY.md §3.4): named things, a qualifier,
+  // three notes and a verdict per slide; a cinematic cover; an ask to close.
+  // Counted off five carousels (43 slides) read on 2026-09-18.
+  rail: [
+    'This is the designed carousel format. Real titles to match: "steal my carousel layouts" · "best font',
+    'pairings" · "steal my visual hook formula" · "color combos" · "steal these carousel aesthetics".',
+    'Real items: "The Stack / the one that always works / Everything in one column, bottom left · Type sits',
+    'low, the image breathes above it · For any cover you are not unsure about / If you cannot decide, it is',
+    'this one." · "The Band / give the words their own room / A solid block across the middle holding all the',
+    'type · Image sits above and below it · For covers where the image is too busy / When the photo will not',
+    'shut up, stop fighting it." · "Infrared / real photo, wrong colours / Every green thing goes hot pink ·',
+    'Only pays off outdoors with plants · Skin goes plastic on close-ups / Search aerochrome".',
+    'Real closers: "comment LAYOUT and I\'ll send you all eight" · "comment PAIRS and I\'ll send these font',
+    'pairings in your DMs".',
+    'Cover photographs in this family: a man crouched in a desert with cards laid out on the sand; a horse',
+    'in fog; a red hut on a blue plain; a figure standing alone in a green field; a lighthouse at dawn.',
+    'Card photographs: the thing itself, cleanly lit, one subject, cinematic colour.',
   ].join(' '),
   // The @bedrock.form format: an illustrated character teaches a programme.
   // No photography, no person, no story — a headline, a figure doing the
@@ -421,6 +476,13 @@ export function judgeCopy({ spec, data, range, styleId }) {
   if (!EMOJI_RX.test(String(data.caption ?? ''))) {
     verdict.failures.push('the caption has no emoji; it must carry 2-3 that fit the topic');
   }
+  // a reference line repeated word for word (F23); the hook is a formula and is exempt
+  if (styleId !== 'bedrock') {
+    for (const sl of slides.slice(1)) {
+      const g = liftedFrom(sl.text);
+      if (g) verdict.failures.push(`slide ${sl.index} repeats a reference post word for word ("${g}"); the examples show the voice, not the words — say it your own way with your own numbers`);
+    }
+  }
   if (phone) {
     // brand-speak on any slide
     for (const sl of slides) {
@@ -434,11 +496,6 @@ export function judgeCopy({ spec, data, range, styleId }) {
     if (promisedN && /\bapps?\b/i.test(hookText)) {
       const appish = (data.ranked ?? []).filter((r) => !r.showsApp || true).filter((r) => /^[A-Z0-9]/.test(String(r.name ?? '').replace(/^\s*(?:no\.?|#)?\s*\d+\s*[.:\-–—]\s*/i, '')) && String(r.name).trim().split(/\s+/).length <= 4);
       if (appish.length !== promisedN) verdict.failures.push(`the hook promises ${promisedN} apps but ${appish.length} are listed (${appish.map((r) => r.name).join(', ')}); make the hook's number match the apps, counting the campaign's app`);
-    }
-    // a reference line repeated word for word (F23); the hook is a formula and is exempt
-    for (const sl of slides.slice(1)) {
-      const g = liftedFrom(sl.text);
-      if (g) verdict.failures.push(`slide ${sl.index} repeats a reference post word for word ("${g}"); the examples show the voice, not the words — say it your own way with your own numbers`);
     }
     // numbering direction (docs/QUALITY.md §4, DECISIONS D-103): of the 12
     // numbered reference sets, 9 count up and the 3 countdowns are rated

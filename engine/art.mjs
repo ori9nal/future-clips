@@ -32,6 +32,8 @@ const LOOK = {
   sunlit: 'Warm natural photo, golden window light, soft shadows, gentle contrast, airy and clean.',
   clean: 'Clean editorial photo, soft even daylight, neutral colour, minimal styling, plenty of negative space.',
   ash: 'Desaturated photo, near-monochrome, overcast light, muted greys, quiet and still.',
+  // the Grow with Alex family: cinematic, a little surreal, one subject, deep colour, a lot of air
+  alex: 'A cinematic editorial photograph, wide lens, deep saturated colour, golden or blue hour, film grain, one subject and a lot of sky or open ground around it, a little surreal, composed like a magazine cover.',
 };
 
 /**
@@ -85,6 +87,9 @@ const SAME_CAR = 'The SAME CAR as in the reference image: same model, same colou
 const NOBODY = /nobody in the frame|no people|nobody in shot/i;
 const OBJECT_GUARD = 'No text, no logos, no watermarks. No person in the frame, not even a hand. Not a photoshoot: no studio lighting, no softbox, no bokeh, no symmetry, no product-photography styling, no render.';
 
+/** The editorial guard: designed imagery may be clean, but never text, never a stock-photo pose. */
+const EDITORIAL_GUARD = 'No text, no letters, no logos, no watermarks, no captions anywhere in the image. If a person appears they are small in the frame or seen from behind, never looking at the camera, never posing. Not a stock photo, not a render, not an illustration.';
+
 /** A scene that asks for the app screenshot on a phone (engine/scenes.mjs SHOTS.phone). */
 const APPSHOT = /^An iPhone lying face up on/;
 
@@ -116,6 +121,11 @@ export function planSet(o) {
     prompt: `${style} ${scene} The phone's screen shows EXACTLY the app screenshot in the reference image, the same layout and colours, legible. No text anywhere except on the phone screen. No person. Not a render: the phone is a real object on a real surface with a reflection on the glass.`,
   });
 
+  if (mode === 'editorial') {
+    // every frame its own generation; coherence comes from the look, the page and the type
+    const indep = (scene, i) => (appScreen && APPSHOT.test(scene) ? appFrame(scene, i) : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${EDITORIAL_GUARD}` });
+    return { mode, size, quality, anchor: null, frames: () => scenes.map(indep) };
+  }
   if (mode === 'aspirational') {
     const indep = (scene, i) => (appScreen && APPSHOT.test(scene)
       ? appFrame(scene, i)
@@ -182,7 +192,7 @@ export async function generateSet(o) {
   // image and no recurring person. Coherence comes from the shared LIFE
   // (engine/scenes.mjs), not from a face — which is how the reference sets
   // are actually built.
-  if (mode === 'aspirational' && !plan.anchor) {
+  if (!plan.anchor) {
     const files = [];
     let usd = 0, cached = 0;
     for (const f of plan.frames()) {
