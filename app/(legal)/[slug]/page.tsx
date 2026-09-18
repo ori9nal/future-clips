@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { BrandMark } from "@/components/BrandMark";
 import path from "node:path";
 import Link from "next/link";
 import type { Metadata } from "next";
@@ -35,7 +36,7 @@ export default async function LegalPage({ params }: { params: Promise<{ slug: st
     <main className="fc fc-legal">
       <header className="fc-legal-top">
         <a href="https://www.thefutureclips.com" className="fc-brand">
-          <span className="fc-mark" aria-hidden />
+          <BrandMark />
           <span><small>The</small><b>futureclips</b></span>
         </a>
         <Link href="/app" className="fc-btn" data-variant="ghost">Open the app</Link>

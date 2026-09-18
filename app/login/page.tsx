@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { BrandMark } from "@/components/BrandMark";
 import { LoginForm } from "./LoginForm";
 import { LegalFooter } from "@/components/LegalFooter";
 
@@ -19,7 +20,7 @@ export default async function LoginPage({
     <main className="fc fc-login">
       <div className="fc-login-card">
         <a href="https://www.thefutureclips.com" className="fc-brand" style={{ marginBottom: 26 }}>
-          <span className="fc-mark" aria-hidden />
+          <BrandMark />
           <span><small>The</small><b>futureclips</b></span>
         </a>
         <h1>Sign in</h1>

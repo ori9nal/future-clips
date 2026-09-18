@@ -5,10 +5,10 @@ const fs = require("fs"), path = require("path");
 const BASE = "https://waipwmyncpsgoglmkhdz.supabase.co/storage/v1/object/public/site";
 const LEGAL = ["terms", "privacy", "acceptable-use", "refunds", "accessibility"];
 const FILES = [
-  ["index-v11.html", "index.html"],
+  ["index-v12.html", "index.html"],
   ["logo.png", "logo.png"],
-  ["og.png", "og.png"],
-  ...LEGAL.map((s) => [`legal-v1/${s}.html`, `${s}/index.html`]),
+  ["og-v2.png", "og.png"],
+  ...LEGAL.map((s) => [`legal-v2/${s}.html`, `${s}/index.html`]),
 ];
 (async () => {
   for (const [src, dst] of FILES) {

@@ -5,7 +5,7 @@ const [dir0, out, title, sub] = process.argv.slice(2); const dir = path.resolve(
 const W = 1440, H = 900, HOLD = 2.4, TITLE = 2.2;
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='${W}' height='${H}'><rect width='${W}' height='${H}' fill='#F7F6F2'/>
-<g transform='translate(120,300) scale(1.3)'><rect x='0' y='21' width='55' height='39' rx='7' fill='#D9D7D1'/><rect x='14' y='12' width='55' height='39' rx='7' fill='#8E8D89'/><rect x='31' y='2' width='55' height='39' rx='7' fill='#151517'/></g>
+<g transform='translate(120,300) scale(1.3)'><rect x='0' y='21' width='55' height='39' rx='7' fill='#D9D7D1'/><rect x='14' y='12' width='55' height='39' rx='7' fill='#8E8D89'/><rect x='31' y='2' width='55' height='39' rx='7' fill='#0E0E10'/></g>
 <text x='120' y='470' font-family='Archivo' font-weight='700' font-size='72' fill='#151517' letter-spacing='-2'>${esc(title)}</text>
 <text x='122' y='530' font-family='Manrope' font-weight='500' font-size='28' fill='#5B5B60'>${esc(sub)}</text>
 <text x='120' y='800' font-family='Manrope' font-weight='600' font-size='20' fill='#8A8A90'>the futureclips, walkthrough, ${new Date().toISOString().slice(0, 10)}</text></svg>`;

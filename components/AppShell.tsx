@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { BrandMark } from "@/components/BrandMark";
 import type { Viewer } from "@/lib/auth";
 import { engineAvailable } from "@/lib/engine";
 import { LegalFooter } from "@/components/LegalFooter";
@@ -22,7 +23,7 @@ export default function AppShell({
     <div className="fc">
       <nav className="fc-nav">
         <Link href="/app" className="fc-brand">
-          <span className="fc-mark" aria-hidden />
+          <BrandMark />
           <span>
             <small>The</small>
             <b>futureclips</b>

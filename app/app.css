@@ -79,15 +79,14 @@ button, input, select, textarea { font: inherit; }
   display: flex; align-items: center; gap: 9px;
   text-decoration: none; color: var(--fc-ink); margin-right: 4px;
 }
-.fc-mark {
-  width: 26px; height: 18px; border-radius: 5px; flex: none;
-  background: var(--fc-ink);
-  box-shadow: 6px 0 0 -2px var(--fc-lime);
-}
-.fc-brand b { font-family: var(--font-archivo), Archivo, sans-serif; font-size: 16px; letter-spacing: -0.02em; }
+/* the mark is components/BrandMark.tsx (the same three cards as the site); the
+   wordmark below mirrors the site's .bt rules: small tracked "THE" over "futureclips" */
+.fc-brand svg { height: 26px; width: auto; display: block; flex: none; }
+.fc-brand > span { display: flex; flex-direction: column; line-height: 1; }
+.fc-brand b { font-family: var(--font-archivo), Archivo, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.032em; color: var(--fc-ink); }
 .fc-brand small {
-  display: block; font-size: 8px; letter-spacing: 0;
-  text-transform: none; color: var(--fc-muted); line-height: 1;
+  display: block; font-family: var(--font-manrope), Manrope, sans-serif; font-weight: 600;
+  font-size: 8.5px; letter-spacing: 0.34em; text-transform: uppercase; color: #9B9890; line-height: 1; margin-bottom: 2px;
 }
 .fc-links { display: flex; gap: 4px; margin-left: auto; }
 .fc-links a {
