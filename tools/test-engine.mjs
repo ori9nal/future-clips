@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { inspectPng, stripPng, assertClean } from '../engine/clean.mjs';
-import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK } from '../engine/generate.mjs';
+import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable } from '../engine/generate.mjs';
 import { enforce, direct, SHOTS } from '../engine/scenes.mjs';
 import { planSet } from '../engine/art.mjs';
 import { deslop, strengthFor } from '../engine/deslop.mjs';
@@ -104,6 +104,18 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   ok(BRAND_SPEAK.test('unlock your potential') && !BRAND_SPEAK.test('the gamechanger fr') && !BRAND_SPEAK.test('laterals are non negotiable'), 'BRAND_SPEAK catches the LLM words and spares the corpus ones');
   const jb = judgeCopy({ spec, data: JSON.parse(JSON.stringify(data)), range: slideRange(spec, 6), styleId: 'bedrock' });
   ok(!jb.verdict.failures.some((f) => /elevate|carry a number/.test(f)), 'the phone-format rules do not apply to bedrock');
+  // numbering direction (docs/QUALITY.md §4, D-103): countdown only when rated or ranked
+  const down = { hook: { lines: ['6 habits that made me consistent'], sub: [] }, ranked: [{ name: '5. one pair', lines: ['3 x 10'] }, { name: '4. risk', lines: ['1% per trade'] }, { name: '3. journal', lines: ['2 lines a night'] }], closer: { lines: ['z'], cta: 'go' }, caption: 'x 💪 🔥', bio: '', hashtags: [], numbering: 'countdown' };
+  const jd = judgeCopy({ spec, data: JSON.parse(JSON.stringify(down)), range: slideRange(spec, 5), styleId: 'feed' });
+  ok(jd.verdict.failures.some((f) => /counts down/.test(f)), 'judge rejects a countdown of habits with nothing rated or ranked');
+  const rated = { ...down, ranked: down.ranked.map((r, i) => ({ ...r, score: `${i + 3}/10` })) };
+  ok(!judgeCopy({ spec, data: JSON.parse(JSON.stringify(rated)), range: slideRange(spec, 5), styleId: 'feed' }).verdict.failures.some((f) => /counts down/.test(f)), 'a rated countdown passes');
+  const topN = { ...down, hook: { lines: ['top 3 things i check'], sub: [] } };
+  ok(!judgeCopy({ spec, data: JSON.parse(JSON.stringify(topN)), range: slideRange(spec, 5), styleId: 'feed' }).verdict.failures.some((f) => /counts down/.test(f)), 'a "top N" ranking may count down');
+  const up = { ...down, numbering: 'up', ranked: down.ranked.map((r) => ({ ...r, name: r.name.replace(/^\d+\.\s*/, '') })) };
+  const ju = judgeCopy({ spec, data: JSON.parse(JSON.stringify(up)), range: slideRange(spec, 5), styleId: 'feed' });
+  ok(!ju.verdict.failures.some((f) => /counts down/.test(f)), 'a count-up list passes');
+  ok(toRenderable(spec, ju.data).content.numbering === 'up', 'toRenderable keeps "up" so the renderers count 1 -> N');
 }
 
 // 7. scene enforcement: shot types rotate, the app slot is the phone shot, the closer is a lifestyle beat

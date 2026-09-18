@@ -49,9 +49,9 @@ const REASONS: Record<string, string> = {
   FC_BAD_LANE: "Unknown lane.",
   FC_BAD_RANGE: "Slide range must be between 5 and 10.",
   FC_NO_CAMPAIGN: "That campaign is not live.",
-  FC_NO_PLAN: "This workspace has no plan yet. Choose a plan to start generating.",
-  FC_NO_HD: "HD export comes with Pro and Studio.",
-  FC_QUOTA: "Not enough slides left this period.",
+  FC_NO_PLAN: "This workspace has no plan yet. Choose Clipper, Pro or Studio to start making slideshows.",
+  FC_NO_HD: "HD comes with Pro and Studio.",
+  FC_QUOTA: "Not enough slides left this period. A pack tops it up now.",
   FC_SPEND_CAP: "This workspace has reached its spend cap for the period. Email team@thefutureclips.com to raise it.",
 };
 

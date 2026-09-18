@@ -22,7 +22,7 @@ const SHAPE = `{
   "hook":   { "lines": ["2-3 short lines, hand-broken"], "sub": [], "scene": "shot type then one clause: mirror | pov | crop | friend | object | outdoors — e.g. \"mirror, locker room, phone at chest\"" },
   "ranked": [ { "name": "slide heading", "score": "optional short tag", "lines": ["1-4 short lines"],
                 "role": "body | app | proof", "showsApp": false, "scene": "shot type then one clause" } ],
-  "numbering": "countdown | none",
+  "numbering": "countdown | up | none",
   "closer": { "lines": ["1-2 short lines"], "cta": "the call to action" },
   "caption": "the post caption: one short natural line in the same voice as the slides, with 2-3 emojis that fit the topic woven in, never a row of emojis at the end",
   "bio": "the profile bio line",
@@ -81,9 +81,10 @@ const RULES_NATIVE = `How to write it:
 - Never invent a feature the campaign description does not mention.
 - The CTA is a fragment, not a sentence: at most six words, no trailing full stop.
 - The hook's lines plus its sub must total under 12 words. It is read at thumbnail size.
-- "numbering": use "countdown" only when the middle slides are a genuine ranked list that pays
-  off at the end. A story told in order gets "none" — numbering a narrative backwards reads as
-  a mistake.
+- "numbering": "up" for a numbered list that counts 1 → N (tips, rules, muscles, months, days:
+  9 of the 12 numbered reference sets count up). "countdown" ONLY when the items carry x/10 scores
+  or the ask is a ranking that pays off at #1. "none" for a story told in order. Never count a set
+  of habits, lessons or rules backwards — no real post does.
 - "subject" is written ONCE and describes the only person in the set. Every slide is the same
   person, so it must be plain and specific enough to recognise: no accessories that come and go.
 - Every slide has a "scene": where the person is, what they are doing, how they are framed. One
@@ -396,6 +397,18 @@ export function judgeCopy({ spec, data, range, styleId }) {
       const m = BRAND_SPEAK.exec(sl.text ?? '');
       if (m) verdict.failures.push(`slide ${sl.index} says "${m[0]}" — a brand word no real post uses; rewrite it plainly`);
     }
+    // numbering direction (docs/QUALITY.md §4, DECISIONS D-103): of the 12
+    // numbered reference sets, 9 count up and the 3 countdowns are rated
+    // rankings. A countdown with nothing rated and no ranking in the hook is
+    // the model numbering a list of habits backwards.
+    const hookText = [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' ');
+    const scored = (data.ranked ?? []).some((r) => /-?\d+\s*\/\s*10/.test(String(r.score ?? '')));
+    const ranking = /\b(top|rank|ranked|ranking|best|worst|peak|tier|tiers)\b/i.test(hookText);
+    const nums = (data.ranked ?? []).filter((r) => !r.showsApp).map((r) => { const m = /^\s*(?:no\.?|#)?\s*(\d+)\s*[.:\-\u2013\u2014]/i.exec(String(r.name ?? '')); return m ? +m[1] : null; });
+    const handDown = nums.length >= 2 && nums.every((n) => n != null) && nums.every((n, i) => i === 0 || n < nums[i - 1]);
+    if ((data.numbering === 'countdown' || handDown) && !scored && !ranking) {
+      verdict.failures.push('the list counts down but nothing is rated or ranked; number it 1 \u2192 N ("numbering": "up") or leave it unnumbered');
+    }
     // specificity: at least half of the body items carry a number
     const body = (data.ranked ?? []).filter((r) => !r.showsApp);
     const withNum = body.filter((r) => /\d/.test([r.score, ...(r.lines ?? [])].filter(Boolean).join(' ')));
@@ -533,7 +546,8 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     ...spec,
     content: {
       style: spec.content?.style ?? 'native',
-      numbering: content.numbering === 'none' && !handNumbered ? 'none' : 'countdown',
+      // "up" and "none" pass through; a hand-numbered set renders its own numbers (feed, native)
+      numbering: handNumbered ? 'countdown' : (content.numbering === 'none' || content.numbering === 'up') ? content.numbering : 'countdown',
       hook: { ...content.hook, lines: content.hook?.headline?.length ? content.hook.headline : content.hook?.lines, photo: hookPhoto },
       ranked,
       closerRank,

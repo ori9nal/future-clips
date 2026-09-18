@@ -29,14 +29,25 @@ Both chats keep this file current. Read it at the start of every session after `
 
 ## Product
 
-### Now
+### Now (2026-09-18, the gauntlet loop)
 
-- First session per the Product prompt: read the audit and `ANALYSIS.md`, look at every reference, write the taxonomy and rubric into `docs/QUALITY.md`, baseline the current output for $0, walk the app in the browser, write `docs/PRODUCT.md`, file the requests below that are still open, one paid round.
-- Rebase `product` onto `main` (see the first request under "Engineering → Product").
+- Run paid rounds one family at a time, one or two named fixes per round, each verifiable on the sheet; log Claude $ and image $ per run in `output/gauntlet/COSTS.md` (rebuilt from `output/lanes/*.json`) and the score in `docs/QUALITY.md` §7. Stop to ask at $15 this session (D-018 note).
+- Gym: F6 (a from-behind body part asked for as a POV shot), skin and room mess in the frames; trading: the app pill at the reference size (cap ≈ 60 px), one car across the set (the car frames edited from the first car frame), no tag line under an app name; food: outfit dealer, the app photographed on a phone.
+- Read the signed-in instagram.com/growithalex posts into QUALITY.md §3.4 (the cookies arrived 2026-09-18).
+- Verify the numbering rule (D-033) and the no-plan state on the real app once the service role key exists (OWNER-ACTIONS 1) with `tools/dev-login.mjs`.
 
-### Next / Later
+### Next
 
-- Product fills these in.
+- Instructions UI in the composer once `sets.instructions` and the upload route exist (PRODUCT.md §3, R3).
+- Recent as a one-row strip on Create (D-039 pending); "Exactly N" in the composer; Shift+Enter hint.
+- Rail rebuilt to the Grow with Alex grammar (D-040) after D-014.
+- Site wording for the no-free-tier edits (E6).
+
+### Later
+
+- Dark collage style if the owner wants that family (D-015).
+- Edit text and re-render for $0 in the drawer (Terms §3.2 promises it).
+- Mobile composer polish after a real sign-in pass on a phone.
 
 ## Done
 
@@ -60,7 +71,16 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | `sharp` 0.34.5 → 0.35.4 (libvips CVE-2026-33327/33328/35590/35591, libheif advisories); `npm test` 31/31 on the new binary | `npm audit --omit=dev`: sharp findings gone; remaining: `next`'s bundled `postcss` (moderate; fix needs Next 16, deferred until a Vercel build proves a bump, D-010) |
 | 2026-09-18 | Local route smoke on `npm run dev`: `/api/health` 503 `{ok:false, ready:{db:true, engine:true, serviceRole:false, cronSecret:false, …}}`; `/api/file/sets/…/slide-1.png` 401; `/api/nope.png` 401 (matcher covers every `/api/*`); `/api/keepalive` 200; `/terms` 200; `/api/styles` and `/api/sets` 401; `/` 307 → `/login`; `/login` 200 | curl, 2026-09-18 03:02 UTC |
 
-Spend this session: $0 (no paid generation).
+| 2026-09-18 | Product: baseline | Scored every on-disk family against the references with side-by-side sheets | gym 66 · trading 59 · food 67 · supplements 58 · Grow with Alex 45 | $0 |
+| 2026-09-18 | Product: 0 | apex-strength lats, current prompts | 73 | $0.47 |
+| 2026-09-18 | Product: 1a | feed caption size ×1.4, outline held, bands at the reference position | 77 | $0 |
+| 2026-09-18 | Product: 1b | de-slop grain 2.4/1.3 | 79 | $0 |
+| 2026-09-18 | Product: 2 | tradelens apps ranked, current prompts (trading baseline) | 78 | $0.35 |
+| 2026-09-18 | Product: rule | numbering direction (D-033) in the copy shape, rules, judge and toRenderable, with 5 new npm test checks | — | $0 |
+| 2026-09-18 | Product: app | picker search and plain format words, HD/priority cost line, error sentences, no-plan state without free-tier words, Refer page hidden, mobile meter clip, mobile light buttons, focus ring; REASONS sentences | — | $0 |
+| 2026-09-18 | Product: docs | QUALITY.md v1, PRODUCT.md v1, DECISIONS.md, ROADMAP.md; product branch + worktree | — | — |
+
+Spend: Engineering $0. Product 2026-09-18: $0.82 so far (round 0 $0.47, round 2 $0.35); every run in `output/gauntlet/COSTS.md`.
 
 ## Requests: Product → Engineering
 
@@ -68,21 +88,30 @@ File here with the exact field, endpoint or bug, a repro and a screenshot path. 
 
 | # | Date | Request | Status | Answer |
 |---|---|---|---|---|
-| – | – | (none yet) | | |
+| R1 | 2026-09-18 | **Dev sign-in**: `tools/dev-login.mjs email=<invited email>` that mints a session locally (service role `generateLink` + code exchange, or a cookie written for the running dev server) so the real `/app` can be tested without Supabase's mailer, which allows a few emails an hour for the whole project. Why: Every app finding this session is from the design preview (PRODUCT.md §6 says which); none is validated on the real app. | done by Engineering (`tools/dev-login.mjs`); still needs the service-role key locally | |
+| R2 | 2026-09-18 | **`SUPABASE_SERVICE_ROLE_KEY` in `.env.local`** (OWNER-ACTIONS E). Why: Without it nothing renders through the app locally; sets were generated through `tools/lane.mjs` instead. | blocked on owner (OWNER-ACTIONS 1) | |
+| R3 | 2026-09-18 | **Instructions storage + API** (D-037): `sets.instructions jsonb` `{ logo_path, avatar_path, handle, note }`; org assets in the `assets` bucket under `<org>/logo.<ext>` and `<org>/avatar.<ext>` (png/jpg/webp ≤ 2 MB); `POST /api/assets` (multipart, returns the path), `DELETE /api/assets/:kind`; `GET /api/me` returns `defaults: { handle, logo_url, avatar_url }`; `POST /api/sets` accepts `instructions` (handle ≤ 30 chars `^@?[a-z0-9._]+$`, note ≤ 200 chars) and the worker passes it to `toRenderable` as `spec.instructions`. Product renders it in the styles. Why: The composer and the engine have nowhere to put a logo, an avatar, a handle or a note today. | open (spec in PRODUCT.md §3) | |
+| R4 | 2026-09-18 | `GET /api/sets/:id` should return `content_json` (audit bug 14). Why: The drawer shows no "Text on the slide" for a set finished while the page was open. | done (E4) | |
+| R5 | 2026-09-18 | A batch set waiting on a provider batch needs a stage the UI can show (audit bug 15): keep `stage` on the row while `status = queued` after the first tick, or add `waiting_on: 'copy' \| 'anchor' \| 'frames'`. Why: The card shows "In the queue" for hours with no step lit. | done (D-023) | |
+| R6 | 2026-09-18 | `tools/rerender.mjs dir=<set folder>` (or `lane=priority`) so a lane output can be re-rendered for $0 without copying it to `output/sets/<campaign>-<style>`. Why: Rounds 1a/1b used a scratch script for this. | open; Product uses `tools/_rerender-dir.mjs` meanwhile | |
+| R7 | 2026-09-18 | Free-tier removals outside Product's files: the site's Free card and copy, `lib/demo.ts` free plan fixture, the `free` welcome-balance path in migration 0006 / `fc_reserve_set`, the Refund Policy sentence (owner). Why: D-002. | site and DB done (D-020, 0010); `lib/demo.ts` free fixture and the Refund Policy sentence remain | |
+| R8 | 2026-09-18 | Every API error carries a `code` (the create route already does for FC_*); `sign in required` on a 401 should come with `code: 'AUTH'`. Why: The composer showed the raw string "sign in required" as the error (preview, PRODUCT.md finding 8); Product maps codes to sentences. | open | |
+| R9 | 2026-09-18 | Campaign payload for the picker: keep `guidance.angles`, add `assets.app_icon` / `app_screen` presence flags and `content.style`. Why: The picker will show "shows an app icon" and a plain-English format word instead of "photo feed". | open | |
+| R10 | 2026-09-18 | Owner environment: sign in to the Claude in Chrome extension on this machine so the Instagram reference pass can page through full posts (list_connected_browsers returned none). Why: The owner asked for the growithalex posts to be read in Chrome; only the public grid was reachable. | done: the owner imported Instagram cookies 2026-09-18; the in-app browser is signed in | |
 
 ## Requests: Engineering → Product
 
 | # | Date | Request | Status |
 |---|---|---|---|
-| E1 | 2026-09-18 | Rebase `product` onto `main` (`git fetch` is not needed, both are local: `cd ../fc-product && git rebase main`). Your `a42506d` "wip snapshot" commit duplicates what `main` now carries in four commits; after the rebase it should shrink to nothing or to your own edits. Resolve any conflict in favour of `main` for Engineering-owned files. | open |
-| E2 | 2026-09-18 | Free-tier wording still in `app/app/Dashboard.tsx` (your file): "Your free slideshow is used. Posting every day starts on Clipper.", "Needs a plan.", the `paid` notice logic, and any "one free slideshow" text; replace with the choose-a-plan state from D-002/D-011. `lib/sets.ts` `FC_NO_PLAN` now reads "This workspace has no plan yet. Choose a plan to start generating." (rewrite as you like, keep the code). | open |
-| E3 | 2026-09-18 | `stageLabel()` in `lib/sets.ts` (your words): batch sets now stay `status = rendering` while waiting on a provider batch (D-023), so the "In the queue" branch only applies before the first provider call; decide what "waiting for the batch" should say. | open |
-| E4 | 2026-09-18 | `GET /api/sets/[id]` now returns `content_json`, so the drawer keeps its slide text for sets finished in-session; nothing to change unless you want a slimmer payload. | info |
-| E5 | 2026-09-18 | `/api/file` URLs are now relative to the working base: `/api/file/sets/<name>/slide-1.png` (was `/api/file/output/sets/...`). `lib/demo.ts` was updated; check any URL you build by hand. In the design preview (`FC_DEMO_PREVIEW=1`) these images load without a session; everywhere else a session is required. | info |
-| E6 | 2026-09-18 | `design/site.html`: the no-free-tier edits (D-020) are placeholders for your wording: the closing section, the mobile bar, "Get started". The yearly toggle and the "$20/mo" hero pill wait for D-013. | open |
-| E7 | 2026-09-18 | Lint is on: 64 warnings, mostly `any` in `Dashboard.tsx`, `PartnerDashboard.tsx` and `StudioClient.tsx`; no action required, errors would fail the build so run `npm run lint` before committing. | info |
-| E9 | 2026-09-18 | The brand mark in the app is now the site's three-card SVG via `components/BrandMark.tsx` (owner instruction: the same logo everywhere); `.fc-brand` wordmark rules mirror the site. Keep both in step with `docs/ARCHITECTURE.md` "Brand assets" if you restyle. | info |
-| E8 | 2026-09-18 | `docs/PRODUCT.md` and `docs/QUALITY.md` are seeded stubs; the instructions feature spec (fields, storage, where each appears per style) is what unblocks `sets.instructions` and the upload route on the Engineering side. | open |
+| E1 | 2026-09-18 | Rebase `product` onto `main` (`git fetch` is not needed, both are local: `cd ../fc-product && git rebase main`). Your `a42506d` "wip snapshot" commit duplicates what `main` now carries in four commits; after the rebase it should shrink to nothing or to your own edits. Resolve any conflict in favour of `main` for Engineering-owned files. | open: done 2026-09-18: `product` rebased with `--onto main`, the snapshot dropped, five conflicts resolved (four docs merged, `lib/sets.ts` REASONS kept as Product's words) |
+| E2 | 2026-09-18 | Free-tier wording still in `app/app/Dashboard.tsx` (your file): "Your free slideshow is used. Posting every day starts on Clipper.", "Needs a plan.", the `paid` notice logic, and any "one free slideshow" text; replace with the choose-a-plan state from D-002/D-011. `lib/sets.ts` `FC_NO_PLAN` now reads "This workspace has no plan yet. Choose a plan to start generating." (rewrite as you like, keep the code). | open: done in Product's commit: notice, plan tab, meter and REASONS carry no free-tier sentence; the no-plan state is PRODUCT.md §2.5 |
+| E3 | 2026-09-18 | `stageLabel()` in `lib/sets.ts` (your words): batch sets now stay `status = rendering` while waiting on a provider batch (D-023), so the "In the queue" branch only applies before the first provider call; decide what "waiting for the batch" should say. | open: done: on the batch lane a `:wait` stage reads "…, in the batch queue"; `queued` reads "In the queue" only before the first provider call |
+| E4 | 2026-09-18 | `GET /api/sets/[id]` now returns `content_json`, so the drawer keeps its slide text for sets finished in-session; nothing to change unless you want a slimmer payload. | info: noted; the drawer keeps its text |
+| E5 | 2026-09-18 | `/api/file` URLs are now relative to the working base: `/api/file/sets/<name>/slide-1.png` (was `/api/file/output/sets/...`). `lib/demo.ts` was updated; check any URL you build by hand. In the design preview (`FC_DEMO_PREVIEW=1`) these images load without a session; everywhere else a session is required. | info: noted; Dashboard.tsx builds no file URLs by hand |
+| E6 | 2026-09-18 | `design/site.html`: the no-free-tier edits (D-020) are placeholders for your wording: the closing section, the mobile bar, "Get started". The yearly toggle and the "$20/mo" hero pill wait for D-013. | open: open: Product proposes the wording next session |
+| E7 | 2026-09-18 | Lint is on: 64 warnings, mostly `any` in `Dashboard.tsx`, `PartnerDashboard.tsx` and `StudioClient.tsx`; no action required, errors would fail the build so run `npm run lint` before committing. | info: noted |
+| E9 | 2026-09-18 | The brand mark in the app is now the site's three-card SVG via `components/BrandMark.tsx` (owner instruction: the same logo everywhere); `.fc-brand` wordmark rules mirror the site. Keep both in step with `docs/ARCHITECTURE.md` "Brand assets" if you restyle. | info: noted |
+| E8 | 2026-09-18 | `docs/PRODUCT.md` and `docs/QUALITY.md` are seeded stubs; the instructions feature spec (fields, storage, where each appears per style) is what unblocks `sets.instructions` and the upload route on the Engineering side. | open: done: PRODUCT.md §3 has the fields, storage paths, limits and per-style placement; R3 carries the API contract |
 
 ## Blocked on owner
 

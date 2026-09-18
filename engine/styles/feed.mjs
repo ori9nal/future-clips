@@ -34,7 +34,18 @@ import { pickPairing } from '../pairings.mjs';
  * the fill over the stroke, so the VISIBLE outline is half this: 0.065 em,
  * which is the 4 px measured on set-05 and set-08 at their ~55 px em.
  */
-const OUTLINE = 0.13;
+const OUTLINE = 0.095;
+
+/**
+ * 2026-09-18 (docs/QUALITY.md §3.1, F1): cap heights read off native-pixel
+ * crops are 48–52 px for a reference gym heading (set-08 "5. Dumbbell
+ * curls" = 50) and 36–40 px for body lines (set-13); the trading family runs
+ * ~37 px bodies (set-01). Rendered at the sizes below without this factor
+ * the same lines came out at 35 / 27 px. So every caption is scaled by 1.4,
+ * and OUTLINE drops from 0.13 to 0.095 em so the visible outline stays at
+ * the measured 5–7 px instead of growing with the type.
+ */
+const SIZE = 1.4;
 
 /**
  * Faces that hold up as a thin-outlined caption over a photo. Every pairing's
@@ -114,7 +125,7 @@ export default {
       const key = face === 'body' ? BODY : HEAD;
       const f = FACES[key];
       const ff = loadFace(f.file);
-      size = Math.round(size * (face === 'body' ? bodyScale : headScale));
+      size = Math.round(size * SIZE * (face === 'body' ? bodyScale : headScale));
       const wrapped = lines.flatMap((l) => breakToFit(ff, l, W - M * 2 - 40, size, { max: 4 }));
       // The outline thickens on a bright ground. A single thin outline is right
       // over a dark car and disappears entirely over a sunset sky, which is
@@ -218,7 +229,10 @@ export default {
           const r = await scoreRegion(f, { w: W, h: H, sharp, rect: { x: 0, y, w: W, h: bandH } });
           // skin barely counts: the reference puts the block across the chest
           // and the arm as often as across a wall (set-05, set-13, gym-2)
-          const cost = r.range + Math.max(0, r.mean - 110) * 0.4 + (r.skin ?? 0) * 30;
+          // and the block belongs near the reference's position: top 0.33 H
+          // (gym) / 0.36 H (wealth), measured 2026-09-18 — a calm ceiling at
+          // 0.10 H is not where a real post puts its caption
+          const cost = r.range + Math.max(0, r.mean - 110) * 0.4 + (r.skin ?? 0) * 30 + Math.abs(frac - 0.34) * 120;
           if (cost < best) { best = cost; top = y; }
         } catch { /* keep the default */ }
       }
@@ -229,7 +243,7 @@ export default {
     {
       const f = await frame(C.hook.photo, 1);
       const s = [image(f, 0, 0, W, H)];
-      const top = await quietBand(f, [0.08, 0.30, 0.42, 0.54], Math.round(H * 0.22));
+      const top = await quietBand(f, [0.24, 0.32, 0.40, 0.48], Math.round(H * 0.22));
       const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.22));
       if (scrim) s.push(rect(0, Math.max(0, top - 60), W, Math.round(H * 0.32), { fill: '#000000', op: scrim }));
       const hk = caption(C.hook.lines, top, { size: 46, boost });
@@ -306,7 +320,7 @@ export default {
         // Three candidate bands; take the quietest. A fixed 30% put the
         // MetaTrader caption straight across a wall of glowing monitors.
         const bandH = Math.round(H * 0.26);
-        const top = await quietBand(f, [0.10, 0.22, 0.34, 0.50], bandH);
+        const top = await quietBand(f, [0.20, 0.28, 0.36, 0.44], bandH);
         const { boost, scrim } = await contrastAt(f, top - 20, bandH);
         if (scrim) {
           s.push(`<defs><linearGradient id="fs${i}" x1="0" y1="0" x2="0" y2="1">` +
@@ -352,7 +366,7 @@ export default {
       } else {
         const f = await frame(C.closer.photo, total);
         const s = [image(f, 0, 0, W, H)];
-        const top = await quietBand(f, [0.12, 0.34, 0.46, 0.58], Math.round(H * 0.24));
+        const top = await quietBand(f, [0.24, 0.34, 0.44, 0.54], Math.round(H * 0.24));
         const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.24));
         if (scrim) s.push(rect(0, Math.max(0, top - 80), W, Math.round(H * 0.40), { fill: '#000000', op: scrim }));
         const closerLines = C.closerRank && C.closer.lines.length

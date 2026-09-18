@@ -67,7 +67,8 @@ html[data-theme="dark"] {
 .app { min-height: 100dvh; display: grid; grid-template-columns: var(--sidebar) 1fr; background: var(--paper); color: var(--text); font-family: var(--font-body); font-size: 14px; line-height: 1.5; -webkit-font-smoothing: antialiased; }
 .app *, .app *::before, .app *::after { box-sizing: border-box; }
 .app button, .app input, .app textarea, .app select { font: inherit; color: inherit; }
-.app :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+.app :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); box-shadow: 0 0 0 5px color-mix(in srgb, var(--focus) 30%, transparent); }
+.seg button:focus-visible, .angles button:focus-visible, .sw:focus-visible, .tile:focus-visible, .mi:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
 .app ::selection { background: var(--lime); color: var(--lime-ink); }
 .app a { color: var(--link); text-decoration: none; }
 .app a:hover { text-decoration: underline; }
@@ -256,6 +257,8 @@ html[data-theme="dark"] .sw.on { background: var(--lime); }
 .ccard .ch small { color: var(--text-2); font-size: 13px; }
 .ccard .tags { display: flex; flex-wrap: wrap; gap: 6px; }
 .search { position: relative; max-width: 360px; }
+.search.pick { max-width: none; padding: 4px 4px 8px; }
+.search.pick .input { padding-left: 12px; }
 .search .input { padding-left: 34px; }
 .search svg { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); width: 15px; height: 15px; color: var(--text-3); }
 
@@ -316,8 +319,14 @@ html[data-theme="dark"] .toast { background: var(--text); color: var(--paper); }
   .set .head { flex-direction: column; align-items: stretch; }
   .set .head .actions { flex-wrap: wrap; }
   .set .head h3 { white-space: normal; }
-  .meter .row { white-space: nowrap; }
+  .meter .row { white-space: nowrap; overflow: hidden; }
   .meter .row > span:first-child { display: none; }
+  .meter .row b { overflow: hidden; text-overflow: ellipsis; }
+  .meter .row .prio { display: none; }
+  /* the set-card buttons keep the surface colours on a phone: the ink/lime pair
+     from the segmented control must not bleed into .btn (PRODUCT.md finding 15) */
+  .set .actions .btn { background: var(--surface); color: var(--text); border-color: var(--line-strong); }
+  .set .actions .btn.primary { background: var(--lime); color: var(--lime-ink); border-color: var(--lime); }
   .strip { grid-template-columns: repeat(3, 1fr); }
   .strip[data-ratio="9:16"] { grid-template-columns: repeat(3, 1fr); }
   .rows > .rowi { flex-direction: column; align-items: flex-start; }

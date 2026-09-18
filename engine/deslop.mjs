@@ -33,8 +33,12 @@ export const KNOBS = {
   brightness: 0.93,   // lower = darker; only applied to bright frames (see `expo`)
   saturation: 0.90,   // lower = more washed out
   contrast: 1.03,     // >1 adds — a phone's own pipeline adds local contrast
-  noiseMono: 4.2,     // luminance grain strength  (script: 15)
-  noiseChroma: 2.2,   // colour speckle strength   (script: 8)
+  // 2026-09-18 (docs/QUALITY.md F3): at 4.2 / 2.2 a fresh gym set measured
+  // flat-area noise 1.80 against the reference family's 1.28 (44 slides), and
+  // the g1 set at the script's 15 / 8 measured 4.5 — about 0.25 noise per
+  // unit of grain over a base of ~0.75. 2.4 / 1.3 lands on the reference.
+  noiseMono: 2.4,     // luminance grain strength  (script: 15)
+  noiseChroma: 1.3,   // colour speckle strength   (script: 8)
   recompressQ: 60,    // lower = more visible blocking (script: 42)
   crop: { x0: [0.03, 0.09], y0: [0.01, 0.045], x1: [0.985, 1.0], y1: [0.93, 0.975] },
   tilt: { degrees: [0.6, 2.4], share: 0.55 },   // a tilted horizon on about half the frames

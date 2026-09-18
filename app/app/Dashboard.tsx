@@ -33,6 +33,8 @@ type SetView = SetRow & { label?: string; urls?: string[] };
 type Theme = "light" | "dark";
 
 const RMIN = 5, RMAX = 10;
+/** The agency "Refer and earn" page stays off the clipper's surface until DECISIONS.md enables it. */
+const REFER_ENABLED = process.env.NEXT_PUBLIC_FC_REFER === "1";
 const PRESETS: [string, number, number][] = [["Short", 5, 6], ["Standard", 6, 8], ["Long", 8, 10]];
 const TITLES: Record<Page, string> = { create: "Create", library: "Library", campaigns: "Campaigns", insights: "Insights", partners: "Refer and earn", settings: "Settings" };
 
@@ -74,7 +76,21 @@ const stepIndex = (stage: string | null, status: string) => {
   const i = STEP_ORDER.findIndex((s) => st.startsWith(s));
   return i < 0 ? 0 : i;
 };
-const styleWord = (s: string) => ({ native: "phone post", feed: "photo feed", bedrock: "figure", mascot: "mascot" } as Record<string, string>)[s] ?? s;
+/** The format in the clipper's words. A style id is a pipeline name and never reaches the screen. */
+const styleWord = (s: string) => ({ native: "phone photos with captions", feed: "phone photos with captions", bedrock: "illustrated programme", mascot: "illustrated mascot", rail: "poster series", clinical: "clinical explainer", editorial: "editorial pages", document: "text pages", poster: "posters", pastel: "pastel pages" } as Record<string, string>)[s] ?? "slides";
+/** API errors as sentences (PRODUCT.md finding 8). Unknown strings are never shown raw. */
+const ERROR_SENTENCES: Record<string, string> = {
+  "sign in required": "Your session has ended. Sign in again to keep going.",
+  "pick a campaign": "Pick a campaign first.",
+  "say what the set is about": "Say what the slideshow is about, a few words is enough.",
+  "keep the ask under 400 characters": "Keep the idea under 400 characters.",
+  "slides must be a count or range between 5 and 10": "Slides must be between 5 and 10.",
+};
+const sentence = (j: { error?: string; code?: string; detail?: string }, fallback: string) => {
+  const e = String(j?.error ?? "");
+  if (j?.code?.startsWith("FC_")) return j.detail ? `${e} ${j.detail}` : e;
+  return ERROR_SENTENCES[e] ?? (e && /^[A-Z]/.test(e) && e.length > 20 ? e : fallback);
+};
 const usd = (n: number) => `$${n.toFixed(2)}`;
 const pct = (r: number) => `${Math.round(r * 100)}%`;
 
@@ -96,6 +112,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [toast, setToastText] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<{ set: SetView; i: number } | null>(null);
   const [query, setQuery] = useState("");
+  const [pickQ, setPickQ] = useState("");
   const [tab, setTab] = useState<"acct" | "plan" | "gen">("acct");
   const [engineGone, setEngineGone] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -142,7 +159,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const hdIncluded = account.plan.hd_per_slide_usd === 0;
   const need = hd && hdIncluded ? 3 : 1;
   const left = lane === "priority" ? account.left.priority : account.left.batch;
+  // a plan or a pack balance; there is no free tier (DECISIONS D-108)
   const paid = account.plan.slides_per_month > 0 || account.balance > 0;
+  const renews = account.periodEnd ? new Date(account.periodEnd).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : null;
   const label = planLabel(account.plan);
 
   // ── polling: any set that is not finished is asked about every few seconds ──
@@ -201,7 +220,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       const r = await fetch("/api/sets", { method: "POST", headers: { "content-type": "application/json" },
         body: JSON.stringify({ campaign: active.id, ask: topic, style: active.content?.style ?? "native", slides: nMin === nMax ? nMin : { min: nMin, max: nMax }, lane, hd }) });
       const j = await r.json();
-      if (!r.ok) { setErr(j.detail ? `${j.error}. ${j.detail}` : j.error); return; }
+      if (!r.ok) { setErr(sentence(j, "Could not start the slideshow. Try again in a moment.")); return; }
       const row: SetView = {
         id: j.id, org_id: "", campaign_id: active.id, style: active.content?.style ?? "native", ask: topic, slides: null, slides_min: nMin, slides_max: nMax,
         reserved_slides: nMax, quality: hd ? "high" : "medium", lane, hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
@@ -214,7 +233,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       const n = nMin === nMax ? `${nMin}` : `${nMin} to ${nMax}`;
       say(j.started ? "Making it now. A minute or two." : lane === "priority" ? `Kept: ${n} slides, starts as soon as rendering is switched on` : `Queued: ${n} slides, back within the day`);
     } catch (e: any) {
-      setErr(e?.message ?? "Could not start");
+      setErr("Could not reach the server. Check your connection and try again.");
     } finally {
       setBusy(false);
     }
@@ -222,7 +241,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
 
   async function cancel(s: SetView) {
     const r = await fetch(`/api/sets/${s.id}`, { method: "DELETE" });
-    if (!r.ok) { say("Too late to cancel, it has started"); return; }
+    if (!r.ok) { say("Too late to cancel, it has already started."); return; }
     const j = await r.json().catch(() => ({}));
     if (j.released) {
       say("Cancelled. The slides are back on your balance.");
@@ -334,7 +353,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           {(["create", "library", "campaigns", "insights"] as Page[]).map((id) => (
             <button key={id} className={page === id ? "on" : ""} onClick={() => go(id)}>{I[id]}{TITLES[id]}</button>
           ))}
-          {partners && <button className={page === "partners" ? "on" : ""} onClick={() => go("partners")}>{I.partners}Refer and earn</button>}
+          {partners && REFER_ENABLED && <button className={page === "partners" ? "on" : ""} onClick={() => go("partners")}>{I.partners}Refer and earn</button>}
         </nav>
         <div className="foot nav">
           {viewer.isPlatformOwner && <Link href="/admin">{I.admin}Admin</Link>}
@@ -349,11 +368,11 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           <h1>{TITLES[page]}</h1>
           <span className="grow" />
           {paid ? (
-            <div className="meter" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period` : `${account.balance} free slides`}>
-              <div className="row"><span>Slides left</span><b className="num">{account.left.batch}{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}{canPriority ? `, ${account.left.priority} priority` : ""}</b></div>
+            <div className="meter" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
+              <div className="row"><span>Slides left</span><b className="num">{account.left.batch}{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}{canPriority ? <span className="prio">, {account.left.priority} priority</span> : null}</b></div>
               <div className="bar"><i style={{ width: `${100 - usedPct}%` }} /></div>
             </div>
-          ) : <a className="btn primary sm" href="https://www.thefutureclips.com/#pricing">See plans</a>}
+          ) : <button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button>}
         </header>
 
         <div className="view" ref={viewRef}>
@@ -365,7 +384,10 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                   <div className="notice warn"><span>Rendering on this host is switched off. Anything you queue is kept and starts as soon as it is on.</span><button className="x" onClick={() => setEngineGone(true)} aria-label="Dismiss">×</button></div>
                 )}
                 {!paid && (
-                  <div className="notice"><span>Your free slideshow is used. Posting every day starts on Clipper.</span><a className="btn sm" href="https://www.thefutureclips.com/#pricing">See plans</a></div>
+                  <div className="notice"><span>Choose a plan to start making slideshows. Clipper is $16 a month for 200 slides; Pro adds priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
+                )}
+                {paid && left === 0 && (
+                  <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
                 )}
                 <section className="composer" aria-label="Make a slideshow">
                   <div className="field campaignSel">
@@ -377,20 +399,24 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     </button>
                     {pop === "camp" && (
                       <div className="pop list" role="listbox">
-                        {specs.map((s) => (
-                          <button key={s.id} className={`mi${active?.id === s.id ? " sel" : ""}`} role="option" aria-selected={active?.id === s.id} onClick={() => pickCamp(s)}>
+                        {specs.length > 8 && (
+                          <div className="search pick"><input className="input" type="search" autoFocus placeholder="Search brand, product or niche" value={pickQ} onChange={(e) => setPickQ(e.target.value)} aria-label="Search campaigns" /></div>
+                        )}
+                        {specs.filter((s) => !pickQ.trim() || `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())).map((s) => (
+                          <button key={s.id} className={`mi${active?.id === s.id ? " sel" : ""}`} role="option" aria-selected={active?.id === s.id} onClick={() => { pickCamp(s); setPickQ(""); }}>
                             <span className="mark" style={{ background: swatch(s), color: readable(swatch(s)) }}>{initial(s.brand)}</span>
                             <span><span>{s.brand}</span><small>{s.product}, {styleWord(s.content?.style ?? "native")}</small></span>
                           </button>
                         ))}
                         {!specs.length && <div className="mi">No live campaigns yet.</div>}
+                        {specs.length > 0 && pickQ.trim() && !specs.some((s) => `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())) && <div className="mi">No campaign matches "{pickQ.trim()}".</div>}
                       </div>
                     )}
                   </div>
                   <div className="field">
                     <label className="label" htmlFor="ask">What should this slideshow be about?</label>
                     <textarea id="ask" className="textarea" ref={taRef} rows={3} value={ask} maxLength={400} disabled={!active}
-                      placeholder={active ? (angles.length ? "Pick an angle below, or write your own" : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Choose a campaign first"}
+                      placeholder={active ? (angles.length ? "Pick an angle below, or write your own. Enter makes it, Shift+Enter is a new line." : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Choose a campaign first"}
                       onChange={(e) => setAsk(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
                     {angles.length > 0 && (
@@ -424,7 +450,13 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     </div>
                   </div>
                   <div className="foot">
-                    <span className={`cost${left < nMax * need ? " bad" : ""}`}>{paid ? (left < nMax * need ? `This needs up to ${nMax * need} slides and you have ${left} left.` : `Uses up to ${nMax * need} of your ${left} slides.`) : "Needs a plan."}</span>
+                    <span className={`cost${paid && left < nMax * need ? " bad" : ""}`}>{!paid
+                      ? "Needs a plan."
+                      : left < nMax * need
+                        ? `This needs up to ${nMax * need} ${lane === "priority" ? "priority " : ""}slides and you have ${left} left.`
+                        : need > 1
+                          ? `${rangeWord} at HD, up to ${nMax * need} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`
+                          : `Uses up to ${nMax} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`}</span>
                     <button className="btn primary lg" disabled={!active || !paid || busy || !ask.trim()} onClick={run}>{busy ? "Starting" : "Make the slideshow"}</button>
                   </div>
                   {err && <p className="err" role="alert">{err}</p>}
@@ -490,7 +522,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
             )}
 
             {/* ══ REFER AND EARN ══ */}
-            {page === "partners" && partners && (() => {
+            {page === "partners" && partners && REFER_ENABLED && (() => {
               const P = partners.summary;
               const link = `https://www.thefutureclips.com/signup?ref=${P.code}`;
               const copy = async () => { try { await navigator.clipboard.writeText(link); say("Link copied"); } catch { say(link); } };
@@ -555,17 +587,17 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 )}
                 {tab === "plan" && (
                   <div className="card rows">
-                    <div className="rowi"><div className="l"><b>{label} plan</b><small>{account.plan.slides_per_month ? `${account.plan.slides_per_month} slides a month` : "One free slideshow"}{account.plan.priority_slides_per_month ? `, ${account.plan.priority_slides_per_month} priority` : ""}{hdIncluded ? ", HD included" : ""}{account.periodEnd ? `, renews ${new Date(account.periodEnd).toLocaleDateString()}` : ""}</small></div>
+                    <div className="rowi"><div className="l"><b>{label} plan</b><small>{account.plan.slides_per_month ? `${account.plan.slides_per_month} slides a month` : "No plan yet"}{account.plan.priority_slides_per_month ? `, ${account.plan.priority_slides_per_month} priority` : ""}{hdIncluded ? ", HD included" : ""}{account.periodEnd ? `, renews ${new Date(account.periodEnd).toLocaleDateString()}` : ""}</small></div>
                       <div className="r">
                         {(["solo", "grind", "agency"] as const).filter((p) => p !== account.plan.id).map((p) => (
-                          <button key={p} className="btn sm" disabled={busy} onClick={() => buy({ plan: p })}>{["solo", "grind", "agency"].indexOf(p) > ["solo", "grind", "agency"].indexOf(account.plan.id) ? "Upgrade to" : "Switch to"} {PLAN_LABELS[p]}</button>
+                          <button key={p} className="btn sm" disabled={busy} onClick={() => buy({ plan: p })}>{!paid ? "Choose" : ["solo", "grind", "agency"].indexOf(p) > ["solo", "grind", "agency"].indexOf(account.plan.id) ? "Upgrade to" : "Switch to"} {PLAN_LABELS[p]}</button>
                         ))}
                         <a className="btn quiet sm" href="https://www.thefutureclips.com/#pricing">Compare plans</a>
                       </div></div>
-                    <div className="rowi"><div className="l"><b>Slides left</b><small>{account.cap.batch ? "This period's allowance, it resets on your billing date" : "Your free slideshow"}{account.balance ? `, plus ${account.balance} purchased slides that never expire` : ""}</small></div><div className="r"><span className="num" style={{ fontSize: 24, fontWeight: 600 }}>{account.left.batch}</span></div></div>
+                    <div className="rowi"><div className="l"><b>Slides left</b><small>{account.cap.batch ? "This period's allowance, it resets on your billing date" : "Purchased slides, they never expire"}{account.cap.batch && account.balance ? `, plus ${account.balance} purchased slides that never expire` : ""}</small></div><div className="r"><span className="num" style={{ fontSize: 24, fontWeight: 600 }}>{account.left.batch}</span></div></div>
                     {canPriority && <div className="rowi"><div className="l"><b>Priority left</b><small>Made in minutes instead of within the day</small></div><div className="r"><span className="num" style={{ fontSize: 24, fontWeight: 600 }}>{account.left.priority}</span></div></div>}
-                    <div className="rowi"><div className="l"><b>Slide packs</b><small>Extra slides on top of any plan. They never expire and are used after the month's allowance.{viewer.checkout ? "" : " Checkout is being connected, so the buttons email us for now."}</small></div>
-                      <div className="r">{(account.packs.length ? account.packs : [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }]).map((k) => <button key={k.id} className="btn sm" disabled={busy} onClick={() => buy({ pack: k.id })}>{k.slides} for ${k.price_usd}</button>)}</div></div>
+                    <div className="rowi"><div className="l"><b>Slide packs</b><small>{paid ? "Extra slides on top of any plan. They never expire and are used after the month's allowance." : "Packs top up a plan. Choose a plan first."}{viewer.checkout ? "" : " Checkout is being connected, so the buttons email us for now."}</small></div>
+                      <div className="r">{(account.packs.length ? account.packs : [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }]).map((k) => <button key={k.id} className="btn sm" disabled={busy || !paid} onClick={() => buy({ pack: k.id })}>{k.slides} for ${k.price_usd}</button>)}</div></div>
                     <div className="rowi"><div className="l"><b>Billing</b><small>{viewer.billing === "none" ? "No subscription on file yet." : `Subscription ${viewer.billing.replace("_", " ")}. You keep access until the end of your billing period.`}</small></div><div className="r">{viewer.checkout && viewer.billing !== "none" ? <button className="btn sm" onClick={portal}>Manage billing</button> : <a className="btn sm" href="mailto:team@thefutureclips.com?subject=Subscription">Email us</a>}</div></div>
                   </div>
                 )}
