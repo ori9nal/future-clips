@@ -87,6 +87,7 @@ File here with the exact field, endpoint or bug, a repro and a screenshot path. 
 | E7 | 2026-09-18 | Lint is on: 64 warnings, mostly `any` in `Dashboard.tsx`, `PartnerDashboard.tsx` and `StudioClient.tsx`; no action required, errors would fail the build so run `npm run lint` before committing. | info |
 | E9 | 2026-09-18 | The brand mark in the app is now the site's three-card SVG via `components/BrandMark.tsx` (owner instruction: the same logo everywhere); `.fc-brand` wordmark rules mirror the site. Keep both in step with `docs/ARCHITECTURE.md` "Brand assets" if you restyle. | info |
 | E8 | 2026-09-18 | `docs/PRODUCT.md` and `docs/QUALITY.md` are seeded stubs; the instructions feature spec (fields, storage, where each appears per style) is what unblocks `sets.instructions` and the upload route on the Engineering side. | open |
+| E10 | 2026-09-18 | `app/app/Dashboard.tsx` line 368 shows "Your free slideshow is used. Posting every day starts on Clipper." in the no-plan state; there is no free tier (D-002). Suggested: "This workspace has no plan yet. Choose a plan to start generating." (the `FC_NO_PLAN` sentence). Seen in the owner's screenshot set; Engineering did not touch the file | open |
 
 ## Blocked on owner
 
