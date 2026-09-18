@@ -4,6 +4,7 @@
 const fs = require("fs"), path = require("path");
 const BASE = "https://waipwmyncpsgoglmkhdz.supabase.co/storage/v1/object/public/site";
 const LEGAL = ["terms", "privacy", "acceptable-use", "refunds", "accessibility"];
+const CAROUSELS = ["hero-1", "hero-2", "hero-3", "hero-4", "hero-5", "look-poster", "look-editorial", "look-native", "look-feed", "look-rail", "look-mascot"];
 const FONTS = ["archivo-500_800-latin", "manrope-400_700-latin", "plexmono-400-latin", "plexmono-500-latin"];
 const FILES = [
   ["index-v12.html", "index.html"],
@@ -12,6 +13,8 @@ const FILES = [
   ...LEGAL.map((s) => [`legal-v2/${s}.html`, `${s}/index.html`]),
   // the site's fonts (future-clips-site/fonts/, from tools/fetch-site-fonts.mjs)
   ...FONTS.map((f) => [`fonts-v1/${f}.woff2`, `fonts/${f}.woff2`]),
+  // the hero deck and the looks strip (our own engine output, future-clips-site/carousels/)
+  ...CAROUSELS.map((f) => [`carousels-v1/${f}.webp`, `carousels/${f}.webp`]),
 ];
 const INLINE = {
   'robots.txt': 'User-agent: *\nAllow: /\nSitemap: https://www.thefutureclips.com/sitemap.xml\n',

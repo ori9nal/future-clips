@@ -11,7 +11,8 @@ https://www.thefutureclips.com
   logo.png og.png         logo/favicon and the link-preview image
   fonts/                  Archivo, Manrope and IBM Plex Mono, self-hosted (no request leaves the site);
                           refreshed by `node tools/fetch-site-fonts.mjs`, which also writes ../design/fonts.css
-  carousels/              example covers (other creators' posts, shown with permission)
+  carousels/              hero-*.webp and look-*.webp are our own engine output (output/sets/…, resized by
+                          ImageMagick); the other covers are other creators' posts, shown with permission
   robots.txt sitemap.xml 404.html
   vercel.json             /login and /signup redirect to the app host; security and cache headers; clean URLs
 

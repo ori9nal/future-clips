@@ -114,14 +114,48 @@ h1{font-stretch:112%;font-weight:700;font-size:clamp(2.2rem,5.6vw,4.2rem);line-h
 .hbtns .btn{padding:16px 28px;font-size:16px}
 .nocard{margin-top:16px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
 
-/* COUNTER */
-.counter-wrap{margin-top:54px;display:flex;justify-content:center}
-.counter{background:var(--ink);border-radius:18px;padding:24px 44px;display:inline-flex;flex-direction:column;align-items:center;gap:5px;box-shadow:0 30px 70px -42px rgba(14,14,16,.75);max-width:100%}
-.counter .live{display:inline-flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:#93918B;text-align:center}
+/* HERO ENTRANCE: a CSS animation, so the first screen never waits for a script */
+.rise{animation:rise .7s cubic-bezier(.2,.7,.3,1) both}
+.hero .pill.rise{animation-delay:.02s}.hero h1.rise{animation-delay:.08s}.hero .sub.rise{animation-delay:.14s}.hero .hbtns.rise{animation-delay:.2s}.hero .deck.rise{animation-delay:.28s}.hero .stats.rise{animation-delay:.36s}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+/* DECK: five real slides from one set */
+.deck{margin-top:52px}
+.deck-track{display:flex;justify-content:center;align-items:flex-end;padding:12px 0 8px}
+.dcard{margin:0;flex:none;width:200px;aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:#fff;box-shadow:0 34px 60px -32px rgba(14,14,16,.5),0 0 0 1px rgba(14,14,16,.06);transition:transform .35s cubic-bezier(.2,.7,.3,1),box-shadow .35s}
+.dcard img{display:block;width:100%;height:100%;object-fit:cover}
+.dcard:nth-child(1){transform:rotate(-9deg) translate(38px,30px)}
+.dcard:nth-child(2){transform:rotate(-4deg) translate(16px,10px);z-index:1}
+.dcard:nth-child(3){width:228px;transform:translateY(-8px);z-index:2}
+.dcard:nth-child(4){transform:rotate(4deg) translate(-16px,10px);z-index:1}
+.dcard:nth-child(5){transform:rotate(9deg) translate(-38px,30px)}
+.dcard:hover{transform:translateY(-14px) scale(1.04);z-index:3;box-shadow:0 44px 70px -30px rgba(14,14,16,.55),0 0 0 1px rgba(14,14,16,.08)}
+.deck-cap{margin:22px 0 0;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#6E6B63}
+/* STATS */
+.stats{margin-top:36px;display:flex;justify-content:center;flex-wrap:wrap;gap:14px 40px}
+.stat{display:flex;flex-direction:column;align-items:center;gap:4px}
+.stat b{font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(1.55rem,3.2vw,2.15rem);letter-spacing:-.03em;line-height:1;color:var(--ink);font-variant-numeric:tabular-nums}
+.stat span{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#6E6B63}
+/* LOOKS: six first slides across styles */
+.looks{padding-top:64px}
+.looks-h{text-align:center;margin:0 0 22px}
+.looks-track{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.look{margin:0}
+.look img{display:block;width:100%;height:auto;aspect-ratio:4/5;object-fit:cover;border-radius:14px;box-shadow:0 22px 40px -28px rgba(14,14,16,.45),0 0 0 1px rgba(14,14,16,.06);background:#fff}
+.look figcaption{margin-top:10px;display:flex;flex-direction:column;gap:2px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#6E6B63}
+.look figcaption b{font-weight:500;color:var(--ink)}
+@media (max-width:760px){
+  .deck{margin-top:40px}
+  .deck-track{justify-content:flex-start;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:8px 18px 18px;margin:0 -18px;scrollbar-width:none}
+  .deck-track::-webkit-scrollbar{display:none}
+  .dcard,.dcard:nth-child(n){width:62vw;max-width:250px;transform:none;scroll-snap-align:center}
+  .stats{gap:12px 24px}
+  .looks{padding-top:48px}
+  .looks-track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:12px;padding:0 18px 16px;margin:0 -18px;scrollbar-width:none}
+  .looks-track::-webkit-scrollbar{display:none}
+  .look{flex:none;width:44vw;max-width:210px;scroll-snap-align:start}
+}
 .eye{width:15px;height:15px;flex:0 0 auto;color:var(--lime);animation:blink 3.4s ease-in-out infinite}
 @keyframes blink{0%,92%,100%{opacity:1}96%{opacity:.25}}
-.counter .num{font-family:'Archivo',sans-serif;font-stretch:112%;font-weight:700;font-size:clamp(2.2rem,6.4vw,3.7rem);color:var(--lime);letter-spacing:-.04em;line-height:1.05;font-variant-numeric:tabular-nums}
-.counter .lbl{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:#93918B}
 
 /* MARQUEE */
 
@@ -355,7 +389,7 @@ text-transform:uppercase;color:#6E6B63}
   section{padding-top:76px}
   .wrap{padding-inline:18px}
   .hero{padding-top:48px}
-  .counter{padding:20px 24px;width:100%}
+  
     .vscol,.plan,.card,.credits{padding:22px}
   .pfor,.pprice{min-height:0}
   .finalcta{padding:76px 0 64px}
@@ -414,22 +448,41 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill rv"><b>Pre-launch</b> Founding price locked at $20/mo</span>
-    <h1 class="rv">Turn one idea into a <span class="mark">viral carousel</span> in two minutes</h1>
-    <p class="sub rv">Enter a topic. Pick your style. Get a ready-to-post carousel with the same character on every slide, a hook that stops the scroll, and no AI watermark anywhere.</p>
-    <div class="hbtns rv">
+    <span class="pill rise"><b>Pre-launch</b> Founding prices locked</span>
+    <h1 class="rise">Turn one idea into a <span class="mark">viral carousel</span> in two minutes</h1>
+    <p class="sub rise">Enter a topic. Pick your style. Get a ready-to-post carousel with the same character on every slide, a hook that stops the scroll, and no AI watermark anywhere.</p>
+    <div class="hbtns rise">
       <a href="/signup" class="btn btn-dark">Get started</a>
       <a href="#pricing" class="btn btn-ghost">See pricing</a>
     </div>
-    <div class="counter-wrap rv">
-      <div class="counter">
-        <span class="live">
-          <svg class="eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1.8 12S5.5 5 12 5s10.2 7 10.2 7-3.7 7-10.2 7S1.8 12 1.8 12z"/><circle cx="12" cy="12" r="3.1"/></svg>
-          Views our team has pulled with this format
-        </span>
-        <span class="num" id="viewnum">0</span>
-        <span class="lbl">in 20 days, one account</span>
+    <div class="deck rise" role="group" aria-label="Five slides of one carousel made with The Future Clips">
+      <div class="deck-track">
+        <figure class="dcard"><img src="/carousels/hero-1.webp" width="440" height="587" alt="Slide 1 of 8 of a gym carousel, the same person on every slide" fetchpriority="high" decoding="async"></figure>
+        <figure class="dcard"><img src="/carousels/hero-2.webp" width="440" height="587" alt="Slide 2 of 8 of a gym carousel, the same person on every slide" loading="lazy" fetchpriority="low" decoding="async"></figure>
+        <figure class="dcard"><img src="/carousels/hero-3.webp" width="440" height="587" alt="Slide 3 of 8 of a gym carousel, the same person on every slide" loading="lazy" fetchpriority="low" decoding="async"></figure>
+        <figure class="dcard"><img src="/carousels/hero-4.webp" width="440" height="587" alt="Slide 4 of 8 of a gym carousel, the same person on every slide" loading="lazy" fetchpriority="low" decoding="async"></figure>
+        <figure class="dcard"><img src="/carousels/hero-5.webp" width="440" height="587" alt="Slide 5 of 8 of a gym carousel, the same person on every slide" loading="lazy" fetchpriority="low" decoding="async"></figure>
       </div>
+      <p class="deck-cap">Made with The Future Clips · one idea in, eight slides out · the same person on every slide</p>
+    </div>
+    <div class="stats rise">
+      <div class="stat"><b id="viewnum">0</b><span>views in 20 days, one account</span></div>
+      <div class="stat"><b>2 min</b><span>from idea to post-ready</span></div>
+      <div class="stat"><b>5–10</b><span>slides, your call</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="looks" aria-labelledby="looks-h">
+  <div class="wrap">
+    <p class="looks-h rv" id="looks-h"><span class="eyebrow"><i></i>Same two-minute flow, any look</span></p>
+    <div class="looks-track rv">
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-poster.webp" width="360" height="450" alt="A poster-style slide: “Nobody saves a boring carousel”"><figcaption><b>Poster</b><span>Creator tips</span></figcaption></figure>
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-editorial.webp" width="360" height="450" alt="An editorial slide: “Why does my skin get worse when I try harder?”"><figcaption><b>Editorial</b><span>Skincare</span></figcaption></figure>
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-native.webp" width="360" height="450" alt="A photo slide: “5 meals I prep every Sunday, ranked by speed”"><figcaption><b>Native</b><span>Meal prep</span></figcaption></figure>
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-feed.webp" width="360" height="450" alt="A photo slide: “4 trading apps I open before every single session”"><figcaption><b>Feed</b><span>Trading</span></figcaption></figure>
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-rail.webp" width="360" height="450" alt="A dark landscape slide: “Regret”, a hiking story"><figcaption><b>Rail</b><span>Travel</span></figcaption></figure>
+      <figure class="look"><img loading="lazy" decoding="async" src="/carousels/look-mascot.webp" width="360" height="450" alt="An orange brand slide with a gorilla mascot: “Four things that actually moved my lifts”"><figcaption><b>Mascot</b><span>Fitness app</span></figcaption></figure>
     </div>
   </div>
 </section>
