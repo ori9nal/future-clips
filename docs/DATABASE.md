@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-18, after 0007)
+## Migration state (2026-09-18, after 0011)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -18,6 +18,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0008_partner_accounts.sql` | – | **no** | dormant feature |
 | `0009_m0_security_hardening.sql` | `m0_security_hardening` (2026-09-18) | yes | S2, S5, S6, S7 from the audit |
 | `0010_no_free_tier_site_pricing.sql` | `no_free_tier_site_pricing` (2026-09-18) | yes | prices 16/32/79, allowances 200/500/1,500, priority 50/150 and HD ×3 (D-012 default), packs, `plans.label`, `welcome_slides = 0`, the `free` row is "No plan", `orgs.slide_balance`, `sets.from_balance`, balance-aware gate functions, `fc_credit_pack`, advisor fixes (duplicate index, seven FK indexes, `members_owner_remove`) |
+| `0011_rate_limits.sql` | `rate_limits` (2026-09-18) | yes | `rate_limits` table and `fc_rate_limit(key, limit, window_s)` (service role only); the sign-in routes call it with hashed keys |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 
@@ -36,6 +37,7 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | `spend_ledger` | `reserve | commit | release` rows per set | the gate functions | members |
 | `packs` | the slide packs on sale: `p100` 100/$8, `p250` 250/$18, `p600` 600/$40 | migrations, later Dodo | any signed-in user |
 | `billing_events` | one row per Dodo webhook delivery (`id` = the `webhook-id` header), payload and outcome; a redelivery is answered as a duplicate | the webhook (service role) | platform owner |
+| `rate_limits` | fixed-window counters keyed by a sha256 of an IP or email (never the plain value) | `fc_rate_limit` (service role) | nobody |
 | `signups` | the old waitlist (3 rows); no code reads or writes it | – | nobody (anon insert policy dropped in 0009) |
 | `creators`, `brand_kits`, `pairing_history`, `jobs` | schema for own-creator, brand lock, pairing rotation, a generic queue; unused by code | – | own org (jobs: no policies) |
 
@@ -51,6 +53,7 @@ Live plan rows after 0010 (2026-09-18): `free` "No plan", 0 slides; `solo` "Clip
 | `fc_release_set(p_set, p_error, p_cost)` | definer | service role | fail the set, return every reserved slide, record partial cost |
 | `fc_period_start(uuid)`, `fc_reserve_rate(lane, hd)` | definer / invoker | service role | billing period; $0.03 batch, $0.06 priority, ×3 HD |
 | `fc_credit_pack(p_org, p_pack, p_note) → integer` | definer | service role (the webhook; the admin by hand) | adds a pack's slides to `orgs.slide_balance`, ledger `credit` |
+| `fc_rate_limit(p_key, p_limit, p_window_s) → boolean` | definer | service role | true while the key is under the limit in the window; `lib/ratelimit.ts` hashes the key first; a laptop without the service role has no limiter |
 | `gate_new_user()`, `handle_new_user()` | definer | trigger only | invite-only sign-up; personal org + owner membership + invited memberships |
 | `invites_respect_seats()`, `orgs_protect_billing()`, `sets_member_update_guard()` | trigger only | – | seat limit on invites; members cannot change plan/billing fields; members may change only `cancel_requested` on a set (generic row comparison since 0009) |
 

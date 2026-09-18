@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { loginError, rememberNext, requestOrigin, safeNext, sameOrigin } from "@/lib/login";
+import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
 
 /**
  * POST { email, next? } → asks Supabase to email a magic link. Runs on the
@@ -16,6 +17,10 @@ export async function POST(req: NextRequest) {
   const body = (await req.json().catch(() => ({}))) as { email?: unknown; next?: unknown };
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!EMAIL.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
+  // 10 requests per address per 10 minutes, 5 per email per hour (hashed keys)
+  if (!(await allow(`otp:ip:${clientIp(req)}`, 10, 600)) || !(await allow(`otp:email:${email}`, 5, 3600))) {
+    return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+  }
 
   const origin = requestOrigin(req);
   const supabase = await createClient();

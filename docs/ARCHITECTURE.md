@@ -64,6 +64,14 @@ Today both projects were deployed by hand through the Vercel MCP: the site as th
 
 Target (milestone M3 in `docs/ROADMAP.md`): GitHub connected to Vercel, the app deployed from `main` with the engine traced in, the site project pointed at `future-clips-site/` as its root directory with no build step, no bucket fetch, the five-minute poller running (Vercel Pro cron or pg_cron + pg_net), `app.thefutureclips.com` on the app project, Supabase Pro. Every owner-side click is listed in `OWNER-ACTIONS.md`.
 
+## Security posture
+
+- **Headers** on both hosts: `X-Content-Type-Options`, `X-Frame-Options DENY`, `Referrer-Policy`, `Permissions-Policy`, HSTS, and a Content-Security-Policy (scripts and styles from the host only, `'unsafe-inline'` for Next's runtime and the site's two inline scripts, images from the host and Storage, no framing, no plugins, `form-action 'self'`). The app's CSP adds `'unsafe-eval'` and the HMR socket in development only (`next.config.ts`).
+- **Sign-in** happens on the server (`/api/auth/*`): same-origin `Origin` only, rate limited per address and per email through `fc_rate_limit` (hashed keys), `next` only ever a path on this host, PKCE verifier in an httpOnly cookie. Whether an email may sign up is the database's call (invite gate).
+- **Billing**: Dodo events are verified (Standard Webhooks, timing-safe, 5 min tolerance), recorded once by delivery id, and applied as the service role; members cannot change plan or balance fields (`orgs_protect_billing`). Checkout and portal are same-origin, owner-only.
+- **Data**: RLS on every table, `anon` reads only `plans`, money and quota move only through `SECURITY DEFINER` gate functions, secrets never `NEXT_PUBLIC_*`, `server-only` on every module that holds the service role.
+- **Checks**: `.github/workflows/ci.yml` runs `tsc`, lint, the engine and helper tests and `next build` on every push; `tests/` covers the sign-in helpers and the webhook signature.
+
 ## Brand assets (one mark everywhere)
 
 The mark is three stacked cards, `viewBox 0 0 92 64`, rects at (0,21), (14,12), (31,2), 55×39, radius 7, fills `#D9D7D1`, `#8E8D89`, `#0E0E10`. The wordmark is a tracked small-caps "THE" (Manrope 600, 8.5 px, letter-spacing .34em, `#6E6B63` on the site and `var(--fc-body)` in the app: both clear 4.5:1) over "futureclips" (Archivo 700, 19 px in the site header, 16 px in compact nav, letter-spacing -.032em, ink). Where it lives:
