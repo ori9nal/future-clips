@@ -136,6 +136,40 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   ok(fr[0].refs[0] === '/x/app.png' && fr[1].refs[0] === '/x/anchor.png', 'the phone-on-a-bench frame references the screenshot; the rest reference the anchor');
   const d = direct({ spec, content: { hook: { lines: ['h'] }, ranked: [{ name: 'a' }, { name: 'b', showsApp: true }, { name: 'c' }], closer: { lines: ['z'] } }, styleId: 'feed', seed: 't' });
   ok(d.days && d.mode === 'subject' && d.look === 'phone' && d.appIndex === 2, `direct(): gym feed is subject+days, phone look, app at ${d.appIndex}`);
+  // F6 (2026-09-18): a part seen from behind or the side is never asked for as a POV of one's own body
+  for (const seed of ['a', 'b', 'c']) {
+    const e2 = enforce(new Array(7).fill('x'), { niche: 'fitness', appIndex: 4, seed, headings: ['Barbell row', 'Lat pulldown', 'Calf raise', 'app', 'Shrugs'] });
+    ok(![e2.shots[1], e2.shots[2], e2.shots[3], e2.shots[5]].includes('pov'), `seed ${seed}: back, calf and trap headings never draw a POV (${e2.shots.join(' ')})`);
+  }
+  // F6b (round 3): "Seated cable row" is a row, not a cable curl; a behind part in a mirror is shot over the shoulder
+  const e3 = enforce(new Array(6).fill('x'), { niche: 'fitness', appIndex: -1, seed: 'q', headings: ['Seated cable row', 'Kroc rows', 'Cable curl', 'Barbell row'] });
+  ok(e3.shots[1] !== 'pov' && /back from behind mid row/.test(e3.scenes[1]), `"Seated cable row" draws the back (${e3.shots[1]})`);
+  const e4 = enforce(['mirror, gym', 'crop', 'crop', 'mirror, back to the glass', 'crop', 'outdoors'], { niche: 'fitness', appIndex: -1, seed: 'q', headings: ['Kroc rows', 'Lat pulldown', 'Barbell row', 'Cable curl'] });
+  ok(e4.shots[3] === 'mirror' && /back to the mirror, the phone held up over one shoulder/.test(e4.scenes[3]), `a row heading in a mirror shot is taken over the shoulder with the back to the glass (${e4.shots.join(' ')})`);
+  ok(/mid cable curl/.test(e4.scenes[4]), 'a cable curl still maps to the curl anatomy');
+  // F12 (2026-09-18): when the hook names the life's car, later car frames are edits of the hook frame
+  const ap = planSet({ subject: 'none', scenes: ['a matte black Lamborghini parked on a street', 'a desk with two monitors', 'a matte black Lamborghini in an underground car park'], mode: 'aspirational', id: 'w' });
+  ok(ap.anchor && ap.anchor.i === 0 && ap.anchor.refs.length === 0, 'aspirational plan takes the car hook as its anchor');
+  const wf = ap.frames('/x/hook.png');
+  ok(wf[0].refs.length === 0 && wf[1].refs[0] === '/x/hook.png' && /SAME CAR/.test(wf[1].prompt), 'the second car frame references the hook; the desk frame stays independent');
+  ok(planSet({ subject: 'none', scenes: ['a pool at night', 'a matte black Lamborghini parked'], mode: 'aspirational', id: 'w2' }).anchor === null, 'no car in the hook: no anchor, every frame independent');
+}
+
+// 8. a tag line in "score" is repaired away; an x/10 rating is kept (2026-09-18)
+{
+  const tag = { hook: { lines: ['4 trading apps i check, ranked'], sub: [] }, ranked: [{ name: 'Forex Factory', score: 'news first', lines: ['8am, 15 mins'] }, { name: 'TradingView', score: '9/10', lines: ['2 layouts'] }, { name: 'MetaTrader 5', score: '', lines: ['1% risk'] }], closer: { lines: ['z'], cta: 'go' }, caption: 'x 📈 ☕', bio: '', hashtags: [] };
+  const jt = judgeCopy({ spec, data: JSON.parse(JSON.stringify(tag)), range: slideRange(spec, 5), styleId: 'feed' });
+  ok(jt.data.ranked[0].score === '' && jt.data.ranked[1].score === '9/10', `a tag line in "score" is blanked, a rating is kept (repairs: ${jt.verdict.repairs.length})`);
+  // F14: the trading family never rates
+  const tspec = { ...spec, niche: 'trading', rules: {}, requirements: {} };
+  const jr = judgeCopy({ spec: tspec, data: JSON.parse(JSON.stringify(tag)), range: slideRange(tspec, 5), styleId: 'feed' });
+  ok(jr.data.ranked[1].score === '', 'an x/10 on a trading item is dropped (the wealth references never rate)');
+  // F15: a wealth mistake stays on the kinds it belongs to
+  for (const seed of ['a', 'b', 'c', 'd', 'e']) {
+    const t2 = enforce(new Array(7).fill('x'), { niche: 'trading', appIndex: 4, seed });
+    const bad = t2.scenes.findIndex((sc, i) => /traffic cone/.test(sc) && !/^(car|behind|street|garage|petrol)$/.test(t2.shots[i]));
+    ok(bad < 0, `seed ${seed}: no traffic cone away from the street (${t2.shots.join(' ')})`);
+  }
 }
 
 console.log(failed ? `\n${failed} failed` : '\nall passed');

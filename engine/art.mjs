@@ -22,6 +22,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { generate, sizeFor } from './providers/image.mjs';
+import { LIVES } from './scenes.mjs';
 
 /** Photographic direction shared by every frame, so the set grades as one. */
 const LOOK = {
@@ -48,7 +49,8 @@ const GUARD = 'No text, no logos, no watermarks, no captions anywhere in the ima
  * subject is the place or the object, shot the way a phone catches it.
  */
 const ASPIRE_GUARD = 'A phone photo, not staged, not a stock photo, not a render. A person may appear from behind, hooded, or as a hand or a shoe — never a visible face, never posing. ' +
-  'No text, no logos, no watermarks. No studio lighting, no bokeh, no HDR glow, no symmetry, no cinematic grade, no perfectly clean surfaces.';
+  'No text, no logos, no watermarks. No studio lighting, no bokeh, no HDR glow, no symmetry, no cinematic grade, no perfectly clean surfaces. ' +
+  'Nothing is showroom-clean: a car has road dust, water spots and fingerprints on the paint; glass has smears; the ground has marks and litter.';
 
 /**
  * The identity line. What must NOT change is the person; what must change
@@ -57,6 +59,15 @@ const ASPIRE_GUARD = 'A phone photo, not staged, not a stock photo, not a render
  */
 const SAME_PERSON = 'The SAME PERSON as the reference image: same face shape, same hair, same skin tone, same build, same body hair, same tattoos if any.';
 const RELEASE = 'Photographed on a DIFFERENT day: do not copy the reference\'s clothing, room, lighting, camera angle or framing.';
+
+/**
+ * The trading set's constant is a possession, not a person (engine/scenes.mjs
+ * LIVES). Round 2 (2026-09-18) drew a Lamborghini on the hook and a different
+ * saloon two slides later, because every aspirational frame was its own
+ * generation. So when the hook names the life's car, it is drawn first and the
+ * later frames that name the same car are edits of it.
+ */
+const SAME_CAR = 'The SAME CAR as in the reference image: same model, same colour, same wheels, same number plate. Photographed on a different day in a different place at a different time of day: do not copy the reference\'s angle, light or background.';
 
 /** A scene that asks for the app screenshot on a phone (engine/scenes.mjs SHOTS.phone). */
 const APPSHOT = /^An iPhone lying face up on/;
@@ -90,12 +101,21 @@ export function planSet(o) {
   });
 
   if (mode === 'aspirational') {
-    return {
-      mode, size, quality, anchor: null,
-      frames: () => scenes.map((scene, i) => (appScreen && APPSHOT.test(scene)
-        ? appFrame(scene, i)
-        : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}` })),
-    };
+    const indep = (scene, i) => (appScreen && APPSHOT.test(scene)
+      ? appFrame(scene, i)
+      : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}` });
+    // the hook names the life's car → it is the anchor and the other car frames are edits of it
+    const car = LIVES.map((L) => L.car).find((c) => String(scenes[0] ?? '').includes(c));
+    if (!car) return { mode, size, quality, anchor: null, frames: () => scenes.map(indep) };
+    const anchor = indep(scenes[0], 0);
+    const frames = (anchorFile) => scenes.slice(1).map((scene, n) => {
+      const i = n + 1;
+      if (anchorFile && scene.includes(car) && !(appScreen && APPSHOT.test(scene))) {
+        return { i, label: `${id}-a${i}`, refs: [anchorFile], prompt: `${style} ${SAME_CAR} ${scene} ${ASPIRE_GUARD}` };
+      }
+      return indep(scene, i);
+    });
+    return { mode, size, quality, anchor, frames, car };
   }
 
   const anchor = { i: 0, label: `${id}-anchor`, refs: [], prompt: `${style} ${subject} ${scenes[0]} ${GUARD}` };
@@ -145,7 +165,7 @@ export async function generateSet(o) {
   // image and no recurring person. Coherence comes from the shared LIFE
   // (engine/scenes.mjs), not from a face — which is how the reference sets
   // are actually built.
-  if (mode === 'aspirational') {
+  if (mode === 'aspirational' && !plan.anchor) {
     const files = [];
     let usd = 0, cached = 0;
     for (const f of plan.frames()) {

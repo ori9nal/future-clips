@@ -39,7 +39,7 @@ const DREARY = /\b(rain|raining|wet window|bus|train|tram|subway|caf[eé]|coffee
  */
 export const CAMERA = {
   gym: 'Taken on an iPhone, straight off the camera roll, unedited: auto exposure so the window or the ceiling lights blow out, overhead gym LED light with a slight green cast, real skin with pores and veins and an uneven tan, a little motion softness, ordinary clutter in the background (a water bottle, a towel, a bag on the floor, another member mid-set). Not a photoshoot: no studio light, no softbox, no rim light, no bokeh, no golden hour, no symmetry, no retouching, no model pose, no colour grade, nobody smiling at the lens.',
-  wealth: 'Taken on an iPhone by the owner or a friend, straight off the camera roll: auto exposure, streetlights and screens blowing out at night, a slight tilt, reflections in glass, part of the phone or a finger sometimes in the frame edge, ordinary clutter (a charger cable, a bag, a coffee cup, traffic cones). Not a photoshoot and not a render: no studio light, no bokeh, no HDR glow, no symmetry, no cinematic grade, no perfectly clean surfaces.',
+  wealth: 'Taken on an iPhone by the owner or a friend, straight off the camera roll: auto exposure, streetlights and screens blowing out at night, a slight tilt, reflections in glass, part of the phone or a finger sometimes in the frame edge, ordinary clutter (a charger cable, a bag, a coffee cup, a receipt on the seat). Not a photoshoot and not a render: no studio light, no bokeh, no HDR glow, no symmetry, no cinematic grade, no perfectly clean surfaces.',
   food: 'Taken on an iPhone in a real kitchen, straight off the camera roll, flash on or the ceiling light overhead, shot from standing height at a slight angle, the counter cluttered (a pack of rice, a kitchen roll, a phone, a spoon on the side), plates that do not match, unedited. Not food photography: no styling, no soft window light, no bokeh, no garnish, no top-down flat lay, no colour grade.',
 };
 
@@ -71,16 +71,18 @@ export const MISTAKES = {
     { text: 'the near edge is too close to the lens and goes soft',        on: ['pov', 'object', 'crop'] },
     { text: 'the phone case and a bit of the thumb in the corner',         on: ['pov'] },
   ],
+  // `on` lists the kinds a mistake belongs to: round 4 (2026-09-18) put a
+  // traffic cone on a penthouse terrace
   wealth: [
-    'the horizon tilts a few degrees',
-    'a reflection of the phone in the window',
-    'part of a finger at the edge of the frame',
-    'the streetlights bloom and the shadows are crushed',
-    'the subject is off-centre, a lot of empty road or sky',
-    'a traffic cone, a bin or a parked van in the background',
-    'the flash reflects off the paint',
-    'a hand or a shoe in the bottom of the frame',
-    'the framing is loose, shot quickly while walking past',
+    { text: 'the horizon tilts a few degrees' },
+    { text: 'a reflection of the phone in the window',                   on: ['interior', 'penthouse', 'plane', 'rooftop', 'lounge', 'desk'] },
+    { text: 'part of a finger at the edge of the frame' },
+    { text: 'the streetlights bloom and the shadows are crushed',        on: ['car', 'behind', 'street', 'garage', 'petrol', 'rooftop', 'interior'] },
+    { text: 'the subject is off-centre, a lot of empty road or sky',     on: ['car', 'behind', 'street', 'petrol', 'boat', 'pool'] },
+    { text: 'a traffic cone, a bin or a parked van in the background',  on: ['car', 'behind', 'street', 'garage', 'petrol'] },
+    { text: 'the flash reflects off the paint',                         on: ['car', 'garage', 'petrol', 'watch'] },
+    { text: 'a hand or a shoe in the bottom of the frame',              on: ['car', 'street', 'pool', 'boat', 'feetup', 'desk', 'behind', 'watch'] },
+    { text: 'the framing is loose, shot quickly while walking past',    on: ['car', 'behind', 'street', 'garage'] },
   ],
   food: [
     'the plate is cut off by the edge of the frame',
@@ -145,7 +147,11 @@ export const ROOMS = [
 export const SHOTS = {
   mirror: {
     face: 'partly',
-    frame: ({ outfit, room, body }) => `Mirror selfie in ${room}: the phone held at chest height in one hand, looking down at the screen not at the camera, ${outfit}, ${body ? `${body} tensed, ` : ''}the room reflected behind.`,
+    // a part seen from behind is shot with the back to the mirror and the
+    // phone over one shoulder (set-13 "4. Rear Delts"), never chest-height
+    frame: ({ outfit, room, body, behind }) => (behind
+      ? `Mirror selfie in ${room}: standing with his back to the mirror, the phone held up over one shoulder pointing at the mirror, ${outfit}, ${body} tensed, face turned away from the camera, the room reflected behind.`
+      : `Mirror selfie in ${room}: the phone held at chest height in one hand, looking down at the screen not at the camera, ${outfit}, ${body ? `${body} tensed, ` : ''}the room reflected behind.`),
   },
   'mirror-dim': {
     face: 'no',
@@ -153,7 +159,7 @@ export const SHOTS = {
   },
   pov: {
     face: 'no',
-    frame: ({ body, outfit }) => `Looking down from his own eye level at his own ${body ?? 'forearm'}: the arm fills the lower half of the frame, ${outfit} visible, his thighs and the gym floor below, the room out of focus at the top. No face.`,
+    frame: ({ body, outfit }) => `Looking down from his own eye level at his own ${body ?? 'forearm'}: it fills the lower half of the frame, ${outfit} visible, his thighs and the gym floor below, the room out of focus at the top. No face.`,
   },
   crop: {
     face: 'no',
@@ -228,20 +234,21 @@ const ANATOMY = [
   { rx: /hammer|forearm|wrist|grip/i,                 body: 'forearm and bicep mid hammer curl, the dumbbell held neutral', move: 'mid hammer curl with a dumbbell' },
   { rx: /preacher/i,                                  body: 'bicep at the top of a preacher curl, arm on the pad', move: 'on the preacher curl bench mid rep' },
   { rx: /incline|dumbbell curl|db curl/i,             body: 'bicep mid incline dumbbell curl, the arm hanging back', move: 'on an incline bench mid dumbbell curl' },
-  { rx: /cable curl|bayesian|cable/i,                 body: 'bicep and forearm mid cable curl, the handle in hand', move: 'at the cable station mid curl' },
+  // "cable" alone matched "Seated cable row" ahead of the row entry (round 3, 2026-09-18)
+  { rx: /cable curl|bayesian/i,                       body: 'bicep and forearm mid cable curl, the handle in hand', move: 'at the cable station mid curl' },
   { rx: /spider|concentration/i,                      body: 'bicep peaked mid concentration curl, elbow braced', move: 'sat on a bench mid concentration curl' },
   { rx: /chin|pull.?up|pullup/i,                      body: 'back and arms at the top of a chin-up', move: 'at the top of a chin-up on the bar' },
   { rx: /curl|bicep/i,                                body: 'bicep flexed mid curl, veins up', move: 'mid barbell curl' },
-  { rx: /row|pulldown|lat\b|lats|back|rear delt|erector/i, body: 'back from behind mid row, lats out', move: 'mid cable row, back to the camera' },
-  { rx: /calf|calves/i,                               body: 'calves from behind at the top of a calf raise', move: 'on the calf raise machine' },
+  { rx: /row|pulldown|lat\b|lats|back|rear delt|erector/i, body: 'back from behind mid row, lats out', move: 'mid cable row, back to the camera', noPov: true },
+  { rx: /calf|calves/i,                               body: 'calves from behind at the top of a calf raise', move: 'on the calf raise machine', noPov: true },
   { rx: /tibialis|shin|ankle/i,                       body: 'shins and training shoes mid tibialis raise', move: 'sat doing tibialis raises' },
   { rx: /glute|hip thrust|hip/i,                      body: 'hips at the top of a hip thrust, bar across the lap', move: 'mid hip thrust on the bench' },
   { rx: /squat|quad|leg\b|legs|hamstring|adductor|lunge|split/i, body: 'quads from the waist down at the bottom of a squat', move: 'at the bottom of a squat in the rack' },
-  { rx: /bench|chest|press|push.?up|fly|pec/i,        body: 'chest and shoulder from the side mid dumbbell press on the bench', move: 'mid dumbbell press on the flat bench' },
+  { rx: /bench|chest|press|push.?up|fly|pec/i,        body: 'chest and shoulder from the side mid dumbbell press on the bench', move: 'mid dumbbell press on the flat bench', noPov: true },
   { rx: /shoulder|delt|raise|overhead|lateral/i,      body: 'shoulder and upper arm at the top of a lateral raise', move: 'mid lateral raise with dumbbells' },
   { rx: /tricep|dip|skull|pushdown/i,                 body: 'back of the upper arm mid tricep pushdown, rope in hand', move: 'at the cable mid tricep pushdown' },
   { rx: /abs|core|plank|crunch|oblique/i,             body: 'torso from the neck down, shirt lifted, abs tensed', move: 'mid hanging leg raise' },
-  { rx: /neck|trap|shrug/i,                           body: 'neck and traps from behind mid shrug', move: 'mid dumbbell shrug' },
+  { rx: /neck|trap|shrug/i,                           body: 'neck and traps from behind mid shrug', move: 'mid dumbbell shrug', noPov: true },
   { rx: /deload|rest|sleep|recover/i,                 thing: THINGS[4] },
   { rx: /log|track|write|app|note|phone|number|guess/i, thing: 'A phone propped against a water bottle on a bench showing a notes app, wrist straps beside it' },
   { rx: /food|meal|protein|eat|creatine|supplement|diet|carb|calorie/i, thing: THINGS[0] },
@@ -397,7 +404,8 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
 
   /* wealth: one life, a mix of day and night, no repeated kind */
   const life = pick(LIVES, seed + '|life');
-  const mistake = dealer(MISTAKES.wealth, seed + '|mis');
+  const dealt = dealer(MISTAKES.wealth, seed + '|mis');
+  const mistake = (kind) => { for (let k = 0; k < 40; k++) { const m = dealt(); if (!m.on || m.on.includes(kind)) return m.text; } return ''; };
   // at least 40 % daylight: the reference is 37 %, and "always dark" was
   // the owner's complaint. The hook takes the seed's world; the rest deal
   // day and night alternately from a seeded start.
@@ -421,7 +429,7 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
     const b = i === 0 ? draw(times[0], hookOrder) : draw(times[i], hint ? [hint] : []);
     shots.push(b.kind);
     const w = WORLDS[times[i] === 'day' ? (hash(seed + i) % 2 ? 'midday' : 'golden') : times[i] === 'dusk' ? 'bluehour' : 'night'];
-    return `${b.scene(life)}. ${w.prompt} ${mistake()}. ${CAMERA.wealth}`;
+    return `${b.scene(life)}. ${w.prompt} ${mistake(b.kind)}. ${CAMERA.wealth}`;
   });
   return { scenes: out, world: { ...world, look: 'phone' }, replaced: scenes.map((_, i) => i), shots, life, times };
 }
@@ -470,12 +478,17 @@ function enforceGym(scenes, { appIndex, seed, headings, closerIsOne, world }) {
       // a heading that names a muscle must show it: the dim mirror and the
       // outdoors beat cannot, so they go to a lesson or a habit instead
       if (anat?.body && /^(mirror-dim|object|outdoors)$/.test(type)) type = prev === 'crop' ? 'pov' : prev === 'pov' ? 'friend' : 'crop';
+      // a part seen from behind or from the side (the back, calves, traps, the
+      // chest mid press) cannot be a POV of one's own body: round 0 (2026-09-18)
+      // asked for "looking down at his own back from behind mid row" and the
+      // model drew a thigh. Those parts go to a crop or a friend shot.
+      if (anat?.noPov && type === 'pov') type = prev === 'crop' ? 'friend' : 'crop';
       if (anat?.thing) { type = 'object'; line = SHOTS.object.frame({ thing: anat.thing }); }
       else if (type === 'object') line = SHOTS.object.frame({ thing: thing() });
       else if (type === 'friend') line = SHOTS.friend.frame({ move: anat?.move, outfit: outfit(), room: room() });
       else if (type === 'mirror-dim') line = SHOTS['mirror-dim'].frame({ outfit: outfit() });
       else if (type === 'pov') line = SHOTS.pov.frame({ body: anat?.body ?? 'forearm, the phone in the other hand', outfit: outfit() });
-      else if (type === 'mirror') line = SHOTS.mirror.frame({ outfit: outfit(), room: room(), body: anat?.body });
+      else if (type === 'mirror') line = SHOTS.mirror.frame({ outfit: outfit(), room: room(), body: anat?.body, behind: !!anat?.noPov });
       else line = SHOTS.crop.frame({ body: anat?.body ?? 'arm and shoulder', outfit: outfit(), room: room() });
     }
     shots.push(type);

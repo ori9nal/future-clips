@@ -20,7 +20,7 @@ function expandIn(text, spec) {
 const SHAPE = `{
   "subject": "one locked sentence describing the person in the set: age, hair, facial hair, one plain outfit. No names, no brands.",
   "hook":   { "lines": ["2-3 short lines, hand-broken"], "sub": [], "scene": "shot type then one clause: mirror | pov | crop | friend | object | outdoors — e.g. \"mirror, locker room, phone at chest\"" },
-  "ranked": [ { "name": "slide heading", "score": "optional short tag", "lines": ["1-4 short lines"],
+  "ranked": [ { "name": "slide heading", "score": "an x/10 rating ONLY when the ask rates or ranks things (\"8/10\", \"-2/10\", \"1000/10\"); otherwise \"\". Never a tag line", "lines": ["1-4 short lines"],
                 "role": "body | app | proof", "showsApp": false, "scene": "shot type then one clause" } ],
   "numbering": "countdown | up | none",
   "closer": { "lines": ["1-2 short lines"], "cta": "the call to action" },
@@ -65,6 +65,8 @@ const RULES_NATIVE = `How to write it:
   "32.5kg", "6am", "twice a week", "$25-$50", "1% risk per trade", "2-4 pairs", "40 min". At least half
   of the ranked items carry one. A noun without a number ("progressive overload", "consistency") is
   what a brand writes.
+- "score" is an x/10 rating when the ask rates or ranks things, otherwise "". No real post puts a tag
+  line ("news first", "the gamechanger") under a heading; say it in "lines" or not at all.
 - The voice is a person typing on their phone: sentence case, a lowercase "i" is fine, "lol", "fr",
   "lowkey", ".." and "..." as trailing punctuation, ONE word in CAPS for emphasis ("ACTUALLY", "ONLY",
   "PEAK", "FAVVV"). No em dashes (use a comma or ".."), no semicolons, no hashtags on slides, at most
@@ -164,6 +166,7 @@ const SCENE_DIRECTION = {
     'me consistent".',
     'closers — "Your own rules: / 1. Keep your journey private, don\'t tell a soul. / 2. Stay',
     'disciplined and stick to your strategy." · "the only one who can make you profitable is you.".',
+    'No x/10 ratings in this format: "score" is always "" (sets 01, 02, 14 never rate).',
     'When the ask is about apps or tools, NAME real ones — TradingView, MetaTrader 5, Forex Factory,',
     'Webull, Stocktwits — alongside the campaign product. The hook is a count plus a promise or a quoted',
     'DM, two short lines, never a confession. Numbers on at least half the items: pairs, months, $,',
@@ -364,6 +367,14 @@ export function judgeCopy({ spec, data, range, styleId }) {
   // repair the mechanical violations first, then judge what is left — a
   // whole regeneration is too expensive to spend on a missing string
   const { copy: repaired, notes } = repair(spec, { slides, caption: data.caption, bio: data.bio });
+  // a "score" that is not a rating is a tag line the reference never carries
+  // (round 2, 2026-09-18: "news first" under "4. Forex Factory"); blanked, not rejected
+  if (phone) for (const r of data.ranked ?? []) {
+    if (r.score && !/-?\d+\s*\/\s*\d+/.test(String(r.score))) { notes.push(`score "${r.score}" on "${r.name}" is not a rating; removed`); r.score = ''; }
+    // x/10 is a gym-family device (sets 08, 15 rate exercises); the trading
+    // and wealth references never rate an app or a habit (sets 01, 02, 11, 14)
+    if (r.score && !GYM_NICHE.test(spec.niche ?? '')) { notes.push(`rating "${r.score}" on "${r.name}" dropped: the ${spec.niche ?? 'trading'} family never rates`); r.score = ''; }
+  }
   data.caption = repaired.caption;
   data.bio = repaired.bio;
   repaired.slides.forEach((s, n) => {

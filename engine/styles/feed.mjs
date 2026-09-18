@@ -144,12 +144,20 @@ export default {
       return { svg, height: wrapped.length * size * lh, bottom: cy + wrapped.length * size * lh };
     };
 
-    /** The app-icon device: rounded icon, white pill, one small line under it. */
-    const iconLockup = (iconFile, label, sub, top) => {
-      const S = Math.round(W * 0.27);
+    /**
+     * The app-icon device: rounded icon, white pill, one small line under it.
+     * `tile: 'none'` draws the pill alone — a third-party app in an apps list
+     * (set-01 puts Forex Factory, Meta Trader 5 and Trading View on the same
+     * device as the campaign's app; we hold no icon for them, so the pill
+     * carries the name and the photo does the rest).
+     */
+    const iconLockup = (iconFile, label, sub, top, { tile = 'icon' } = {}) => {
+      const S = tile === 'none' ? 0 : Math.round(W * 0.27);
       const x = Math.round((W - S) / 2);
       let svg = '';
-      if (iconFile && fs.existsSync(path.join(root, iconFile))) {
+      if (tile === 'none') {
+        // no tile: the pill sits where the icon's lower edge would be
+      } else if (iconFile && fs.existsSync(path.join(root, iconFile))) {
         svg += `<g clip-path="inset(0 round ${Math.round(S * 0.225)}px)">` +
           image(path.join(root, iconFile), x, top, S, S) + '</g>';
       } else {
@@ -160,14 +168,18 @@ export default {
       }
       // the white pill, overlapping the icon's lower edge exactly as the
       // reference does — it reads as one object rather than two stacked
-      const pt = 44;
-      const pw = Math.ceil(layoutWidth(capFace, label, pt)) + 56;
-      const py = top + S - Math.round(pt * 0.5);
+      // set-01 slide 2 "4. Forex Factory" on a 25 px grid: cap height ≈ 60 px,
+      // pill ≈ 100 px tall and 62 % of the width; ours was a 32 px cap (round
+      // 2, 2026-09-18, docs/QUALITY.md F11)
+      const pt = 76;
+      const pw = Math.ceil(layoutWidth(capFace, label, pt)) + 64;
+      const py = tile === 'none' ? top : top + S - Math.round(pt * 0.5);
       svg += rect(Math.round((W - pw) / 2), py, pw, pt + 28, { r: (pt + 28) / 2, fill: '#FFFFFF' });
       svg += text(HEAD, W / 2, py + pt + 4, label, { size: pt, fill: '#111111', anchor: 'middle' });
       let bottom = py + pt + 28;
-      if (sub) {
-        const c = caption([sub], bottom + 18, { size: 32, face: 'body' });
+      const subs = Array.isArray(sub) ? sub.filter(Boolean) : sub ? [sub] : [];
+      if (subs.length) {
+        const c = caption(subs, bottom + 18, { size: 32, face: 'body' });
         svg += c.svg;
         bottom = c.bottom;
       }
@@ -214,6 +226,8 @@ export default {
     const out = [];
     const total = C.ranked.length + 2;
     const numbering = C.numbering ?? 'countdown';
+    // an apps list ("4 trading apps i open") puts EVERY app on the pill device
+    const appsList = /\bapps?\b/i.test((C.hook?.lines ?? []).join(' ')) && C.ranked.some((r) => r.icon);
 
     /**
      * The quietest of a few bands for a caption block. A fixed top put the
@@ -257,18 +271,21 @@ export default {
     }
 
     /* body */
-    // The app slide is not a ranked item and gets no number — set 08 runs
-    // 5, 4, 3, 2, PRO TIP, 1. Ranks count only the real items, and start one
-    // higher when the closer is the number one.
-    const rankable = C.ranked.filter((r) => !(r.screen || r.icon));
+    // Two kinds of app slide. The PHOTOGRAPHED app (a phone on a bench, the
+    // gym convention) is a bonus tip and gets no number — set 08 runs 5, 4,
+    // 3, 2, PRO TIP, 1. The ICON device (the trading app-list convention) is
+    // one of the ranked apps and is numbered like the rest — set-01 runs
+    // "4. Forex Factory … 1. The Edge X", set-14 "1. Webull, 2. TradeLens,
+    // 3. Stocktwits". Round 2 (2026-09-18) rendered 4, 3, [TradeLens App], 1.
+    const rankable = C.ranked.filter((r) => !r.screen);
     let remaining = rankable.length + (C.closerRank ? 1 : 0);
     for (let i = 0; i < C.ranked.length; i++) {
       const item = C.ranked[i];
-      const isApp = !!(item.screen || item.icon);
+      const isBonus = !!item.screen;
       // a hand-numbered set uses the model's numbers and nothing else
       const hand = C.ranked.some((r) => r.rank != null);
-      const rank = hand ? item.rank : isApp ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;
-      const label = (numbering === 'none' && !hand) || isApp || !rank ? item.name : `${rank}. ${item.name}`;
+      const rank = hand ? item.rank : isBonus ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;
+      const label = (numbering === 'none' && !hand) || isBonus || !rank ? item.name : `${rank}. ${item.name}`;
 
       const appPhoto = item.screen && item.photo && path.isAbsolute(String(item.photo)) && fs.existsSync(String(item.photo)) ? String(item.photo) : null;
       if (appPhoto) {
@@ -315,6 +332,12 @@ export default {
       if (item.icon) {
         // app-icon slide: icon + pill, no heading above it
         const lock = iconLockup(item.icon, label, (item.lines ?? [])[0], Math.round(H * 0.14));
+        s.push(lock.svg);
+      } else if (appsList && /^[A-Z0-9]/.test(String(item.name ?? '')) && String(item.name).trim().split(/\s+/).length <= 3) {
+        // a third-party app (a proper noun of one to three words; a routine like
+        // "how i actually run it" keeps the plain caption): the pill alone at
+        // the reference's pill height (set-01: ≈0.40 H)
+        const lock = iconLockup(null, label, item.lines ?? [], Math.round(H * 0.40), { tile: 'none' });
         s.push(lock.svg);
       } else {
         // Three candidate bands; take the quietest. A fixed 30% put the
