@@ -53,6 +53,7 @@ const REASONS: Record<string, string> = {
   FC_NO_HD: "HD export comes with Pro and Studio.",
   FC_QUOTA: "Not enough slides left this period.",
   FC_SPEND_CAP: "This workspace has reached its spend cap for the period. Email team@thefutureclips.com to raise it.",
+  FC_DEMO: "This is the demo workspace: everything here was made with The Future Clips. Pick a plan to make your own.",
 };
 
 export class ReserveError extends Error {

@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-18, after 0012)
+## Migration state (2026-09-18, after 0013)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -20,6 +20,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0010_no_free_tier_site_pricing.sql` | `no_free_tier_site_pricing` (2026-09-18) | yes | prices 16/32/79, allowances 200/500/1,500, priority 50/150 and HD ×3 (D-012 default), packs, `plans.label`, `welcome_slides = 0`, the `free` row is "No plan", `orgs.slide_balance`, `sets.from_balance`, balance-aware gate functions, `fc_credit_pack`, advisor fixes (duplicate index, seven FK indexes, `members_owner_remove`) |
 | `0011_rate_limits.sql` | `rate_limits` (2026-09-18) | yes | `rate_limits` table and `fc_rate_limit(key, limit, window_s)` (service role only); the sign-in routes call it with hashed keys |
 | `0012_provider_fund.sql` | `provider_fund` (2026-09-18) | yes | `fund_ledger`, `app_settings.provider_reserve` (share 0.35), `fc_record_sale` (service role), `fc_fund_summary` (platform owner, checked inside) |
+| `0013_demo_workspace.sql` | `demo_workspace` (2026-09-18) | yes | `orgs.is_demo`, the shared demo org (Clipper, 500 seats), `fc_demo_org_id()`, platform owners may read demo orgs, `orgs_protect_billing` also guards `is_demo` |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 
@@ -28,7 +29,7 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | Table | Purpose | Written by | Read by (RLS) |
 |---|---|---|---|
 | `plans` | one row per tier: `price_usd_month`, `slides_per_month`, `priority_slides_per_month`, `hd_per_slide_usd` (null = not offered), `seats`, feature flags, extras, `cogs_allowance_usd` | migrations | any signed-in user; `anon` may SELECT (keepalive/health, RLS returns no rows) |
-| `orgs` | workspaces: `plan`, `seat_limit`, `is_platform` (one row), billing ids and status, `current_period_*`, `spend_cap_usd` | `handle_new_user`, the billing webhook (service role), owner rename | members of the org |
+| `orgs` | workspaces: `plan`, `seat_limit`, `is_platform` (one row), `is_demo` (the shared demo, 0013), billing ids and status, `current_period_*`, `spend_cap_usd` | `handle_new_user`, the billing webhook (service role), owner rename | members of the org |
 | `members` | `(org_id, user_id, role owner|member)` | `handle_new_user`; owner may remove others | members |
 | `app_settings` | `signup {mode: invite|open}`, `keepalive {at}`, `provider_reserve {share}` | platform owner, keepalive | platform owner |
 | `allowed_emails` | the invite list (citext), optional org and role | platform owner, org owners | same |
@@ -57,6 +58,7 @@ Live plan rows after 0010 (2026-09-18): `free` "No plan", 0 slides; `solo` "Clip
 | `fc_credit_pack(p_org, p_pack, p_note) → integer` | definer | service role (the webhook; the admin by hand) | adds a pack's slides to `orgs.slide_balance`, ledger `credit` |
 | `fc_rate_limit(p_key, p_limit, p_window_s) → boolean` | definer | service role | true while the key is under the limit in the window; `lib/ratelimit.ts` hashes the key first; a laptop without the service role has no limiter |
 | `fc_record_sale(p_org, p_payment_id, p_sku, p_gross_usd, p_note) → numeric` | definer | service role | earmarks `gross × provider_reserve.share` in `fund_ledger`; a repeat payment id is ignored |
+| `fc_demo_org_id() → uuid` | definer, stable | authenticated | the demo workspace's id, for the admin's invite form |
 | `fc_fund_summary()` | definer (checks `is_platform_owner()` inside) | authenticated | gross, earmarked, consumed (`spend_ledger` commits), balance, sales, share |
 | `gate_new_user()`, `handle_new_user()` | definer | trigger only | invite-only sign-up; personal org + owner membership + invited memberships |
 | `invites_respect_seats()`, `orgs_protect_billing()`, `sets_member_update_guard()` | trigger only | – | seat limit on invites; members cannot change plan/billing fields; members may change only `cancel_requested` on a set (generic row comparison since 0009) |

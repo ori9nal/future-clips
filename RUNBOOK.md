@@ -43,6 +43,10 @@ database: Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`).
 
 Switching to the real Dodo is env only: remove `DODO_API_BASE`, set the real key, secret and product ids (OWNER-ACTIONS 14).
 
+## The demo workspace
+
+Prospects get a login that lands in a shared, read-only Clipper workspace (migration 0013, OWNER-ACTIONS 18): `/admin/invites` → access **Demo**. What they see comes from `lib/demo-manifest.ts` and `public/demo/**`, built by `node tools/build-demo.mjs` from ten sets under `output/sets` (edit the `DEFAULT` list in the tool or pass set names). Rebuild, commit `public/demo` and the manifest, deploy. Preview without a session: `FC_DEMO_PREVIEW=1 npm run dev` → `/design-preview?view=demo`.
+
 ## Rollback
 
 - Site/app: Vercel → Deployments → promote the previous READY deployment (or redeploy the previous `index-vN` name).

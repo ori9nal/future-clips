@@ -73,6 +73,10 @@ Target (milestone M3 in `docs/ROADMAP.md`): GitHub connected to Vercel, the app 
 - **Data**: RLS on every table, `anon` reads only `plans`, money and quota move only through `SECURITY DEFINER` gate functions, secrets never `NEXT_PUBLIC_*`, `server-only` on every module that holds the service role.
 - **Checks**: `.github/workflows/ci.yml` runs `tsc`, lint, the engine and helper tests and `next build` on every push; Dependabot opens weekly update PRs; `npm audit --omit=dev` is clean (postcss overridden to a patched release, `next` pinned); `tests/` covers the sign-in helpers, the bearer check and the webhook signature. Known and accepted: the CSP allows `'unsafe-inline'` scripts (Next's runtime; a nonce-based policy is a follow-up), and the sign-in route says when an email is not on the invite list (private beta).
 
+## The demo workspace
+
+One org flagged `is_demo` (migration 0013) on the Clipper plan. The admin invites an email with access **Demo**; the person signs in the normal way and `getViewer()` picks the demo org over their empty personal one. For that viewer the app never reads sets, usage or campaigns from the database: `lib/demo.ts` serves `lib/demo-manifest.ts` (ten finished sets with the engine's own captions, eight campaigns from `campaigns/*.json`, a Clipper account) and the slides ship as webp under `public/demo/**` (traced into the download route). Generation, cancel and checkout answer `FC_DEMO`. `node tools/build-demo.mjs` rebuilds the fixtures from `output/sets`; `/design-preview?view=demo` shows the result without a session.
+
 ## Brand assets (one mark everywhere)
 
 The mark is three stacked cards, `viewBox 0 0 92 64`, rects at (0,21), (14,12), (31,2), 55×39, radius 7, fills `#D9D7D1`, `#8E8D89`, `#0E0E10`. The wordmark is a tracked small-caps "THE" (Manrope 600, 8.5 px, letter-spacing .34em, `#6E6B63` on the site and `var(--fc-body)` in the app: both clear 4.5:1) over "futureclips" (Archivo 700, 19 px in the site header, 16 px in compact nav, letter-spacing -.032em, ink). Where it lives:

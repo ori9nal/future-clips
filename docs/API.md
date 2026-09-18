@@ -32,7 +32,9 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/auth/callback` | GET | public | `?code=` (the PKCE code from the emailed link or Google; the verifier cookie was written by `/api/auth/*`) or `?token_hash=&type=` (a server-verified token: Supabase's server-side template shape, and what `tools/dev-login.mjs` mints) → session cookie, referral claim, redirect to `next` (same-host paths only) | – |
 | `/auth/signout` | POST | public | signs out, 303 to `/login` | – |
 
-Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove, sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.
+**Demo workspace (0013)**: when `viewer.org.is_demo`, `/app`, `/api/me`, `/api/sets`, `/api/sets/[id]`, `/api/sets/[id]/download` and `/api/specs` answer from `lib/demo-manifest.ts` and `public/demo/**` (no database reads, no Storage, no engine); writes answer `FC_DEMO`.
+
+Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove (access `customer`, `platform_owner` or `demo`), sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.
 
 ## `FC_*` codes (raised by the SQL gate, mapped to sentences in `lib/sets.ts`)
 
@@ -49,6 +51,7 @@ Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each
 | `FC_NO_SET` | `fc_commit_set`, `fc_release_set` | unknown set id | – |
 | `FC_INVITE_ONLY` | `gate_new_user` | email not on the invite list (sign-up refused) | – |
 | `FC_NO_PACK`, `FC_FORBIDDEN` | `fc_credit_pack` | unknown pack; caller is not the service role | – |
+| `FC_DEMO` | the app (`lib/demo.ts`), not SQL | the caller's workspace is the demo: generation, cancel and checkout are refused; reads come from shipped fixtures | 402 (generate), 409 (cancel), 403 (checkout) |
 
 Add codes; never rename one silently. New codes appear here and in `lib/sets.ts REASONS` (Product writes the sentence).
 

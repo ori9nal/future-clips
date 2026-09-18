@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listSets, reserveSet, ReserveError, type Lane } from "@/lib/sets";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { engineAvailable } from "@/lib/engine";
+import { isDemo, demoWorkspaceSets, DEMO_REASON } from "@/lib/demo";
 
 export const maxDuration = 300;
 
@@ -15,6 +16,7 @@ const STYLES = new Set(["native", "feed", "bedrock", "mascot", "clinical", "post
 export async function GET() {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (isDemo(viewer)) return Response.json({ sets: demoWorkspaceSets(viewer.org.id) });
   const sb = await createClient();
   return Response.json({ sets: await listSets(sb, viewer.org.id) });
 }
@@ -29,6 +31,7 @@ export async function GET() {
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (isDemo(viewer)) return Response.json({ error: DEMO_REASON, code: "FC_DEMO" }, { status: 402 });
   if (!(await allow(`sets:user:${viewer.user.id}`, 30, 600))) {
     return Response.json({ error: "Too many requests in a short time. Wait a few minutes and try again." }, { status: 429 });
   }

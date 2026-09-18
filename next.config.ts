@@ -30,6 +30,8 @@ const nextConfig: NextConfig = {
   // sees it; without this Vercel's function bundle would not carry it.
   outputFileTracingIncludes: {
     "/api/**": ["./engine/**", "./assets/fonts/**", "./assets/campaigns/**"],
+    // the demo workspace's zip is built from the shipped slides
+    "/api/sets/[id]/download": ["./public/demo/**"],
   },
   serverExternalPackages: ["sharp", "@resvg/resvg-js", "opentype.js"],
   // the same response headers the static site sends (future-clips-site/vercel.json);

@@ -33,6 +33,7 @@ export default async function InvitesPage() {
   }
   const mode = (setting?.value as any)?.mode ?? "invite";
   const platformOrgId = viewer.memberships.find((m) => m.org.is_platform)?.org.id;
+  const { data: demoOrgId } = await sb.rpc("fc_demo_org_id");
 
   return (
     <AppShell active="admin" viewer={viewer}>
@@ -64,6 +65,7 @@ export default async function InvitesPage() {
               <select name="scope" defaultValue="customer">
                 <option value="customer">Customer — their own workspace, free plan</option>
                 <option value="platform_owner">Platform owner — sees /admin (team only)</option>
+                <option value="demo">Demo — the shared demo workspace: Clipper plan, example results and campaigns, nothing generated</option>
               </select>
             </label>
           </div>
@@ -80,7 +82,7 @@ export default async function InvitesPage() {
             {(invites as Invite[] | null)?.map((i) => (
               <tr key={i.email}>
                 <td><b>{i.email}</b></td>
-                <td>{i.org_id === platformOrgId ? `platform ${i.role}` : i.org_id ? `org ${i.role}` : "customer"}</td>
+                <td>{i.org_id === platformOrgId ? `platform ${i.role}` : i.org_id && i.org_id === demoOrgId ? "demo" : i.org_id ? `org ${i.role}` : "customer"}</td>
                 <td>{i.note ?? "—"}</td>
                 <td>{new Date(i.created_at).toLocaleDateString()}</td>
                 <td>

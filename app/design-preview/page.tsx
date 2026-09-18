@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Account } from "@/lib/account";
-import { demoAccount, demoPartners, demoSets } from "@/lib/demo";
+import { demoAccount, demoPartners, demoSets, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs } from "@/lib/demo";
 import Dashboard from "../app/Dashboard";
 import PartnerDashboard from "../app/PartnerDashboard";
 
@@ -14,6 +14,7 @@ export const dynamic = "force-dynamic";
  * Development only: 404 in production, and only when FC_DEMO_PREVIEW=1.
  *   /design-preview?view=clipper&plan=solo|grind|agency|free
  *   /design-preview?view=partner
+ *   /design-preview?view=demo          the demo workspace (0013) on the shipped fixtures
  */
 const SPECS = [
   { id: "fuel-prep", brand: "FUEL", product: "high-protein meal prep", niche: "nutrition", requirements: { min_slides: 5, max_slides: 8 }, assets: { palette: ["#0B0B0C", "#FF7A1A", "#F2F0EB"] }, content: { style: "native" }, guidance: { angles: ["5 meals I prep every Sunday, ranked by speed", "the nights I don't cook", "what a week of lunches costs me"] } },
@@ -29,6 +30,18 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
   const q = await searchParams;
   const orgId = "00000000-0000-0000-0000-000000000000";
   const partners = demoPartners("FCDEMO42");
+  if (q.view === "demo") {
+    // what an invited prospect sees in the demo workspace (0013)
+    return (
+      <Dashboard
+        viewer={{ email: "you@example.com", orgName: "Demo workspace", plan: "solo", billing: "none", checkout: false, isPlatformOwner: false, engine: true }}
+        specs={demoWorkspaceSpecs()}
+        account={demoWorkspaceAccount()}
+        sets={demoWorkspaceSets("0d3e0000-0000-4000-8000-000000000001")}
+        partners={null}
+      />
+    );
+  }
   if (q.view === "partner") {
     return <PartnerDashboard viewer={{ email: "agency@example.com", orgName: "Northline Agency", isPlatformOwner: false }} partners={partners} payout={null} />;
   }

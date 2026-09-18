@@ -1,6 +1,7 @@
 import { viewerForRequest } from "@/lib/auth";
 import { createCheckout, dodoEnabled, productMap } from "@/lib/billing/dodo";
 import { requestOrigin, sameOrigin } from "@/lib/login";
+import { isDemo, DEMO_REASON } from "@/lib/demo";
 
 /**
  * Start a hosted checkout for the signed-in member's workspace.
@@ -11,6 +12,7 @@ export async function POST(req: Request) {
   if (!sameOrigin(req)) return Response.json({ error: "cross-site request" }, { status: 403 });
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (isDemo(viewer)) return Response.json({ error: DEMO_REASON, code: "FC_DEMO", url: "https://www.thefutureclips.com/#pricing" }, { status: 403 });
   if (viewer.role !== "owner") return Response.json({ error: "only the workspace owner can change billing" }, { status: 403 });
   if (!dodoEnabled()) return Response.json({ error: "checkout is not connected yet — email team@thefutureclips.com" }, { status: 503 });
   let body: any = {};
