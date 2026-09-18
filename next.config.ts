@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  // FC_HIDE_DEV_BADGE=1 hides the dev-mode indicator for screenshots taken from `next dev`
+  ...(process.env.FC_HIDE_DEV_BADGE === "1" ? { devIndicators: false as const } : {}),
   reactStrictMode: true,
   poweredByHeader: false,
   // The engine is ESM imported by file URL at runtime, so the bundler never

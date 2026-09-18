@@ -32,6 +32,26 @@
         "cd ../fc-product && FC_DEMO_PREVIEW=1 npx next dev -p 3001"
       ],
       "port": 3001
+    },
+    {
+      "name": "future-clips-preview",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "FC_DEMO_PREVIEW=1 FC_HIDE_DEV_BADGE=1 npx next dev -p 3002"
+      ],
+      "port": 3002
+    },
+    {
+      "name": "future-clips-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "next",
+        "start",
+        "-p",
+        "3100"
+      ],
+      "port": 3100
     }
   ]
 }

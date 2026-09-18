@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-18)
+## Migration state (2026-09-18, after 0007)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -14,7 +14,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0004_lanes_and_quota.sql` | `lanes_and_quota_a` … `_g` (2026-09-12) | yes | lanes, ranges, gate functions, spend cap, cancel |
 | `0005_agency_referrals.sql` | – | **no** | dormant feature (D-001); decision on applying it as dormant schema is open |
 | `0006_plans_match_the_site.sql` | – | **no** | superseded: it assumes a free welcome balance and references 0005's columns inside `orgs_protect_billing`; replaced by the planned `0010` |
-| `0007_billing_events.sql` | – | **no** | applied with the Dodo work (M5) |
+| `0007_billing_events.sql` | `billing_events` (2026-09-18) | yes | the webhook's idempotency table and `billing_status = 'expired'`; applied ahead of the Dodo connection, with `revoke all … from anon` added |
 | `0008_partner_accounts.sql` | – | **no** | dormant feature |
 | `0009_m0_security_hardening.sql` | `m0_security_hardening` (2026-09-18) | yes | S2, S5, S6, S7 from the audit |
 | `0010_no_free_tier_site_pricing.sql` | `no_free_tier_site_pricing` (2026-09-18) | yes | prices 16/32/79, allowances 200/500/1,500, priority 50/150 and HD ×3 (D-012 default), packs, `plans.label`, `welcome_slides = 0`, the `free` row is "No plan", `orgs.slide_balance`, `sets.from_balance`, balance-aware gate functions, `fc_credit_pack`, advisor fixes (duplicate index, seven FK indexes, `members_owner_remove`) |
@@ -35,6 +35,7 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | `usage` | per org per period counters and `reserved_usd`, `cogs_usd` | the gate functions | members |
 | `spend_ledger` | `reserve | commit | release` rows per set | the gate functions | members |
 | `packs` | the slide packs on sale: `p100` 100/$8, `p250` 250/$18, `p600` 600/$40 | migrations, later Dodo | any signed-in user |
+| `billing_events` | one row per Dodo webhook delivery (`id` = the `webhook-id` header), payload and outcome; a redelivery is answered as a duplicate | the webhook (service role) | platform owner |
 | `signups` | the old waitlist (3 rows); no code reads or writes it | – | nobody (anon insert policy dropped in 0009) |
 | `creators`, `brand_kits`, `pairing_history`, `jobs` | schema for own-creator, brand lock, pairing rotation, a generic queue; unused by code | – | own org (jobs: no policies) |
 
@@ -78,4 +79,4 @@ After 0010: `jobs` has RLS with no policies (INFO, dormant table); the four SECU
 
 ## Still to come
 
-`billing_events` (0007) with the Dodo work; `sets.instructions jsonb` and a private per-org uploads bucket with the instructions feature (M4); an admin "set plan" path (service role) for D-011; the dormant tables and buckets decision (D-017 and the list above). If the owner changes D-012 or D-013, the plan rows are one `update` each.
+`sets.instructions jsonb` and a private per-org uploads bucket with the instructions feature (M4); an admin "set plan" path (service role) for D-011; the dormant tables and buckets decision (D-017 and the list above). If the owner changes D-012 or D-013, the plan rows are one `update` each.

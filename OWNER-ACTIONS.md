@@ -28,7 +28,7 @@ Things only the account owner can do, in the order they unblock work. Engineerin
 
 | # | Action | Where | Unblocks |
 |---|---|---|---|
-| 13 | **Either** do B (link `dhxnx-7/future-clips` to the Vercel site project with root `future-clips-site/`; everything below then deploys from git) **or** upload the current site objects to bucket `site` under new names (Storage → `site` → Upload; anonymous uploads are gone): `future-clips-site/index.html` as `index-v12.html`; `og.png` as `og-v2.png`; each `<slug>/index.html` as `legal-v2/<slug>.html` (terms, privacy, acceptable-use, refunds, accessibility); `404.html` as `404-v1.html`; the four files in `future-clips-site/fonts/` as `fonts-v1/<same name>` (the site no longer calls Google Fonts). Then tell Engineering "deploy the site": `deploy/site/build.js` already names these objects; it redeploys through the Vercel MCP | Supabase → Storage → `site` → Upload (or Vercel → Git) | the live homepage without the Free card, the fixed link preview, the 404 page, self-hosted fonts, security and cache headers |
+| 13 | Score the screenshots Engineering sent (site, login, dashboard). At 90 or above, say "ship": Engineering deploys `future-clips-site/` to the Vercel project `the-future-clips` through the connected Vercel API (no bucket uploads needed any more; `deploy/site/build.js` stays as the fallback) and verifies www.thefutureclips.com. The app (`future-clips-app`) still needs B, the GitHub link with the engine traced in, before it can be deployed from `main` | this chat, then Vercel → Git for the app | the live homepage without the Free card, the fixed link preview, the 404 page, self-hosted fonts, security and cache headers |
 
 ## Decisions the code is waiting on
 

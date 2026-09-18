@@ -1,14 +1,14 @@
 import "server-only";
-import type { NextRequest, NextResponse } from "next/server";
+import type { NextResponse } from "next/server";
 
 /**
- * Sign-in helpers for the two /api/auth routes. The browser no longer talks to
+ * Request helpers for the /api/auth and /api/billing routes. The browser no longer talks to
  * Supabase directly to ask for a magic link: the login page ships no Supabase
  * client, and the callback URL is built here from the request's own origin.
  */
 
 /** The public origin of this request: what the browser typed, behind Vercel's proxy too. */
-export function requestOrigin(req: NextRequest): string {
+export function requestOrigin(req: Request): string {
   const u = new URL(req.url);
   const proto = req.headers.get("x-forwarded-proto")?.split(",")[0].trim() || u.protocol.replace(":", "");
   const host = req.headers.get("x-forwarded-host")?.split(",")[0].trim() || req.headers.get("host") || u.host;
@@ -16,7 +16,7 @@ export function requestOrigin(req: NextRequest): string {
 }
 
 /** A browser-sent Origin header must be this host (a cross-site POST cannot request links). */
-export function sameOrigin(req: NextRequest): boolean {
+export function sameOrigin(req: Request): boolean {
   const o = req.headers.get("origin");
   return !o || o === requestOrigin(req);
 }

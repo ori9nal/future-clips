@@ -17,6 +17,7 @@ import { verifyWebhook, skuFor, dodoWebhookEnabled, type DodoEvent } from "@/lib
 export const runtime = "nodejs";
 
 const PLAN_SKUS = new Set(["solo", "grind", "agency"]);
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 const planFromSku = (sku: string | null) => (sku ? sku.replace(/_year$/, "") : null);
 
 export async function POST(req: Request) {
@@ -28,9 +29,14 @@ export async function POST(req: Request) {
   catch (e: any) { return Response.json({ error: e?.message ?? "bad signature" }, { status: 400 }); }
 
   const db = adminClient();
-  // idempotency: the first delivery wins
-  const { error: dup } = await db.from("billing_events").insert({ id, type: event.type, payload: event });
-  if (dup) return Response.json({ ok: true, duplicate: true });
+  // idempotency: the first delivery wins; any other failure to record it is
+  // a real error, answered 500 so Dodo retries (a missing table must not
+  // look like a duplicate)
+  const { error: ins } = await db.from("billing_events").insert({ id, type: event.type, payload: event });
+  if (ins) {
+    if (ins.code === "23505") return Response.json({ ok: true, duplicate: true });
+    return Response.json({ error: `could not record the event: ${ins.message}` }, { status: 500 });
+  }
 
   let outcome = "ignored";
   try {
@@ -49,6 +55,7 @@ async function handle(db: ReturnType<typeof adminClient>, ev: DodoEvent): Promis
   const meta = d.metadata ?? {};
   const orgId = meta.org_id ?? (await orgByCustomer(db, d.customer?.customer_id));
   if (!orgId) return "no org for this event";
+  if (!UUID.test(orgId)) return `ignored: org_id "${orgId}" is not a workspace id`;
 
   if (ev.type.startsWith("subscription.")) {
     const sku = meta.plan ?? skuFor(d.product_id ?? "") ?? null;
@@ -63,10 +70,14 @@ async function handle(db: ReturnType<typeof adminClient>, ev: DodoEvent): Promis
         if (!plan || !PLAN_SKUS.has(plan)) return `unknown plan sku "${sku}"`;
         const { error } = await db.from("orgs").update({ plan, billing_status: "active", ...ids, ...period }).eq("id", orgId);
         if (error) throw error;
-        // the referral programme: revenue for this period, at the agency's current rate
-        const revenue = (d.recurring_pre_tax_amount ?? 0) / 100;
-        if (revenue > 0 && period.current_period_start) {
-          await db.rpc("fc_record_commission", { p_referred: orgId, p_period: period.current_period_start.slice(0, 10), p_revenue: revenue, p_note: `dodo ${d.subscription_id ?? ""} ${ev.type}` });
+        // the referral programme is dormant (D-001, D-017): only with its
+        // schema applied and the flag on; a failure there never fails the plan
+        if (process.env.FC_REFERRALS === "1") {
+          const revenue = (d.recurring_pre_tax_amount ?? 0) / 100;
+          if (revenue > 0 && period.current_period_start) {
+            const { error: rc } = await db.rpc("fc_record_commission", { p_referred: orgId, p_period: period.current_period_start.slice(0, 10), p_revenue: revenue, p_note: `dodo ${d.subscription_id ?? ""} ${ev.type}` });
+            if (rc) console.warn(`commission not recorded for ${orgId}: ${rc.message}`);
+          }
         }
         return `plan ${plan} active`;
       }

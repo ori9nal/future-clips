@@ -22,9 +22,9 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/api/studio/render` | POST | platform owner | `{ campaignId, style? }` → `{ style, canvas, ms, logic, slides: "/api/file/..." }`; renders stored copy into `workDirs().studioDir` | engine; laptop or a single function instance |
 | `/api/character` | POST | platform owner | `{ campaignId, quality?, variants? }` → character sheets under `workDirs().cacheDir` | engine + OpenAI key |
 | `/api/file/[...path]` | GET | member (dev preview: no session) | a file under `workDirs().base` on this host, resolved inside it; `private, no-store` | laptop use; on Vercel `/tmp` is per instance |
-| `/api/billing/checkout` | POST | org owner | `{ plan, yearly? } | { pack }` → `{ url }` (Dodo hosted checkout); `503` until `DODO_API_KEY` is set | Dodo env |
-| `/api/billing/portal` | POST | member | `{ url }` for Dodo's customer portal; `404` without a subscription | Dodo env |
-| `/api/webhooks/dodo` | POST | Dodo (Standard Webhooks signature) | applies subscription and payment events; idempotent on `webhook-id` (`billing_events`) | service role, migration 0007 |
+| `/api/billing/checkout` | POST | org owner (same-origin `Origin` only) | `{ plan, yearly? } | { pack }` → `{ url }` (Dodo hosted checkout); `503` until `DODO_API_KEY` is set | Dodo env |
+| `/api/billing/portal` | POST | member (same-origin) | `{ url }` for Dodo's customer portal; `404` without a subscription | Dodo env |
+| `/api/webhooks/dodo` | POST | Dodo (Standard Webhooks signature, 5 min tolerance) | applies subscription and payment events; idempotent on `webhook-id` (`billing_events`, a duplicate is `{ ok, duplicate }`, any other write failure is 500 so Dodo retries); `metadata.org_id` must be a uuid; the referral commission call only with `FC_REFERRALS=1` | service role, `DODO_WEBHOOK_SECRET` |
 | `/api/partner/payout` | POST | org owner | payout details (dormant feature; needs migration 0008) | – |
 | `/api/auth/otp` | POST | public (same-origin `Origin` only) | `{ email, next? }` → asks Supabase for the magic link from the server; writes the PKCE verifier cookie and `fc_next`; `403` invite refused, `429` mailer rate limit, `400` otherwise; `{ ok: true }` | – |
 | `/api/auth/google` | POST | public (same-origin) | `{ next? }` → `{ url }` to send the browser to Google; `404` unless `NEXT_PUBLIC_GOOGLE_AUTH=1` | Google OAuth client |
