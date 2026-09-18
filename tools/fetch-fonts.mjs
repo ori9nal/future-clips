@@ -78,6 +78,14 @@ const REQUESTS = [
   ['SpaceGrotesk-Medium','family=Space+Grotesk:wght@500'],
   ['Syne-ExtraBold','family=Syne:wght@800'],
   ['Unbounded-Black','family=Unbounded:wght@900'],
+  // the phone-caption faces (engine/styles/feed.mjs, render-native.mjs): the
+  // reference sets are typed in TikTok's built-in "Classic" (a Proxima Nova
+  // cut) and Instagram's overlay sans — Figtree is the closest open face,
+  // Inter the fallback
+  ['Figtree-Medium','family=Figtree:ital,wght@0,500'],
+  ['Figtree-SemiBold','family=Figtree:ital,wght@0,600'],
+  ['Figtree-Bold','family=Figtree:ital,wght@0,700'],
+  ['Inter-SemiBold','family=Inter:ital,opsz,wght@0,14..32,600'],
 ];
 
 async function css(query) {

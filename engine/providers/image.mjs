@@ -66,7 +66,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  * the same money on the same mistake, so it throws immediately with the API's
  * own message rather than a generic one.
  */
-async function request(url, init, { tries = 4 } = {}) {
+async function request(url, init, { tries = 8 } = {}) {
   let last;
   for (let i = 0; i < tries; i++) {
     const r = await fetch(url, init);
@@ -76,9 +76,32 @@ async function request(url, init, { tries = 4 } = {}) {
     try { msg = JSON.parse(body).error?.message ?? msg; } catch { /* keep raw */ }
     last = new Error(`image API ${r.status}: ${msg}`);
     if (r.status !== 429 && r.status < 500) throw last;
-    await sleep(1500 * 2 ** i);
+    // A 429 says how long to wait ("try again in 12s", or a retry-after header);
+    // honour it, then back off on top, capped at a minute — the per-minute
+    // limits are the ones that bite when two sets render at once.
+    const said = /try again in (\d+(?:\.\d+)?)\s*(ms|s)/i.exec(msg);
+    const hinted = said ? (said[2] === 'ms' ? +said[1] : +said[1] * 1000) : Number(r.headers.get('retry-after') ?? 0) * 1000;
+    const wait = Math.min(60000, Math.max(hinted, 1500 * 2 ** i)) + Math.random() * 500;
+    await sleep(wait);
   }
   throw last;
+}
+
+/**
+ * Edits with reference images count against a separate, much lower limit
+ * ("input-images per min", 5 on a fresh org). One bucket per process keeps
+ * every set this worker is rendering under it; across processes the retry
+ * above takes over. OPENAI_INPUT_IMAGES_PER_MIN raises it as the org's tier does.
+ */
+const inputBucket = { stamps: [] };
+async function takeInputSlot() {
+  const limit = Math.max(1, Number(process.env.OPENAI_INPUT_IMAGES_PER_MIN ?? 5));
+  for (;;) {
+    const now = Date.now();
+    inputBucket.stamps = inputBucket.stamps.filter((t) => now - t < 60000);
+    if (inputBucket.stamps.length < limit) { inputBucket.stamps.push(now); return; }
+    await sleep(inputBucket.stamps[0] + 60000 - now + 50);
+  }
 }
 
 /* ── cost ledger ────────────────────────────────────────────────────────── */
@@ -212,6 +235,7 @@ export async function generate(o) {
     for (const f of refs) {
       form.append('image[]', new Blob([fs.readFileSync(f)], { type: 'image/png' }), path.basename(f));
     }
+    await takeInputSlot();
     json = await request(`${API}/images/edits`, { method: 'POST', headers: { authorization: `Bearer ${apiKey}` }, body: form });
   } else {
     json = await request(`${API}/images/generations`, {

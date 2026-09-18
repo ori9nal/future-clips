@@ -17,6 +17,7 @@ import { layoutWidth } from '../fit-text.mjs';
 import { pickPairing } from '../pairings.mjs';
 import { scoreRegion } from '../caption.mjs';
 import { grade } from '../grade.mjs';
+import { deslop, strengthFor } from '../deslop.mjs';
 
 export default {
   id: 'rail',
@@ -106,8 +107,10 @@ export default {
       const src = path.join(ctx.photoDir, `${id}.jpg`);
       const p = await plate(sharp, src, W, H, outDir);
       const graded = await grade(p, look, { width: W, height: H });
+      const strength = spec.assets?.deslop ?? strengthFor(look);
+      const d = strength > 0 ? await deslop(graded, { seed: `${spec.id}:${n}:${id}`, width: W, height: H, strength }) : graded;
       const file = path.join(outDir, `_g${n}.png`);
-      fs.writeFileSync(file, graded);
+      fs.writeFileSync(file, d);
       return file;
     }
 

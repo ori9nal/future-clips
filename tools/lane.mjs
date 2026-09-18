@@ -22,6 +22,15 @@ fs.mkdirSync(stateDir, { recursive: true });
 let s;
 if (args.resume) {
   s = JSON.parse(fs.readFileSync(path.join(stateDir, `${args.resume}.json`), 'utf8'));
+  // A checkpoint saved after a provider failure (a 429, a network drop) is
+  // resumed from the last step it had completed, not replayed as "failed":
+  // frames already generated are cache hits, so only the missing work is paid for.
+  if (s.stage === 'failed') {
+    const back = s.art?.files ? 'render' : s.art?.anchorFile ? 'art:frames:submit' : s.copy?.content ? 'art:anchor:submit' : 'copy:submit';
+    s.log.push(`${new Date().toISOString()} resume  rewound from failed to ${back} (${s.error})`);
+    s.stage = back; s.error = null;
+    console.log(`  resuming from ${back}`);
+  }
 } else {
   const { campaign, ask } = args;
   if (!campaign || !ask) { console.error('usage: lane.mjs campaign=<id> ask="..." [lane=batch|priority] [slides=7|6-8] [style=feed] [quality=medium] [model=claude-opus-5]'); process.exit(1); }

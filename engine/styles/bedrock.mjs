@@ -39,7 +39,7 @@ export default {
     const paper = '#F3EBDD', ink = '#141212', muted = '#6B635C';
     const acc = /^#[0-9a-f]{6}$/i.test(spec.assets?.palette?.[1] ?? '') ? spec.assets.palette[1] : '#E0261B';
     const quality = spec.assets?.character?.quality ?? 'medium';
-    const cacheDir = path.join(root, 'output/gen/cache');
+    const cacheDir = ctx.cacheDir ?? path.join(root, 'output/gen/cache');
     const figDir = path.join(outDir, 'figures');
     fs.mkdirSync(figDir, { recursive: true });
 

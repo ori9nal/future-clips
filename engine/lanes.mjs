@@ -21,7 +21,7 @@ import { generate } from './providers/image.mjs';
 import * as oaBatch from './providers/openai-batch.mjs';
 import { planSet } from './art.mjs';
 import { render } from './styles/registry.mjs';
-import { enforce, bankFor, BANK } from './scenes.mjs';
+import { direct } from './scenes.mjs';
 
 export const STAGES = [
   'copy:submit', 'copy:wait', 'art:anchor:submit', 'art:anchor:wait',
@@ -80,7 +80,7 @@ async function copyWait(s, { root, spec }) {
 }
 
 function copyJudge(s, { spec, data }) {
-  const judged = judgeCopy({ spec, data, range: s.copy.range });
+  const judged = judgeCopy({ spec, data, range: s.copy.range, styleId: s.styleId });
   s.copy.verdict = judged.verdict;
   s.copy.count = judged.count;
   if (!judged.verdict.pass) {
@@ -98,30 +98,19 @@ function copyJudge(s, { spec, data }) {
 /* ── art ────────────────────────────────────────────────────────────────── */
 
 /**
- * The art plan from the copy: scenes (enforced into one world for the feed
- * format), the subject, the mode. Same logic make-set had inline.
+ * The art plan from the copy. The direction itself — which scenes, which
+ * world, whether the person is held across days — lives in
+ * engine/scenes.mjs `direct()`, shared with tools/make-set.mjs.
  */
-function artPlan(s, { spec }) {
-  const content = s.copy.content;
-  let scenes = [content.hook?.scene, ...(content.ranked ?? []).map((r) => r.scene), content.closer?.scene]
-    .map((sc, i) => sc || `the person, scene ${i + 1}`);
-  const isGym = bankFor(spec.niche) === BANK.fitness;
-  let world = null;
-  let look = s.look ?? spec.assets?.look ?? 'cinematic';
-  if (s.styleId === 'feed') {
-    const appIndex = 1 + (content.ranked ?? []).findIndex((r) => r.showsApp);
-    const e = enforce(scenes, { niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed: s.seed, headings: (content.ranked ?? []).map((r) => r.name) });
-    scenes = e.scenes; world = e.world;
-    if (!s.look) look = world.look ?? look;
-  }
-  const mode = s.mode ?? (s.styleId === 'feed' && !isGym ? 'aspirational' : 'subject');
-  const days = s.styleId === 'feed' && isGym && world?.id === 'life';
-  const subject = content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.';
-  s.art.world = world ? { id: world.id, label: world.label } : null;
-  s.art.look = look;
-  s.art.scenes = scenes;
-  s.art.mode = mode;
-  return planSet({ subject, scenes, look, quality: s.quality, w: 1080, h: 1920, id: s.id, mode, days });
+function artPlan(s, { spec, root }) {
+  const d = direct({ spec, content: s.copy.content, styleId: s.styleId, seed: s.seed, look: s.look, mode: s.mode });
+  s.art.world = d.world ? { id: d.world.id, label: d.world.label } : null;
+  s.art.look = d.look;
+  s.art.scenes = d.scenes;
+  s.art.shots = d.shots;
+  s.art.mode = d.mode;
+  const appScreen = spec.assets?.app_screen ? path.join(root, spec.assets.app_screen) : null;
+  return planSet({ subject: d.subject, scenes: d.scenes, look: d.look, quality: s.quality, w: 1080, h: 1920, id: s.id, mode: d.mode, days: d.days, appScreen: appScreen && fs.existsSync(appScreen) ? appScreen : null });
 }
 
 const withSize = (plan, f) => ({ ...f, size: plan.size, quality: plan.quality });
@@ -142,7 +131,7 @@ async function pool(items, n, fn) {
 
 async function anchorSubmit(s, ctx) {
   const { root, spec, cacheDir } = ctx;
-  const plan = artPlan(s, { spec });
+  const plan = artPlan(s, { spec, root });
   s.art.plan = { size: plan.size, quality: plan.quality, mode: plan.mode };
   if (!plan.anchor) {
     // aspirational: no anchor, every frame is independent — straight to frames
@@ -183,7 +172,7 @@ async function anchorWait(s, { root }) {
 
 async function framesSubmit(s, ctx) {
   const { root, spec, cacheDir } = ctx;
-  const plan = artPlan(s, { spec });
+  const plan = artPlan(s, { spec, root });
   const frames = plan.frames(s.art.anchorFile).map((f) => withSize(plan, f));
   if (s.lane === 'priority') {
     // The frames after the anchor are independent, so they go out together:
@@ -196,13 +185,15 @@ async function framesSubmit(s, ctx) {
     s.stage = 'render';
     return s;
   }
-  // the reference goes up once as a File and is named by id on every line
+  // every reference (the anchor, the app screenshot) goes up once as a File
+  // and is named by id on every line that uses it
   const refFileIds = {};
-  const needsRef = frames.some((f) => f.refs.length);
-  if (needsRef) {
-    refFileIds[s.art.anchorFile] = await oaBatch.uploadFile(root, { bytes: fs.readFileSync(s.art.anchorFile), name: 'anchor.png', purpose: 'user_data', type: 'image/png' });
-    s.art.anchorFileId = refFileIds[s.art.anchorFile];
+  const refs = [...new Set(frames.flatMap((f) => f.refs))];
+  for (const ref of refs) {
+    refFileIds[ref] = await oaBatch.uploadFile(root, { bytes: fs.readFileSync(ref), name: path.basename(ref), purpose: 'user_data', type: 'image/png' });
   }
+  s.art.anchorFileId = s.art.anchorFile ? refFileIds[s.art.anchorFile] ?? null : null;
+  s.art.refFileIds = Object.values(refFileIds);
   const b = await oaBatch.submitFrames(root, { cacheDir, frames, refFileIds });
   s.art.framesBatch = { id: b.id, entries: b.entries, labels: frames.map((f) => f.label) };
   s.art.cached += b.cached;
@@ -221,7 +212,8 @@ async function framesWait(s, { root }) {
   if (!st.done) return s;
   const got = await oaBatch.collectFrames(root, s.art.framesBatch);
   s.art.usd += got.usd; s.usd += got.usd;
-  if (s.art.anchorFileId) { await oaBatch.deleteFile(root, s.art.anchorFileId); s.art.anchorFileId = null; }
+  for (const id of s.art.refFileIds ?? (s.art.anchorFileId ? [s.art.anchorFileId] : [])) { try { await oaBatch.deleteFile(root, id); } catch { /* already gone */ } }
+  s.art.anchorFileId = null; s.art.refFileIds = [];
   const missing = s.art.framesBatch.labels.filter((l) => !got.files[l]);
   if (missing.length) return fail(s, `frames failed: ${missing.map((l) => `${l}: ${got.failed[l] ?? st.status}`).join('; ')}`);
   s.art.files = [s.art.anchorFile, ...s.art.framesBatch.labels.map((l) => got.files[l])].filter(Boolean);
@@ -232,11 +224,11 @@ async function framesWait(s, { root }) {
 
 /* ── render ─────────────────────────────────────────────────────────────── */
 
-async function renderStage(s, { root, spec, outDir }) {
+async function renderStage(s, { root, spec, outDir, cacheDir }) {
   const content = s.copy.content;
   const renderable = toRenderable(spec, content, { appScreen: spec.assets?.app_screen, appIcon: spec.assets?.app_icon, photos: s.art.files });
   renderable.assets = { ...renderable.assets, look: s.art.look, photos: { dir: '.', credit: 'gpt-image-2' } };
-  const r = await render({ spec: renderable, root, styleId: s.styleId, outDir });
+  const r = await render({ spec: renderable, root, styleId: s.styleId, outDir, cacheDir });
   if (r.artUsd) { s.art.usd += r.artUsd; s.usd += r.artUsd; }
   fs.writeFileSync(path.join(outDir, 'content.json'), JSON.stringify({ content, photos: s.art.files }, null, 2));
   fs.writeFileSync(path.join(outDir, 'post.json'), JSON.stringify({

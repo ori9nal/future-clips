@@ -1,20 +1,23 @@
 // FEED — what the TikTok slideshow niche actually posts (reference-2026-09).
 //
-// Measured off fifteen real sets rather than guessed at. Three things separate
-// this from what the engine was producing:
+// Measured off the reference corpus (tools/_measure.mjs, 2026-09-13), not
+// guessed at. What separates a real post from what the engine produced:
 //
-//  1. The type is SMALL. Heading ~44px on a 1080 canvas, body ~36px, in a tight
-//     block. The engine was setting 84–104px and filling the frame. The
-//     reference reads at thumbnail size because the block is compact, not big.
-//  2. The stroke is a thin outline — about 0.045 of the type size, enough to
-//     lift the letterform off the photo. 0.155 reads as a CapCut default.
-//  3. There is no recurring character. The imagery is aspirational (a car, a
-//     pool, a penthouse window) or anatomical (an arm mid-curl). Holding one
-//     face across eight frames is effort on the wrong axis, and a first-person
-//     story told over one repeated model reads as staged.
+//  1. The type is the PLATFORM'S: TikTok "Classic" (a Proxima Nova cut), one
+//     weight, sentence case, white, on every one of the 100-odd phone-photo
+//     slides. Never condensed, never uppercase, never a serif. Figtree is the
+//     closest open face. A rotating display pairing was the loudest tell.
+//  2. The outline is thin but real: 3.5–4.5 px visible on a 1080 canvas at a
+//     ~55 px em, i.e. 0.065–0.075 of the size. With paint-order stroke the
+//     SVG stroke-width is twice the visible width, so OUTLINE is 0.13.
+//  3. The block is small and sits in the picture — over the chest as often
+//     as over a quiet wall (block top median 0.33 H, bottom 0.62 H). No scrim,
+//     ever: a gradient behind the text is a designed tell.
+//  4. The app is a PHOTOGRAPH of a phone on a bench or in a hand (9 of 11
+//     gym sets), never a full-bleed UI mock.
 //
-// Plus the device the engine was missing entirely: an app icon as a rounded
-// square over a lifestyle photo, with a white pill naming it underneath.
+// Plus the trading device: an app icon as a rounded square over a lifestyle
+// photo, with a white pill naming it underneath (sets 01, 04, 14).
 import fs from 'node:fs';
 import path from 'node:path';
 import { rect, text, paragraph, plate, image, FACES } from './kit.mjs';
@@ -22,11 +25,16 @@ import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 import { breakToFit } from '../caption.mjs';
 import { grade } from '../grade.mjs';
+import { deslop, strengthFor } from '../deslop.mjs';
 import { scoreRegion } from '../caption.mjs';
 import { pickPairing } from '../pairings.mjs';
 
-/** Thin outline, sized off the type. The reference is nowhere near a slab. */
-const OUTLINE = 0.045;
+/**
+ * The outline as an SVG stroke-width fraction of the em. paint-order puts
+ * the fill over the stroke, so the VISIBLE outline is half this: 0.065 em,
+ * which is the 4 px measured on set-05 and set-08 at their ~55 px em.
+ */
+const OUTLINE = 0.13;
 
 /**
  * Faces that hold up as a thin-outlined caption over a photo. Every pairing's
@@ -38,7 +46,7 @@ const OUTLINE = 0.045;
 const CAPTION_SAFE = new Set([
   'sansBlack', 'displayCond', 'anton', 'bebas', 'oswald', 'syne', 'serifFat',
   'serifDisplay', 'serifDisplayIt', 'frauncesBlack', 'playfairBlack', 'manrope',
-  'grotesk', 'outfitBlack', 'poppinsBold', 'familjen',
+  'grotesk', 'outfitBlack', 'poppinsBold', 'familjen', 'phoneSemi', 'phoneBold', 'phoneMed', 'phoneAlt',
 ]);
 
 /**
@@ -67,18 +75,18 @@ export default {
     const M = 56;
     const look = spec.assets?.look ?? 'cinematic';
 
-    // One pairing per set. The loud face heads every slide, the body face
-    // carries the lines under it. `spec.assets.pairing` pins one for a brand
-    // with a house style; otherwise it rotates, remembering recent picks.
+    // The platform face, always — every reference slide is typed in it. A
+    // brand with a house style can still pin a pairing with assets.pairing;
+    // the default pin is not recorded, so the designed styles' rotation is
+    // untouched.
     const pairing = pickPairing({
       root, seed: `${spec.id}:${(C.hook?.lines ?? []).join(' ')}`,
-      moods: [spec.niche, C.mood].filter(Boolean), force: spec.assets?.pairing,
-      // only pairings whose loud face survives as a caption — otherwise the
-      // pick falls back to Archivo Black and two sets in a row look the same
+      moods: [spec.niche, C.mood].filter(Boolean), force: spec.assets?.pairing ?? 'phone',
+      record: !!spec.assets?.pairing,
       allow: (p) => CAPTION_SAFE.has(p.loud),
     });
-    const HEAD = CAPTION_SAFE.has(pairing.loud) ? pairing.loud : 'sansBlack';
-    const BODY = ['sans', 'sansMed', 'bookSerif'].includes(pairing.body) ? pairing.body : 'sansMed';
+    const HEAD = CAPTION_SAFE.has(pairing.loud) ? pairing.loud : 'phoneSemi';
+    const BODY = ['sans', 'sansMed', 'bookSerif', 'phoneSemi', 'phoneMed'].includes(pairing.body) ? pairing.body : 'phoneSemi';
     // The gym reference runs a size up on the trading reference (set 08
     // heads at ~48px and bodies at ~40px; set 01 heads at 44 and bodies at 36).
     const T = /gym|fitness|supplement|nutrition|muscle/i.test(spec.niche ?? '') ? 1.12 : 1;
@@ -87,11 +95,11 @@ export default {
 
     const capFace = loadFace(FACES[HEAD].file);
 
-    // Stroke weight varies by set: set 08 is a hairline, the GYM-niche example
-    // is a fat CapCut stroke. Both are native; a brand can pin one.
-    const seedHash = [...`${spec.id}:${(C.hook?.lines ?? []).join(' ')}`].reduce((h, ch) => (h * 31 + ch.charCodeAt(0)) % 9973, 7);
-    const strokeMode = spec.assets?.stroke ?? (T > 1 && seedHash % 2 ? 'heavy' : 'thin');
-    const OUTLINE_W = strokeMode === 'heavy' ? 0.11 : OUTLINE;
+    // One outline for every set: measured 5–7 px core on 1080–1200 canvases
+    // across all fifteen reference sets, no hairlines and no slabs. A brand
+    // can still pin `assets.stroke: "heavy"` for the CapCut look.
+    const strokeMode = spec.assets?.stroke ?? 'thin';
+    const OUTLINE_W = strokeMode === 'heavy' ? 0.2 : OUTLINE;
     spec.content.stroke = strokeMode;
 
     /**
@@ -118,7 +126,7 @@ export default {
         const esc = String(l).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         svg += `<text x="${W / 2}" y="${Math.round(y)}" text-anchor="middle" ` +
           `font-family="${f.family}" font-weight="${f.weight}"${f.style ? ` font-style="${f.style}"` : ""} font-size="${size}" ` +
-          `fill="${fill}" stroke="#000000" stroke-width="${sw}" stroke-opacity="${(0.8 + boost * 3).toFixed(2)}" ` +
+          `fill="${fill}" stroke="#000000" stroke-width="${sw}" ` +
           `stroke-linejoin="round" paint-order="stroke fill">${esc}</text>`;
         y += size * lh;
       }
@@ -168,11 +176,11 @@ export default {
         const r = await scoreRegion(file, { w: W, h: H, sharp, rect: { x: 0, y: Math.max(0, y), w: W, h } });
         mean = r.mean ?? 128;
       } catch { /* keep the default */ }
-      // Calibrated against the frames that actually failed: a sunset at mean
-      // 135 needs a real scrim, a dark street at mean 35 needs nothing. The
-      // first thresholds were set by guess and gave the sunset 0.015 of boost.
-      const over = Math.max(0, (mean - 80) / 120);
-      return { boost: Math.min(0.06, over * 0.06), scrim: over > 0.18 ? Math.min(0.5, over * 0.62) : 0, mean };
+      // No scrim, ever — the reference holds white type over a midday sky
+      // (set-01 slide 3, set-14 slide 2) with the outline alone. A bright
+      // ground gets a little more outline instead.
+      const over = Math.max(0, (mean - 90) / 120);
+      return { boost: Math.min(0.05, over * 0.05), scrim: 0, mean };
     }
 
     async function frame(idOrPath, n) {
@@ -181,8 +189,14 @@ export default {
         : path.join(ctx.photoDir ?? root, `${idOrPath}.jpg`);
       const p = await plate(sharp, src, W, H, outDir);
       const g = await grade(p, look, { width: W, height: H });
+      // De-slop the photo before the caption goes on: off-centre crop, flat
+      // exposure, sensor grain in the shadows, a hard JPEG pass. The text is
+      // drawn afterwards so it stays crisp. `assets.deslop` pins the strength
+      // (0 turns it off); otherwise the look decides.
+      const strength = spec.assets?.deslop ?? strengthFor(look);
+      const d = strength > 0 ? await deslop(g, { seed: `${spec.id}:${n}:${(C.hook?.lines ?? []).join(' ')}`, width: W, height: H, strength }) : g;
       const f = path.join(outDir, `_f${n}.png`);
-      fs.writeFileSync(f, g);
+      fs.writeFileSync(f, d);
       return f;
     }
 
@@ -202,7 +216,9 @@ export default {
         const y = Math.round(H * frac);
         try {
           const r = await scoreRegion(f, { w: W, h: H, sharp, rect: { x: 0, y, w: W, h: bandH } });
-          const cost = r.range + Math.max(0, r.mean - 110) * 0.6 + (r.skin ?? 0) * 120;
+          // skin barely counts: the reference puts the block across the chest
+          // and the arm as often as across a wall (set-05, set-13, gym-2)
+          const cost = r.range + Math.max(0, r.mean - 110) * 0.4 + (r.skin ?? 0) * 30;
           if (cost < best) { best = cost; top = y; }
         } catch { /* keep the default */ }
       }
@@ -240,11 +256,25 @@ export default {
       const rank = hand ? item.rank : isApp ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;
       const label = (numbering === 'none' && !hand) || isApp || !rank ? item.name : `${rank}. ${item.name}`;
 
+      const appPhoto = item.screen && item.photo && path.isAbsolute(String(item.photo)) && fs.existsSync(String(item.photo)) ? String(item.photo) : null;
+      if (appPhoto) {
+        // The app photographed on a phone — the frame generated from the
+        // screenshot (engine/art.mjs appFrame). Caption above it, verdict
+        // under: "PRO TIP / Track your lifts … / stop guessing and start
+        // tracking" is set 08's app slide, over a phone on the gym floor.
+        const f = await frame(appPhoto, i + 2);
+        const s = [image(f, 0, 0, W, H)];
+        const top = await quietBand(f, [0.05, 0.09, 0.13], Math.round(H * 0.22));
+        const { boost } = await contrastAt(f, top - 20, Math.round(H * 0.22));
+        const hd = caption([label], top, { size: 44, boost });
+        s.push(hd.svg);
+        if (item.lines?.length) s.push(caption(item.lines, hd.bottom + 14, { size: 36, face: 'body', boost }).svg);
+        out.push(s.join(''));
+        continue;
+      }
       if (item.screen) {
-        // The screen is 9:16 and the canvas is 3:4, so cover-cropping it cuts
-        // the bottom off the app. Contain it on a dark ground instead — which
-        // is also how the reference sets show a phone: as an object, not a
-        // full-bleed crop.
+        // No generated frame (no AI art): contain the screenshot on a dark
+        // ground rather than cover-cropping the bottom off the app.
         const src = path.join(root, item.screen);
         const meta = await sharp(src).metadata();
         const availH = Math.round(H * 0.80);
@@ -302,7 +332,18 @@ export default {
 
     /* closer */
     {
-      if (C.closer.screen) {
+      const closerAppPhoto = C.closer.screen && C.closer.photo && path.isAbsolute(String(C.closer.photo)) && fs.existsSync(String(C.closer.photo)) ? String(C.closer.photo) : null;
+      if (closerAppPhoto) {
+        // the app on the closer, photographed on a phone (see the ranked app slide)
+        const f = await frame(closerAppPhoto, total);
+        const s = [image(f, 0, 0, W, H)];
+        const top = await quietBand(f, [0.05, 0.09, 0.13], Math.round(H * 0.22));
+        const { boost } = await contrastAt(f, top - 20, Math.round(H * 0.22));
+        const c = caption(C.closer.lines, top, { size: 44, boost });
+        s.push(c.svg);
+        s.push(caption([C.closer.cta], c.bottom + 14, { size: 34, face: 'body', boost }).svg);
+        out.push(s.join(''));
+      } else if (C.closer.screen) {
         const s = [image(path.join(root, C.closer.screen), 0, 0, W, H)];
         s.push(rect(0, 0, W, Math.round(H * 0.20), { fill: '#000000', op: 0.6 }));
         s.push(caption(C.closer.lines, Math.round(H * 0.04), { size: 40 }).svg);

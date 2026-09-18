@@ -70,9 +70,9 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
  */
 export async function complete(o) {
   const { root, system, user, model = 'claude-opus-5', maxTokens = 16000, label = 'blueprint' } = o;
-  const env = loadEnv(root);
-  const key = env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error('ANTHROPIC_API_KEY missing from .env.local');
+  // A host carries the key in its environment; a laptop keeps it in .env.local.
+  const key = process.env.ANTHROPIC_API_KEY || loadEnv(root).ANTHROPIC_API_KEY;
+  if (!key) throw new Error('ANTHROPIC_API_KEY missing (env or .env.local)');
 
   let last;
   for (let attempt = 0; attempt < 4; attempt++) {

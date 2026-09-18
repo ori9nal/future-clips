@@ -19,9 +19,9 @@ function expandIn(text, spec) {
 
 const SHAPE = `{
   "subject": "one locked sentence describing the person in the set: age, hair, facial hair, one plain outfit. No names, no brands.",
-  "hook":   { "lines": ["2-4 short lines, hand-broken"], "sub": ["one supporting line"], "scene": "what the photo shows" },
-  "ranked": [ { "name": "slide heading", "score": "optional short tag", "lines": ["1-3 short lines"],
-                "role": "body | app | proof", "showsApp": false } ],
+  "hook":   { "lines": ["2-3 short lines, hand-broken"], "sub": [], "scene": "shot type then one clause: mirror | pov | crop | friend | object | outdoors — e.g. \"mirror, locker room, phone at chest\"" },
+  "ranked": [ { "name": "slide heading", "score": "optional short tag", "lines": ["1-4 short lines"],
+                "role": "body | app | proof", "showsApp": false, "scene": "shot type then one clause" } ],
   "numbering": "countdown | none",
   "closer": { "lines": ["1-2 short lines"], "cta": "the call to action" },
   "caption": "the post caption: one short natural line in the same voice as the slides, with 2-3 emojis that fit the topic woven in, never a row of emojis at the end",
@@ -61,6 +61,18 @@ const RULES_NATIVE = `How to write it:
 - Write like a person who actually uses this, first person, specific. Not like a brand. That does NOT
   mean a struggle story — "the four apps I open every morning" is first person too. Match the clipper's
   ask; do not turn a list into a confession.
+- SPECIFIC means a number a real post would have: "3 x 10", "4x60 seconds planks", "8-10 reps",
+  "32.5kg", "6am", "twice a week", "$25-$50", "1% risk per trade", "2-4 pairs", "40 min". At least half
+  of the ranked items carry one. A noun without a number ("progressive overload", "consistency") is
+  what a brand writes.
+- The voice is a person typing on their phone: sentence case, a lowercase "i" is fine, "lol", "fr",
+  "lowkey", ".." and "..." as trailing punctuation, ONE word in CAPS for emphasis ("ACTUALLY", "ONLY",
+  "PEAK", "FAVVV"). No em dashes (use a comma or ".."), no semicolons, no hashtags on slides, at most
+  one emoji on a slide and most slides none.
+- NEVER these words, they are not in any real post: elevate, unlock, level up, transform, empower,
+  seamless, effortless, supercharge, next level, unleash, harness, dominate, crush it, the secret to,
+  here's the thing, let's dive, "it's not about X, it's about Y", game-changing, revolutionary,
+  "trust me", "you got this", "pro tip:" more than once.
 - The "ranked" array is the middle of the set. hook + ranked + closer must total the slide count
   you are given, so ranked has (count - 2) entries.
 - Exactly one ranked entry has "role": "app" and "showsApp": true, at the position you are told.
@@ -132,43 +144,99 @@ const SYSTEM = systemFor('native');
  */
 const SCENE_DIRECTION = {
   feed: [
-    'This is the TikTok slideshow format. Its whole appeal is ASPIRATION: the imagery is the life the',
-    'viewer wants, not the viewer\'s current mood. Every scene must be one of these kinds of shot, and no',
-    'two scenes the same kind: a dark supercar on a wet street at night; a hotel pool lit from below with',
-    'palms; a penthouse window at golden hour over a city; a trading desk with three monitors glowing in a',
-    'dim room; a yacht deck at dusk; a first-class window seat; the interior of a luxury car at night from',
-    'the driver\'s seat; a rooftop at blue hour; a watch and a phone on a marble table. Warm, rich,',
-    'expensive. NEVER: rain on a window, a bus, a train, a bedroom, a café, an office, anything grey or',
-    'dreary, any person\'s face, anyone sitting sadly. The set should make someone want the life.',
-    'When the ask is about apps or tools, NAME real, well-known ones — TradingView, MetaTrader 5, Forex',
-    'Factory, Webull — alongside the campaign product. Vague headings like "the charting one" are a failure.',
-    'The HOOK for this format is a count plus a promise, never a confession: "4 trading apps I will never',
-    'uninstall", "Top 3 apps I wish I had earlier", "The only 4 I still open". Two short lines. Do not',
-    'open with "I blew my account" — that is a story hook, and this is a list post.',
-    'The "subject" field is unused for this format; write "none".',
+    'This is the TikTok slideshow format for trading. The imagery is one person\'s LIFE seen on their',
+    'phone — their car, their desk, a pool, a plane tray — and the person is never a face: from behind,',
+    'hooded, a hand on a wheel, feet up. Real posts to match, copied exactly:',
+    'hooks — "4 trading apps I\'ll never uninstall" · "Traders don\'t sleep on this:" · "How I became a',
+    'profitable trader" · „Bro I don\'t know how to start trading..." 🗣️ · "How I would structure the first',
+    'year in trading, starting as a complete beginner..." · "TJR will not make you profitable.." · "Top 3',
+    'trading apps I wish I had earlier..".',
+    'items — "4. Forex Factory / Every red folder news event, before it moves the market" · "3. Meta',
+    'Trader 5 / Where the orders actually get placed, no fluff" · "1. TradingView / the only chart app',
+    'i\'ll ever trust. smooth, customizable, just elite." · "Best pairs to trade on forex: / XAUUSD /',
+    'USDCAD / EURUSD / GBPUSD / GBPJPY" · "Month 3: / Backtest a full year of data on 2-4 pairs, then',
+    'choose the pair that delivers the strongest results." · "Month 7-9: / Open a small funded account',
+    '($5k-$10k), costing roughly $25-$50 to purchase." · "I stopped chasing my losses. / When I lost a',
+    'trade, I stopped for the entire day and learned from it".',
+    'app lines — "saved me so much time on charting, the gamechanger fr 💯" · "this app is the secret',
+    'sauce fr" · "I check it before every session for the market read, then log my trades after. Keeps',
+    'me consistent".',
+    'closers — "Your own rules: / 1. Keep your journey private, don\'t tell a soul. / 2. Stay',
+    'disciplined and stick to your strategy." · "the only one who can make you profitable is you.".',
+    'When the ask is about apps or tools, NAME real ones — TradingView, MetaTrader 5, Forex Factory,',
+    'Webull, Stocktwits — alongside the campaign product. The hook is a count plus a promise or a quoted',
+    'DM, two short lines, never a confession. Numbers on at least half the items: pairs, months, $,',
+    '%, a time of day. The "subject" field is unused for this format; write "none".',
+    '"scene" is a hint only: one of car | interior | desk | feetup | pool | penthouse | plane | boat |',
+    'street | garage | watch | rooftop | behind, then a clause.',
   ].join(' '),
-  // The gym feed is a different animal from the trading feed: it IS one
-  // person — one lifter, one gym, one session — shot as anatomy close-ups, and
-  // every item carries a rating out of ten. Measured off reference sets 08 and
-  // 13: "Top 5 PEAK exercises for BICEPS", "7 muscles I regret skipping".
+  // The gym feed IS one person across many days, shot on a phone: mirror
+  // selfies, close crops with the head out of frame, looking down at his own
+  // arm, a friend shooting from across the gym. Measured off sets 05, 08, 09,
+  // 10, 13, 15 and the GYM-niche examples.
   'feed:fitness': [
-    'This is the TikTok gym slideshow format. One lifter, one gym, one session. The frames are',
-    'ANATOMY close-ups of that lifter — a bicep mid-curl, a back at the cable station, quads at the',
-    'bottom of a squat, a shoulder at the top of a raise — shot on a phone in the gym mirror or by a',
-    'training partner. Never a face straight to camera; a mirror selfie with the phone in front of the',
-    'face is the only full-body frame allowed. NEVER: a bedroom, a kitchen, a café, a street, a sad',
-    'mood, a stock pose, a thumbs up.',
-    'Every ranked item is a specific EXERCISE or a specific MUSCLE, named plainly ("Incline dumbbell',
-    'curl", "Rear delts"), with "score" as a rating out of ten like "8/10", and one or two lines of',
-    'blunt lifter-to-lifter verdict — why it is rated that, what it does, what it does not. Not a',
-    'brand voice. Lowercase "lol" energy is fine; exclamation marks are not.',
-    'The HOOK is a count plus a promise: "Top 5 PEAK exercises for BICEPS", "7 muscles I regret',
-    'skipping", "4 things that actually moved my lifts". Two short lines.',
-    'The "subject" field IS used: one lifter, described once — age, build, hair, skin tone, facial',
-    'hair. NO clothing: he is photographed across many different days and wears something different',
-    'in every frame. Just the person.',
+    'This is the TikTok gym slideshow format: one lifter\'s camera roll over many days. Real posts to',
+    'match, copied exactly:',
+    'hooks — "Top 5 PEAK exercises for BICEPS" · "7 muscles I regret skipping when I started lifting..."',
+    '· "6 things I wish I new before I started lifting" · "If i could ONLY pick 4 exercises for glute',
+    'growth.." · "5 tips on how to ACTUALLY get v shape body" · "hot girls don\'t gate keep / ab guide➡"',
+    '· "I want to go to gym 4x a week" (a quoted DM) · "Maturing is realising...".',
+    'rated items — "5. Dumbbell curls / -8/10 / Only good for beginners, but it will make your bicep',
+    'grow slower long term" · "4. Preacher curls / 3/10 / Pretty dangerous exercise, not really worth',
+    'the risk lol" · "2. Spider curls / 8/10 / Good tension, ROM, and form is lowkey hard to mess up" ·',
+    '"1. Snake curls / 1000/10 / No explanation needed..." · "1. Kitty curls / 10/10 / Popularized by',
+    'Sam Sulek. / It speaks for itself.".',
+    'programme items — "RDLS / my FAVVV exercise for glute growth / - 1 warmup set / - 3 working sets /',
+    '- 8 reps" · "Hipthrusts / pause at the top. if you\'re not squeezing, it\'s useless" · "Day 1: Back',
+    'Workout / - Lat Pulldown 3 x 10 / - Rear Delt Fly 3 x 10 / - Face Pull 3x 12" · "1. Shoulders /',
+    '-lateral raises to failure / -heavy on shoulder press / - control the weight and form" · "2.',
+    'abs/chest / -Only two exercises / - russian twist to failure / -4x60 seconds planks / -never take',
+    'chest to failure, the fatigue will haunt you".',
+    'lesson items — "6. Forearms / Well developed forearms just make you look jacked regardless of what',
+    'you wear. A few hard sets at the end of your bicep workouts is all you need" · "3. Control Your Ab',
+    'Work: / Focus on slow, weighted core exercises instead of spamming high-rep crunches that widen',
+    'your waist.".',
+    'app slide — "PRO TIP / Track your lifts and meals in HealthMeter for MAXIMUM BICEP GROWTH / stop',
+    'guessing and start tracking" · "QUICK TIP / You don\'t know what you lifted last week ? you\'re',
+    'basically guessing your progression 💀 / I use the app : Liftly / It keeps my exercises, weights,',
+    'reps & PRs saved." · "bonus tip: / remember to track your lifts and also your meals, it\'s a MUST',
+    'for progressive overload / (I use HealthMeter)".',
+    'Every ranked item is a specific EXERCISE or MUSCLE named plainly, or when the ask is mistakes,',
+    'habits, lessons or myths, that mistake or lesson named plainly. "score" is "x/10" (negative and',
+    'over-ten allowed, "-1/10", "1000/10") ONLY when the ask asks for ratings or a ranking of',
+    'exercises; otherwise "". Lines are a dash list ("- 3 working sets", "- 8-10 reps") or one or two',
+    'blunt lifter-to-lifter sentences. Numbers on at least half the items: sets x reps, seconds, kg, a',
+    'day of the week, "twice a week". Lowercase "lol" energy is fine; exclamation marks are not.',
+    'The "subject" field IS used: one lifter, described once — age, build, hair, skin tone, facial hair.',
+    'NO clothing: he wears something different in every frame. Just the person.',
+    '"scene" per slide: one of mirror | pov | crop | friend | object | outdoors, then a clause.',
   ].join(' '),
-  native: 'Scenes are real gym or lifestyle moments a phone would catch. Vary the place and framing every slide.',
+  native: [
+    'This is a phone-photo slideshow: 9:16 frames off someone\'s camera roll with a small caption on',
+    'each. Scenes are real moments a phone would catch — a mirror, looking down at your own hands, a',
+    'friend shooting from across the room, an object on a counter. Vary the shot every slide.',
+    'Numbers on at least half the items. "scene": one of mirror | pov | crop | friend | object |',
+    'outdoors, then a clause.',
+  ].join(' '),
+  // Food and meal prep: mostly objects (containers, the pan, the plate) and
+  // two frames with the cook in them from behind. Measured off set-15 (the
+  // supplement row, the cucumber hot dog) and set-07 (the Notes food guide).
+  'native:food': [
+    'This is a phone-photo slideshow about food someone actually cooks: 9:16 frames off their camera',
+    'roll — the containers on the table, the pan on the hob, a plate on a cluttered counter with the',
+    'flash on, the fridge shelf, a kitchen scale — and at most two frames with the cook in them from',
+    'behind. Real lines to match: "3. Eat healthy" over a plate · "2. Take supplements" over a row of',
+    'tubs · "Pro tip: / Nourishing protein + fibre meals keeps me full & supports my recovery" · a Notes',
+    'list "protein / • chicken breast, red meat, salmon / • Greek yogurt, cottage cheese" · "→ Ex: $1,200',
+    'iPhone upgrade? Match it with $1,200 into your brokerage account.".',
+    'Every ranked item is a specific meal or step with its numbers: minutes, grams, how many containers,',
+    'what it costs, which day. "Chicken thighs and potatoes / 30 min / One tray, one oven / I salt them',
+    'the night before". Blunt, first person, a lowercase "i" is fine. No recipe-blog voice, no "delicious",',
+    'no "nourish", no "fuel your day".',
+    'The "subject" is one person described once — age, build, hair, skin tone. No clothing.',
+    '"scene": one of plate | containers | pan | fridge | board | scale | cook | hands | car | oven | bag,',
+    'then a clause.',
+  ].join(' '),
   // The @bedrock.form format: an illustrated character teaches a programme.
   // No photography, no person, no story — a headline, a figure doing the
   // movement, and the sets x reps. Extra fields ride along on each item.
@@ -196,7 +264,17 @@ const SCENE_DIRECTION = {
   ].join(' '),
 };
 
-const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|nutrition|health|muscle/i;
+const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|creatine|muscle|lifting/i;
+const FOOD_NICHE = /food|meal|nutrition|kitchen|cook|recipe|diet/i;
+
+/**
+ * Phrases no real post in the corpus uses and the model reaches for. A slide
+ * carrying one is rejected and the set regenerated with the failure named —
+ * the copy is the cheapest line, and "elevate your training" on slide 3 is
+ * the whole set read as an ad.
+ */
+export const BRAND_SPEAK = /\b(elevate|unlock(?:ing|ed)?|level up|transform(?:ative|ed|ing)?|empower(?:ing|ed)?|seamless(?:ly)?|effortless(?:ly)?|supercharge|next level|unleash|harness|dominate|crush it|the secret to|here's the thing|let's dive|game-changing|revolutionary|trust me|you got this|fuel your|nourish(?:ing)?)\b|it's not (?:about|just) [^.]{1,40}, it's (?:about )?/i;
+
 
 /** Any emoji (pictographs, symbols, flags, keycaps); the caption must carry some. */
 export const EMOJI_RX = /\p{Extended_Pictographic}|\p{Regional_Indicator}/u;
@@ -228,7 +306,10 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
   // to default to. Every gym feed round wrote its copy under the "native"
   // direction because the APEX file says native and make-set said feed.
   const styleId = wanted ?? spec.content?.style ?? 'native';
-  const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(spec.niche ?? '') && SCENE_DIRECTION['feed:fitness'])
+  const niche = spec.niche ?? '';
+  const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(niche) && SCENE_DIRECTION['feed:fitness'])
+    || (styleId === 'native' && GYM_NICHE.test(niche) && SCENE_DIRECTION['feed:fitness'])
+    || (styleId === 'native' && FOOD_NICHE.test(niche) && SCENE_DIRECTION['native:food'])
     || SCENE_DIRECTION[styleId] || SCENE_DIRECTION.native;
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
@@ -259,7 +340,16 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
  * rules, then the ask's own rules (count in range, emoji in the caption).
  * Pure: returns the repaired content and a verdict, spends nothing.
  */
-export function judgeCopy({ spec, data, range }) {
+export function judgeCopy({ spec, data, range, styleId }) {
+  // The phone formats never carry an em dash on a slide (none in 237
+  // reference slides); the model writes one on most. Repair, don't reject.
+  const phone = styleId ? /^(feed|native)$/.test(styleId) : !/^bedrock$/.test(spec.content?.style ?? '');
+  if (phone) {
+    const fix = (t) => (t == null ? t : String(t).replace(/\s*[—–]\s*/g, ', ').replace(/;\s*/g, ', '));
+    if (data.hook) { data.hook.lines = (data.hook.lines ?? []).map(fix); data.hook.sub = (data.hook.sub ?? []).map(fix); }
+    for (const r of data.ranked ?? []) { r.name = fix(r.name); r.lines = (r.lines ?? []).map(fix); }
+    if (data.closer) { data.closer.lines = (data.closer.lines ?? []).map(fix); data.closer.cta = fix(data.closer.cta); }
+  }
   // fold the generated content into the shape compliance expects
   const slides = [
     { index: 1, role: 'hook', text: [...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' '), showsApp: false },
@@ -300,6 +390,19 @@ export function judgeCopy({ spec, data, range }) {
   if (!EMOJI_RX.test(String(data.caption ?? ''))) {
     verdict.failures.push('the caption has no emoji; it must carry 2-3 that fit the topic');
   }
+  if (phone) {
+    // brand-speak on any slide
+    for (const sl of slides) {
+      const m = BRAND_SPEAK.exec(sl.text ?? '');
+      if (m) verdict.failures.push(`slide ${sl.index} says "${m[0]}" — a brand word no real post uses; rewrite it plainly`);
+    }
+    // specificity: at least half of the body items carry a number
+    const body = (data.ranked ?? []).filter((r) => !r.showsApp);
+    const withNum = body.filter((r) => /\d/.test([r.score, ...(r.lines ?? [])].filter(Boolean).join(' ')));
+    if (body.length >= 2 && withNum.length * 2 < body.length) {
+      verdict.failures.push(`only ${withNum.length} of ${body.length} items carry a number (sets x reps, kg, minutes, $, %, a time); at least half must`);
+    }
+  }
   verdict.pass = verdict.failures.length === 0;
   return { data, verdict, slides: repaired.slides, count: n };
 }
@@ -326,7 +429,7 @@ export async function generateContent({ root, spec, instruction, slideCount, sli
       system: req.system, user: req.user,
     });
     spent += usd;
-    const judged = judgeCopy({ spec, data, range: req.range });
+    const judged = judgeCopy({ spec, data, range: req.range, styleId: req.styleId });
     last = judged;
     if (judged.verdict.pass) return { content: judged.data, verdict: judged.verdict, usd: spent, attempts: i + 1, count: judged.count };
     feedback = feedbackFor(judged.verdict);
@@ -401,7 +504,9 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
       rank: hand, role: r.role, showsApp,
       icon: useIcon ? appIcon : undefined,
       screen: showsApp && !useIcon && appScreen ? appScreen : undefined,
-      photo: showsApp && !useIcon && appScreen ? undefined : photoAt(i + 1),
+      // the app slide keeps its frame too: for the phone formats that frame
+      // is the app photographed on a phone, and the renderer prefers it
+      photo: photoAt(i + 1),
     };
   });
 
@@ -432,9 +537,11 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
       hook: { ...content.hook, lines: content.hook?.headline?.length ? content.hook.headline : content.hook?.lines, photo: hookPhoto },
       ranked,
       closerRank,
+      // the closer keeps its frame either way: when it carries the screen the
+      // renderer prefers a generated phone-on-a-bench frame over the UI mock
       closer: appAlreadyShown
         ? { ...closer, photo: closerPhoto }
-        : { ...closer, screen: appScreen ?? undefined, photo: appScreen ? undefined : closerPhoto },
+        : { ...closer, screen: appScreen ?? undefined, photo: closerPhoto },
       caption: content.caption, bio: content.bio, hashtags: content.hashtags,
     },
   };

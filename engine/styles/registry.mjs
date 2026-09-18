@@ -60,7 +60,7 @@ export function stylesFor(niche) {
 }
 
 /** Render one campaign in one style. */
-export async function render({ spec, root, styleId, outDir }) {
+export async function render({ spec, root, styleId, outDir, cacheDir }) {
   const style = byId(styleId);
   if (!style) throw new Error(`unknown style "${styleId}"`);
   const { w, h } = style.canvas;
@@ -73,6 +73,9 @@ export async function render({ spec, root, styleId, outDir }) {
 
   const ctx = {
     root, sharp, outDir,
+    // a style that generates its own art (bedrock's figures) caches into the same
+    // content-addressed frame cache as the lanes; the host passes /tmp, a laptop output/
+    cacheDir: cacheDir ?? path.join(root, 'output/gen/cache'),
     photoDir: spec.assets?.photos?.dir ? path.join(root, spec.assets.photos.dir) : null,
   };
   const bodies = await style.slides(spec, ctx);

@@ -1,7 +1,37 @@
 {
   "version": "0.0.1",
   "configurations": [
-    { "name": "future-clips", "runtimeExecutable": "npm", "runtimeArgs": ["run", "dev"], "port": 3000 },
-    { "name": "site", "runtimeExecutable": "python", "runtimeArgs": ["-m", "http.server", "3323", "--bind", "127.0.0.1", "--directory", "future-clips-site"], "port": 3323 }
+    {
+      "name": "future-clips",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "site",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "3323",
+        "--bind",
+        "127.0.0.1",
+        "--directory",
+        "future-clips-site"
+      ],
+      "port": 3323
+    },
+    {
+      "name": "future-clips-product",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "cd ../fc-product && FC_DEMO_PREVIEW=1 npx next dev -p 3001"
+      ],
+      "port": 3001
+    }
   ]
 }

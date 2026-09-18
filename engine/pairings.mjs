@@ -12,6 +12,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
+import os from 'node:os';
 
 /**
  * Each pairing names faces by kit key. `mood` is what makes the pick
@@ -33,6 +34,13 @@ export const PAIRINGS = [
   { id: 'manrope',    loud: 'manrope',        quiet: 'monoMed',        body: 'sansMed',     moods: ['clean', 'finance', 'saas'],       note: 'Rounded geometric with a mono caption rail.' },
   { id: 'bebas',      loud: 'bebas',          quiet: 'bookSerifIt',    body: 'sansMed',     moods: ['sport', 'street', 'fitness'],     note: 'Poster condensed with a literary italic.' },
   { id: 'abril',      loud: 'abril',          quiet: 'grotesk',        body: 'sans',        moods: ['fashion', 'beauty', 'editorial'], note: 'Fat display serif, magazine cover energy.' },
+  // The phone-photo formats (feed, native) are not a pairing at all: every
+  // reference set in Carousel examples/reference-2026-09 is typed in the
+  // platform's own caption face — TikTok "Classic" (a Proxima Nova cut),
+  // one weight, sentence case. Figtree is the closest open face. This entry
+  // exists so a brand can still pin something else with assets.pairing, and
+  // so the rotation history never records it (see pickPairing `record`).
+  { id: 'phone',      loud: 'phoneSemi',      quiet: 'phoneSemi',      body: 'phoneSemi',   moods: ['phone', 'creator', 'fitness', 'trading'], note: 'The platform caption face. One weight, sentence case, thin outline.' },
 ];
 
 /** Kit keys the pairings reference, mapped to real files. Merged into FACES. */
@@ -63,21 +71,38 @@ export const PAIRING_FACES = {
   script:         { file: 'Caveat-Bold',                family: 'Caveat',                 weight: 700 },
   scriptItalic:   { file: 'Caveat-Bold',                family: 'Caveat',                 weight: 700 },
   familjen:       { file: 'FamiljenGrotesk-Bold',       family: 'Familjen Grotesk',       weight: 700 },
+  // the phone caption faces — see the `phone` pairing
+  phoneMed:       { file: 'Figtree-Medium',             family: 'Figtree',                weight: 500 },
+  phoneSemi:      { file: 'Figtree-SemiBold',           family: 'Figtree',                weight: 600 },
+  phoneBold:      { file: 'Figtree-Bold',               family: 'Figtree',                weight: 700 },
+  phoneAlt:       { file: 'Inter-SemiBold',             family: 'Inter',                  weight: 600 },
 };
 
-const STATE = 'output/gen/pairing-history.json';
+const STATE = 'gen/pairing-history.json';
+
+/**
+ * Where the rotation state lives: output/ on a laptop, /tmp/fc on a host whose
+ * checkout is read-only (the same base lib/engine.ts workDirs() uses).
+ */
+function stateFile(root) {
+  const base = process.env.VERCEL ? path.join(os.tmpdir(), 'fc') : path.join(root, 'output');
+  return path.join(base, STATE);
+}
 
 function history(root) {
-  const f = path.join(root, STATE);
+  const f = stateFile(root);
   if (!fs.existsSync(f)) return [];
   try { return JSON.parse(fs.readFileSync(f, 'utf8')); } catch { return []; }
 }
 
+/** Best effort: a rotation record must never fail a render (read-only disk, full disk). */
 function remember(root, id) {
-  const f = path.join(root, STATE);
-  fs.mkdirSync(path.dirname(f), { recursive: true });
-  const h = [id, ...history(root).filter((x) => x !== id)].slice(0, 8);
-  fs.writeFileSync(f, JSON.stringify(h));
+  try {
+    const f = stateFile(root);
+    fs.mkdirSync(path.dirname(f), { recursive: true });
+    const h = [id, ...history(root).filter((x) => x !== id)].slice(0, 8);
+    fs.writeFileSync(f, JSON.stringify(h));
+  } catch { /* the next set rotates from an empty history; nothing else changes */ }
 }
 
 /**
@@ -103,7 +128,9 @@ export function pickPairing({ root, seed = '', moods = [], force, record = true,
   const recent = history(root);
   const wanted = moods.map((m) => String(m).toLowerCase());
 
-  const scored = PAIRINGS.filter(allow).map((p) => {
+  // `phone` is only ever pinned (feed/native ask for it by name); it never
+  // enters the rotation, so the designed styles keep their shelf
+  const scored = PAIRINGS.filter((p) => p.id !== 'phone').filter(allow).map((p) => {
     let score = 0;
     if (wanted.length && p.moods.some((m) => wanted.includes(m))) score += 100;
     // the more recently a pairing was used, the harder it is pushed down —

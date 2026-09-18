@@ -19,14 +19,22 @@ import sharp from 'sharp';
 import { loadFace } from './fonts.mjs';
 import { fitLines, layoutWidth } from './fit-text.mjs';
 import { captionBlock, placementsFor, breakToFit } from './caption.mjs';
+import { deslop } from './deslop.mjs';
 
 export const W = 1080, H = 1920;
 
+// The caption face is the platform's own (TikTok "Classic", a Proxima Nova
+// cut) on every reference slide; Figtree is the closest open face. Poppins
+// Bold, the previous choice, is rounder and heavier than anything in the
+// corpus. Sizes follow: the reference body em is 45–60 px on a 1080 canvas
+// and the hook 60–85 — the 104 px hook this file used to allow is twice it.
 const FACE = {
-  cap:   { file: 'Poppins-Bold', family: 'Poppins', weight: 700 },
-  body:  { file: 'Poppins-SemiBold', family: 'Poppins SemiBold', weight: 400 },
+  cap:   { file: 'Figtree-SemiBold', family: 'Figtree', weight: 600 },
+  body:  { file: 'Figtree-SemiBold', family: 'Figtree', weight: 600 },
   mono:  { file: 'JetBrainsMono-Bold', family: 'JetBrains Mono', weight: 700 },
 };
+/** SVG stroke-width as a fraction of the em; the visible outline is half (paint-order). */
+const STROKE = 0.13;
 
 const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 const R = (x, y, w, h, r, fill, extra = '') =>
@@ -47,7 +55,7 @@ function png(root, body, file) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   fs.writeFileSync(file, new Resvg(svg, {
     fitTo: { mode: 'width', value: W },
-    font: { loadSystemFonts: false, defaultFontFamily: 'Poppins', fontFiles: fontFiles(root) },
+    font: { loadSystemFonts: false, defaultFontFamily: 'Figtree', fontFiles: fontFiles(root) },
   }).render().asPng());
   return file;
 }
@@ -59,11 +67,16 @@ const embed = (f) => {
 
 /* ── native style ───────────────────────────────────────────────────────── */
 
-async function plate(src, cacheDir) {
-  const out = path.join(cacheDir, `_p${path.basename(src).replace(/\.\w+$/, '')}.png`);
+// `strength` is the de-slop pass (engine/deslop.mjs) on the photo before the
+// caption goes on; the cache name carries it so a changed knob is not served
+// a stale plate. The native reference runs are phone JPEGs, so the default
+// is close to the script's full recipe.
+async function plate(src, cacheDir, { strength = 0.85, seed = '' } = {}) {
+  const out = path.join(cacheDir, `_p${path.basename(src).replace(/\.\w+$/, '')}${strength > 0 ? `-d${Math.round(strength * 100)}` : ''}.png`);
   if (!fs.existsSync(out)) {
     fs.mkdirSync(cacheDir, { recursive: true });
-    await sharp(src).resize(W, H, { fit: 'cover', position: sharp.strategy.attention }).png().toFile(out);
+    const fitted = await sharp(src).resize(W, H, { fit: 'cover', position: sharp.strategy.attention }).png().toBuffer();
+    fs.writeFileSync(out, strength > 0 ? await deslop(fitted, { seed: `${seed}:${path.basename(src)}`, width: W, height: H, strength }) : fitted);
   }
   return out;
 }
@@ -85,7 +98,7 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
   for (const cap of [max, Math.round(max * 0.82), Math.round(max * 0.68)]) {
     try {
       probe = captionBlock(face, use, { x: margin, y: zone[0], w: boxW, h: zone[1] - zone[0] },
-        { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min });
+        { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min, strokeRatio: STROKE });
       break;
     } catch { /* smaller */ }
   }
@@ -97,7 +110,7 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
     for (const cap of [max, Math.round(max * 0.8), Math.round(max * 0.66)]) {
       try {
         probe = captionBlock(face, use, { x: margin, y: zone[0], w: boxW, h: zone[1] - zone[0] },
-          { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min });
+          { family: FACE.cap.family, weight: FACE.cap.weight, max: cap, min, strokeRatio: STROKE });
         break;
       } catch { /* smaller */ }
     }
@@ -111,7 +124,7 @@ async function place(plateFile, lines, { zone, max, min, avoid = [] }) {
   for (const spot of pool) {
     try {
       const c = captionBlock(face, lines, { x: spot.x, y: spot.y, w: spot.w, h: blockH + 8 },
-        { family: FACE.cap.family, weight: FACE.cap.weight, max, min });
+        { family: FACE.cap.family, weight: FACE.cap.weight, max, min, strokeRatio: STROKE });
       return { ...c, box: { x: spot.x, y: spot.y, w: spot.w, h: c.height }, spot };
     } catch { /* next spot */ }
   }
@@ -124,19 +137,21 @@ export async function nativeSlides(spec, root, outDir) {
   const cache = path.join(outDir, '_plates');
   const C = spec.content;
   const out = [];
+  const dopt = { strength: spec.assets?.deslop ?? 0.85, seed: `${spec.id}:${(C.hook?.lines ?? []).join(' ')}` };
+  const plateOf = (photo) => plate(path.isAbsolute(String(photo)) ? String(photo) : path.join(photoDir, `${photo}.jpg`), cache, dopt);
 
   // hook
   {
-    const p = await plate(path.isAbsolute(String(C.hook.photo)) ? String(C.hook.photo) : path.join(photoDir, `${C.hook.photo}.jpg`), cache);
+    const p = await plateOf(C.hook.photo);
     const s = [embed(p)];
-    const title = await place(p, C.hook.lines, { zone: [H * 0.05, H * 0.58], max: 104, min: 58 });
+    const title = await place(p, C.hook.lines, { zone: [H * 0.08, H * 0.62], max: 70, min: 48 });
     s.push(title.svg);
     if (C.hook.sub?.length) {
       // Directly under the title. Searching for the subline independently
       // floated it down onto the model's face.
       const sub = captionBlock(face, C.hook.sub,
         { x: title.box.x, y: title.box.y + title.height + 14, w: title.box.w, h: 130 },
-        { family: FACE.cap.family, weight: FACE.cap.weight, max: 50, min: 30 });
+        { family: FACE.cap.family, weight: FACE.cap.weight, max: 40, min: 28, strokeRatio: STROKE });
       s.push(sub.svg);
     }
     out.push(s.join(''));
@@ -152,15 +167,21 @@ export async function nativeSlides(spec, root, outDir) {
     // A campaign can require the app to appear mid-set rather than at the end
     // (TradeLens: slide 4 or 5 on a 7+ slide post), so a ranked item may carry
     // its own screen instead of a photo.
-    const p = item.screen
-      ? path.join(root, item.screen)
-      // a generated frame arrives as an absolute path; a sourced one as an id
-      : await plate(path.isAbsolute(String(item.photo)) ? String(item.photo) : path.join(photoDir, `${item.photo}.jpg`), cache);
+    // The app slide: the screenshot photographed on a phone when a frame was
+    // generated from it (engine/art.mjs appFrame); the raw screen otherwise.
+    const appPhoto = item.screen && item.photo && path.isAbsolute(String(item.photo)) && fs.existsSync(String(item.photo)) ? String(item.photo) : null;
+    const rawScreen = !!item.screen && !appPhoto;
+    const p = appPhoto
+      ? await plateOf(appPhoto)
+      : item.screen
+        ? path.join(root, item.screen)
+        // a generated frame arrives as an absolute path; a sourced one as an id
+        : await plateOf(item.photo);
     const s = [embed(p)];
     // An app screenshot is dense UI everywhere, so the band-quietness solver
     // has no genuinely quiet band to find — white stroked type landed straight
     // across the levels rows. Reserve two bands with a scrim instead.
-    if (item.screen) {
+    if (rawScreen) {
       s.push(`<defs><linearGradient id="ap${i}" x1="0" y1="0" x2="0" y2="1">` +
         `<stop offset="0" stop-color="rgba(0,0,0,0.88)"/><stop offset="1" stop-color="rgba(0,0,0,0)"/>` +
         `</linearGradient></defs><rect x="0" y="0" width="${W}" height="${Math.round(H * 0.30)}" fill="url(#ap${i})"/>`);
@@ -176,37 +197,50 @@ export async function nativeSlides(spec, root, outDir) {
     const head = [numbering === 'none' ? item.name : `${rank}. ${item.name}`];
     if (item.score) head.push(item.score);
     const title = await place(p, head, {
-      zone: item.screen ? [H * 0.03, H * 0.22] : [H * 0.10, H * 0.52], max: 84, min: 46,
+      zone: rawScreen ? [H * 0.03, H * 0.22] : appPhoto ? [H * 0.04, H * 0.20] : [H * 0.12, H * 0.56], max: 56, min: 40,
     });
     s.push(title.svg);
     const body = await place(p, item.lines, {
-      zone: item.screen
+      zone: rawScreen
         ? [H * 0.72, H * 0.95]
-        : [Math.max(title.box.y + title.height + 40, H * 0.56), H * 0.92],
-      max: 60, min: 34, avoid: [title.box],
+        : appPhoto
+          ? [title.box.y + title.height + 16, H * 0.40]
+          : [Math.max(title.box.y + title.height + 40, H * 0.56), H * 0.92],
+      max: 46, min: 32, avoid: [title.box],
     });
     s.push(body.svg);
     out.push(s.join(''));
   }
 
-  // payload: the app's own screen, full bleed, if the campaign has one
-  if (C.closer.screen) {
+  // payload: the app's own screen, full bleed, if the campaign has one — or
+  // the phone-on-a-bench frame generated from it, which is what the
+  // reference closers are
+  const closerAppPhoto = C.closer.screen && C.closer.photo && path.isAbsolute(String(C.closer.photo)) && fs.existsSync(String(C.closer.photo)) ? String(C.closer.photo) : null;
+  if (closerAppPhoto) {
+    const p = await plateOf(closerAppPhoto);
+    const s = [embed(p)];
+    const c = await place(p, C.closer.lines, { zone: [H * 0.04, H * 0.30], max: 56, min: 38 });
+    s.push(c.svg);
+    const cta = await place(p, [C.closer.cta], { zone: [c.box.y + c.height + 16, H * 0.46], max: 44, min: 30, avoid: [c.box] });
+    s.push(cta.svg);
+    out.push(s.join(''));
+  } else if (C.closer.screen) {
     const screen = path.join(root, C.closer.screen);
     const s = [embed(screen)];
-    const c = await place(screen, C.closer.lines, { zone: [H * 0.76, H * 0.94], max: 56, min: 32 });
+    const c = await place(screen, C.closer.lines, { zone: [H * 0.76, H * 0.94], max: 48, min: 32 });
     s.push(c.svg);
     const cta = captionBlock(face, [C.closer.cta],
       { x: 90, y: c.box.y + c.height + 16, w: W - 180, h: 110 },
-      { family: FACE.cap.family, weight: FACE.cap.weight, max: 46, min: 28 });
+      { family: FACE.cap.family, weight: FACE.cap.weight, max: 40, min: 28, strokeRatio: STROKE });
     s.push(cta.svg);
     out.push(s.join(''));
   } else {
-    const p = await plate(path.isAbsolute(String(C.closer.photo)) ? String(C.closer.photo) : path.join(photoDir, `${C.closer.photo}.jpg`), cache);
+    const p = await plateOf(C.closer.photo);
     const s = [embed(p)];
-    const c = await place(p, C.closer.lines, { zone: [H * 0.12, H * 0.56], max: 80, min: 44 });
+    const c = await place(p, C.closer.lines, { zone: [H * 0.12, H * 0.58], max: 60, min: 40 });
     s.push(c.svg);
     const cta = await place(p, [C.closer.cta], {
-      zone: [Math.max(c.box.y + c.height + 40, H * 0.60), H * 0.92], max: 56, min: 32, avoid: [c.box],
+      zone: [Math.max(c.box.y + c.height + 40, H * 0.60), H * 0.92], max: 46, min: 30, avoid: [c.box],
     });
     s.push(cta.svg);
     out.push(s.join(''));
@@ -346,7 +380,7 @@ export async function preflightFonts(root, tolerance = 0.05) {
     const expected = layoutWidth(loadFace(f.file), probe, 100);
     const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="4000" height="300"><rect width="4000" height="300" fill="#fff"/>` +
       `<text x="20" y="200" font-family="${f.family}" font-weight="${f.weight}" font-size="100" fill="#000">${probe}</text></svg>`;
-    const buf = new Resvg(svg, { font: { loadSystemFonts: false, defaultFontFamily: 'Poppins', fontFiles: fontFiles(root) } }).render().asPng();
+    const buf = new Resvg(svg, { font: { loadSystemFonts: false, defaultFontFamily: 'Figtree', fontFiles: fontFiles(root) } }).render().asPng();
     const { data, info } = await sharp(buf).greyscale().raw().toBuffer({ resolveWithObject: true });
     let minX = info.width, maxX = -1;
     for (let y = 0; y < info.height; y++) for (let x = 0; x < info.width; x++) {

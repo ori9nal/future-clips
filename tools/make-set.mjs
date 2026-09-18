@@ -36,49 +36,23 @@ const appIcon = args.icon ?? spec.assets?.app_icon;
 
 let photos = [];
 let artUsd = 0;
-let look = args.look ?? spec.assets?.look ?? 'cinematic';
+let look = args.look ?? spec.assets?.look ?? 'phone';
 let world = null;
 if (args.art === 'ai') {
-  // Generate the imagery instead of sourcing it. Scenes come from the copy
-  // step, so the pictures illustrate the story rather than sitting beside it.
-  let scenes = [
-    content.hook?.scene,
-    ...(content.ranked ?? []).map((r) => r.scene),
-    content.closer?.scene,
-  ].map((s, i) => s || `the person, scene ${i + 1}`);
-
-  // Feed imagery is enforced in code, and the set is locked to ONE world —
-  // one time of day and palette, or for gym one location — which is what
-  // makes six separate generations read as one post rather than six. The
-  // world also picks the grade, so a bright midday set is not then crushed
-  // into a night look by a hard-coded "cinematic".
-  const { enforce, bankFor, BANK } = await import('../engine/scenes.mjs');
-  const isGym = bankFor(spec.niche) === BANK.fitness;
-  if (styleId === 'feed') {
-    const appIndex = 1 + (content.ranked ?? []).findIndex((r) => r.showsApp);
-    // the seed carries the ask, so two sets from one campaign land in
-    // different worlds instead of the same one every time
-    const e = enforce(scenes, {
-      niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed: args.seed ?? `${id}|${instruction}`,
-      headings: (content.ranked ?? []).map((r) => r.name),
-    });
-    scenes = e.scenes;
-    world = e.world;
-    if (!args.look) look = world.look ?? look;
-    console.log(`  world: ${world.label} · grade: ${look}`);
-  }
-  // The trading feed has no recurring person (a car, a pool, a window). The
-  // gym feed IS one person — one lifter, one session — so it holds the
-  // subject across frames exactly as the reference sets do.
-  const mode = args.mode ?? (styleId === 'feed' && !isGym ? 'aspirational' : 'subject');
-  process.stdout.write(`  art: generating ${scenes.length} frames at ${args.quality ?? 'medium'} (${mode})… `);
+  // Generate the imagery instead of sourcing it. The direction — scenes
+  // enforced into shot types, the world, whether the person is held across
+  // days — is engine/scenes.mjs direct(), shared with the lanes.
+  const { direct } = await import('../engine/scenes.mjs');
+  const d = direct({ spec, content, styleId, seed: args.seed ?? `${id}|${instruction}`, look: args.look, mode: args.mode });
+  world = d.world; look = d.look;
+  if (world) console.log(`  world: ${world.label} · grade: ${look} · shots: ${(d.shots ?? []).join(' ')}`);
+  const appScreenAbs = appScreen ? path.join(ROOT, appScreen) : null;
+  process.stdout.write(`  art: generating ${d.scenes.length} frames at ${args.quality ?? 'medium'} (${d.mode}${d.days ? ', days' : ''})… `);
   const art = await generateSet({
     root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
-    subject: content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.',
-    scenes, look,
-    quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode,
-    // the gym feed is one person across many days — hold the face, not the clothes
-    days: styleId === 'feed' && isGym && world?.id === 'life',
+    subject: d.subject, scenes: d.scenes, look,
+    quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode: d.mode, days: d.days,
+    appScreen: appScreenAbs && fs.existsSync(appScreenAbs) ? appScreenAbs : null,
   });
   artUsd = art.usd;
   console.log(`$${art.usd.toFixed(4)} (${art.cached} cached)`);

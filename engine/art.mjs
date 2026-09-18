@@ -11,13 +11,21 @@
 // as an edit conditioned on that anchor. Slide order does not matter; only the
 // anchor does. If the anchor is wrong the whole set is wrong, which is why it
 // is the one frame worth generating best-of-N.
+//
+// 2026-09-13: the prompts were rewritten against the reference corpus. The
+// scene line (engine/scenes.mjs) now carries the whole camera situation, so
+// the LOOK here is short; the GUARD forbids the photograph vocabulary by
+// name; and the identity line holds the PERSON — face shape, hair, skin,
+// build, body hair — and explicitly releases the wardrobe, the room and the
+// framing, because "keep the same person" alone copies the hoodie into the
+// boat shot.
 import fs from 'node:fs';
 import path from 'node:path';
 import { generate, sizeFor } from './providers/image.mjs';
 
 /** Photographic direction shared by every frame, so the set grades as one. */
 const LOOK = {
-  phone: 'Amateur iPhone photo. Slightly grainy, slightly soft, harsh mixed lighting, no retouching, no colour grade, candid, imperfect framing, a real cluttered place.',
+  phone: 'A phone photo from someone\'s camera roll, not a photograph.',
   cinematic: 'Cinematic phone photo, 35mm, natural light, shallow depth of field, muted film grade, fine grain.',
   steel: 'Cinematic photo, cool blue-grey grade, hard directional light, deep shadows, high contrast, fine grain.',
   sunlit: 'Warm natural photo, golden window light, soft shadows, gentle contrast, airy and clean.',
@@ -25,15 +33,33 @@ const LOOK = {
   ash: 'Desaturated photo, near-monochrome, overcast light, muted greys, quiet and still.',
 };
 
-const GUARD = 'Photograph, not an illustration. No text, no logos, no watermarks, no captions anywhere in the image. One person only.';
+/**
+ * What is forbidden, by name. The image model's default for "a man in a
+ * gym" is a fitness catalogue: symmetrical face, softbox light, smooth skin,
+ * centred, clean floor. Every one of those is a tell next to the reference.
+ */
+const GUARD = 'No text, no logos, no watermarks, no captions anywhere in the image. One person only. ' +
+  'Not a photoshoot: no studio lighting, no softbox, no rim light, no bokeh, no golden-hour glow, no symmetry, no centred composition, ' +
+  'no retouching, no smooth skin, no model looking at the camera, no professional photography, no render, no illustration.';
 
 /**
  * The aspirational guard is different in kind: it forbids the thing that made
  * round one fail. No face, no emotional pose, no person as the subject — the
  * subject is the place or the object, shot the way a phone catches it.
  */
-const ASPIRE_GUARD = 'Candid phone photograph, not staged, not a stock photo. No visible face, no person as the subject, ' +
-  'no one posing or emoting. No text, no logos, no watermarks. The subject is the place or the object itself.';
+const ASPIRE_GUARD = 'A phone photo, not staged, not a stock photo, not a render. A person may appear from behind, hooded, or as a hand or a shoe — never a visible face, never posing. ' +
+  'No text, no logos, no watermarks. No studio lighting, no bokeh, no HDR glow, no symmetry, no cinematic grade, no perfectly clean surfaces.';
+
+/**
+ * The identity line. What must NOT change is the person; what must change
+ * is everything else. Naming the released things does more work than
+ * re-describing the person — the reference already carries the likeness.
+ */
+const SAME_PERSON = 'The SAME PERSON as the reference image: same face shape, same hair, same skin tone, same build, same body hair, same tattoos if any.';
+const RELEASE = 'Photographed on a DIFFERENT day: do not copy the reference\'s clothing, room, lighting, camera angle or framing.';
+
+/** A scene that asks for the app screenshot on a phone (engine/scenes.mjs SHOTS.phone). */
+const APPSHOT = /^An iPhone lying face up on/;
 
 /**
  * The prompt for every frame of a set, without spending anything.
@@ -44,47 +70,52 @@ const ASPIRE_GUARD = 'Candid phone photograph, not staged, not a stock photo. No
  * when it lands, the remaining frames as a second batch conditioned on it.
  * Frames after the anchor need the anchor's FILE (the edit endpoint takes the
  * pixels), so `frames(anchorFile)` is a function of it rather than a list.
+ *
+ * `appScreen` is the app screenshot's path; a scene that is the phone-on-a-
+ * bench shot is generated as an edit of THAT image rather than of the
+ * anchor — the phone's screen has to show the real app, and the person is
+ * not in the frame.
  */
 export function planSet(o) {
   const {
-    subject, scenes, look = 'cinematic', quality = 'medium', w = 1080, h = 1920, id = 'set',
-    mode = 'subject', days = false,
+    subject, scenes, look = 'phone', quality = 'medium', w = 1080, h = 1920, id = 'set',
+    mode = 'subject', days = false, appScreen = null,
   } = o;
   const size = sizeFor(w, h);
-  const style = LOOK[look] ?? LOOK.cinematic;
+  const style = LOOK[look] ?? LOOK.phone;
+
+  const appFrame = (scene, i) => ({
+    i, label: `${id}-app${i}`, refs: [appScreen],
+    prompt: `${style} ${scene} The phone's screen shows EXACTLY the app screenshot in the reference image, the same layout and colours, legible. No text anywhere except on the phone screen. No person. Not a render: the phone is a real object on a real surface with a reflection on the glass.`,
+  });
 
   if (mode === 'aspirational') {
     return {
       mode, size, quality, anchor: null,
-      frames: () => scenes.map((scene, i) => ({
-        i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}`,
-      })),
+      frames: () => scenes.map((scene, i) => (appScreen && APPSHOT.test(scene)
+        ? appFrame(scene, i)
+        : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}` })),
     };
   }
 
   const anchor = { i: 0, label: `${id}-anchor`, refs: [], prompt: `${style} ${subject} ${scenes[0]} ${GUARD}` };
   const frames = (anchorFile) => scenes.slice(1).map((scene, n) => {
     const i = n + 1;
+    if (appScreen && APPSHOT.test(scene)) return appFrame(scene, i);
     // A close-up is asked for by the scene, and "keep the same face" pulls
     // the model straight back to the anchor's full-body framing — round one
     // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
     // mirror selfie four times. So a close-up keeps the person by skin, build
     // and clothing, and is told outright that the face is not in the frame.
-    const closeUp = /close-up|no face|from behind|from the waist down|neck down/i.test(scene);
-    // `days` mode: the person is the constant, everything else changes. The
-    // scene names its own outfit and place, and the model is told the
-    // reference's clothing and room are NOT to be kept — otherwise it copies
-    // the anchor's hoodie into the boat shot.
+    const closeUp = /no face|from behind|from the waist down|neck down|head out of frame|face is hidden|looking down from his own/i.test(scene);
+    // `days` mode: the person is the constant, everything else changes.
     const keep = days
       ? (closeUp
-        ? `Same person as the reference image — same skin tone, same build, same body hair — photographed on a DIFFERENT day in a DIFFERENT place. Do not copy the reference's clothing, room or lighting. ${scene} The face is not in the frame; the body part named fills the frame.`
-        : `The SAME PERSON as the reference image — same face, same hair, same build, same skin tone — photographed on a DIFFERENT day. Different clothes, different place, different light from the reference; do not copy the reference's outfit or room. ${scene}`)
+        ? `${SAME_PERSON} ${RELEASE} ${scene} The face is not in the frame; the body part named fills the frame.`
+        : `${SAME_PERSON} ${RELEASE} ${scene}`)
       : closeUp
         ? `Same person as the reference image — same skin tone, same build, same clothing and shoes — and the same gym and lighting, this is the same session. But the framing is DIFFERENT from the reference: ${scene} The face is NOT in the frame; the body part named fills the frame, shot close on a phone. Do not repeat the reference composition.`
         : `Keep the SAME PERSON from the reference image: same face, same hair, same body, same clothing, same shoes. Same location and same lighting as the reference — this is the same session. Do not restyle or age them. New scene: ${scene}`;
-    // Naming what must NOT change does more work than describing the person
-    // again — the reference already carries the likeness, and re-describing
-    // it invites the model to reinterpret rather than preserve.
     return { i, label: `${id}-${i}`, refs: [anchorFile], prompt: `${style} ${keep} ${GUARD}` };
   });
   return { mode, size, quality, anchor, frames };
@@ -103,6 +134,7 @@ export function planSet(o) {
  * @param {number} [o.w]       canvas, used to pick the nearest accepted size
  * @param {number} [o.h]
  * @param {number} [o.anchorTries] how many anchors to draw before picking one
+ * @param {string} [o.appScreen]  the app screenshot, for the phone-on-a-bench frame
  */
 export async function generateSet(o) {
   const { root, cacheDir, anchorTries = 1 } = o;
@@ -110,15 +142,14 @@ export async function generateSet(o) {
   const { size, quality, mode } = plan;
 
   // Aspirational mode: every frame is its own generation with no reference
-  // image and no recurring person. Coherence comes from the shared LOOK, not
-  // from a face — which is how the reference sets are actually built. Round
-  // one of the gauntlet put one man with his hand over his face on five of six
-  // slides, because "hold the subject" was the only mode there was.
+  // image and no recurring person. Coherence comes from the shared LIFE
+  // (engine/scenes.mjs), not from a face — which is how the reference sets
+  // are actually built.
   if (mode === 'aspirational') {
     const files = [];
     let usd = 0, cached = 0;
     for (const f of plan.frames()) {
-      const r = await generate({ root, cacheDir, size, quality, label: f.label, prompt: f.prompt });
+      const r = await generate({ root, cacheDir, size, quality, label: f.label, refs: f.refs, prompt: f.prompt });
       files.push(r.file);
       usd += r.usd ?? 0;
       if (r.cached) cached++;
