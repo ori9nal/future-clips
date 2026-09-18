@@ -8,7 +8,7 @@ import { useState } from "react";
  * the browser. Whether an email may sign up at all is decided in the
  * database (allowed_emails + the invite gate), not here.
  */
-type Reply = { ok?: boolean; url?: string; error?: string };
+type Reply = { ok?: boolean; url?: string; next?: string; error?: string };
 
 async function post(path: string, body: Record<string, string>): Promise<Reply> {
   try {
@@ -24,6 +24,7 @@ export function LoginForm({ next, initialError, googleEnabled }: { next: string;
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
+  const [code, setCode] = useState("");
 
   async function sendLink(e: React.FormEvent) {
     e.preventDefault();
@@ -41,12 +42,31 @@ export function LoginForm({ next, initialError, googleEnabled }: { next: string;
     setBusy(false); setError(r.error ?? "Google sign-in is not available right now.");
   }
 
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    const r = await post("/api/auth/verify", { email: email.trim().toLowerCase(), token: code, next });
+    if (r.ok) { window.location.assign(r.next ?? next); return; }
+    setBusy(false); setError(r.error ?? "That code did not work.");
+  }
+
   if (sent) {
     return (
       <div className="fc-card" role="status">
         <h2>Check your inbox</h2>
-        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. It works once and expires in an hour.</p>
-        <p className="fc-note" style={{ marginTop: 12 }}>No email? Check spam, then <button type="button" className="fc-link" onClick={() => setSent(false)}>try again</button>.</p>
+        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. Tap it, or enter the 6-digit code from the email here. Both work once and expire in an hour.</p>
+        <form onSubmit={verify} className="fc-form" style={{ marginTop: 14 }}>
+          <label>
+            <span>Code</span>
+            <input type="text" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required
+              placeholder="123456" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+          </label>
+          {error && <p className="fc-err-line" role="alert">{error}</p>}
+          <button type="submit" className="fc-btn" disabled={busy || code.length < 6} style={{ justifySelf: "stretch" }}>
+            {busy ? "Checking…" : "Sign in with the code"}
+          </button>
+        </form>
+        <p className="fc-note" style={{ marginTop: 12 }}>No email? Check spam, then <button type="button" className="fc-link" onClick={() => { setSent(false); setCode(""); setError(null); }}>try again</button>.</p>
       </div>
     );
   }

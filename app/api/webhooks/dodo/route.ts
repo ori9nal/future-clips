@@ -11,7 +11,7 @@ import { verifyWebhook, skuFor, dodoWebhookEnabled, type DodoEvent } from "@/lib
  *   subscription.cancelled                        → billing_status 'cancelled' (plan stays until the period ends)
  *   subscription.on_hold | failed                 → billing_status 'past_due'
  *   subscription.expired                          → plan 'free', billing_status 'expired'
- *   payment.succeeded with metadata.pack          → fc_credit_pack
+ *   payment.succeeded                            → fc_record_sale (the provider fund); with metadata.pack → fc_credit_pack
  * Anything else is stored and acknowledged.
  */
 export const runtime = "nodejs";
@@ -102,6 +102,13 @@ async function handle(db: ReturnType<typeof adminClient>, ev: DodoEvent): Promis
   }
 
   if (ev.type === "payment.succeeded") {
+    // the provider fund: a share of every paid invoice is earmarked for Anthropic and OpenAI (migration 0012)
+    const gross = (d.total_amount ?? 0) / 100;
+    const sku = meta.plan ?? meta.pack ?? (d.product_cart ?? []).map((c) => skuFor(c.product_id)).find(Boolean) ?? null;
+    if (gross > 0 && d.payment_id) {
+      const { error: fe } = await db.rpc("fc_record_sale", { p_org: orgId, p_payment_id: d.payment_id, p_sku: sku, p_gross_usd: gross, p_note: `dodo ${ev.type}` });
+      if (fe) console.warn(`sale not recorded in the provider fund: ${fe.message}`);
+    }
     const pack = meta.pack ?? (d.product_cart ?? []).map((c) => skuFor(c.product_id)).find((s) => s && /^p\d+$/.test(s)) ?? null;
     if (!pack) return "payment without a pack (subscription invoice)";
     const { error } = await db.rpc("fc_credit_pack", { p_org: orgId, p_pack: pack, p_note: `dodo ${d.payment_id ?? ""}` });

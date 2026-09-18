@@ -33,6 +33,7 @@ export function safeNext(raw: unknown): string {
  * the callback reads and clears.
  */
 export function rememberNext(res: NextResponse, next: string, secure: boolean): void {
+  if (!next) { res.cookies.set("fc_next", "", { maxAge: 0, path: "/" }); return; }
   res.cookies.set("fc_next", next, { maxAge: 3600, path: "/", sameSite: "lax", httpOnly: true, secure });
 }
 

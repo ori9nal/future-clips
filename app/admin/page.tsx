@@ -8,11 +8,29 @@ import { createCampaign, setBriefStatus, removeBrief } from "./actions";
 
 export const dynamic = "force-dynamic";
 
+type Fund = { gross_usd: number; reserve_usd: number; spent_usd: number; balance_usd: number; sales: number; share: number; since: string | null };
+
+/** The provider fund (migration 0012): what came in, what is earmarked for Anthropic and OpenAI, what the engine consumed. */
+async function fundSummary(sb: Awaited<ReturnType<typeof createClient>>): Promise<Fund | null> {
+  try {
+    const { data, error } = await sb.rpc("fc_fund_summary");
+    if (error || !data) return null;
+    const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
+    if (!row) return null;
+    const n = (k: string) => Number(row[k] ?? 0);
+    return { gross_usd: n("gross_usd"), reserve_usd: n("reserve_usd"), spent_usd: n("spent_usd"), balance_usd: n("balance_usd"), sales: n("sales"), share: n("share"), since: (row.since as string | null) ?? null };
+  } catch {
+    return null;
+  }
+}
+
+const usd = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+
 /** Platform owners only — requirePlatformOwner() sends anyone else to /app. */
 export default async function AdminHome() {
   const viewer = await requirePlatformOwner();
   const sb = await createClient();
-  const [campaigns, specs] = await Promise.all([listCampaigns(sb), listSpecs(sb)]);
+  const [campaigns, specs, fund] = await Promise.all([listCampaigns(sb), listSpecs(sb), fundSummary(sb)]);
 
   return (
     <AppShell active="admin" viewer={viewer}>
@@ -30,6 +48,32 @@ export default async function AdminHome() {
             : <> · <span className="fc-note">Briefs ingest and the studio arrive with the render engine.</span></>}
         </p>
       </header>
+
+      <section className="fc-card">
+        <h2>Provider fund <span className="fc-tag">{fund ? `${Math.round(fund.share * 100)}% of every sale` : "not connected"}</span></h2>
+        {fund ? (
+          <>
+            <table className="fc-table">
+              <thead><tr><th>Sales</th><th>Gross</th><th>Earmarked for Anthropic + OpenAI</th><th>Consumed by rendering</th><th>Balance</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td>{fund.sales}{fund.since ? <span className="fc-note"> since {new Date(fund.since).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span> : null}</td>
+                  <td>{usd(fund.gross_usd)}</td>
+                  <td>{usd(fund.reserve_usd)}</td>
+                  <td>{usd(fund.spent_usd)}</td>
+                  <td data-bad={fund.balance_usd < 0 ? "1" : undefined}><b>{usd(fund.balance_usd)}</b></td>
+                </tr>
+              </tbody>
+            </table>
+            <p className="fc-note" style={{ marginTop: 10 }}>
+              Every Dodo payment earmarks this share for the model providers; rendering draws it down at real provider cost.
+              Keep auto-recharge on in both consoles and top them up from the balance. The share is <code>app_settings.provider_reserve</code>.
+            </p>
+          </>
+        ) : (
+          <p className="fc-note">The fund appears after the first Dodo payment (migration 0012, webhook <code>payment.succeeded</code>).</p>
+        )}
+      </section>
 
       <section className="fc-card">
         <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>
