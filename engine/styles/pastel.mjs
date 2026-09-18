@@ -1,3 +1,4 @@
+import path from 'node:path';
 // PASTEL — the friendly explainer (library folder 6).
 //
 // Warm cream ground, a serif question as the headline with an italic clause,
@@ -14,6 +15,9 @@ import { layoutWidth } from '../fit-text.mjs';
 const dashed = (x, y, w, h, { stroke, r = 10 }) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" ` +
   `stroke="${stroke}" stroke-width="3" stroke-dasharray="14 10"/>`;
+
+/** A campaign photo id under ctx.photoDir, or a generated frame's absolute path. */
+const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id));
 
 export default {
   id: 'pastel',
@@ -102,10 +106,10 @@ export default {
       }
       // the spec carries a photo per item; using it fills the lower third that
       // the panel layout leaves empty, and skincare content wants a face
-      if (item.photo && ctx.photoDir) {
+      if (item.photo && (ctx.photoDir || path.isAbsolute(String(item.photo)))) {
         const ph = Math.max(180, H - 96 - (y + 34));
         if (ph >= 220) {
-          const pl = await plate(sharp, `${ctx.photoDir}/${item.photo}.jpg`, W - M * 2, ph, outDir);
+          const pl = await plate(sharp, src(ctx, item.photo), W - M * 2, ph, outDir);
           s.push(image(pl, M, H - 96 - ph, W - M * 2, ph, { round: 18 }));
         }
       }

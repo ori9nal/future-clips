@@ -68,6 +68,18 @@ The project's decision record. Both chats append; only the owner settles an OPEN
 | D-040 | 2026-09-18 | Rail style | **Rebuild `rail` to the Grow with Alex grammar** once D-014 is answered: header strip, one loud serif/condensed word + quiet sans qualifiers, a person or object composite, 1–3 product cards, a footer triplet, orange/cream on blue-orange photographs. Evidence: QUALITY.md §3.4 (18 images + the grid); current rail scores 45. Read signed-in on 2026-09-18: the family has two page grammars, A (full-bleed photo, loud/quiet type pair, white pill; every cover and the font-pairings post) and B (cream or black page, orange ordinal disc, a card, three notes, an orange verdict bar; the three "steal my" posts); the rebuild needs both, chosen per slide. Five posts and captions are in `reference/growithalex/ig/`. | PROPOSED |
 | D-041 | 2026-09-18 | App icons for the trading device | Set-01 and set-14 put every app (Forex Factory, Meta Trader 5, Trading View, Webull, Stocktwits) on its real icon over the pill; the engine holds only the campaign's icon, so third-party apps get the pill alone (F16). Closing the gap means shipping a small library of the common trading and fitness app icons under `assets/apps/` and matching them by name. That is other companies' artwork on our slides: an owner call. Default in effect: pill only. | OPEN (owner) |
 
+## Owner instructions received in the Product chat (2026-09-18, second session)
+
+- The owner scored the output **7/10** after seeing the round-8 gym set and the round-11b trading set (Product's own scores were 89/100 against the reference sets; the owner's bar is the one that counts). Recorded in QUALITY.md §7.
+- "Do not run a gauntlet loop, do each niche once, I will give a score": rounds 12–17 are one set per niche (design/rail, nutrition, supplements, personal finance, skincare, mindset) with no iteration; the owner scores them.
+- "Look at Grow with Alex, try using more stuff and more types of fonts": read as the go-ahead for D-040 (the rail rebuild) ahead of D-014's formal answer. The rail style now renders the family's two page grammars and rotates a loud/quiet font pairing per set (four faces per set: loud, quiet, notes, strip). D-014 stays OPEN for whether it becomes a clipper-pickable style.
+- "In slide 6 of the gym one the head is not there, so remove it": done as a $0 re-render (`output/gauntlet/2026-09-18/r8-cut/`, 7 slides, renumbered). Head-out-of-frame crops are 20 % of the reference gym family, so the shot type stays in the rotation; if the owner wants them gone from every set, say so and the `crop` shot type goes (D-042, OPEN).
+- "Give me the cost per slide": the lane checkpoint keeps only totals; from round 12 every set carries `costs.json` with one entry per provider call mapped to its slide (`tools/_lane-costs.mjs`, priority lane). The batch lane has no per-call ledger; request R11 asks Engineering to persist per-frame cost in the checkpoint for both lanes.
+
+| ID | Date | Context | Decision | Status |
+|---|---|---|---|---|
+| D-042 | 2026-09-18 | Head-out-of-frame crops | The owner removed one such slide from a set. Keep the `crop` shot type (20 % of the reference gym family, the device that makes the sets read as a camera roll) unless the owner says the objection is general. | OPEN (owner) |
+
 ## Product notes on the open items (2026-09-18)
 
 - D-014 Grow with Alex: the owner imported Instagram cookies on 2026-09-18 and the in-app browser now reads instagram.com/growithalex signed in; the posts are being read into QUALITY.md §3.4. Still to answer: whether the 18 images + the account are the whole family, and whether the look becomes a style a clipper can pick (Product proposes yes, D-040).

@@ -1,3 +1,4 @@
+import path from 'node:path';
 // EDITORIAL — the quiet magazine look (library folder 13).
 //
 // Near-white ground, a serif headline where exactly one word carries an italic
@@ -8,6 +9,9 @@
 import { rect, line, text, stack, paragraph, plate, image, grain } from './kit.mjs';
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
+
+/** A campaign photo id under ctx.photoDir, or a generated frame's absolute path. */
+const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id));
 
 export default {
   id: 'editorial',
@@ -66,7 +70,7 @@ export default {
       }
       if (C.hook.photo) {
         const ph = 520;
-        const p = await plate(sharp, `${ctx.photoDir}/${C.hook.photo}.jpg`, W - M * 2, ph, outDir);
+        const p = await plate(sharp, src(ctx, C.hook.photo), W - M * 2, ph, outDir);
         // desaturated so the figure reads as a plate, not a stock photo
         s.push(`<g style="filter:grayscale(1) contrast(1.08)">${image(p, M, H - 150 - ph, W - M * 2, ph, { round: 3 })}</g>`);
       }
@@ -91,7 +95,7 @@ export default {
       }
       if (item.photo) {
         const ph = 440;
-        const p = await plate(sharp, `${ctx.photoDir}/${item.photo}.jpg`, W - M * 2, ph, outDir);
+        const p = await plate(sharp, src(ctx, item.photo), W - M * 2, ph, outDir);
         s.push(`<g style="filter:grayscale(1) contrast(1.08)">${image(p, M, H - 150 - ph, W - M * 2, ph, { round: 3 })}</g>`);
       }
       out.push(s.join(''));

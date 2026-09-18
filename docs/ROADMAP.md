@@ -29,18 +29,19 @@ Both chats keep this file current. Read it at the start of every session after `
 
 ## Product
 
-### Now (2026-09-18, the gauntlet loop)
+### Now (2026-09-18, second session: the owner's instructions)
 
-- Continue the gauntlet loop one family at a time (gym 89, trading 87 at the end of 2026-09-18): verify F24 (grip regex) and F25 (apps-count rule) on the next paid rounds; then the remaining tells are model obedience on friend-shot moves and the hook face. Log Claude $ and image $ per run in `output/gauntlet/COSTS.md` and the score in `docs/QUALITY.md` §7; $5 a session unless D-018 says otherwise.
-- Gym: F6 (a from-behind body part asked for as a POV shot), skin and room mess in the frames; trading: the app pill at the reference size (cap ≈ 60 px), one car across the set (the car frames edited from the first car frame), no tag line under an app name; food: outfit dealer, the app photographed on a phone.
-- Read the signed-in instagram.com/growithalex posts into QUALITY.md §3.4 (the cookies arrived 2026-09-18).
+- No gauntlet loop until the owner asks again: one set per niche (rounds 12–17: design/rail, nutrition, supplements, personal finance, skincare, mindset), the owner scores them (current owner score 7/10 on the gym and trading sets).
+- Every set from round 12 carries `costs.json` (Claude and image dollars per slide); R11 asks Engineering to persist the same in the checkpoint.
+- The rail style renders the Grow with Alex grammar (D-040 in effect); first paid rail set is round 12. Next on that style: the cover photograph's subject (the model draws a phone for "carousel"), the pairing's quiet face on covers, real cards for app slides.
+- Still to verify on a paid gym and trading round when the owner wants: F24 (grip regex) and F25 (apps-count rule).
 - Verify the numbering rule (D-033) and the no-plan state on the real app once the service role key exists (OWNER-ACTIONS 1) with `tools/dev-login.mjs`.
 
 ### Next
 
 - Instructions UI in the composer once `sets.instructions` and the upload route exist (PRODUCT.md §3, R3).
 - Recent as a one-row strip on Create (D-039 pending); "Exactly N" in the composer; Shift+Enter hint.
-- Rail rebuilt to the Grow with Alex grammar (D-040) after D-014.
+- Rail: second pass after the owner's score on round 12 (cover subject, app cards, a light page for the closer).
 - Site wording for the no-free-tier edits (E6).
 
 ### Later
@@ -90,8 +91,10 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | Product: round 9, trading, promised count numbers the apps, extras unnumbered, countdown repaired without a retry | 87 vs set-01 | Claude $0.1074 + image $0.2833 |
 | 2026-09-18 | Product: round 10, gym rated back list, behind parts never in a mirror | 88 vs set-08 | Claude $0.0782 + image $0.3449 |
 | 2026-09-18 | Product: round 11, trading, lifted reference lines rejected | 87 vs set-01 | Claude $0.0613 + image $0.2831 |
+| 2026-09-18 | Product: rounds 12–25, one set per campaign (16 niches) on the owner's instruction; the all-niches sheet with per-slide costs | Product 3–7/10 per set, owner to score | Claude $1.323 + image $4.952 = $6.275 |
+| 2026-09-18 | Product: rail rebuilt to the Grow with Alex grammar (D-040); editorial, pastel and clinical styles accept generated frames; `tools/_lane-costs.mjs` writes per-slide costs | rounds 12, 16, 17, 18 | $0 beyond the runs |
 
-Spend: Engineering $0. Product 2026-09-18: $4.57 over eleven paid rounds (Claude $0.95 + image $3.62), stopped under the $5 session default; every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
+Spend: Engineering $0. Product 2026-09-18: $10.85 over 25 paid rounds (Claude $2.27 + image $8.58): $4.57 on the gauntlet under the $5 default, then $6.28 on one set per campaign at the owner's instruction; every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
 
 ## Requests: Product → Engineering
 
@@ -109,6 +112,7 @@ File here with the exact field, endpoint or bug, a repro and a screenshot path. 
 | R8 | 2026-09-18 | Every API error carries a `code` (the create route already does for FC_*); `sign in required` on a 401 should come with `code: 'AUTH'`. Why: The composer showed the raw string "sign in required" as the error (preview, PRODUCT.md finding 8); Product maps codes to sentences. | open | |
 | R9 | 2026-09-18 | Campaign payload for the picker: keep `guidance.angles`, add `assets.app_icon` / `app_screen` presence flags and `content.style`. Why: The picker will show "shows an app icon" and a plain-English format word instead of "photo feed". | open | |
 | R10 | 2026-09-18 | Owner environment: sign in to the Claude in Chrome extension on this machine so the Instagram reference pass can page through full posts (list_connected_browsers returned none). Why: The owner asked for the growithalex posts to be read in Chrome; only the public grid was reachable. | done: the owner imported Instagram cookies 2026-09-18; the in-app browser is signed in | |
+| R11 | 2026-09-18 | Persist per-call provider cost in the lane checkpoint: `s.copy.entries` (label, in, out, usd) from `engine/providers/claude.mjs` and `s.art.entries` (label, out, usd) from `engine/providers/image.mjs`, in both lanes (the batch collectors know the per-line usage too). Why: the owner wants the Claude and image cost per slide for every set; today `tools/_lane-costs.mjs` (scratch, priority only) reads the in-process ledgers after the run. | open | |
 
 ## Requests: Engineering → Product
 

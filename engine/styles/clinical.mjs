@@ -1,3 +1,4 @@
+import path from 'node:path';
 // CLINICAL — the whitepaper look (library folder 11).
 //
 // White ground, a reading serif headline, body copy set small and tight, a row
@@ -8,6 +9,9 @@
 // Which is exactly why the citation line is not decorative. A style that looks
 // like a paper and cites nothing is worse than one that never pretended.
 import { rect, line, text, stack, paragraph, list, plate, image, grain } from './kit.mjs';
+
+/** A campaign photo id under ctx.photoDir, or a generated frame's absolute path. */
+const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id));
 
 export default {
   id: 'clinical',
@@ -48,7 +52,7 @@ export default {
         s.push(p.svg);
       }
       if (C.hook.photo) {
-        const p = await plate(sharp, `${ctx.photoDir}/${C.hook.photo}.jpg`, W - M * 2, 420, outDir);
+        const p = await plate(sharp, src(ctx, C.hook.photo), W - M * 2, 420, outDir);
         s.push(image(p, M, H - 118 - 460, W - M * 2, 420, { round: 4 }));
       }
       out.push(s.join(''));
@@ -69,7 +73,7 @@ export default {
 
       if (item.photo) {
         const iw = W - M * 2, ih = 470;
-        const pl = await plate(sharp, `${ctx.photoDir}/${item.photo}.jpg`, iw, ih, outDir);
+        const pl = await plate(sharp, src(ctx, item.photo), iw, ih, outDir);
         s.push(image(pl, M, H - 118 - ih - 46, iw, ih, { round: 4 }));
         if (item.score) {
           // the verdict, set as a measurement rather than a rating chip
