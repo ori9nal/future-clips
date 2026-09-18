@@ -16,7 +16,7 @@
   --ink: #151517;
   --text: #151517;
   --text-2: #5B5B60;
-  --text-3: #8A8A90;
+  --text-3: #707076;
   --lime: #C6F135;
   --lime-ink: #151517;
   --lime-soft: #EEF9C7;
@@ -47,7 +47,7 @@ html[data-theme="dark"] {
   --ink: #ECEBE6;
   --text: #ECEBE6;
   --text-2: #A5A4A0;
-  --text-3: #77767A;
+  --text-3: #838286;
   --lime: #D2FF4A;
   --lime-ink: #131315;
   --lime-soft: #2A3411;

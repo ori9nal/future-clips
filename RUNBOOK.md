@@ -21,8 +21,8 @@ database: Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`).
 ## Deploy
 
 **Site** (until the GitHub↔Vercel link exists — OWNER-ACTIONS B):
-1. Edit `design/Main.dc.html` (never `future-clips-site/index.html`), run `python design/build_site.py`; legal pages: edit `legal/*.md`, run `node design/build_legal.mjs`.
-2. Upload changed files to bucket `site` **under a new name** through the Supabase dashboard (Storage → `site` → Upload) or with the service role: `index-vN.html`, `legal-vN/<slug>.html`. Anonymous uploads were removed on 2026-09-18 (migration 0009). No charset in the content type.
+1. Edit `design/site.html` (never `future-clips-site/index.html`), then `cp design/site.html future-clips-site/index.html`; legal pages: edit `legal/*.md`, run `node design/build_legal.mjs`. Fonts are self-hosted from `future-clips-site/fonts/` (`node tools/fetch-site-fonts.mjs` refreshes them and `design/fonts.css`). Before every site commit: `node tools/site-check.mjs` (links, share meta, alt text, one h1, no free-tier wording) and a Lighthouse pass on the folder served locally, e.g. `CHROME_PATH=/usr/bin/chromium npx lighthouse http://127.0.0.1:3323/ --chrome-flags="--headless=new --no-sandbox" --output=json --output-path=/tmp/lh.json` (the bar: 95+ in every category on mobile and desktop; the local server sends no gzip, Vercel does).
+2. Upload changed files to bucket `site` **under a new name** through the Supabase dashboard (Storage → `site` → Upload) or with the service role: `index-vN.html`, `legal-vN/<slug>.html`, `404-vN.html`, `fonts-vN/<file>.woff2` (the list `deploy/site/build.js` expects is in OWNER-ACTIONS 13). Anonymous uploads were removed on 2026-09-18 (migration 0009). No charset in the content type.
 3. Deploy via the Vercel MCP `deploy_to_vercel` with the three files in HANDOFF-SITE.md, bumping the names in `build.js`.
 4. Verify: `curl -sI https://www.thefutureclips.com/terms` → 200.
 

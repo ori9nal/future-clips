@@ -26,7 +26,9 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/api/billing/portal` | POST | member | `{ url }` for Dodo's customer portal; `404` without a subscription | Dodo env |
 | `/api/webhooks/dodo` | POST | Dodo (Standard Webhooks signature) | applies subscription and payment events; idempotent on `webhook-id` (`billing_events`) | service role, migration 0007 |
 | `/api/partner/payout` | POST | org owner | payout details (dormant feature; needs migration 0008) | – |
-| `/auth/callback` | GET | public | `?code=` (the PKCE code from the emailed link) or `?token_hash=&type=` (a server-verified token: Supabase's server-side template shape, and what `tools/dev-login.mjs` mints) → session cookie, referral claim, redirect to `next` (same-host paths only) | – |
+| `/api/auth/otp` | POST | public (same-origin `Origin` only) | `{ email, next? }` → asks Supabase for the magic link from the server; writes the PKCE verifier cookie and `fc_next`; `403` invite refused, `429` mailer rate limit, `400` otherwise; `{ ok: true }` | – |
+| `/api/auth/google` | POST | public (same-origin) | `{ next? }` → `{ url }` to send the browser to Google; `404` unless `NEXT_PUBLIC_GOOGLE_AUTH=1` | Google OAuth client |
+| `/auth/callback` | GET | public | `?code=` (the PKCE code from the emailed link or Google; the verifier cookie was written by `/api/auth/*`) or `?token_hash=&type=` (a server-verified token: Supabase's server-side template shape, and what `tools/dev-login.mjs` mints) → session cookie, referral claim, redirect to `next` (same-host paths only) | – |
 | `/auth/signout` | POST | public | signs out, 303 to `/login` | – |
 
 Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove, sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.

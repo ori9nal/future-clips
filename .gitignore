@@ -35,3 +35,4 @@ deploy/*
 
 # downloaded reference posts (other creators' work; 4 MB of zips)
 New reference stuff/
+.playwright-mcp/

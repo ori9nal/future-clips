@@ -5,27 +5,33 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>the futureclips — viral carousels in two minutes</title>
 <meta name="description" content="Turn one idea into a post-ready carousel in two minutes. Proven viral hooks, consistent character on every slide, no AI watermark. Built for creators who post daily.">
-<link rel="canonical" href="https://thefutureclips.com/">
+<link rel="canonical" href="https://www.thefutureclips.com/">
 <meta name="theme-color" content="#FAF9F6">
+<script>document.documentElement.classList.add('js')</script>
 
 <meta property="og:type" content="website">
-<meta property="og:url" content="https://thefutureclips.com/">
+<meta property="og:url" content="https://www.thefutureclips.com/">
 <meta property="og:site_name" content="the futureclips">
 <meta property="og:title" content="Viral carousels in two minutes">
 <meta property="og:description" content="One idea in, a post-ready carousel out. Proven viral hooks, no AI watermark. Built for creators who post daily.">
-<meta property="og:image" content="https://thefutureclips.com/og.png">
+<meta property="og:image" content="https://www.thefutureclips.com/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Viral carousels in two minutes">
 <meta name="twitter:description" content="One idea in, a post-ready carousel out. Proven viral hooks, no AI watermark.">
-<meta name="twitter:image" content="https://thefutureclips.com/og.png">
+<meta name="twitter:image" content="https://www.thefutureclips.com/og.png">
 
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 64'%3E%3Crect x='0' y='21' width='55' height='39' rx='7' fill='%23D9D7D1'/%3E%3Crect x='14' y='12' width='55' height='39' rx='7' fill='%238E8D89'/%3E%3Crect x='31' y='2' width='55' height='39' rx='7' fill='%230E0E10'/%3E%3C/svg%3E">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,500..800&family=Manrope:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/archivo-500_800-latin.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/manrope-400_700-latin.woff2">
+<style>
+@font-face{font-family:'Archivo';font-style:normal;font-weight:500 800;font-stretch:100% 125%;font-display:swap;src:url(/fonts/archivo-500_800-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:400;font-display:swap;src:url(/fonts/plexmono-400-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'IBM Plex Mono';font-style:normal;font-weight:500;font-display:swap;src:url(/fonts/plexmono-500-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Manrope';font-style:normal;font-weight:400 700;font-display:swap;src:url(/fonts/manrope-400_700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+</style>
 <style>
 :root{
   --ink:#0E0E10; --body:#57554F; --muted:#8C8981;
@@ -70,7 +76,8 @@ section{padding:104px 0 0}
 .eyebrow i{width:7px;height:7px;background:var(--lime);border-radius:2px;display:block}
 
 /* reveal */
-.rv{opacity:0;transform:translateY(18px);transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+.rv{transition:opacity .7s cubic-bezier(.2,.7,.3,1),transform .7s cubic-bezier(.2,.7,.3,1)}
+html.js .rv:not(.in){opacity:0;transform:translateY(18px)}
 .rv.in{opacity:1;transform:none}
 
 /* HEADER + LOGO */
@@ -79,7 +86,7 @@ header{position:sticky;top:0;z-index:70;background:rgba(250,249,246,.86);backdro
 .brand{display:flex;align-items:center;gap:11px;flex:0 0 auto}
 .brand svg{height:26px;width:auto;display:block;flex:0 0 auto}
 .bt{display:flex;flex-direction:column;line-height:1}
-.bt small{font-family:'Manrope',sans-serif;font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:#9B9890;font-weight:600;margin-bottom:2px}
+.bt small{font-family:'Manrope',sans-serif;font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:#6E6B63;font-weight:600;margin-bottom:2px}
 .bt b{font-family:'Archivo',sans-serif;font-weight:700;font-size:19px;color:var(--ink);letter-spacing:-.032em}
 nav.desk{display:flex;gap:28px;font-size:15px;font-weight:500}
 nav.desk a:hover{color:var(--ink)}
@@ -318,14 +325,14 @@ details p{padding:0 22px 20px;font-size:15.5px;max-width:66ch;margin:0}
 footer{border-top:1px solid #EAE7DE;padding:56px 0 40px;margin-top:0}
 .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:36px}
 .fbrand .brand{margin-bottom:14px}
-.ftag{font-size:14.5px;color:var(--muted);margin:0;line-height:1.6}
-.fcol h4{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
+.ftag{font-size:14.5px;color:#6E6B63;margin:0;line-height:1.6}
+.fcol h3{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;
 color:var(--ink);font-weight:500;margin:0 0 14px}
-.fcol a{display:block;font-size:14.5px;color:var(--muted);padding:5px 0;transition:color .15s}
+.fcol a{display:block;font-size:14.5px;color:#6E6B63;padding:5px 0;transition:color .15s}
 .fcol a:hover{color:var(--ink)}
 .fbase{margin-top:44px;padding-top:22px;border-top:1px solid #EFECE4;display:flex;flex-wrap:wrap;gap:14px;
 justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;
-text-transform:uppercase;color:var(--muted)}
+text-transform:uppercase;color:#6E6B63}
 @media(max-width:820px){.fgrid{grid-template-columns:1fr 1fr;gap:30px}}
 @media(max-width:520px){.fgrid{grid-template-columns:1fr}}
 .fmeta{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
@@ -367,7 +374,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 @media (prefers-reduced-motion:reduce){
   *{animation:none!important;transition:none!important}
   html{scroll-behavior:auto}
-  .rv{opacity:1;transform:none}
+  html.js .rv:not(.in),.rv{opacity:1;transform:none;transition:none}
 }
 </style>
 </head>
@@ -377,7 +384,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 <header>
   <div class="wrap">
     <div class="hbar">
-      <a href="#top" class="brand" aria-label="the futureclips home">
+      <a href="#top" class="brand">
         <svg viewBox="0 0 92 64" aria-hidden="true">
           <rect x="0"  y="21" width="55" height="39" rx="7" fill="#D9D7D1"/>
           <rect x="14" y="12" width="55" height="39" rx="7" fill="#8E8D89"/>
@@ -682,7 +689,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
   <div class="wrap">
     <div class="fgrid">
       <div class="fbrand">
-        <a href="#top" class="brand" aria-label="the futureclips">
+        <a href="#top" class="brand">
           <svg viewBox="0 0 92 64" aria-hidden="true" style="height:22px">
             <rect x="0" y="21" width="55" height="39" rx="7" fill="#D9D7D1"/>
             <rect x="14" y="12" width="55" height="39" rx="7" fill="#8E8D89"/>
@@ -693,7 +700,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
         <p class="ftag">Viral carousels in two minutes.<br>Built for people who post every day.</p>
       </div>
       <div class="fcol">
-        <h4>Product</h4>
+        <h3>Product</h3>
         <a href="#why">Why carousels</a>
         <a href="#how">How it works</a>
         <a href="#features">Features</a>
@@ -701,7 +708,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
         <a href="#faq">FAQ</a>
       </div>
       <div class="fcol">
-        <h4>Trust &amp; Legal</h4>
+        <h3>Trust &amp; Legal</h3>
         <a href="/terms">Terms of Service</a>
         <a href="/privacy">Privacy Policy</a>
         <a href="/acceptable-use">Acceptable Use</a>
@@ -709,7 +716,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
         <a href="/accessibility">Accessibility</a>
       </div>
       <div class="fcol">
-        <h4>Contact</h4>
+        <h3>Contact</h3>
         <a href="mailto:team@thefutureclips.com">team@thefutureclips.com</a>
         <a href="/login">Log in</a>
         <a href="/signup">Get started</a>

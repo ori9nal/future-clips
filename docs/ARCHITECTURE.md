@@ -66,7 +66,7 @@ Target (milestone M3 in `docs/ROADMAP.md`): GitHub connected to Vercel, the app 
 
 ## Brand assets (one mark everywhere)
 
-The mark is three stacked cards, `viewBox 0 0 92 64`, rects at (0,21), (14,12), (31,2), 55×39, radius 7, fills `#D9D7D1`, `#8E8D89`, `#0E0E10`. The wordmark is a tracked small-caps "THE" (Manrope 600, 8.5 px, letter-spacing .34em, `#9B9890`) over "futureclips" (Archivo 700, 19 px in the site header, 16 px in compact nav, letter-spacing -.032em, ink). Where it lives:
+The mark is three stacked cards, `viewBox 0 0 92 64`, rects at (0,21), (14,12), (31,2), 55×39, radius 7, fills `#D9D7D1`, `#8E8D89`, `#0E0E10`. The wordmark is a tracked small-caps "THE" (Manrope 600, 8.5 px, letter-spacing .34em, `#6E6B63` on the site and `var(--fc-body)` in the app: both clear 4.5:1) over "futureclips" (Archivo 700, 19 px in the site header, 16 px in compact nav, letter-spacing -.032em, ink). Where it lives:
 
 | Surface | Source |
 |---|---|
@@ -80,13 +80,15 @@ The mark is three stacked cards, `viewBox 0 0 92 64`, rects at (0,21), (14,12), 
 
 Change the geometry or colours in `components/BrandMark.tsx` first, then mirror the same numbers into the other five places in the same commit.
 
+**Site fonts.** The static site self-hosts Archivo (variable, wdth 100–125, wght 500–800), Manrope (variable, 400–700) and IBM Plex Mono (400, 500) as latin woff2 subsets under `future-clips-site/fonts/`, declared once in `design/fonts.css` (inlined by hand in `design/site.html`, by `design/build_legal.mjs` at build time) with `font-display: swap` and two preloads. No request leaves the site. `node tools/fetch-site-fonts.mjs` refreshes both. The app's fonts come from `next/font` in `app/layout.tsx` (also self-hosted by Next).
+
 ## Conventions
 
 Model rules live in the JSON `SHAPE` in `engine/generate.mjs`, never in prose. Every dollar comes from a provider usage block. Prompt text is a cache key (editing it re-pays every frame downstream). Never `git add -A`; stage by path. Never hand-edit `future-clips-site/index.html`; edit `design/site.html` and copy. Upload site objects under new names while the bucket path exists. `next` stays pinned exactly (15.5.24) until a Vercel build proves a bump. `output/` is disposable. The database is campaign truth; `campaigns/*.json` are fixtures. `FC_*` codes are the SQL-to-UI contract. Never weaken `engine/compliance.mjs`. Secrets are never `NEXT_PUBLIC_*`. `engineAvailable()` before any engine import on a host. `workDirs()` for any host write. `npx tsc --noEmit`, `npm test`, `npm run lint`, `npm run build` before every commit. Schema changes are numbered migration files applied through the Supabase MCP and recorded in `docs/DATABASE.md`.
 
 ## Ownership
 
-Engineering: `middleware.ts`, `lib/**`, `app/api/**`, `app/auth/**`, `app/admin/**` data loading and actions, `app/(legal)`, `app/app/page.tsx` data loading, `components/AppShell.tsx`, `next.config.ts`, `vercel.json`, `package.json`, `eslint.config.mjs`, `supabase/migrations/**`, `deploy/**`, `scripts/**`, `engine/providers/**`, `engine/lanes.mjs`, `engine/clean.mjs`, `engine/budget.mjs`, `engine/fonts.mjs`, `engine/fit-text.mjs`, `engine/styles/registry.mjs` mechanics, `engine/pairings.mjs` history mechanics, `tools/lane.mjs`, `tools/test-engine.mjs`, `tools/fetch-fonts.mjs`, the site build and deploy, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/DATABASE.md`, `docs/ENGINE.md` (mechanics), `RUNBOOK.md`, `OWNER-ACTIONS.md`.
+Engineering: `middleware.ts`, `lib/**`, `app/api/**`, `app/auth/**`, `app/admin/**` data loading and actions, `app/(legal)`, `app/app/page.tsx` data loading, `components/AppShell.tsx`, `next.config.ts`, `vercel.json`, `package.json`, `eslint.config.mjs`, `supabase/migrations/**`, `deploy/**`, `scripts/**`, `engine/providers/**`, `engine/lanes.mjs`, `engine/clean.mjs`, `engine/budget.mjs`, `engine/fonts.mjs`, `engine/fit-text.mjs`, `engine/styles/registry.mjs` mechanics, `engine/pairings.mjs` history mechanics, `tools/lane.mjs`, `tools/test-engine.mjs`, `tools/fetch-fonts.mjs`, `tools/fetch-site-fonts.mjs`, `tools/site-check.mjs`, `tools/dev-login.mjs`, `lib/login.ts`, the site build and deploy, `docs/ARCHITECTURE.md`, `docs/API.md`, `docs/DATABASE.md`, `docs/ENGINE.md` (mechanics), `RUNBOOK.md`, `OWNER-ACTIONS.md`.
 
 Product: `app/app/Dashboard.tsx`, `app/app/PartnerDashboard.tsx`, `app/dashboard.css`, `app/app.css`, `app/login/*` presentation and copy, user-facing sentences (the `REASONS` text in `lib/sets.ts`, not the codes), `engine/generate.mjs` prompts and judge rules, `engine/scenes.mjs`, `engine/art.mjs` prompt text, `engine/deslop.mjs`, `engine/styles/*.mjs` rendering and typography, `engine/caption.mjs`, `engine/grade.mjs`, `engine/ingest.mjs` prompt, `docs/PRODUCT.md`, `docs/QUALITY.md`, the "Prompt and style surfaces" section of `docs/ENGINE.md`.
 

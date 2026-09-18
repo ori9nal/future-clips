@@ -28,7 +28,7 @@ Things only the account owner can do, in the order they unblock work. Engineerin
 
 | # | Action | Where | Unblocks |
 |---|---|---|---|
-| 13 | Upload `future-clips-site/index.html` to bucket `site` as `index-v12.html` (anonymous uploads are gone; the dashboard upload is the path). `og.png` is already in the bucket. Then tell Engineering "deploy the site": it bumps `deploy/site/build.js` to `index-v12.html` and redeploys through the Vercel MCP | Supabase → Storage → `site` → Upload | the live homepage without the Free card and with a working link preview |
+| 13 | **Either** do B (link `dhxnx-7/future-clips` to the Vercel site project with root `future-clips-site/`; everything below then deploys from git) **or** upload the current site objects to bucket `site` under new names (Storage → `site` → Upload; anonymous uploads are gone): `future-clips-site/index.html` as `index-v12.html`; `og.png` as `og-v2.png`; each `<slug>/index.html` as `legal-v2/<slug>.html` (terms, privacy, acceptable-use, refunds, accessibility); `404.html` as `404-v1.html`; the four files in `future-clips-site/fonts/` as `fonts-v1/<same name>` (the site no longer calls Google Fonts). Then tell Engineering "deploy the site": `deploy/site/build.js` already names these objects; it redeploys through the Vercel MCP | Supabase → Storage → `site` → Upload (or Vercel → Git) | the live homepage without the Free card, the fixed link preview, the 404 page, self-hosted fonts, security and cache headers |
 
 ## Decisions the code is waiting on
 

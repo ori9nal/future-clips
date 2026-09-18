@@ -14,6 +14,7 @@ const PUBLIC = [
   /^\/$/,
   /^\/login(\/|$)/,
   /^\/auth\//,
+  /^\/api\/auth\//,
   /^\/api\/keepalive$/,
   /^\/api\/webhooks\//,
   /^\/api\/health$/,

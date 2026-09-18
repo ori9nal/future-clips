@@ -9,8 +9,11 @@ https://www.thefutureclips.com
                           the five Trust and Legal pages, generated from ../legal/*.md by
                           `node design/build_legal.mjs`
   logo.png og.png         logo/favicon and the link-preview image
+  fonts/                  Archivo, Manrope and IBM Plex Mono, self-hosted (no request leaves the site);
+                          refreshed by `node tools/fetch-site-fonts.mjs`, which also writes ../design/fonts.css
   carousels/              example covers (other creators' posts, shown with permission)
-  vercel.json             /login and /signup redirect to the app host
+  robots.txt sitemap.xml 404.html
+  vercel.json             /login and /signup redirect to the app host; security and cache headers; clean URLs
 
 To change the homepage: edit ../design/site.html, then `cp design/site.html future-clips-site/index.html`.
 To change a policy: edit ../legal/<slug>.md, then `node design/build_legal.mjs`.
