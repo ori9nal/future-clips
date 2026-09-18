@@ -243,11 +243,13 @@ const ANATOMY = [
   { rx: /calf|calves/i,                               body: 'calves from behind at the top of a calf raise', move: 'on the calf raise machine', noPov: true },
   { rx: /tibialis|shin|ankle/i,                       body: 'shins and training shoes mid tibialis raise', move: 'sat doing tibialis raises' },
   { rx: /glute|hip thrust|hip/i,                      body: 'hips at the top of a hip thrust, bar across the lap', move: 'mid hip thrust on the bench' },
+  // round 5 (2026-09-18): "Barbell RDLs" matched nothing and "Hanging leg raises" matched the squat line
+  { rx: /rdl|romanian|deadlift|hinge|good morning/i,  body: 'hamstrings and glutes from behind at the bottom of a Romanian deadlift, the bar at the shins', move: 'mid Romanian deadlift, the bar at the shins', noPov: true },
+  { rx: /abs|core|plank|crunch|oblique|leg raise|hanging/i, body: 'torso from the neck down, shirt lifted, abs tensed', move: 'mid hanging leg raise' },
   { rx: /squat|quad|leg\b|legs|hamstring|adductor|lunge|split/i, body: 'quads from the waist down at the bottom of a squat', move: 'at the bottom of a squat in the rack' },
   { rx: /bench|chest|press|push.?up|fly|pec/i,        body: 'chest and shoulder from the side mid dumbbell press on the bench', move: 'mid dumbbell press on the flat bench', noPov: true },
   { rx: /shoulder|delt|raise|overhead|lateral/i,      body: 'shoulder and upper arm at the top of a lateral raise', move: 'mid lateral raise with dumbbells' },
   { rx: /tricep|dip|skull|pushdown/i,                 body: 'back of the upper arm mid tricep pushdown, rope in hand', move: 'at the cable mid tricep pushdown' },
-  { rx: /abs|core|plank|crunch|oblique/i,             body: 'torso from the neck down, shirt lifted, abs tensed', move: 'mid hanging leg raise' },
   { rx: /neck|trap|shrug/i,                           body: 'neck and traps from behind mid shrug', move: 'mid dumbbell shrug', noPov: true },
   { rx: /deload|rest|sleep|recover/i,                 thing: THINGS[4] },
   { rx: /log|track|write|app|note|phone|number|guess/i, thing: 'A phone propped against a water bottle on a bench showing a notes app, wrist straps beside it' },
@@ -469,8 +471,17 @@ function enforceGym(scenes, { appIndex, seed, headings, closerIsOne, world }) {
       type = 'phone';
       line = SHOTS.phone.frame({ surface: pick(['a black gym bench', 'a granite kitchen counter', 'the rubber gym floor next to a dumbbell', 'a wooden table'], seed + '|surf') });
     } else if (i === n - 1 && !closerIsOne) {
-      type = 'outdoors';
-      line = SHOTS.outdoors.frame({ outfit: outfit(), place: place() });
+      // set-08 closes on a dim bedroom mirror selfie; an outdoors beat sent as an
+      // edit of the gym anchor came back as a gym twice (rounds 5 and 7,
+      // 2026-09-18), so the closer is the mirror unless the model asked for outdoors
+      if (hinted === 'outdoors') {
+        type = 'outdoors';
+        const pl = place();
+        line = SHOTS.outdoors.frame({ outfit: /beach|boat|pool|water/i.test(pl) ? 'shirtless in swim shorts' : outfit(), place: pl });
+      } else {
+        type = 'mirror-dim';
+        line = SHOTS['mirror-dim'].frame({ outfit: outfit() });
+      }
     } else {
       const prev = shots[shots.length - 1];
       type = hinted && hinted !== prev && SHOTS[hinted] ? hinted : ROTA[(start + i) % ROTA.length];

@@ -277,11 +277,11 @@ export default {
     // one of the ranked apps and is numbered like the rest — set-01 runs
     // "4. Forex Factory … 1. The Edge X", set-14 "1. Webull, 2. TradeLens,
     // 3. Stocktwits". Round 2 (2026-09-18) rendered 4, 3, [TradeLens App], 1.
-    const rankable = C.ranked.filter((r) => !r.screen);
+    const rankable = C.ranked.filter((r) => !r.screen && !r.bonus);
     let remaining = rankable.length + (C.closerRank ? 1 : 0);
     for (let i = 0; i < C.ranked.length; i++) {
       const item = C.ranked[i];
-      const isBonus = !!item.screen;
+      const isBonus = !!item.screen || !!item.bonus;
       // a hand-numbered set uses the model's numbers and nothing else
       const hand = C.ranked.some((r) => r.rank != null);
       const rank = hand ? item.rank : isBonus ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;

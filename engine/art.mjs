@@ -57,6 +57,14 @@ const ASPIRE_GUARD = 'A phone photo, not staged, not a stock photo, not a render
  * is everything else. Naming the released things does more work than
  * re-describing the person — the reference already carries the likeness.
  */
+/**
+ * F17 (rounds 0 and 3, 2026-09-18): "no smooth skin, no model" in the GUARD
+ * still returned a symmetrical catalogue face on the hook. Negatives are weak;
+ * naming the ordinary things is not. The anchor alone carries this, and every
+ * later frame inherits the face from it.
+ */
+const ORDINARY = 'An ordinary-looking person, not a model: some asymmetry in the face, uneven stubble, a spot or two, tired eyes, a shine on the forehead, a haircut that is a week overdue, the skin texture of a phone photo.';
+
 const SAME_PERSON = 'The SAME PERSON as the reference image: same face shape, same hair, same skin tone, same build, same body hair, same tattoos if any.';
 const RELEASE = 'Photographed on a DIFFERENT day: do not copy the reference\'s clothing, room, lighting, camera angle or framing.';
 
@@ -68,6 +76,14 @@ const RELEASE = 'Photographed on a DIFFERENT day: do not copy the reference\'s c
  * later frames that name the same car are edits of it.
  */
 const SAME_CAR = 'The SAME CAR as in the reference image: same model, same colour, same wheels, same number plate. Photographed on a different day in a different place at a different time of day: do not copy the reference\'s angle, light or background.';
+
+/**
+ * F20 (round 7, 2026-09-18): an object scene ("nobody in the frame") sent as an
+ * edit of the anchor with "the SAME PERSON as the reference" came back as the
+ * person in a gym. A frame with nobody in it references nothing.
+ */
+const NOBODY = /nobody in the frame|no people|nobody in shot/i;
+const OBJECT_GUARD = 'No text, no logos, no watermarks. No person in the frame, not even a hand. Not a photoshoot: no studio lighting, no softbox, no bokeh, no symmetry, no product-photography styling, no render.';
 
 /** A scene that asks for the app screenshot on a phone (engine/scenes.mjs SHOTS.phone). */
 const APPSHOT = /^An iPhone lying face up on/;
@@ -118,10 +134,11 @@ export function planSet(o) {
     return { mode, size, quality, anchor, frames, car };
   }
 
-  const anchor = { i: 0, label: `${id}-anchor`, refs: [], prompt: `${style} ${subject} ${scenes[0]} ${GUARD}` };
+  const anchor = { i: 0, label: `${id}-anchor`, refs: [], prompt: `${style} ${subject} ${ORDINARY} ${scenes[0]} ${GUARD}` };
   const frames = (anchorFile) => scenes.slice(1).map((scene, n) => {
     const i = n + 1;
     if (appScreen && APPSHOT.test(scene)) return appFrame(scene, i);
+    if (NOBODY.test(scene)) return { i, label: `${id}-o${i}`, refs: [], prompt: `${style} ${scene} ${OBJECT_GUARD}` };
     // A close-up is asked for by the scene, and "keep the same face" pulls
     // the model straight back to the anchor's full-body framing — round one
     // of the gym gauntlet rendered "a tight close-up of a bicep" as the same

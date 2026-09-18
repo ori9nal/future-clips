@@ -107,21 +107,32 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   // numbering direction (docs/QUALITY.md §4, D-103): countdown only when rated or ranked
   const down = { hook: { lines: ['6 habits that made me consistent'], sub: [] }, ranked: [{ name: '5. one pair', lines: ['3 x 10'] }, { name: '4. risk', lines: ['1% per trade'] }, { name: '3. journal', lines: ['2 lines a night'] }], closer: { lines: ['z'], cta: 'go' }, caption: 'x 💪 🔥', bio: '', hashtags: [], numbering: 'countdown' };
   const jd = judgeCopy({ spec, data: JSON.parse(JSON.stringify(down)), range: slideRange(spec, 5), styleId: 'feed' });
-  ok(jd.verdict.failures.some((f) => /counts down/.test(f)), 'judge rejects a countdown of habits with nothing rated or ranked');
+  ok(jd.data.numbering === 'up' && jd.data.ranked[0].name === 'one pair' && jd.verdict.repairs.some((n) => /renumbered/.test(n)), `a countdown of habits with nothing rated or ranked is renumbered 1 → N without a retry (${jd.data.ranked.map((r) => r.name).join(', ')})`);
   const rated = { ...down, ranked: down.ranked.map((r, i) => ({ ...r, score: `${i + 3}/10` })) };
-  ok(!judgeCopy({ spec, data: JSON.parse(JSON.stringify(rated)), range: slideRange(spec, 5), styleId: 'feed' }).verdict.failures.some((f) => /counts down/.test(f)), 'a rated countdown passes');
+  ok(judgeCopy({ spec, data: JSON.parse(JSON.stringify(rated)), range: slideRange(spec, 5), styleId: 'feed' }).data.numbering === 'countdown', 'a rated countdown keeps counting down');
   const topN = { ...down, hook: { lines: ['top 3 things i check'], sub: [] } };
-  ok(!judgeCopy({ spec, data: JSON.parse(JSON.stringify(topN)), range: slideRange(spec, 5), styleId: 'feed' }).verdict.failures.some((f) => /counts down/.test(f)), 'a "top N" ranking may count down');
+  ok(judgeCopy({ spec, data: JSON.parse(JSON.stringify(topN)), range: slideRange(spec, 5), styleId: 'feed' }).data.numbering === 'countdown', 'a "top N" ranking may count down');
   const up = { ...down, numbering: 'up', ranked: down.ranked.map((r) => ({ ...r, name: r.name.replace(/^\d+\.\s*/, '') })) };
   const ju = judgeCopy({ spec, data: JSON.parse(JSON.stringify(up)), range: slideRange(spec, 5), styleId: 'feed' });
-  ok(!ju.verdict.failures.some((f) => /counts down/.test(f)), 'a count-up list passes');
+  ok(ju.data.numbering === 'up' && !ju.verdict.repairs.some((n) => /renumbered/.test(n)), 'a count-up list passes untouched');
   ok(toRenderable(spec, ju.data).content.numbering === 'up', 'toRenderable keeps "up" so the renderers count 1 -> N');
+  // F19 (round 6): a hook that promises N things is numbered even when the model says "none"
+  const none4 = { ...up, numbering: 'none', hook: { lines: ['4 apps a beginner', 'trader ACTUALLY needs'], sub: [] } };
+  ok(toRenderable(spec, JSON.parse(JSON.stringify(none4))).content.numbering === 'up', 'a "4 apps" hook with numbering none renders 1 → N');
+  const story = { ...up, numbering: 'none', hook: { lines: ['how i went from 60kg', 'to 80kg in a year'], sub: [] } };
+  ok(toRenderable(spec, JSON.parse(JSON.stringify(story))).content.numbering === 'none', 'a story hook with numbering none stays unnumbered');
+  // F21 (round 6b): items past the promised count are unnumbered bonus tips
+  const five = { ...none4, ranked: [...none4.ranked, { name: 'how i actually use them', lines: ['6am news'] }, { name: 'a routine', lines: ['x'] }] };
+  const rb = toRenderable(spec, JSON.parse(JSON.stringify(five))).content.ranked;
+  ok(!rb[0].bonus && !rb[3].bonus && rb[4].bonus, `after a "4 apps" hook the fifth item is a bonus (${rb.map((r) => r.bonus ? 'b' : 'n').join('')})`);
 }
 
 // 7. scene enforcement: shot types rotate, the app slot is the phone shot, the closer is a lifestyle beat
 {
   const e = enforce(new Array(8).fill('x'), { niche: 'fitness', appIndex: 5, seed: 't', headings: ['Hammer curl', 'Preacher curl', 'Deloading', 'Rear delts', 'App', 'Spider curl'] });
-  ok(e.shots[0] === 'mirror' && e.shots[5] === 'phone' && e.shots[7] === 'outdoors', `gym shots: ${e.shots.join(' ')}`);
+  ok(e.shots[0] === 'mirror' && e.shots[5] === 'phone' && e.shots[7] === 'mirror-dim', `gym shots: ${e.shots.join(' ')} (the closer is the bedroom mirror, set-08 slide 7)`);
+  const eo = enforce(['mirror', 'x', 'x', 'x', 'x', 'x', 'x', 'outdoors, on the beach'], { niche: 'fitness', appIndex: 5, seed: 't', headings: ['Hammer curl', 'Preacher curl', 'Deloading', 'Rear delts', 'App', 'Spider curl'] });
+  ok(eo.shots[7] === 'outdoors', 'a closer the model asked for outdoors stays outdoors');
   ok(e.shots.slice(1).every((t, i) => i === 0 || t !== e.shots[i]), 'no shot type repeats back to back');
   ok(/hammer curl/.test(e.scenes[1]) && /No face/.test(e.scenes[1]), 'a heading that names a lift shows that lift with no face');
   ok(e.scenes.every((sc) => /Not a photoshoot/.test(sc)), 'every gym frame carries the camera line');
@@ -147,6 +158,23 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   const e4 = enforce(['mirror, gym', 'crop', 'crop', 'mirror, back to the glass', 'crop', 'outdoors'], { niche: 'fitness', appIndex: -1, seed: 'q', headings: ['Kroc rows', 'Lat pulldown', 'Barbell row', 'Cable curl'] });
   ok(e4.shots[3] === 'mirror' && /back to the mirror, the phone held up over one shoulder/.test(e4.scenes[3]), `a row heading in a mirror shot is taken over the shoulder with the back to the glass (${e4.shots.join(' ')})`);
   ok(/mid cable curl/.test(e4.scenes[4]), 'a cable curl still maps to the curl anatomy');
+  // F17: the subject-mode anchor names ordinary imperfections; the edits inherit the face and do not repeat it
+  const sp = planSet({ subject: 'a man', scenes: ['mirror', 'crop no face'], mode: 'subject', days: true, id: 's' });
+  ok(/ordinary-looking person/.test(sp.anchor.prompt) && !/ordinary-looking person/.test(sp.frames('/x/a.png')[0].prompt), 'the anchor carries the ordinary-face line; the edits do not');
+  // F6c (round 5): RDLs are a hinge from behind; hanging leg raises are abs, not legs
+  const e5 = enforce(new Array(6).fill('x'), { niche: 'fitness', appIndex: -1, seed: 'r', headings: ['Barbell RDLs', 'Hanging leg raises', 'Bulgarian split squats', 'Cable curl'] });
+  ok(/Romanian deadlift/.test(e5.scenes[1]) && e5.shots[1] !== 'pov', `RDLs map to the hinge from behind (${e5.shots[1]})`);
+  ok(/abs tensed|hanging leg raise/.test(e5.scenes[2]) && !/squat/.test(e5.scenes[2]), 'hanging leg raises map to abs, not the squat line');
+  // F18 (round 5): a beach, boat or pool closer is never in a hoodie
+  for (const seed of ['a', 'b', 'c', 'd', 'e', 'f']) {
+    const e6 = enforce(new Array(6).fill('x'), { niche: 'fitness', appIndex: -1, seed, headings: ['a', 'b', 'c', 'd'] });
+    const first = e6.scenes[5].split('. ')[0];
+    ok(!(/beach|boat|pool/i.test(first) && /hoodie|sweatpants|joggers|t-shirt|tee/i.test(first)), `seed ${seed}: the outdoors closer dresses for its place (${first.slice(0, 60)}…)`);
+  }
+  // F20 (round 7): a frame with nobody in it references nothing, in subject mode too
+  const so = planSet({ subject: 'a man', scenes: ['mirror', 'A shaker bottle on a bench, nobody in the frame.', 'crop no face'], mode: 'subject', days: true, id: 'o' });
+  const sof = so.frames('/x/a.png');
+  ok(sof[0].refs.length === 0 && /No person in the frame/.test(sof[0].prompt) && sof[1].refs[0] === '/x/a.png', 'the object frame is its own generation; the crop still references the anchor');
   // F12 (2026-09-18): when the hook names the life's car, later car frames are edits of the hook frame
   const ap = planSet({ subject: 'none', scenes: ['a matte black Lamborghini parked on a street', 'a desk with two monitors', 'a matte black Lamborghini in an underground car park'], mode: 'aspirational', id: 'w' });
   ok(ap.anchor && ap.anchor.i === 0 && ap.anchor.refs.length === 0, 'aspirational plan takes the car hook as its anchor');

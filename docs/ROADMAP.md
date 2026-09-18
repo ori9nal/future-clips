@@ -79,8 +79,11 @@ Both chats keep this file current. Read it at the start of every session after `
 | 2026-09-18 | Product: rule | numbering direction (D-033) in the copy shape, rules, judge and toRenderable, with 5 new npm test checks | — | $0 |
 | 2026-09-18 | Product: app | picker search and plain format words, HD/priority cost line, error sentences, no-plan state without free-tier words, Refer page hidden, mobile meter clip, mobile light buttons, focus ring; REASONS sentences | — | $0 |
 | 2026-09-18 | Product: docs | QUALITY.md v1, PRODUCT.md v1, DECISIONS.md, ROADMAP.md; product branch + worktree | — | — |
+| 2026-09-18 | Product: round 3, gym, F6 (behind parts never POV) | 84 vs set-08 | Claude $0.0746 + image $0.3953 |
+| 2026-09-18 | Product: round 4, trading, one car across the set, pill at the reference size, tag lines repaired | 82 vs set-01; 85 after the $0 re-render (rank on the app slide, pill on every app) | Claude $0.0819 + image $0.2830 |
+| 2026-09-18 | Product: `output/` arranged (README, `_attic/`, dated `gauntlet/` folders, `COSTS.md` rebuilt from `output/lanes`); `tools/_gauntlet.mjs` runner; two growithalex carousels saved to `reference/growithalex/ig/` | — | $0 |
 
-Spend: Engineering $0. Product 2026-09-18: $0.82 so far (round 0 $0.47, round 2 $0.35); every run in `output/gauntlet/COSTS.md`.
+Spend: Engineering $0. Product 2026-09-18: $1.65 through round 4 (rounds 5 and 6 running); every run with its Claude and image dollars in `output/gauntlet/COSTS.md`.
 
 ## Requests: Product → Engineering
 

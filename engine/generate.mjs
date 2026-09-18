@@ -418,7 +418,11 @@ export function judgeCopy({ spec, data, range, styleId }) {
     const nums = (data.ranked ?? []).filter((r) => !r.showsApp).map((r) => { const m = /^\s*(?:no\.?|#)?\s*(\d+)\s*[.:\-\u2013\u2014]/i.exec(String(r.name ?? '')); return m ? +m[1] : null; });
     const handDown = nums.length >= 2 && nums.every((n) => n != null) && nums.every((n, i) => i === 0 || n < nums[i - 1]);
     if ((data.numbering === 'countdown' || handDown) && !scored && !ranking) {
-      verdict.failures.push('the list counts down but nothing is rated or ranked; number it 1 \u2192 N ("numbering": "up") or leave it unnumbered');
+      // repaired, not rejected: a retry costs about $0.09 (round 6, 2026-09-18) and the fix is mechanical
+      data.numbering = 'up';
+      for (const r of data.ranked ?? []) r.name = String(r.name ?? '').replace(/^\s*(?:no\.?|#)?\s*\d+\s*[.:\-–—]\s*/i, '');
+      if (data.closer?.lines?.[0]) data.closer.lines[0] = String(data.closer.lines[0]).replace(/^\s*(?:no\.?|#)?\s*(?:1|one)\s*[.:\-–—]\s*/i, '');
+      notes.push('the list counted down with nothing rated or ranked; renumbered 1 → N');
     }
     // specificity: at least half of the body items carry a number
     const body = (data.ranked ?? []).filter((r) => !r.showsApp);
@@ -469,6 +473,13 @@ export async function generateContent({ root, spec, instruction, slideCount, sli
  * from the campaign's folder here, one per slide with no repeats, because a set
  * that reuses a frame reads as padding.
  */
+/** The hook promises N things ("4 apps", "top 5 exercises", "six lifts"). */
+const COUNT_RX = /\b(?:top\s+)?(\d{1,2}|two|three|four|five|six|seven|eight|nine|ten)\s+(?:[a-z-]+\s+){0,2}[a-z]+s\b/i;
+export const promisesCount = (content) => COUNT_RX.test([...(content.hook?.lines ?? []), ...(content.hook?.sub ?? [])].join(' '));
+const WORDS = { two: 2, three: 3, four: 4, five: 5, six: 6, seven: 7, eight: 8, nine: 9, ten: 10 };
+/** The N a hook promises, or null. */
+export const promisedCount = (content) => { const m = COUNT_RX.exec([...(content.hook?.lines ?? []), ...(content.hook?.sub ?? [])].join(' ')); if (!m) return null; const w = m[1].toLowerCase(); return WORDS[w] ?? (Number(w) || null); };
+
 export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } = {}) {
   const styleId = spec.content?.style ?? 'native';
   const n = (content.ranked ?? []).length;
@@ -553,12 +564,25 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     handNumbered = true;
   }
 
+  // "4 apps a beginner needs" followed by a fifth item that is not an app: the
+  // extras past the promised count are bonus tips and carry no number (round
+  // 6b, 2026-09-18 rendered "5. how i actually use them" beside set-01)
+  const promised = promisedCount(content);
+  if (promised && !handNumbered) {
+    let seen = 0;
+    for (const r of ranked) { if (r.screen) continue; seen++; if (seen > promised) r.bonus = true; }
+  }
+
   return {
     ...spec,
     content: {
       style: spec.content?.style ?? 'native',
-      // "up" and "none" pass through; a hand-numbered set renders its own numbers (feed, native)
-      numbering: handNumbered ? 'countdown' : (content.numbering === 'none' || content.numbering === 'up') ? content.numbering : 'countdown',
+      // "up" and "none" pass through; a hand-numbered set renders its own numbers (feed, native).
+      // A hook that promises a count ("4 apps a beginner trader needs") is a numbered list even
+      // when the model says "none": set-01 and set-14 number every app (round 6, 2026-09-18).
+      numbering: handNumbered ? 'countdown'
+        : content.numbering === 'none' && promisesCount(content) && n >= 3 ? 'up'
+        : (content.numbering === 'none' || content.numbering === 'up') ? content.numbering : 'countdown',
       hook: { ...content.hook, lines: content.hook?.headline?.length ? content.hook.headline : content.hook?.lines, photo: hookPhoto },
       ranked,
       closerRank,
