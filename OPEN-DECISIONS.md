@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-09-18).** Kept for history only; facts below may be stale. Current truth: `docs/ARCHITECTURE.md`, `docs/ENGINE.md`, `docs/DATABASE.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`.
+
 # OPEN-DECISIONS.md
 
 Decisions only the owner can make. Each entry says what was done in the
@@ -11,9 +13,14 @@ pricing table has no such row, so **it is not implemented**: an Agency-tier
 customer pays $249/mo and gets 10 seats, and that is the whole relationship in
 the code today.
 
-**Decide:** does an Agency customer also earn a share on referred accounts, or
-is $249 the entire relationship? If a share exists, it needs a ledger, a
-payout method, and tax handling — a separate phase, not a toggle.
+**Decided by the owner, 2026-09-13:** a tiered commission on the subscriptions a
+referring agency brings in — **20% under 200 referred accounts, up to 30%**.
+Built as migration `0005_agency_referrals.sql` (codes on every org, `?ref=`
+attribution on first sign-in, `commissions` ledger, `referral_tiers` 0→20% ·
+200→25% · 500→30% — the 25% step is an assumption), the "Refer & earn" page in
+the app and `/admin/partners`. Paid by hand from margin; never through the
+payment provider (what Dodo was told). Still open: the site no longer carries a
+partner section (the 09-13 page dropped it) — add one or leave it in-app.
 
 ## 2. View counter — removed, then restored at the owner's request
 
@@ -123,3 +130,47 @@ Settings → Plan page shows the per-slide extras and an email link; no
 checkout exists until phase 5 (payment provider still undecided:
 OWNER-ACTIONS 4). Say if you want packs with a discount instead of
 per-slide extras; it changes `plans` and the Settings copy only.
+
+
+## 9. The de-slop pass — built, on by default for the feed style
+
+2026-09-13: the owner's `deslop.py` (off-centre crop, flat exposure and
+saturation, shadow-weighted sensor grain, a hard JPEG pass, text pasted back)
+is ported as `engine/deslop.mjs` and applied to the **photo layer** of every
+feed frame before the caption is drawn — so the text is crisp by construction
+and no bright-pixel mask is needed. Seeded per set (re-renders are
+byte-identical), full strength for the camera-roll (`phone`) look, lighter
+for the daylight worlds (`strengthFor`). `assets.deslop: 0` on a campaign
+turns it off. Evidence: `output/gauntlet/deslop/AB-apex-feed.jpg` (before /
+after, $0) and `output/gauntlet/g1/G1-sheet.jpg` (a fresh set, $0.46).
+
+**Decide:** nothing — but the knobs in `engine/deslop.mjs` (`KNOBS`) are the
+script's numbers verbatim; if a niche looks too dark, lower `brightness` or
+the look's strength rather than switching it off.
+
+## 10. The plans now follow the site — with three assumptions
+
+The 09-13 site sells Free / Clipper $16 (200 slides) / Pro $32 (500) / Studio
+$79 (1,500), packs of 100/$8 · 250/$18 · 600/$40 that never expire. Migration
+`0006_plans_match_the_site.sql` re-meters the database to it (internal ids
+unchanged; `plans.label` carries the names). Where the page is silent:
+
+- **Priority** is 10% of the allowance on Pro (50) and Studio (150). The page
+  lists "priority render queue" as a feature; unlimited priority at 2× COGS
+  would take Pro to ~9% gross.
+- **HD** is included on Pro and Studio as the page says, but an HD slide
+  **uses three slides** of the allowance (an HD frame costs ~4×).
+  `hd_per_slide_usd = 0` now means "included, ×3"; `null` means not offered.
+- **Free** gets a welcome balance of **5 slides** (the engine's minimum set),
+  not the page's "2 slides" — two slides cannot make a slideshow. The site
+  and Refund Policy §1 should say "one free slideshow".
+
+Gross at full quota with COST.md's COGS: Clipper 66%, Pro 49%, Studio 38%.
+**Decide:** keep or change any of the three; each is one number.
+
+## 11. Legal claims the code now keeps (from #6)
+
+- "Purchased credits do not expire" — true from 0006 (the balance carries).
+- "2 free Slides" — the code gives 5 (one slideshow); change the text.
+- "Editing text … does not use Slides" — still true by construction; the
+  edit-and-re-render button is still not built.

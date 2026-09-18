@@ -1,63 +1,33 @@
-# Future Clips
+# The Future Clips
 
-Two workstreams share this repo. Each has its own handoff document; read the
-one for what you are touching.
+Carousel generation for clippers: a platform admin ingests a brand brief once; a clipper picks the campaign, types an idea, chooses slides and a lane, and gets a compliant, metadata-free TikTok/Instagram carousel with caption, bio and hashtags. Claude writes and directs, gpt-image-2 draws, the Node engine composes.
 
-| Surface | What it is | Handoff |
-|---|---|---|
-| `future-clips-site/` | The public marketing site — a **static** page, generated from `design/` and deployed to Vercel. | [HANDOFF-SITE.md](HANDOFF-SITE.md) |
-| `engine/`, `tools/`, `campaigns/` | The carousel engine — CLI that turns a campaign brief into a rendered slide set. | [HANDOFF-ENGINE.md](HANDOFF-ENGINE.md) |
-| `app/`, `components/`, `lib/` | A **local** Next.js studio + admin over the engine. Not deployed; not the marketing site. | [HANDOFF-SITE.md](HANDOFF-SITE.md) (surface), [HANDOFF-ENGINE.md](HANDOFF-ENGINE.md) (what it calls) |
+**Read first:** `docs/DECISIONS.md` (what is decided), `docs/ROADMAP.md` (what is in flight), then `docs/ARCHITECTURE.md`, `docs/ENGINE.md`, `docs/API.md`, `docs/DATABASE.md`, `docs/PRODUCT.md`, `docs/QUALITY.md`. The full audit of 2026-09-17 is `docs/AUDIT-2026-09-17.md`. Operations: `RUNBOOK.md`. Owner-side steps: `OWNER-ACTIONS.md`.
 
-## The site (what is live)
-
-```bash
-python design/build_site.py     # design/Main.dc.html -> future-clips-site/  (idempotent, byte-stable)
-```
-
-Live at **https://the-future-clips.vercel.app** — Vercel project `the-future-clips`.
-The folder is the deployable; nothing in it is hand-edited. No env vars; the
-Supabase URL and *publishable* key are constants in `design/build_site.py`.
-
-## The studio (local only)
+## Run
 
 ```bash
 npm install
-npm run dev          # http://localhost:3000  -> redirects to /studio
+cp .env.example .env.local        # fill the keys; never commit it
+npm run dev                       # http://localhost:3000
 ```
 
-`/` redirects to `/studio`. `/admin` is a local tool with a shared-secret gate
-(`FC_ADMIN_SECRET` in `.env.local`) on some pages and none on others — do not
-put this app on the public internet as-is. It writes to `campaigns/` and
-`output/` on the local disk and dynamically imports `engine/` at runtime, which
-is also why it is not on Vercel.
+Checks before every commit: `npx tsc --noEmit`, `npm test`, `npm run lint`, `npm run build`.
 
-## Database
+## Surfaces
 
-Table `signups` in Supabase project `waipwmyncpsgoglmkhdz` (`clipcarousel`,
-us-east-1). RLS on, one policy: anon may INSERT. Anon SELECT returns `[]`,
-anon DELETE/UPDATE are no-ops, CHECK constraints reject malformed rows —
-all re-verified 2026-09-11 (see HANDOFF-SITE.md, "Runs cold?").
+| What | Where | Source of truth |
+|---|---|---|
+| Marketing site | www.thefutureclips.com (Vercel `the-future-clips`) | `design/site.html`, copied verbatim to `future-clips-site/index.html`; legal pages from `legal/*.md` via `node design/build_legal.mjs` |
+| App | future-clips-app.vercel.app (Vercel `future-clips-app`) | `app/`, `lib/`, `middleware.ts` |
+| Engine | laptop CLI and the hosted worker | `engine/`, `tools/lane.mjs`, `lib/worker.ts` |
+| Database, auth, storage | Supabase `clipcarousel` (`waipwmyncpsgoglmkhdz`) | `supabase/migrations/`, `docs/DATABASE.md` |
 
-The free-tier project **auto-pauses after a week without traffic**; when it is
-paused its hostname does not resolve and the signup form fails. Restore it from
-the Supabase dashboard (or the MCP `restore_project`).
-
-## Deploying the site
-
-Preferred, needs the owner's Vercel login:
+## Make a set from the command line
 
 ```bash
-cd future-clips-site && npx vercel --prod
+node tools/lane.mjs campaign=apex-strength ask="top 5 exercises for biceps rated" lane=priority slides=6-8 style=feed
+node tools/rerender.mjs campaign=apex-strength style=feed    # $0, from cached frames
 ```
 
-Link to project `the-future-clips` when asked. What is there today was
-deployed without the CLI (see HANDOFF-SITE.md → Entry points for the exact
-mechanism and why).
-
-## Two things that bite
-
-- **Vercel refuses vulnerable Next.js versions** (`VULNERABLE_NEXTJS_VERSION`,
-  CVE-2025-66478 on 15.5.4). `package.json` pins `next` to exactly `15.5.24`.
-- **The Vercel team is on Hobby**, which forbids commercial use. Pro before
-  anything is sold.
+Superseded documents kept for history: `HANDOFF-ENGINE.md`, `HANDOFF-SITE.md`, `OPEN-DECISIONS.md`, `COST.md`, `docs/attic/`.

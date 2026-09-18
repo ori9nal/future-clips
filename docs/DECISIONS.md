@@ -1,0 +1,53 @@
+# Decisions
+
+The project's decision record. Both chats append; only the owner settles an OPEN item. Never resolve an OPEN item silently: propose, then wait. Format: `D-### | date | context | decision | status | owner`. Status is one of SETTLED-OWNER, PROPOSED (a chat's default, in effect until the owner objects), OPEN (needs the owner).
+
+## Settled by the owner (2026-09-17)
+
+| ID | Context | Decision | Status | Owner |
+|---|---|---|---|---|
+| D-001 | Who the product is for | The customer is the individual clipper. Agency, team, partner and referral features stay dormant: keep the code, gate it off, do not build on it, do not delete it. | SETTLED-OWNER | owner |
+| D-002 | Free tier | There is no free tier. An account without a plan cannot generate and sees a choose-a-plan state. Free-tier artifacts go: welcome slides, the site's Free card, "ready-made set" ideas, the `free-sets` bucket plan, the `brief_hash` cron idea. | SETTLED-OWNER | owner |
+| D-003 | Pricing | Follows the site: Clipper $16 for 200 slides, Pro $32 for 500 (priority, HD), Studio $79 for 1,500, packs 100/$8, 250/$18, 600/$40. Internal ids `solo`, `grind`, `agency` stay. The database is reconciled by migration `0010` (see D-012, D-013 for the two numbers the site does not state). | SETTLED-OWNER | owner |
+| D-004 | Pipeline | Claude directs and writes, OpenAI draws, the Node engine renders. Improve the architecture, do not replace it. No provider or model swap without a measured quality comparison agreed with Product. | SETTLED-OWNER | owner |
+| D-005 | Cost | As cheap to operate as reasonable, never at the cost of the visual target. Levers are proposed here, measured by Product, then adopted. | SETTLED-OWNER | owner |
+| D-006 | Validation | Product validates through the real running app in a browser (use, observe, change, use again). Engineering does technical smoke tests. | SETTLED-OWNER | owner |
+| D-007 | The core flow | Sign in; pick a campaign; give or pick an idea; choose 5 to 10 slides; choose the lane; optional instructions (logo, avatar, handle, note); generate; receive slides, caption, bio, hashtags. The pipeline is invisible to the clipper. | SETTLED-OWNER | owner |
+| D-008 | Visual target | The references are the target; generic design taste does not count. The Grow with Alex family is weighted highest. | SETTLED-OWNER | owner |
+| D-009 | How the work is organised | Two chats (Engineering / Ship, Product / Quality), one repository, one database, `docs/` as the source of truth, this file as the record, `docs/ROADMAP.md` for status and requests. Engineering on `main`, Product on branch `product` in the worktree `../fc-product`. | SETTLED-OWNER | owner |
+| D-010 | Conventions | The audit's conventions stay in force: JSON `SHAPE` for model rules; dollars from provider usage blocks; prompt text is a cache key; never `git add -A`; never hand-edit `future-clips-site/index.html`; versioned bucket object names; `next` pinned exactly; `output/` disposable; the database is campaign truth; `FC_*` codes are the SQL-to-UI contract; never weaken `engine/compliance.mjs`; secrets never `NEXT_PUBLIC_`; `engineAvailable()` before engine imports on hosts; `/tmp` for host writes; the four checks before every commit; schema changes as applied migrations. | SETTLED-OWNER | owner |
+
+## Open: the owner's call (defaults in effect until answered)
+
+| ID | Context | Question and the default in effect | Status | Owner |
+|---|---|---|---|---|
+| D-011 | Plans before Dodo is approved | How does a customer get a paid plan before checkout exists? Default in effect: invite-only beta; the platform owner assigns the plan by hand from `/admin` (Engineering builds a "set plan" control, M4); a signed-in account without a plan sees the choose-a-plan state and cannot generate. | OPEN | owner |
+| D-012 | Priority and HD inside the plans | The site says Pro and Studio have a "priority render queue" and "HD export" but gives no numbers. Draft 0006 assumed priority = 10% of the allowance (50 on Pro, 150 on Studio) and an HD slide draws 3 slides of the allowance. Default in effect: those numbers go into migration `0010`. | OPEN | owner |
+| D-013 | Monthly versus yearly | The live homepage loads with a yearly toggle ON and shows $16/$32/$79 as the yearly-billing monthly price with "2 months free"; the monthly toggle shows $20/$39/$99. The owner's instruction was "keep $16, $32, $79". Default in effect: the database carries 16/32/79 as `price_usd_month` with no yearly product (matching the instruction literally), the checkout still accepts a `yearly` flag but no yearly product will be created, and the site is left as it is. Decide: (a) $16/$32/$79 monthly and remove the toggle, (b) keep monthly $20/$39/$99 with yearly at $16/$32/$79 and create six Dodo products, (c) something else. | OPEN | owner |
+| D-014 | Grow with Alex | Is `reference/growithalex/` (18 images; the `rail` style was built from it) the family meant? Is it the whole set or will more arrive? Should its look be a style a clipper can pick, or a typography/hierarchy reference across all styles? Default in effect: primary typography, hierarchy and density reference for Product's taxonomy; no new style until answered. | OPEN | owner |
+| D-015 | "Journey" | The five zips in `New reference stuff/` came from a Drive doc titled "Example Clips — Journey". What are they (a client, a campaign to ingest, a niche)? Which app or brand must those sets feature? Default in effect: visual references only; no campaign, no client name, no style named after it. | OPEN | owner |
+| D-016 | Legal wording | May the chats edit `legal/refunds.md` §1 ("2 free slides"; there is no free tier) and `legal/terms.md` §3.2 ("editing text does not use slides" is not built; "purchased credits never expire" needs the balance from `0010`), or will the owner supply the wording? Default in effect: unchanged; the pages are live on both hosts as written. | OPEN | owner |
+| D-017 | Referral and partner code | Migrations 0005 and 0008 and the matching UI exist. Default in effect: not applied, code kept, every surface hidden; if `0010` needs 0005's columns (it does as drafted), 0005 goes in as dormant schema behind a flag that is off. Delete instead? | OPEN | owner |
+| D-018 | Quality budget | How much paid generation Product may run per week without asking, and the ceiling. A priority set costs about $0.40. Default in effect: at most $5 per Product session. | OPEN | owner |
+
+## Carried over from `OPEN-DECISIONS.md` (superseded file)
+
+| ID | Context | Decision | Status | Owner |
+|---|---|---|---|---|
+| D-026 | Agency referral share | The owner chose a 20% to 30% tiered commission on 2026-09-13; built as draft 0005; dormant under D-001 and D-017. | SETTLED-OWNER (dormant) | owner |
+| D-027 | Homepage view counter | The owner kept the rolling "1,304,895 views" figure; it is not a measured number. A reviewer may read it as a claim. Still open: what the number means. | SETTLED-OWNER, meaning OPEN | owner |
+| D-028 | Rollover | Allowances reset on the billing date; no rollover. Purchased packs never expire (site copy, `0010`). | SETTLED-OWNER | owner |
+| D-029 | Watermark claim | The site says "no visible watermark"; gpt-image-2 frames carry an invisible pixel watermark and the C2PA manifest is stripped. | SETTLED-OWNER | owner |
+| D-030 | De-slop | The de-slop pass is on by default for the feed and native styles; `assets.deslop: 0` on a campaign turns it off. | SETTLED-OWNER | owner |
+
+## Proposed by Engineering (in effect; say so to reverse)
+
+| ID | Date | Context | Decision | Status |
+|---|---|---|---|---|
+| D-019 | 2026-09-18 | Lint | ESLint added (`eslint.config.mjs`, `next/core-web-vitals` + `next/typescript`); `@typescript-eslint/no-explicit-any` is a warning (64 today, at the database and engine seams), `react/no-unescaped-entities` is off; every other rule is an error and `next build` fails on errors. The engine and generated folders are outside lint. | PROPOSED |
+| D-020 | 2026-09-18 | Site copy after D-002 | The Free card and the Free column were removed from `design/site.html`; "Start free" became "Get started"; "No card required · 2 free slides" lines were removed; the closing section reads "Post every day. Pick a plan and make your first carousel in minutes."; the mobile bar reads "Post every day, Plans from $16". Product rewrites the wording as it sees fit; these edits only removed false claims. The yearly toggle and the "$20/mo" hero pill were left for D-013. | PROPOSED |
+| D-021 | 2026-09-18 | Migration files | File numbers are the record, not the apply order; `docs/DATABASE.md` carries the applied state. Draft 0006 is superseded by the planned `0010` (no free tier, site pricing); 0005, 0007, 0008 wait for D-017 and the Dodo work. | PROPOSED |
+| D-022 | 2026-09-18 | Grants | `anon` keeps only SELECT on `plans`; default privileges no longer hand new tables, sequences or functions to `anon`; `authenticated` lost TRUNCATE, REFERENCES and TRIGGER; the waitlist insert policy and the site bucket's anonymous upload policy are gone (migration 0009). Every new function gets an explicit EXECUTE grant. | PROPOSED |
+| D-023 | 2026-09-18 | Set status semantics | `queued` means nothing has been spent and cancel is open; from the first provider call to the commit the row is `rendering`, including while it waits on a provider batch. `stageLabel()` (Product's words) can now show the real stage for batch sets. | PROPOSED |
+| D-024 | 2026-09-18 | Local files on hosts | `/api/file` is for laptops and platform-owner tools, signed-in only, relative to `workDirs().base`; a customer's slides are served from Storage as signed URLs. Studio output on hosts moves to Storage later (M6). | PROPOSED |
+| D-025 | 2026-09-18 | Reference downloads | `New reference stuff/` is git-ignored (other creators' posts, 4 MB of zips); the corpus stays in `Carousel examples/` and `reference/`. | PROPOSED |

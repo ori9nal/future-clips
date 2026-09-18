@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-09-18).** Kept for history only; facts below may be stale. Current truth: `docs/ARCHITECTURE.md`, `docs/ENGINE.md`, `docs/DATABASE.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`.
+
 # HANDOFF-SITE.md
 
 ## What this is

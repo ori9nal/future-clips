@@ -1,32 +1,41 @@
 # OWNER-ACTIONS.md
 
-Things only the account owner can do, in the order they bite. Nothing below
-blocks the build; each one blocks a step named next to it.
+Things only the account owner can do, in the order they unblock work. Engineering keeps this list current; every item names the exact place, the exact names, and what it unblocks. Values that are secrets are never written here, never `NEXT_PUBLIC_`.
 
-## Do these first — they gate signing in to the app (2 minutes)
+## Now: these gate local testing and every deploy
 
-| # | Action | Why | Blocks |
+| # | Action | Where | Unblocks |
 |---|---|---|---|
-| A | **Supabase Auth → URL Configuration** (dashboard: project `clipcarousel` → Authentication → URL Configuration). Set **Site URL** to `https://future-clips-app.vercel.app` and add to **Redirect URLs**: `https://future-clips-app.vercel.app/auth/callback` and `http://localhost:3000/auth/callback`. | Supabase only sends a magic link back to an allow-listed URL; anything else falls back to the Site URL, which is still `localhost:3000`. Until this is set, the link in your email lands on localhost instead of the hosted app. No MCP tool changes auth config. | **Signing in to https://future-clips-app.vercel.app.** (Local sign-in at `localhost:3000` works today — verified 2026-09-12 — because the default Site URL is localhost.) |
-| B | **Connect GitHub to Vercel as `DhanushMusunuru`** — from **https://vercel.com/new** (not from GitHub's side): under *Import Git Repository* open the account dropdown → *Add GitHub Account* → choose `DhanushMusunuru` → grant `future-clips` and `the-future-clips-site`. Then import `future-clips` as project **future-clips-app** (it already exists — Vercel will offer to link it) with default settings. | Vercel's API still answers `repo_not_found` for the private repos, which means the Vercel account has no GitHub connection to the account that owns them (you have two GitHub identities on this machine: `dawg703` in GitHub Desktop, `DhanushMusunuru` in git). Installing the GitHub App from github.com alone does not create the Vercel-side link. Once linked, every `git push` to `main` deploys, with the engine, fonts and assets included — the hand-carried deploy below retires. | Deploying the engine (phase 3) and everything after; today's deploy is the app without it. |
-| C | **Vercel project `future-clips-app` → Settings → Environment Variables** (Production, *server-side only*) — and paste `SUPABASE_SERVICE_ROLE_KEY` into this chat (or `.env.local`) so the worker can be exercised end to end locally: `SUPABASE_SERVICE_ROLE_KEY` (Supabase → Project Settings → API → service_role), `ANTHROPIC_API_KEY` (workspace-scoped), `OPENAI_API_KEY`, `CRON_SECRET` (any 32+ random characters). Never prefix any of these with `NEXT_PUBLIC_`. | The MCP deploy tool cannot set environment variables. Without the service-role key the admin "signed-in accounts" list shows only your own workspaces and the keepalive does not stamp; without the API keys nothing can render. `CRON_SECRET` makes Vercel sign its cron calls. | Phase 3 (rendering on the host), the full invites page. |
+| 1 | Put `SUPABASE_SERVICE_ROLE_KEY=<service_role key>` into `.env.local` on this machine and into `../fc-product/.env.local` | Supabase → Project Settings → API Keys → `service_role` | local end-to-end generation through the app (both lanes), immediate cancel release, the full account lists in `/admin` (M1) |
+| 2 | Give this machine a GitHub credential for `DhanushMusunuru`: `gh auth login` (HTTPS, browser) | terminal | pushing `main` and `product`; everything below that deploys from git |
+| 3 | Connect GitHub to Vercel as `DhanushMusunuru`: https://vercel.com/new → Import Git Repository → account dropdown → Add GitHub Account → grant `future-clips`; import it and link to the existing project `future-clips-app` (default Next.js settings). For the site, add a second git project from the same repo with Root Directory `future-clips-site`, Framework Preset `Other`, no build command, output `.`; or point the existing `the-future-clips` project at it | Vercel dashboard | deploys from `git push` with the engine, fonts and assets traced in (M3); the site without the bucket fetch |
+| 4 | Environment variables on project `future-clips-app` (Production and Preview, plain server variables): `SUPABASE_SERVICE_ROLE_KEY`, `ANTHROPIC_API_KEY` (workspace-scoped), `OPENAI_API_KEY`, `OPENAI_IMAGE_MODEL=gpt-image-2`, `OPENAI_INPUT_IMAGES_PER_MIN=5`, `CRON_SECRET` (any 32+ random characters). Redeploy after saving | Vercel → project → Settings → Environment Variables | hosted rendering, the poller, the keepalive stamp. Verify: `https://future-clips-app.vercel.app/api/health` answers `"ok":true` |
+| 5 | Supabase Auth URL configuration: Site URL `https://future-clips-app.vercel.app`; Redirect URLs `https://future-clips-app.vercel.app/auth/callback`, `http://localhost:3000/auth/callback`, `http://localhost:3001/auth/callback` (add `https://app.thefutureclips.com/auth/callback` once item 11 is done) | Supabase → Authentication → URL Configuration | signing in on the host and from the Product worktree |
+| 6 | Custom SMTP for auth emails (Resend or Postmark) | Supabase → Authentication → SMTP Settings | more than a few sign-in links per hour for the whole project (hit on 2026-09-13) |
+| 7 | Enable leaked password protection | Supabase → Authentication → Attack Protection | closes the last security advisor; one click |
 
-## Then, before launch
+## Before launch
 
-| # | Action | Why | Blocks |
+| # | Action | Where | Unblocks |
 |---|---|---|---|
-| 1 | **Vercel: upgrade team `earnfromwhop07-5800s-projects` Hobby → Pro** ($20/seat/mo) | Hobby terms prohibit commercial use; Hobby cron jobs run at most once a day (the batch poller needs every 5 min). Function duration is 300 s on both Hobby and Pro by default (measured 2026-09-12: Vercel refused 800 s on Hobby; Pro's 800 s needs Fluid compute), so the instant tier fits either way — it is the commercial-use clause and the cron cadence that force Pro. | The first charge (phase 5), the 5-minute poller. |
-| 2 | **Supabase: upgrade project `clipcarousel` (`waipwmyncpsgoglmkhdz`) Free → Pro** ($25/mo) | Free pauses after 7 idle days and its hostname stops resolving — the app, auth and the signup form all die with it. The daily keepalive cron (live on `future-clips-app`) makes the pause unlikely, not impossible. Pro also lifts the 1 GB storage cap, which the `cache` bucket (324 MB today, growing per set) and `sets` bucket will exceed. Also: the default auth email sender is rate-limited (a few per hour) — add a custom SMTP (Resend/Postmark) under Authentication → SMTP before real users. | Launch. |
-| 3 | **Vercel: delete project `future-clips`** (`prj_j55AR37CEDttehNz3RnTolaSNDNa`) | Dead: both production deployments are ERROR, it has no clean alias, nothing points at it. There is no MCP tool that deletes a project. If a payment provider was ever given its URL, replace it with https://www.thefutureclips.com. | Nothing; tidiness and reviewer confusion. |
-| 4 | **Payment provider: finish Dodo Payments merchant approval** (or decide Stripe) | Phase 5 builds against whichever is approved. The webhook handler is one file either way. | The first charge. |
-| 5 | **Custom domain — DONE for the site** (`www.thefutureclips.com` live 2026-09-12). Still to do: add `app.thefutureclips.com` to project `future-clips-app` (Settings → Domains), then update Supabase Site URL / Redirect URLs (action A) to the new host. No MCP tool adds domains. | Auth emails and the checkout return URL show the `*.vercel.app` host until then. | Launch polish; not the build. |
-| 6 | **Supabase Auth: Google OAuth client** (optional) | Magic-link email works with no setup. Google sign-in needs a Google Cloud OAuth client id + secret pasted into Supabase Auth → Providers → Google, then `NEXT_PUBLIC_GOOGLE_AUTH=1` on the Vercel project. | Google sign-in only. |
-| 7 | **Vercel CLI login on this machine** (`vercel login`) — optional, superseded by B | Would let the static site deploy with `cd future-clips-site && npx vercel --prod` instead of the Storage-fetch-at-build path. Connecting GitHub (B) and importing `the-future-clips-site` as a git project achieves the same. | Nothing; the MCP path works. |
+| 8 | Vercel team `earnfromwhop07-5800s-projects` Hobby → Pro ($20/seat/mo) | Vercel → Team Settings → Billing | commercial use (Hobby forbids it); the five-minute batch poller (Hobby crons are daily); function duration headroom |
+| 9 | Supabase project `clipcarousel` Free → Pro ($25/mo) | Supabase → Organization → Billing | no seven-day auto-pause; storage above 1 GB (the frame cache is already 448 MB on a laptop) |
+| 10 | Delete the dead Vercel project `future-clips` (`prj_j55AR37CEDttehNz3RnTolaSNDNa`) | Vercel → project → Settings → Delete | nothing; tidiness |
+| 11 | Domain `app.thefutureclips.com` on project `future-clips-app`, then update item 5 | Vercel → project → Settings → Domains | sign-in emails and checkout return URLs without a `*.vercel.app` host |
+| 12 | Dodo Payments: finish merchant approval; create products Clipper $16, Pro $32, Studio $79 (monthly; yearly only if D-013 says so) and packs 100/$8, 250/$18, 600/$40; webhook `https://future-clips-app.vercel.app/api/webhooks/dodo` with all subscription and payment events; then env `DODO_API_KEY`, `DODO_WEBHOOK_SECRET`, `DODO_ENV=live`, `DODO_PRODUCTS=solo=pdt_…,grind=pdt_…,agency=pdt_…,p100=pdt_…,p250=pdt_…,p600=pdt_…` | Dodo dashboard, Vercel env | the first charge (M5) |
 
-Done by the third agent, for the record (no owner action needed):
-- 2026-09-11 — site redeployed with the four-tier pricing (`dpl_CxiRWLGzYGBoPhnJBFVS6urfy8fD`, READY), `index-v4.html` in bucket `site`.
-- 2026-09-12 — pricing re-expressed in slides + "priority" (`index-v7.html`, `dpl_5ET2DxbFCN1mo4Gp7Xq3RLfjA3Vf`), live on www.thefutureclips.com.
-- 2026-09-12 — private repos `DhanushMusunuru/future-clips` (everything) and `DhanushMusunuru/the-future-clips-site` (generated site, via `git subtree`) created and pushed with the machine's git credential.
-- 2026-09-12 — five Trust and Legal pages live at www.thefutureclips.com/{terms,privacy,acceptable-use,refunds,accessibility} (`dpl_CNX4nyNtXK88aZfqUxpsjhhxASHK`) and on the app host; site copy softened to "no visible watermark" (`index-v9`, `dpl_CBaUbPeMxGQGAUQAUDBGNXutyh3g`).
-- 2026-09-12 — schema 0004 applied (lanes, slide ranges, quota gate functions, spend cap); the owner's personal workspace (`efff00ca…`) was put on **Grind** for testing — set it back to `free` (or leave it) with `update orgs set plan = 'free' where id = 'efff00ca-55d7-477d-8217-91a98e143f5c'`.
-- 2026-09-12 — app deployed to Vercel project `future-clips-app` (`prj_W959SiY6FoIcYxL9z9hSyqEILiAD`) at https://future-clips-app.vercel.app (`dpl_9zUPmhRBZHrdamsjV6Edo6c1m5ms`, READY): login, invite gate, campaigns, usage, admin, invites. Source was hand-carried through the MCP deploy tool as plain files (the engine, studio and render APIs are not on this host yet — they come with the git-connected deploy). Verified from outside: every app route → 302 to /login, APIs → 401, /api/keepalive → 200.
+## Interim: publish the no-free-tier homepage before item 3 exists
+
+| # | Action | Where | Unblocks |
+|---|---|---|---|
+| 13 | Upload `future-clips-site/index.html` to bucket `site` as `index-v12.html` (anonymous uploads are gone; the dashboard upload is the path). `og.png` is already in the bucket. Then tell Engineering "deploy the site": it bumps `deploy/site/build.js` to `index-v12.html` and redeploys through the Vercel MCP | Supabase → Storage → `site` → Upload | the live homepage without the Free card and with a working link preview |
+
+## Decisions the code is waiting on
+
+See `docs/DECISIONS.md` D-011 to D-018: plan assignment before Dodo, priority and HD accounting, monthly versus yearly pricing, Grow with Alex scope, "Journey", legal wording, referral gating, the quality budget.
+
+## Done (for the record)
+
+- 2026-09-11/12: site redeployed with four-tier pricing, then slides-based pricing, then the five legal pages (`index-v9`); private repos `DhanushMusunuru/future-clips` and `DhanushMusunuru/the-future-clips-site` created; schema 0004 applied; app deployed to `future-clips-app` from a hand-carried tarball (no engine).
+- 2026-09-13: `index-v10`/`v11` uploaded (`v10` is what is live); `og.png` uploaded to the bucket but not yet deployed.
+- 2026-09-18: migration 0009 applied (anonymous site-bucket uploads and waitlist inserts removed, anon table grants revoked, set-row guard made generic); the working tree committed on `main`; the Product worktree exists.

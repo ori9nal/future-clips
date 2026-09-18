@@ -1,3 +1,5 @@
+> **SUPERSEDED (2026-09-18).** Kept for history only; facts below may be stale. Current truth: `docs/ARCHITECTURE.md`, `docs/ENGINE.md`, `docs/DATABASE.md`, `docs/DECISIONS.md`, `docs/ROADMAP.md`.
+
 # COST.md
 
 What one set costs to make, measured — not estimated — on 2026-09-12 with

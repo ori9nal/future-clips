@@ -1,0 +1,57 @@
+# API
+
+Engineering owns this file. Every route runs behind `middleware.ts` unless listed as public; a request without a session gets `401 {"error":"sign in required"}` on `/api/*` and a redirect to `/login?next=` on pages. Errors are JSON `{ error, code?, detail? }`.
+
+## Routes
+
+| Route | Method | Who | Does | Needs on the host |
+|---|---|---|---|---|
+| `/api/health` | GET | public | readiness: `{ ok, ready: { db, engine, supabase, serviceRole, anthropic, openai, cronSecret, dodo }, dbStatus, host, commit, at }`; 200 when a rendering host is fully configured, 503 otherwise; booleans only | – |
+| `/api/keepalive` | GET | public (bearer `CRON_SECRET` if set) | one anon read to keep the Free project awake; stamps `app_settings.keepalive` with the service role | – |
+| `/api/me` | GET | member | `{ account: { plan, usage, periodEnd, left, cap, balance, packs }, org: { id, name, plan } }` | – |
+| `/api/sets` | GET | member | `{ sets: SetRow[] }`, the org's newest 50 | – |
+| `/api/sets` | POST | member | body `{ campaign, ask, style?, slides: n | {min,max}, lane: "batch"|"priority", hd? }`; validates, calls `fc_reserve_set`, starts the priority worker in `after()`; `201 { id, lane, started }`; refusals `402` (`FC_QUOTA`, `FC_SPEND_CAP`, `FC_NO_PLAN`, `FC_NO_HD`), `403` (`FC_NOT_MEMBER`), `400` otherwise | engine + service role to start |
+| `/api/sets/[id]` | GET | member (RLS) | `{ set: SetRow, label, slides: signedUrl[] }`; the row includes `content_json`; signed URLs last one hour | – |
+| `/api/sets/[id]` | DELETE | member (RLS) | cancel a `queued` set: `{ cancelled, released }`; `409 { cancelled: false }` once it started; released immediately when the host has the service role | service role optional |
+| `/api/sets/[id]/download` | GET | member (storage policy) | a store-only zip of `slide-N.png` plus `post.txt`; `409` until done | – |
+| `/api/cron/lanes` | GET, POST | bearer `CRON_SECRET` (refuses when unset) | one worker tick over every open, unlocked set (240 s budget): `{ ticks: [{ id, before, after, ok, note }], skipped, ms }` | engine + service role |
+| `/api/specs` | GET | member | `{ campaigns: Spec[] }` visible under RLS | – |
+| `/api/specs` | POST | platform owner | upsert a spec (`{ campaign }`) | – |
+| `/api/ingest` | POST | platform owner | `{ brief, save? }` → `{ spec, usd, saved }` via Claude | engine + Anthropic key |
+| `/api/styles` | GET | member | `?niche=` → `{ niche, styles: [{ id, label, blurb, canvas, fit }] }` | engine |
+| `/api/studio/render` | POST | platform owner | `{ campaignId, style? }` → `{ style, canvas, ms, logic, slides: "/api/file/..." }`; renders stored copy into `workDirs().studioDir` | engine; laptop or a single function instance |
+| `/api/character` | POST | platform owner | `{ campaignId, quality?, variants? }` → character sheets under `workDirs().cacheDir` | engine + OpenAI key |
+| `/api/file/[...path]` | GET | member (dev preview: no session) | a file under `workDirs().base` on this host, resolved inside it; `private, no-store` | laptop use; on Vercel `/tmp` is per instance |
+| `/api/billing/checkout` | POST | org owner | `{ plan, yearly? } | { pack }` → `{ url }` (Dodo hosted checkout); `503` until `DODO_API_KEY` is set | Dodo env |
+| `/api/billing/portal` | POST | member | `{ url }` for Dodo's customer portal; `404` without a subscription | Dodo env |
+| `/api/webhooks/dodo` | POST | Dodo (Standard Webhooks signature) | applies subscription and payment events; idempotent on `webhook-id` (`billing_events`) | service role, migration 0007 |
+| `/api/partner/payout` | POST | org owner | payout details (dormant feature; needs migration 0008) | – |
+| `/auth/callback` | GET | public | exchanges the magic-link code for a session, claims a referral cookie, redirects to `next` (same-host paths only) | – |
+| `/auth/signout` | POST | public | signs out, 303 to `/login` | – |
+
+Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove, sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.
+
+## `FC_*` codes (raised by the SQL gate, mapped to sentences in `lib/sets.ts`)
+
+| Code | Raised by | Meaning | HTTP |
+|---|---|---|---|
+| `FC_NOT_MEMBER` | `fc_reserve_set` | caller is not a member of `p_org` | 403 |
+| `FC_BAD_LANE`, `FC_BAD_RANGE` | `fc_reserve_set` | lane not batch/priority; range outside 5–10 | 400 |
+| `FC_NO_CAMPAIGN` | `fc_reserve_set` | campaign not live or not visible | 400 |
+| `FC_NO_PLAN` | `fc_reserve_set` | the workspace has no plan (there is no free tier) | 402 |
+| `FC_NO_HD` | `fc_reserve_set` | HD not on this plan | 402 |
+| `FC_QUOTA` | `fc_reserve_set` | not enough slides this period (detail says how many) | 402 |
+| `FC_SPEND_CAP` | `fc_reserve_set` | the org's spend cap would be passed | 402 |
+| `FC_READ_ONLY` | `sets_member_update_guard` | a member changed anything but `cancel_requested` | – |
+| `FC_NO_SET` | `fc_commit_set`, `fc_release_set` | unknown set id | – |
+| `FC_INVITE_ONLY` | `gate_new_user` | email not on the invite list (sign-up refused) | – |
+
+Add codes; never rename one silently. New codes appear here and in `lib/sets.ts REASONS` (Product writes the sentence).
+
+## Set row (`lib/sets.ts SetRow`)
+
+`id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status (queued | rendering | done | failed), stage, caption, cost_usd, files_json, content_json, compliance_json, error, cancel_requested, created_at, started_at, finished_at, updated_at`. `status = queued` means nothing has been spent and cancel is open; `rendering` covers every stage from the first provider call to the commit, including waiting on a provider batch; `stage` carries the machine stage (`copy:submit … render`), `stageLabel()` turns it into words (Product's).
+
+## Planned (see `docs/ROADMAP.md`)
+
+`sets.instructions` (logo, avatar, handle, free text) with a private per-org uploads bucket and an upload route; an admin "set plan" action; an idea-generation endpoint if Product asks; Storage-backed studio output on hosts.
