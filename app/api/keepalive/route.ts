@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { hasServiceRole, adminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
+import { bearerMatches } from "@/lib/secrets";
 
 /**
  * Keeps the Supabase free-tier project awake.
@@ -20,7 +21,7 @@ export const dynamic = "force-dynamic";
  */
 export async function GET(req: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.get("authorization") !== `Bearer ${secret}`) {
+  if (secret && !bearerMatches(req.headers.get("authorization") ?? "", secret)) {
     return NextResponse.json({ error: "forbidden" }, { status: 403 });
   }
   const base = process.env.NEXT_PUBLIC_SUPABASE_URL!;

@@ -31,3 +31,18 @@ test('loginError maps the invite gate and the mailer limit to sentences and stat
   assert.equal(loginError('email rate limit exceeded').status, 429);
   assert.deepEqual(loginError('Something else'), { error: 'Something else', status: 400 });
 });
+
+test('requestOrigin: the configured app URL wins in production, headers only on a laptop', () => {
+  const prev = { env: process.env.NODE_ENV, app: process.env.NEXT_PUBLIC_APP_URL };
+  process.env.NEXT_PUBLIC_APP_URL = 'https://app.thefutureclips.com/';
+  process.env.NODE_ENV = 'production';
+  assert.equal(requestOrigin(req('http://evil.internal/x', { host: 'evil.example', 'x-forwarded-host': 'evil.example' })), 'https://app.thefutureclips.com');
+  process.env.NODE_ENV = 'development';
+  assert.equal(requestOrigin(req('http://localhost:3000/x', { host: 'localhost:3000' })), 'http://localhost:3000');
+  process.env.NODE_ENV = prev.env; if (prev.app === undefined) delete process.env.NEXT_PUBLIC_APP_URL; else process.env.NEXT_PUBLIC_APP_URL = prev.app;
+});
+
+test('sameOrigin refuses Sec-Fetch-Site: cross-site even without an Origin header', () => {
+  assert.equal(sameOrigin(req('https://a.example/x', { host: 'a.example', 'sec-fetch-site': 'cross-site' })), false);
+  assert.equal(sameOrigin(req('https://a.example/x', { host: 'a.example', 'sec-fetch-site': 'same-origin', origin: 'https://a.example' })), true);
+});

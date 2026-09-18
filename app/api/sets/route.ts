@@ -1,5 +1,6 @@
 import { after } from "next/server";
 import { viewerForRequest } from "@/lib/auth";
+import { allow } from "@/lib/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import { listSets, reserveSet, ReserveError, type Lane } from "@/lib/sets";
 import { hasServiceRole } from "@/lib/supabase/admin";
@@ -28,6 +29,9 @@ export async function GET() {
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!(await allow(`sets:user:${viewer.user.id}`, 30, 600))) {
+    return Response.json({ error: "Too many requests in a short time. Wait a few minutes and try again." }, { status: 429 });
+  }
   let body: any;
   try {
     body = await req.json();

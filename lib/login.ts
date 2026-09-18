@@ -7,8 +7,14 @@ import type { NextResponse } from "next/server";
  * client, and the callback URL is built here from the request's own origin.
  */
 
-/** The public origin of this request: what the browser typed, behind Vercel's proxy too. */
+/**
+ * The public origin of this request. In production the configured app URL
+ * wins (a spoofed Host or X-Forwarded-Host must never end up in an emailed
+ * link or a checkout return URL); the headers are only trusted on a laptop.
+ */
 export function requestOrigin(req: Request): string {
+  const configured = process.env.NEXT_PUBLIC_APP_URL?.replace(/\/$/, "");
+  if (configured && process.env.NODE_ENV === "production") return configured;
   const u = new URL(req.url);
   const proto = req.headers.get("x-forwarded-proto")?.split(",")[0].trim() || u.protocol.replace(":", "");
   const host = req.headers.get("x-forwarded-host")?.split(",")[0].trim() || req.headers.get("host") || u.host;
@@ -17,8 +23,12 @@ export function requestOrigin(req: Request): string {
 
 /** A browser-sent Origin header must be this host (a cross-site POST cannot request links). */
 export function sameOrigin(req: Request): boolean {
+  const site = req.headers.get("sec-fetch-site");
+  if (site === "cross-site") return false;
   const o = req.headers.get("origin");
-  return !o || o === requestOrigin(req);
+  if (!o) return true;
+  const allowed = new Set([requestOrigin(req), `${new URL(req.url).protocol}//${req.headers.get("host") ?? ""}`]);
+  return allowed.has(o);
 }
 
 /** Where to land after sign-in: a path on this host, never another site. */

@@ -142,6 +142,8 @@ export type DodoEvent = {
     next_billing_date?: string;
     recurring_pre_tax_amount?: number;   // cents
     total_amount?: number;               // cents (payments)
+    amount?: number;                     // cents (refunds)
+    refund_id?: string;
     settlement_amount?: number;
     currency?: string;
   };

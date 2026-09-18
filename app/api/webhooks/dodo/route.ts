@@ -9,9 +9,11 @@ import { verifyWebhook, skuFor, dodoWebhookEnabled, type DodoEvent } from "@/lib
  * What each event does:
  *   subscription.active | renewed | plan_changed → plan, billing ids, period; commission for a referred org
  *   subscription.cancelled                        → billing_status 'cancelled' (plan stays until the period ends)
+ *   subscription.paused                          → billing_status 'paused'
  *   subscription.on_hold | failed                 → billing_status 'past_due'
  *   subscription.expired                          → plan 'free', billing_status 'expired'
  *   payment.succeeded                            → fc_record_sale (the provider fund); with metadata.pack → fc_credit_pack
+ *   refund.succeeded                             → the provider fund gives the share back
  * Anything else is stored and acknowledged.
  */
 export const runtime = "nodejs";
@@ -87,6 +89,11 @@ async function handle(db: ReturnType<typeof adminClient>, ev: DodoEvent): Promis
         if (error) throw error;
         return "canceled (access until period end)";
       }
+      case "subscription.paused": {
+        const { error } = await db.from("orgs").update({ billing_status: "paused", ...ids }).eq("id", orgId);
+        if (error) throw error;
+        return "paused";
+      }
       case "subscription.on_hold":
       case "subscription.failed": {
         const { error } = await db.from("orgs").update({ billing_status: "past_due", ...ids }).eq("id", orgId);
@@ -115,6 +122,17 @@ async function handle(db: ReturnType<typeof adminClient>, ev: DodoEvent): Promis
     const { error } = await db.rpc("fc_credit_pack", { p_org: orgId, p_pack: pack, p_note: `dodo ${d.payment_id ?? ""}` });
     if (error) throw error;
     return `credited ${pack}`;
+  }
+  if (ev.type === "refund.succeeded") {
+    // the provider fund gives the earmarked share back
+    const amount = (d.amount ?? d.total_amount ?? 0) / 100;
+    const refundId = d.refund_id ?? (d.payment_id ? `refund:${d.payment_id}` : null);
+    if (amount > 0 && refundId) {
+      const { error: fe } = await db.rpc("fc_record_sale", { p_org: orgId, p_payment_id: refundId, p_sku: null, p_gross_usd: -amount, p_note: `dodo refund of ${d.payment_id ?? "?"}` });
+      if (fe) console.warn(`refund not recorded in the provider fund: ${fe.message}`);
+      return `refund recorded (-$${amount.toFixed(2)})`;
+    }
+    return "refund without an amount";
   }
   return `stored ${ev.type}`;
 }
