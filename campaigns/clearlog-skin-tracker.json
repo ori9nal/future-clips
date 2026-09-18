@@ -1,0 +1,33 @@
+{
+  "id": "clearlog-skin-tracker",
+  "brand": "ClearLog",
+  "product": "Acne tracking app that scans your skin every week, scores it, finds the likely cause and builds a routine",
+  "niche": "skincare",
+  "advertiser": "ClearLog Health Ltd",
+  "agency": "Touchline Media",
+  "platforms": ["tiktok", "instagram"],
+  "payout": { "rate_usd": 1.0, "min_payout_usd": 20, "max_payout_usd": 250, "budget_total_usd": 8000, "budget_remaining_usd": 8000, "review_days": 14, "platforms": ["tiktok", "instagram"] },
+  "requirements": {
+    "min_slides": 6, "max_slides": 8, "aspect": "9:16", "required_mention": null, "must_show_app": true,
+    "app_placement": [ { "when_slides": [6, 7], "on_slides": [4] }, { "when_slides": [8, 9], "on_slides": [4, 5] } ],
+    "first_slide_must_be_hook": true, "language": "English", "audience_tier1_pct": null
+  },
+  "rules": {
+    "required_phrase": "ClearLog", "never_bare": null,
+    "banned_claims": ["clears acne", "cures acne", "clear skin in 30 days", "dermatologist approved", "medical grade", "ClearLog App", "the ClearLog"],
+    "banned_topics": ["medical diagnosis or treatment advice", "prescription medication", "before-and-after guarantees", "negative framing of a named brand or person", "invented scores or percentages"],
+    "tone": "A young woman telling what she changed, in order, in her own words; specific and unpolished, never a claim about results for anyone else.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "A moment in time (a date line, a day something happened) or small habits that hold your skin back. First person.",
+    "angles": ["a story in order: the day it got bad, what she changed (food, routine, sleep), the app once, the after", "small habits that hold your skin back (touching your face, sleeping late, skipping water, changing products weekly)", "what a weekly scan showed her"],
+    "notes": ["ClearLog appears once: what the scan showed or what the routine builder did", "no invented scores or percentages on the slides", "the closer is the after, one or two lines"]
+  },
+  "assets": {
+    "palette": ["#F2C4B6", "#1B1B1F", "#FFF7F3"],
+    "app_store": { "title": "ClearLog: Skin Tracker", "subtitle": "Weekly scans, a routine that fits", "developer": "ClearLog Health Ltd", "theme": "light" },
+    "mascot": null, "look": "phone"
+  },
+  "content": { "style": "feed" }
+}

@@ -37,6 +37,8 @@ Both chats keep this file current. Read it at the start of every session after `
 - Still to verify on a paid gym and trading round when the owner wants: F24 (grip regex) and F25 (apps-count rule).
 - Verify the numbering rule (D-033) and the no-plan state on the real app once the service role key exists (OWNER-ACTIONS 1) with `tools/dev-login.mjs`.
 
+- **2026-09-18 (third pass, the owner's second reference batch):** four scene families with their own subjects and camera lines (sport, fashion, life, everyday), the soft-shadow centred caption look at 9:16, the App Store card, the campaign's language honoured, and the numbers rule scoped to the families that use numbers — QUALITY.md §3.12–3.14, D-048…D-051, rounds 26–29.
+
 ### Next
 
 - Instructions UI in the composer once `sets.instructions` and the upload route exist (PRODUCT.md §3, R3).
@@ -113,6 +115,7 @@ File here with the exact field, endpoint or bug, a repro and a screenshot path. 
 | R9 | 2026-09-18 | Campaign payload for the picker: keep `guidance.angles`, add `assets.app_icon` / `app_screen` presence flags and `content.style`. Why: The picker will show "shows an app icon" and a plain-English format word instead of "photo feed". | open | |
 | R10 | 2026-09-18 | Owner environment: sign in to the Claude in Chrome extension on this machine so the Instagram reference pass can page through full posts (list_connected_browsers returned none). Why: The owner asked for the growithalex posts to be read in Chrome; only the public grid was reachable. | done: the owner imported Instagram cookies 2026-09-18; the in-app browser is signed in | |
 | R11 | 2026-09-18 | Persist per-call provider cost in the lane checkpoint: `s.copy.entries` (label, in, out, usd) from `engine/providers/claude.mjs` and `s.art.entries` (label, out, usd) from `engine/providers/image.mjs`, in both lanes (the batch collectors know the per-line usage too). Why: the owner wants the Claude and image cost per slide for every set; today `tools/_lane-costs.mjs` (scratch, priority only) reads the in-process ledgers after the run. | open | |
+| R13 | 2026-09-18 | **App Store card fields on the campaign** (D-049): `assets.app_store { title, subtitle, developer, rating, ratings, age, category, theme }` in the ingest shape and the admin campaign form, plus `assets.app_icon` (png/jpg ≤ 1 MB, square) uploaded to the assets bucket and passed to the engine as a path. Why: the feed style draws the App Store card from these; without them it falls back to the brand name, the product line and a monogram tile. | open | |
 | R12 | 2026-09-18 | The single-image format (D-044, PRODUCT.md §2.7): `sets.format text default 'slideshow'` (`slideshow` \| `single`), `fc_reserve_set` accepts `p_min = p_max = 1` when the format is `single`, the worker passes `format` to `engine/lanes.mjs newState`, the download zip is `image.png` + `post.txt`. Product writes the copy shape and the frame. | open | |
 
 ## Requests: Engineering → Product

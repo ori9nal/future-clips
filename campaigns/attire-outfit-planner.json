@@ -1,0 +1,33 @@
+{
+  "id": "attire-outfit-planner",
+  "brand": "Attire",
+  "product": "Outfit planner app that scans your closet and builds looks from the clothes you already own",
+  "niche": "fashion",
+  "advertiser": "Attire Studio Inc.",
+  "agency": "Touchline Media",
+  "platforms": ["tiktok", "instagram"],
+  "payout": { "rate_usd": 1.2, "min_payout_usd": 20, "max_payout_usd": 300, "budget_total_usd": 10000, "budget_remaining_usd": 10000, "review_days": 14, "platforms": ["tiktok", "instagram"] },
+  "requirements": {
+    "min_slides": 6, "max_slides": 8, "aspect": "9:16", "required_mention": null, "must_show_app": true,
+    "app_placement": [ { "when_slides": [6, 7], "on_slides": [4] }, { "when_slides": [8, 9], "on_slides": [4, 5] } ],
+    "first_slide_must_be_hook": true, "language": "English", "audience_tier1_pct": null
+  },
+  "rules": {
+    "required_phrase": "Attire", "never_bare": null,
+    "banned_claims": ["look rich", "look expensive on a budget", "dupe", "replica", "Attire App", "AttireAI", "the Attire"],
+    "banned_topics": ["body shaming", "negative framing of a named brand or influencer", "counterfeits", "prices or discounts", "invented user numbers"],
+    "tone": "A young woman sharing what actually makes an outfit look put together, plain sentences, warm, never a sales pitch.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "A count plus the promise: easy ways to look classy and put together, fashion mistakes that cheapen a look, outfit ideas. Sentence case.",
+    "angles": ["easy ways to look classy and put together (fit, neat hair, curated pieces, skin and scent, nails, sunglasses, posture)", "fashion mistakes that cheapen a look (wrinkles, over-accessorising, loud branding, clashing aesthetics, cheap-looking fabrics, poor fit)", "old money outfits"],
+    "notes": ["Attire appears once as a tip: an app like Attire builds the combos from what you already own", "the closer is the last numbered item, then save for later / follow for more", "old-money palette: cream, camel, black, brown"]
+  },
+  "assets": {
+    "palette": ["#2E2A26", "#C8B4A0", "#F4F1EC"],
+    "app_store": { "title": "Attire: Outfit Maker, Planner", "subtitle": "Your closet, styled", "developer": "Attire Studio Inc.", "theme": "dark" },
+    "mascot": null, "look": "phone"
+  },
+  "content": { "style": "feed" }
+}

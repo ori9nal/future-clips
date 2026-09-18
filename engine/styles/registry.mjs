@@ -63,7 +63,9 @@ export function stylesFor(niche) {
 export async function render({ spec, root, styleId, outDir, cacheDir }) {
   const style = byId(styleId);
   if (!style) throw new Error(`unknown style "${styleId}"`);
-  const { w, h } = style.canvas;
+  // a style may size its canvas per campaign (feed: 9:16 for the families
+  // whose references are all 9:16, 4:5 for the gym and trading families)
+  const { w, h } = style.canvasFor?.(spec) ?? style.canvas;
   fs.mkdirSync(outDir, { recursive: true });
   // A shorter set rendered over a longer one leaves the old tail behind, and a
   // stale slide-7 then ships with a six-slide post. Clear the slides first.
@@ -94,5 +96,5 @@ export async function render({ spec, root, styleId, outDir, cacheDir }) {
   // Pixels only: no C2PA manifest, no EXIF, no text chunks. Throws if a
   // renderer ever starts leaking provider metadata into a slide.
   assertClean(files);
-  return { files, canvas: style.canvas, style: style.id, artUsd: ctx.artUsd ?? 0 };
+  return { files, canvas: { w, h }, style: style.id, artUsd: ctx.artUsd ?? 0 };
 }

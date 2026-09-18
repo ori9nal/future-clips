@@ -20,7 +20,8 @@
 // photo, with a white pill naming it underneath (sets 01, 04, 14).
 import fs from 'node:fs';
 import path from 'node:path';
-import { rect, text, paragraph, plate, image, FACES } from './kit.mjs';
+import { rect, text, paragraph, plate, image, line, esc, FACES } from './kit.mjs';
+import { familyFor, SOFT_FAMILIES } from '../scenes.mjs';
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 import { breakToFit } from '../caption.mjs';
@@ -46,6 +47,35 @@ const OUTLINE = 0.095;
  * the measured 5–7 px instead of growing with the type.
  */
 const SIZE = 1.4;
+
+/**
+ * The SOFT look (docs/QUALITY.md §3.12–3.15; the owner's 2026-09-18 batch,
+ * 11 sets / 68 slides: football, fashion, skincare, height). The platform's
+ * own caption — white, NO outline, a soft drop shadow, sentence case — and
+ * the block dead-centre: top 0.47 / bottom 0.53 H on every one-line item
+ * measured, 0.43–0.59 on five-liners. Line bands at 1080 wide: 47–58 px on
+ * the football sets, 28–36 px on the fashion sets, 47 px on the height set.
+ * Font sizes per family below (a band is ≈ 0.95 em); the hook runs 12 % up.
+ */
+const SOFT_SIZES = {
+  sport:    { head: 48, body: 36 },
+  fashion:  { head: 38, body: 31 },
+  life:     { head: 42, body: 34 },
+  everyday: { head: 42, body: 34 },
+};
+const SOFT_DEFS = '<defs><filter id="softsh" x="-10%" y="-40%" width="120%" height="180%">' +
+  '<feGaussianBlur in="SourceAlpha" stdDeviation="3.2"/><feOffset dx="0" dy="2" result="b"/>' +
+  '<feFlood flood-color="#000000" flood-opacity="0.82"/><feComposite in2="b" operator="in"/>' +
+  '<feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>';
+// the caption faces hold no emoji glyphs; the send-off's 📌 and 💜 are dropped rather than drawn as boxes
+const EMOJI_G = /[\p{Extended_Pictographic}\u{FE0F}\u{200D}\u{20E3}\u{1F3FB}-\u{1F3FF}]/gu;
+const deEmoji = (s) => String(s ?? '').replace(EMOJI_G, '').replace(/\s{2,}/g, ' ').trim();
+/** A five-point star path, for the App Store card's rating row. */
+const star = (cx, cy, r, fill) => {
+  const pts = [];
+  for (let k = 0; k < 10; k++) { const a = -Math.PI / 2 + (k * Math.PI) / 5; const rr = k % 2 ? r * 0.45 : r; pts.push(`${(cx + rr * Math.cos(a)).toFixed(1)},${(cy + rr * Math.sin(a)).toFixed(1)}`); }
+  return `<polygon points="${pts.join(' ')}" fill="${fill}"/>`;
+};
 
 /**
  * Faces that hold up as a thin-outlined caption over a photo. Every pairing's
@@ -76,13 +106,17 @@ export default {
   id: 'feed',
   label: 'Feed',
   canvas: { w: 1080, h: 1440 },
-  niches: ['trading', 'finance', 'fitness', 'gym', 'lifestyle', 'supplements', 'crypto'],
+  niches: ['trading', 'finance', 'fitness', 'gym', 'lifestyle', 'supplements', 'crypto', 'football', 'soccer', 'fashion', 'skincare'],
+  /** 9:16 for the soft families (every one of their references is 9:16); 4:5 for gym and trading. */
+  canvasFor(spec) { return SOFT_FAMILIES.has(familyFor(spec?.niche)) ? { w: 1080, h: 1920 } : this.canvas; },
   blurb: 'What the niche actually posts: full-bleed phone photography, small outlined captions, numbered countdown, app icon on a pill.',
 
   async slides(spec, ctx) {
     const { sharp, outDir, root } = ctx;
     const C = spec.content;
-    const W = 1080, H = 1440;
+    const family = familyFor(spec.niche);
+    const soft = SOFT_FAMILIES.has(family);
+    const W = 1080, H = soft ? 1920 : 1440;
     const M = 56;
     const look = spec.assets?.look ?? 'cinematic';
 
@@ -121,6 +155,97 @@ export default {
      * instead of the type growing bigger. `face` is a ROLE — head or body —
      * resolved through the set's pairing, never a font name.
      */
+    const SZ = SOFT_SIZES[family] ?? SOFT_SIZES.everyday;
+    const softPx = (kind) => (kind === 'hook' ? Math.round(SZ.head * 1.12) : kind === 'body' ? SZ.body : kind === 'cta' ? Math.round(SZ.body * 0.92) : SZ.head);
+    /** One soft block: centred lines under a drop shadow, no outline. `dry` measures only. */
+    const softCaption = (lines, cy, { kind = 'head', fill = '#FFFFFF', lh = 1.32, dry = false } = {}) => {
+      // the fashion references run the body a weight lighter than the heading
+      const key = kind === 'body' || kind === 'cta' ? (family === 'fashion' ? 'phoneMed' : BODY) : HEAD;
+      const f = FACES[key];
+      const ff = loadFace(f.file);
+      const size = softPx(kind);
+      const wrapped = (lines ?? []).map(deEmoji).filter(Boolean).flatMap((l) => breakToFit(ff, l, Math.round(W * 0.74), size, { max: 6 }));
+      const height = wrapped.length * size * lh;
+      if (dry) return { svg: '', height, bottom: cy + height };
+      let y = cy + size * (ff.capHeight / ff.upm);
+      let svg = '';
+      for (const l of wrapped) {
+        svg += `<text x="${W / 2}" y="${Math.round(y)}" text-anchor="middle" filter="url(#softsh)" ` +
+          `font-family="${f.family}" font-weight="${f.weight}"${f.style ? ` font-style="${f.style}"` : ''} font-size="${size}" ` +
+          `fill="${fill}">${esc(l)}</text>`;
+        y += size * lh;
+      }
+      return { svg, height, bottom: cy + height };
+    };
+    /** Parts stacked with a gap, centred on `cy`, or hung from it with anchor 'top'. */
+    const softStack = (parts, cy, { anchor = 'centre', gap = 22 } = {}) => {
+      const live = parts.filter((p) => (p.lines ?? []).some((l) => deEmoji(l)));
+      const heights = live.map((p) => softCaption(p.lines, 0, { kind: p.kind, dry: true }).height);
+      const total = heights.reduce((a, b) => a + b, 0) + gap * Math.max(0, live.length - 1);
+      const top = anchor === 'top' ? cy : Math.round(cy - total / 2);
+      let y = top, svg = '';
+      live.forEach((p, k) => { svg += softCaption(p.lines, y, { kind: p.kind }).svg; y += heights[k] + gap; });
+      return { svg, top, bottom: y - gap };
+    };
+    /**
+     * The App Store card (four of the five app slides in the owner's 2026-09-18
+     * batch: Footly twice, Inspoy twice): the store's own product card — icon,
+     * name, subtitle, developer, a GET pill, and the ratings / age / category
+     * row when the campaign supplies `assets.app_store` — drawn over an
+     * ordinary frame at 0.66 W, never a phone on a bench and never an icon on a pill.
+     */
+    const appCard = (top) => {
+      const st = spec.assets?.app_store ?? {};
+      const title = st.title ?? spec.rules?.required_phrase ?? spec.brand ?? 'App';
+      const sub = st.subtitle ?? String(spec.product ?? '').split(/,| that | which | — |:/)[0].trim();
+      const dev = st.developer ?? spec.advertiser ?? '';
+      const dark = (st.theme ?? 'dark') !== 'light';
+      const cw = Math.round(W * 0.66), cx = Math.round((W - cw) / 2), pad = 28, ic = 116;
+      const bg = dark ? '#151517' : '#FFFFFF', fg = dark ? '#FFFFFF' : '#111111', mute = dark ? '#98989F' : '#6E6E73';
+      const stats = !!(st.rating || st.age || st.category);
+      const ch = pad * 2 + ic + (stats ? 126 : 0);
+      let s = rect(cx, top, cw, ch, { r: 30, fill: bg, op: 0.95 });
+      const ix = cx + pad, iy = top + pad;
+      const iconFile = spec.assets?.app_icon ? path.join(root, spec.assets.app_icon) : null;
+      if (iconFile && fs.existsSync(iconFile)) s += `<g clip-path="inset(0 round 26px)">${image(iconFile, ix, iy, ic, ic)}</g>`;
+      else {
+        s += rect(ix, iy, ic, ic, { r: 26, fill: spec.assets?.palette?.[0] ?? '#2A6DF4' });
+        s += text('phoneBold', ix + ic / 2, iy + ic / 2 + 22, (title.match(/[A-Za-z]/) ?? ['A'])[0].toUpperCase(), { size: 64, fill: '#FFFFFF', anchor: 'middle' });
+      }
+      const pw = 104, ph = 44;
+      const tx = ix + ic + 22, tw = cw - pad * 2 - ic - 22 - pw - 16;
+      const tf = loadFace(FACES.phoneSemi.file), mf = loadFace(FACES.phoneMed.file);
+      const fitOne = (face, str, w, size) => { let t = String(str); while (t.length > 3 && layoutWidth(face, t, size) > w) t = t.slice(0, -2).trimEnd() + '…'; return t; };
+      const tl = breakToFit(tf, title, tw, 32, { max: 2 });
+      let ty = iy + 30;
+      for (const l of tl) { s += text('phoneSemi', tx, ty, l, { size: 32, fill: fg }); ty += 37; }
+      if (sub) { s += text('phoneMed', tx, ty + 1, fitOne(mf, sub, tw, 24), { size: 24, fill: mute }); ty += 31; }
+      if (dev) s += text('phoneMed', tx, ty + 1, fitOne(mf, dev, tw, 22), { size: 22, fill: mute });
+      const px = cx + cw - pad - pw, py = iy + Math.round(ic / 2 - ph / 2);
+      s += rect(px, py, pw, ph, { r: 22, fill: '#0A84FF' });
+      s += text('phoneBold', px + pw / 2, py + 31, st.cta ?? 'GET', { size: 23, fill: '#FFFFFF', anchor: 'middle', ls: 1 });
+      if (stats) {
+        const sy = iy + ic + 22;
+        s += line(cx + pad, sy, cx + cw - pad, sy, { stroke: dark ? '#2C2C2E' : '#E5E5EA', sw: 2 });
+        const colW = (cw - pad * 2) / 3;
+        const col = (k, a, b, c) => {
+          const mx = Math.round(cx + pad + colW * k + colW / 2);
+          let o = text('phoneMed', mx, sy + 30, a, { size: 17, fill: mute, anchor: 'middle', ls: 1 });
+          if (b) o += text('phoneBold', mx, sy + 72, b, { size: 34, fill: fg, anchor: 'middle' });
+          if (typeof c === 'string') o += text(b ? 'phoneMed' : 'phoneSemi', mx, b ? sy + 100 : sy + 76, fitOne(mf, c, colW - 12, b ? 19 : 22), { size: b ? 19 : 22, fill: b ? mute : fg, anchor: 'middle' });
+          else if (c) o += c(mx);
+          return o;
+        };
+        const n = st.rating ? Math.max(1, Math.min(5, Math.round(+st.rating))) : 0;
+        const stars = (mx) => { let o = ''; for (let k = 0; k < 5; k++) o += star(mx - 40 + k * 20, sy + 96, 8, k < n ? mute : (dark ? '#3A3A3C' : '#D1D1D6')); return o; };
+        s += col(0, st.ratings ? `${st.ratings} RATINGS` : 'RATING', st.rating ?? '', st.rating ? stars : '');
+        s += col(1, 'AGE', st.age ?? '4+', 'Years');
+        s += col(2, 'CATEGORY', '', st.category ?? '');
+      }
+      return { svg: s, bottom: top + ch };
+    };
+    const base = (f) => [image(f, 0, 0, W, H), ...(soft ? [SOFT_DEFS] : [])];
+
     const caption = (lines, cy, { size = 40, face = 'head', fill = '#FFFFFF', lh = 1.24, boost = 0 } = {}) => {
       const key = face === 'body' ? BODY : HEAD;
       const f = FACES[key];
@@ -254,9 +379,15 @@ export default {
     };
 
     /* hook — one short block wherever the frame is calm, nothing else */
-    {
+    if (soft) {
+      // dead-centre: every hook in the 2026-09-18 batch sits at 0.41–0.53 H
       const f = await frame(C.hook.photo, 1);
-      const s = [image(f, 0, 0, W, H)];
+      const s = base(f);
+      s.push(softStack([{ lines: C.hook.lines ?? [], kind: 'hook' }, { lines: C.hook.sub ?? [], kind: 'body' }], Math.round(H * 0.50)).svg);
+      out.push(s.join(''));
+    } else {
+      const f = await frame(C.hook.photo, 1);
+      const s = base(f);
       const top = await quietBand(f, [0.24, 0.32, 0.40, 0.48], Math.round(H * 0.22));
       const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.22));
       if (scrim) s.push(rect(0, Math.max(0, top - 60), W, Math.round(H * 0.32), { fill: '#000000', op: scrim }));
@@ -277,15 +408,30 @@ export default {
     // one of the ranked apps and is numbered like the rest — set-01 runs
     // "4. Forex Factory … 1. The Edge X", set-14 "1. Webull, 2. TradeLens,
     // 3. Stocktwits". Round 2 (2026-09-18) rendered 4, 3, [TradeLens App], 1.
-    const rankable = C.ranked.filter((r) => !r.screen && !r.bonus);
+    const rankable = C.ranked.filter((r) => !r.screen && !r.bonus && !r.card);
     let remaining = rankable.length + (C.closerRank ? 1 : 0);
     for (let i = 0; i < C.ranked.length; i++) {
       const item = C.ranked[i];
-      const isBonus = !!item.screen || !!item.bonus;
+      const isBonus = !!item.screen || !!item.bonus || !!item.card;
       // a hand-numbered set uses the model's numbers and nothing else
       const hand = C.ranked.some((r) => r.rank != null);
       const rank = hand ? item.rank : isBonus ? 0 : numbering === 'countdown' ? remaining-- : rankable.length - --remaining;
       const label = (numbering === 'none' && !hand) || isBonus || !rank ? item.name : `${rank}. ${item.name}`;
+
+      if (soft) {
+        const f = await frame(item.photo, i + 2);
+        const s = base(f);
+        if (item.card) {
+          // the App Store card high in the frame and the "Bonus" line under it
+          const card = appCard(Math.round(H * 0.31));
+          s.push(card.svg);
+          s.push(softStack([{ lines: [label], kind: 'head' }, { lines: item.lines ?? [], kind: 'body' }], card.bottom + 84, { anchor: 'top' }).svg);
+        } else {
+          s.push(softStack([{ lines: [label], kind: 'head' }, { lines: item.lines ?? [], kind: 'body' }], Math.round(H * 0.50)).svg);
+        }
+        out.push(s.join(''));
+        continue;
+      }
 
       const appPhoto = item.screen && item.photo && path.isAbsolute(String(item.photo)) && fs.existsSync(String(item.photo)) ? String(item.photo) : null;
       if (appPhoto) {
@@ -294,7 +440,7 @@ export default {
         // under: "PRO TIP / Track your lifts … / stop guessing and start
         // tracking" is set 08's app slide, over a phone on the gym floor.
         const f = await frame(appPhoto, i + 2);
-        const s = [image(f, 0, 0, W, H)];
+        const s = base(f);
         const top = await quietBand(f, [0.05, 0.09, 0.13], Math.round(H * 0.22));
         const { boost } = await contrastAt(f, top - 20, Math.round(H * 0.22));
         const hd = caption([label], top, { size: 44, boost });
@@ -327,7 +473,7 @@ export default {
       }
 
       const f = await frame(item.photo, i + 2);
-      const s = [image(f, 0, 0, W, H)];
+      const s = base(f);
 
       if (item.icon) {
         // app-icon slide: icon + pill, no heading above it
@@ -368,12 +514,25 @@ export default {
     }
 
     /* closer */
-    {
+    if (soft) {
+      const f = await frame(C.closer.photo, total);
+      const s = base(f);
+      const closerLines = C.closerRank && C.closer.lines.length ? [`${C.closerRank}. ${C.closer.lines[0]}`, ...C.closer.lines.slice(1)] : C.closer.lines;
+      const parts = [{ lines: closerLines.slice(0, 1), kind: 'head' }, { lines: closerLines.slice(1), kind: 'body' }, { lines: C.closer.cta ? [C.closer.cta] : [], kind: 'cta' }];
+      if (C.closer.card) {
+        const card = appCard(Math.round(H * 0.31));
+        s.push(card.svg);
+        s.push(softStack(parts, card.bottom + 84, { anchor: 'top' }).svg);
+      } else {
+        s.push(softStack(parts, Math.round(H * 0.50)).svg);
+      }
+      out.push(s.join(''));
+    } else {
       const closerAppPhoto = C.closer.screen && C.closer.photo && path.isAbsolute(String(C.closer.photo)) && fs.existsSync(String(C.closer.photo)) ? String(C.closer.photo) : null;
       if (closerAppPhoto) {
         // the app on the closer, photographed on a phone (see the ranked app slide)
         const f = await frame(closerAppPhoto, total);
-        const s = [image(f, 0, 0, W, H)];
+        const s = base(f);
         const top = await quietBand(f, [0.05, 0.09, 0.13], Math.round(H * 0.22));
         const { boost } = await contrastAt(f, top - 20, Math.round(H * 0.22));
         const c = caption(C.closer.lines, top, { size: 44, boost });
@@ -388,7 +547,7 @@ export default {
         out.push(s.join(''));
       } else {
         const f = await frame(C.closer.photo, total);
-        const s = [image(f, 0, 0, W, H)];
+        const s = base(f);
         const top = await quietBand(f, [0.24, 0.34, 0.44, 0.54], Math.round(H * 0.24));
         const { boost, scrim } = await contrastAt(f, top - 20, Math.round(H * 0.24));
         if (scrim) s.push(rect(0, Math.max(0, top - 80), W, Math.round(H * 0.40), { fill: '#000000', op: scrim }));

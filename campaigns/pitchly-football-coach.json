@@ -1,0 +1,33 @@
+{
+  "id": "pitchly-football-coach",
+  "brand": "Pitchly",
+  "product": "AI football coach app that tracks your training, nutrition and sleep and builds a weekly plan around your position",
+  "niche": "football",
+  "advertiser": "Pitchly Labs Ltd",
+  "agency": "Touchline Media",
+  "platforms": ["tiktok", "instagram"],
+  "payout": { "rate_usd": 1.0, "min_payout_usd": 20, "max_payout_usd": 300, "budget_total_usd": 12000, "budget_remaining_usd": 12000, "review_days": 14, "platforms": ["tiktok", "instagram"] },
+  "requirements": {
+    "min_slides": 6, "max_slides": 8, "aspect": "9:16", "required_mention": null, "must_show_app": true,
+    "app_placement": [ { "when_slides": [6, 7], "on_slides": [4] }, { "when_slides": [8, 9], "on_slides": [4, 5] } ],
+    "first_slide_must_be_hook": true, "language": "English", "audience_tier1_pct": null
+  },
+  "rules": {
+    "required_phrase": "Pitchly", "never_bare": null,
+    "banned_claims": ["guaranteed pro contract", "scouts will find you", "get signed in 30 days", "Pitchly App", "PitchlyAI", "the Pitchly"],
+    "banned_topics": ["injury or medical advice", "supplements or steroids", "negative framing of a named player, club or coach", "earnings from football", "invented statistics"],
+    "tone": "A young player talking to other players, plain and direct, no coach-speak and no hype.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "A count plus a consequence: things killing your career, habits holding you back, ways to progress. Never a question.",
+    "angles": ["habits that hold a player back (sleep, junk food, only training when motivated, skipping recovery, comparing yourself)", "ways to make quick progress (train daily and track it, nutrition, analyse your game, sleep, remember someone works harder)", "what a pro does that you don't"],
+    "notes": ["Pitchly appears once, mid-set, as a Bonus slide: what it tracked or showed", "no readable club crests, names or numbers on shirts", "the closer is the last numbered item"]
+  },
+  "assets": {
+    "palette": ["#1B6B3A", "#0B0C10", "#F2F2F2"],
+    "app_store": { "title": "Pitchly: AI Football Coach", "subtitle": "Training, nutrition, recovery", "developer": "Pitchly Labs Ltd", "rating": "4.9", "ratings": "1.2K", "age": "9+", "category": "Health & Fitness" },
+    "mascot": null, "look": "phone"
+  },
+  "content": { "style": "feed" }
+}

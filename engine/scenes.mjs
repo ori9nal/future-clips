@@ -43,6 +43,20 @@ export const CAMERA = {
   food: 'Taken on an iPhone in a real kitchen, straight off the camera roll, flash on or the ceiling light overhead, shot from standing height at a slight angle, the counter cluttered (a pack of rice, a kitchen roll, a phone, a spoon on the side), plates that do not match, unedited. Not food photography: no styling, no soft window light, no bokeh, no garnish, no top-down flat lay, no colour grade.',
 };
 
+/**
+ * 2026-09-18, the owner's second reference batch (docs/QUALITY.md §3.12–3.15):
+ * four football sets (26 slides), three fashion sets (20), three skincare
+ * stories (18), one height set (4). Half the sport frames are a photographer's
+ * match shot, the rest are the phone on the ground; fashion is daylight on
+ * pale stone; the skin family is a woman's bathroom and car; "everyday" is the
+ * bank every other niche falls to instead of the trading bank (F26).
+ */
+CAMERA.sport = 'Taken on an iPhone at training or from the stands, straight off the camera roll: floodlights or flat daylight, the pitch or court filling the lower half, a slight tilt, kit and boots that have been worn, a bag or a bottle on the grass. Not a photoshoot: no studio light, no bokeh, no golden-hour glow, no symmetry, no smiling at the lens, no logos, no readable names or numbers on shirts.';
+CAMERA.match = 'A sports photographer\'s frame from the touchline: long lens, a floodlit stadium or a grey afternoon, the crowd a blur behind, the player sharp and mid-movement, a little motion blur on the ball and the boots, the shirt a plain colour with no readable name, number, crest or sponsor. Not a poster, not a render, not a video game.';
+CAMERA.fashion = 'Taken on an iPhone by a friend or in a mirror, daylight, straight off the camera roll: pale stone buildings, a shopfront, a hallway mirror, the light flat and slightly overexposed, a coffee or a bag in hand, muted colours (cream, camel, black, brown, white), no logos readable. Not a campaign shoot: no studio light, no bokeh, no golden-hour glow, no symmetry, no smiling at the lens, no retouching.';
+CAMERA.life = 'Taken on an iPhone, straight off the camera roll: a bathroom or hallway mirror, a car seat, a bed, a kitchen counter, the phone often visible in the mirror, front-camera softness, ordinary home light with a slight yellow cast, real skin with texture and a blemish or two. Not a photoshoot: no studio light, no bokeh, no retouching, no smiling at the lens, no perfect skin.';
+CAMERA.everyday = 'Taken on an iPhone, straight off the camera roll, daylight or ordinary room light: a desk, a kitchen table, a street, a café window, a sofa, the framing loose and slightly tilted, a hand or a shoulder at the edge, ordinary clutter (a charger, a cup, keys, a bag). Not a photoshoot and not a render: no studio light, no bokeh, no HDR glow, no symmetry, no faces to the camera.';
+
 /** Kept for importers; the gym camera line under its old name. */
 export const PHONE_LOOK = CAMERA.gym;
 
@@ -93,6 +107,41 @@ export const MISTAKES = {
     'the phone is too close and the near edge is soft',
     'a kitchen roll and a pack of rice in the background',
     'shot standing, looking down at an angle, not from directly above',
+  ],
+  sport: [
+    'the horizon of the pitch tilts a few degrees',
+    'the floodlights bloom and the sky goes black',
+    'a bottle and a bag on the grass in the foreground',
+    'the framing is loose, more ground than needed',
+    'a bit of the phone case in the corner',
+    'motion blur on the moving leg',
+    'another player out of focus in the background',
+  ],
+  fashion: [
+    'the light is flat and a touch overexposed',
+    'the building behind tilts a few degrees',
+    'a stranger walks past in the background',
+    'the phone and the fingers cover part of the face in the mirror',
+    'the framing is loose, cut off at the shins',
+    'a coffee cup or a bag at the edge of the frame',
+    'the window behind is completely blown out',
+  ],
+  life: [
+    'the mirror has a smudge and a water spot',
+    'the front camera is a little soft and warm',
+    'the bathroom light casts a yellow tint',
+    'the phone covers part of the face',
+    'the framing is loose and a little tilted',
+    'a towel or a bottle in the corner of the frame',
+    'the window behind is blown out',
+  ],
+  everyday: [
+    'the table tilts a few degrees',
+    'a thumb at the edge of the frame',
+    'the window is blown out',
+    'a charger cable and a cup in the foreground',
+    'the framing is loose and casual',
+    'the near edge is too close to the lens and goes soft',
   ],
 };
 
@@ -327,12 +376,141 @@ export const BANK = {
   ],
 };
 
-/** Map a campaign niche onto a bank. Unknown niches get trading, the broadest. */
-export function bankFor(niche) {
+/* ── the 2026-09-18 families: sport, fashion, life, everyday ─────────── */
+
+/** The sport's nouns, so one bank serves football, soccer and basketball. */
+export const SPORTS = {
+  football:   { player: 'A young player', kit: 'a plain training kit', field: 'pitch', ground: 'the grass', ball: 'football', balls: 'footballs', shoes: 'football boots', goal: 'a goal' },
+  basketball: { player: 'A tall young player', kit: 'a plain jersey and shorts', field: 'court', ground: 'the hardwood', ball: 'basketball', balls: 'basketballs', shoes: 'basketball shoes', goal: 'a hoop' },
+};
+export const sportFor = (niche) => (/basketball|hoop|dunk|taller|height/i.test(String(niche ?? '')) ? SPORTS.basketball : SPORTS.football);
+
+// FOOTBALL / SOCCER / BASKETBALL (four owner sets, 26 slides): the player's
+// own boots on the grass, cones on an empty pitch, a bowl of breakfast,
+// recovery boots, an indoor turf gym — and a photographer's match frame in
+// between (`match: true` swaps the camera line). Nobody smiles at the lens.
+BANK.sport = [
+  { kind: 'boots',    scene: (S) => `Looking down from his own eye level at his own ${S.shoes} on ${S.ground}, a ${S.ball} beside them, a line of the ${S.field} across the frame, no face` },
+  { kind: 'cones',    scene: (S) => `An empty ${S.field} in flat daylight with training cones, a rebounder net and a bag of ${S.balls} left by the touchline, nobody in the frame` },
+  { kind: 'back',     scene: (S) => `${S.player} from behind in ${S.kit}, walking across the ${S.field} towards ${S.goal}, a plain number on the back, floodlights on, shot on a phone from ten metres`, match: true },
+  { kind: 'night',    scene: (S) => `An empty floodlit ${S.field} at night, ${S.goal} and the fence, the lights blooming, nobody in the frame` },
+  { kind: 'gym',      scene: () => `An indoor performance gym with a strip of artificial turf, a rack of kettlebells and a sled, ceiling lights on, nobody in the frame` },
+  { kind: 'recovery', scene: () => `Looking down at his own legs in black compression recovery boots on a treatment couch, a TV on the wall of the physio room, no face` },
+  { kind: 'bowl',     scene: () => `A bowl of yoghurt, granola and berries held in one hand over a kitchen counter, shot looking down, no face` },
+  { kind: 'dribble',  scene: (S) => `${S.player} in ${S.kit} mid-dribble around a training pole on a ${S.field}, head down over the ${S.ball}`, match: true },
+  { kind: 'stands',   scene: (S) => `From the stands: a ${S.field} under floodlights during a game, small players below, the backs of a few heads in the foreground` },
+  { kind: 'run',      scene: (S) => `${S.player} from behind running with the ${S.ball} at his feet on a ${S.field} in low sun, in ${S.kit}, shot from behind`, match: true },
+  { kind: 'sit',      scene: (S) => `${S.player} sat on ${S.ground} after training with his back against a post, ${S.shoes} off beside him, head down, in ${S.kit}` },
+  { kind: 'bag',      scene: (S) => `A kit bag open on ${S.ground} with ${S.shoes}, shin pads, a bottle and a ${S.ball} spilling out, shot looking down` },
+  { kind: 'tunnel',   scene: (S) => `${S.player} in ${S.kit} sat on the floor of a stadium tunnel, head down, the ${S.field} bright at the end of it`, match: true },
+];
+
+// FASHION / OUTFITS (three owner sets, 20 slides, all one app): one young
+// woman, daylight on pale stone, a hallway mirror, a boutique shopfront, a
+// marble vanity, her nails on a car seat. Cream, camel, black, brown.
+BANK.fashion = [
+  { kind: 'street',   scene: () => 'Shot by a friend from a few metres away: she walks down a pale stone street in a long camel coat and sunglasses, a coffee in one hand, head turned to the side, leaves on the pavement' },
+  { kind: 'mirror',   scene: () => 'Mirror selfie in a hallway: a fitted cream dress, the phone held up covering half her face, a small handbag in the other hand, a door and a lamp behind' },
+  { kind: 'hair',     scene: () => 'From behind on a stone street: her dark hair pulled back with a pearl claw clip, a white shirt collar and a black shoulder-bag strap, no face' },
+  { kind: 'boutique', scene: () => 'A white vintage convertible parked outside a stone designer boutique with arched windows, shot from across the pavement, nobody in the frame' },
+  { kind: 'vanity',   scene: () => 'Two perfume bottles and a lipstick on a marble vanity beside a gold-framed mirror, morning window light, nobody in the frame' },
+  { kind: 'nails',    scene: () => 'Her hand with neutral almond nails and a thin gold bracelet resting on a magazine on a cream leather car seat, shot from above, no face' },
+  { kind: 'cafe',     scene: () => 'Sat outside a café in a black dress, a wide-brim hat and sunglasses, a straw bag on the chair, looking away from the camera, shot by a friend' },
+  { kind: 'crossing', scene: () => 'Crossing a quiet city street away from the camera in a brown blazer and a mini skirt, a chain bag over the shoulder, white townhouses behind' },
+  { kind: 'collar',   scene: () => 'A close crop from the neck down: layered gold necklaces over a white shirt collar and a burgundy top, hands adjusting a belt, no face' },
+  { kind: 'shirt',    scene: () => 'A white fitted shirt laid flat on an unmade white bed, morning light from the window, nobody in the frame' },
+  { kind: 'car',      scene: () => 'Stepping out of the back seat of a black car at night in a metallic skirt and tall boots, one hand on the door, face turned away, the street lights blooming' },
+  { kind: 'rail',     scene: () => 'Mirror selfie in a bedroom in a white t-shirt and wide jeans, a clothes rail of coats and shirts beside the mirror, the phone covering her face' },
+  { kind: 'flatlay',  scene: () => 'A leather bag, sunglasses, a coffee cup and a folded jumper on the passenger seat of a car, shot looking down, nobody in the frame' },
+];
+
+// LIFE — skin, GLP-1, wellness (the Poky family §3.6, the AcneTrack stories
+// §3.14): one young woman, face visible, a bathroom mirror, her car, her
+// bed, a plate of eggs, a bathroom shelf; pyjamas and scrubs, never gym wear.
+BANK.life = [
+  { kind: 'bathroom', scene: () => 'Mirror selfie in a small bathroom: hair tied up, a plain t-shirt, the phone held at chin height, the sink and a few bottles on the shelf, front-camera softness' },
+  { kind: 'car',      scene: () => 'Selfie in the front seat of a parked car in daylight, seatbelt on, sunglasses pushed up, looking slightly off the lens, the window and the street behind' },
+  { kind: 'bed',      scene: () => 'Lying in bed in the morning, the phone held above her face, pyjamas, the duvet and a pillow filling the frame, soft window light' },
+  { kind: 'hallway',  scene: () => 'Mirror selfie in a hallway in a cap and a scarf, the phone covering part of the face, a coat rack behind' },
+  { kind: 'plate',    scene: () => 'A plate of fried eggs, toast, blackberries and sliced cucumber on a kitchen table, shot from above at a slight angle, a fork beside it, nobody in the frame' },
+  { kind: 'shelf',    scene: () => 'A cluttered bathroom shelf: a cleanser, a moisturiser tube, a hair tie and a toothbrush cup, shot on a phone with the flash on, nobody in the frame' },
+  { kind: 'work',     scene: () => 'Selfie at work in scrubs or a plain uniform, in a break room, the phone held low, looking at the screen not the lens' },
+  { kind: 'walk',     scene: () => 'Looking down at her own trainers on a pavement mid-walk, a water bottle in the other hand, no face' },
+  { kind: 'beach',    scene: () => 'A selfie on a beach in sunglasses, hair blown across the face, the sea and a towel behind, hard midday light' },
+  { kind: 'kitchen',  scene: () => 'Standing at a kitchen counter in a hoodie making a smoothie, shot by a flatmate from the doorway, back mostly to the camera' },
+  { kind: 'scale',    scene: () => 'Looking down at her own feet on a bathroom scale on a tiled floor, pyjama bottoms, no face' },
+  { kind: 'sofa',     scene: () => 'Curled up on a sofa under a blanket looking at her phone, shot from the side by a friend, a mug on the table, a lamp on' },
+];
+
+// EVERYDAY — the bank every other niche falls to (F26: fashion and language
+// used to come back as night-city cars). Places and hands, never a face.
+BANK.everyday = [
+  { kind: 'desk',     scene: () => 'A desk by a window with a laptop open, a notebook, a mug and a charger cable, shot from the chair on a phone, nobody in the frame' },
+  { kind: 'phone',    scene: () => 'Their own hand holding a phone over a kitchen table, the screen lit, a coffee and keys beside it, shot looking down, no face' },
+  { kind: 'street',   scene: () => 'A daylight street from eye level while walking, shops and parked cars, a shoulder at the edge of the frame, shot on a phone' },
+  { kind: 'cafe',     scene: () => 'A café table by the window with a laptop, a flat white and a croissant, the street outside blown out, nobody in the frame' },
+  { kind: 'bed',      scene: () => 'A laptop open on an unmade bed, a phone and headphones beside it, the duvet crumpled, morning light, nobody in the frame' },
+  { kind: 'wardrobe', scene: () => 'An open wardrobe with shirts on hangers and shoes on the floor, shot from the doorway on a phone, nobody in the frame' },
+  { kind: 'carseat',  scene: () => 'Looking down at their own lap in the driver seat of a parked car, a phone in one hand, the steering wheel and the dashboard, no face' },
+  { kind: 'behind',   scene: () => 'A person from behind in a hoodie walking down a street in daylight, a backpack on, face never visible, shot on a phone' },
+  { kind: 'notes',    scene: () => 'A notebook open on a table with a pen across it, a phone face down beside it, shot from above at an angle, nobody in the frame' },
+  { kind: 'window',   scene: () => 'A sofa by a big window, a cup on the sill, the city outside, a blanket thrown over the arm, nobody in the frame' },
+  { kind: 'hand',     scene: () => 'Their own hand on a café table around a cup, a receipt and a phone beside it, shot looking down, no face' },
+  { kind: 'stairs',   scene: () => 'Sat on the front steps of a house in daylight, trainers and jeans, the phone in hand, head down, shot by a friend' },
+];
+
+/**
+ * The subject per family (F30): the engine's only subject used to be a lean
+ * muscular man, and the fashion, skin and GLP-1 references are all one young
+ * woman. Two or three per family so sets differ; the model's own "subject"
+ * is ignored for these families because it copied the gym default.
+ */
+export const SUBJECTS = {
+  sport: [
+    'A young man of nineteen, lean, short dark curly hair, no facial hair, an ordinary face.',
+    'A young man of twenty, lean, short black hair, light stubble, an ordinary face.',
+    'A teenage boy of seventeen, tall and thin, short brown hair, an ordinary face.',
+  ],
+  fashion: [
+    'A young woman in her early twenties, long dark brown hair, olive skin, no visible tattoos, an ordinary face.',
+    'A young woman in her mid twenties, long blonde hair, fair skin, an ordinary face.',
+    'A young woman in her early twenties, dark hair in a low bun, light brown skin, an ordinary face.',
+  ],
+  life: [
+    'A young woman in her mid twenties, blonde hair usually tied back, fair skin with a few blemishes, an ordinary face.',
+    'A young woman in her late twenties, dark wavy hair, olive skin, an ordinary face.',
+    'A woman in her early thirties, brown hair, fair skin, an ordinary tired face.',
+  ],
+  everyday: [
+    'A person in their twenties, short dark hair, seen mostly from behind or as hands.',
+    'A person in their late twenties, brown hair, seen mostly from behind or as hands.',
+  ],
+};
+export const subjectFor = (family, seed = '') => (SUBJECTS[family] ? pick(SUBJECTS[family], seed + '|subject') : null);
+
+/** The families whose captions are the soft-shadow centred TikTok look (docs/QUALITY.md §3.12). */
+export const SOFT_FAMILIES = new Set(['sport', 'fashion', 'life', 'everyday']);
+
+/**
+ * A campaign niche → its reference family. The old map sent every niche
+ * that was not gym or food to the trading bank (F26); now trading is only
+ * trading, and the rest go to the family whose references they resemble.
+ */
+export function familyFor(niche) {
   const n = String(niche ?? '').toLowerCase();
-  if (/gym|fitness|calisthenic|physique|supplement|creatine|muscle|lifting/.test(n)) return BANK.fitness;
-  if (/food|meal|nutrition|kitchen|cook|recipe|diet/.test(n)) return BANK.food;
-  return BANK.trading;
+  if (/gym|fitness|calisthenic|physique|supplement|creatine|muscle|lifting|workout/.test(n)) return 'gym';
+  if (/food|meal|nutrition|kitchen|cook|recipe|diet/.test(n)) return 'food';
+  if (/football|soccer|basketball|athlete|sport|player|height|taller|running|runner/.test(n)) return 'sport';
+  if (/fashion|outfit|style|closet|wardrobe|cloth|resale|thrift|old money/.test(n)) return 'fashion';
+  if (/skin|acne|beauty|glp|peptide|weight|ozempic|wellness|hormone|hair loss|self.?care/.test(n)) return 'life';
+  if (/trad|forex|crypto|stock|invest|wealth|prop firm|funded/.test(n)) return 'trading';
+  return 'everyday';
+}
+
+/** Map a campaign niche onto a bank. */
+export function bankFor(niche) {
+  const f = familyFor(niche);
+  return f === 'gym' ? BANK.fitness : f === 'food' ? BANK.food : f === 'trading' ? BANK.trading : BANK[f];
 }
 
 const hash = (s) => { let h = 7; for (let i = 0; i < String(s).length; i++) h = (h * 31 + String(s).charCodeAt(i)) % 100003; return h; };
@@ -357,6 +535,11 @@ export function worldFor(niche, seed = '') {
   const bank = bankFor(niche);
   if (bank === BANK.fitness) return { id: 'life', label: 'his camera roll', look: 'phone' };
   if (bank === BANK.food) return { id: 'kitchen', label: 'his kitchen', look: 'phone' };
+  const fam = familyFor(niche);
+  if (fam === 'sport') return { id: 'sport', label: 'his training', look: 'phone', sport: sportFor(niche) === SPORTS.basketball ? 'basketball' : 'football' };
+  if (fam === 'fashion') return { id: 'fashion', label: 'her camera roll', look: 'phone' };
+  if (fam === 'life') return { id: 'life', label: 'her camera roll', look: 'phone' };
+  if (fam === 'everyday') return { id: 'everyday', label: 'an ordinary week', look: 'phone' };
   const ids = Object.keys(WORLDS);
   const id = ids[hash(seed) % ids.length];
   return { id, ...WORLDS[id] };
@@ -404,6 +587,8 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
 
   if (bank === BANK.fitness) return enforceGym(scenes, { appIndex, seed, headings, closerIsOne, world });
   if (bank === BANK.food) return enforceFood(scenes, { appIndex, seed, world });
+  const family = familyFor(niche);
+  if (SOFT_FAMILIES.has(family)) return enforceFamily(scenes, { family, appIndex, seed, world, niche });
 
   /* wealth: one life, a mix of day and night, no repeated kind */
   const life = pick(LIVES, seed + '|life');
@@ -536,6 +721,49 @@ function enforceFood(scenes, { appIndex, seed, world }) {
 }
 
 /**
+ * The sport, fashion, life and everyday sets: the hook from a short list of
+ * strong openers, the app slide on a quiet frame (the App Store card is drawn
+ * over it by the renderer, so no phone-on-a-bench), the closer a lifestyle
+ * beat, and never the same kind twice. A sport frame marked `match` takes
+ * the photographer's camera line instead of the phone's.
+ */
+const FAMILY_HOOKS = {
+  sport:    [['back', 'run', 'dribble', 'boots'], ['boots', 'back', 'stands'], ['run', 'tunnel', 'back']],
+  fashion:  [['street', 'crossing', 'mirror'], ['mirror', 'street', 'cafe'], ['cafe', 'street', 'mirror']],
+  life:     [['bathroom', 'car', 'beach'], ['car', 'bathroom', 'bed'], ['beach', 'bathroom', 'car']],
+  everyday: [['desk', 'street', 'phone'], ['phone', 'cafe', 'desk'], ['street', 'desk', 'notes']],
+};
+const FAMILY_APP = { sport: ['night', 'gym', 'cones'], fashion: ['boutique', 'vanity', 'flatlay'], life: ['shelf', 'plate', 'bed'], everyday: ['desk', 'cafe', 'notes'] };
+const FAMILY_CLOSER = { sport: ['run', 'sit', 'tunnel', 'night'], fashion: ['crossing', 'rail', 'cafe'], life: ['bathroom', 'walk', 'sofa'], everyday: ['stairs', 'behind', 'window'] };
+
+function enforceFamily(scenes, { family, appIndex, seed, world, niche }) {
+  const bank = BANK[family];
+  const S = family === 'sport' ? sportFor(niche) : {};
+  const mistake = dealer(MISTAKES[family], seed + '|mis');
+  const used = new Set();
+  const draw = (prefer = []) => {
+    const pool = bank.filter((b) => !used.has(b.kind));
+    for (const k of prefer) { const b = pool.find((e) => e.kind === k); if (b) { used.add(b.kind); return b; } }
+    const b = pool[hash(seed + '|' + used.size) % pool.length] ?? bank[0];
+    used.add(b.kind);
+    return b;
+  };
+  const hookOrder = pick(FAMILY_HOOKS[family], seed + '|hook');
+  const shots = [];
+  const out = scenes.map((scene, i) => {
+    const hint = scene && !DREARY.test(scene) ? kindOf(scene, bank) : null;
+    const b = i === 0 ? draw(hookOrder)
+      : i === appIndex ? draw(FAMILY_APP[family])
+      : i === scenes.length - 1 ? draw(FAMILY_CLOSER[family])
+      : draw(hint ? [hint] : []);
+    shots.push(b.kind);
+    const cam = b.match ? CAMERA.match : CAMERA[family];
+    return `${b.scene(S)}. ${mistake()}. ${cam}`;
+  });
+  return { scenes: out, world, replaced: out.map((_, i) => i), shots, family };
+}
+
+/**
  * The art direction for one set, in one place. lanes.mjs and make-set.mjs
  * both used to work this out inline and had drifted; now they call this.
  *
@@ -567,10 +795,16 @@ export function direct({ spec, content, styleId, seed = '', look: wantLook, mode
   if (styleId === 'rail') {
     return { scenes, world: { id: 'editorial', label: 'editorial', look: 'alex' }, look: wantLook ?? 'alex', mode: 'editorial', days: false, subject: 'none', shots: null, life: null, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood };
   }
-  const mode = wantMode ?? (phone && !isGym ? 'aspirational' : 'subject');
+  const family = familyFor(spec.niche);
+  // sport, fashion and life hold one person across the set (F30: the
+  // family's own subject, not the model's, which copied the gym default);
+  // everyday has no face anywhere, so every frame is its own generation
+  const familyMode = family === 'everyday' ? 'aspirational' : SOFT_FAMILIES.has(family) ? 'subject' : null;
+  const mode = wantMode ?? (phone && familyMode ? familyMode : phone && !isGym ? 'aspirational' : 'subject');
   // one person across many days is the rule for every phone format that
   // holds a subject — the same outfit across a set was rated "too AI"
   const days = phone && mode === 'subject';
-  const subject = content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.';
-  return { scenes, world, look, mode, days, subject, shots, life, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood };
+  const familySubject = phone && SOFT_FAMILIES.has(family) ? subjectFor(family, seed) : null;
+  const subject = familySubject ?? (content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.');
+  return { scenes, world, look, mode, days, subject, shots, life, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood, family };
 }

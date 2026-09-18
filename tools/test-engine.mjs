@@ -245,5 +245,52 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   ok(!judgeCopy({ spec: rspec, data: JSON.parse(JSON.stringify(lifted)), range: slideRange(rspec, 4), styleId: 'rail' }).verdict.pass, 'a rail closer lifted from the family\'s post is rejected');
 }
 
+// 11. the 2026-09-18 families (docs/QUALITY.md §3.12–3.15): sport / fashion / life / everyday, F26, F29, F30, the soft feed and the App Store card
+{
+  const { familyFor } = await import('../engine/scenes.mjs');
+  ok(familyFor('football') === 'sport' && familyFor('basketball') === 'sport' && familyFor('fashion') === 'fashion' && familyFor('skincare') === 'life' && familyFor('GLP-1') === 'life' && familyFor('personal finance') === 'everyday' && familyFor('language') === 'everyday' && familyFor('trading') === 'trading' && familyFor('gym') === 'gym' && familyFor('nutrition') === 'food', 'familyFor maps the owner\'s niches (F26: personal finance and language no longer fall to trading)');
+  for (const [niche, fam] of [['football', 'sport'], ['fashion', 'fashion'], ['skincare', 'life'], ['personal finance', 'everyday']]) {
+    for (const seed of ['a', 'b', 'c']) {
+      const e = enforce(new Array(8).fill('x'), { niche, appIndex: 3, seed });
+      ok(new Set(e.shots).size === e.shots.length && e.scenes.length === 8 && e.family === fam, `${niche}/${seed}: eight ${fam} frames, no kind twice (${e.shots.join(' ')})`);
+      ok(!/An iPhone lying face up/.test(e.scenes[3]), `${niche}/${seed}: the app slide is an ordinary frame (the card goes over it), not a phone on a bench`);
+    }
+  }
+  const sp = enforce(new Array(7).fill('x'), { niche: 'football', appIndex: 3, seed: 't' });
+  ok(sp.scenes.some((s) => /sports photographer/.test(s)) && sp.scenes.some((s) => /Taken on an iPhone at training/.test(s)), 'a football set mixes the photographer\'s match frames with the phone\'s');
+  const bb = enforce(new Array(6).fill('x'), { niche: 'basketball', seed: 't' });
+  ok(bb.scenes.some((s) => /basketball|hardwood/.test(s)) && !bb.scenes.some((s) => /football/.test(s)), 'the basketball set uses the court and the basketball, never the football');
+  const fspec = { ...spec, id: 'attire', niche: 'fashion', content: { style: 'feed' }, rules: {}, requirements: { must_show_app: true, language: 'English' }, assets: {} };
+  const content = { subject: 'A lean muscular man in his early twenties', hook: { lines: ['7 fashion mistakes'] }, ranked: [{ name: 'a' }, { name: 'Bonus', showsApp: true }, { name: 'c' }], closer: { lines: ['4. carry yourself well'], cta: 'follow for more' } };
+  const d = direct({ spec: fspec, content, styleId: 'feed', seed: 't' });
+  ok(d.family === 'fashion' && d.mode === 'subject' && d.days && /woman/.test(d.subject) && !/muscular man/.test(d.subject), `fashion direction: subject mode, days, the family's woman not the model's man (${d.subject.slice(0, 44)})`);
+  const de = direct({ spec: { ...fspec, niche: 'language' }, content, styleId: 'feed', seed: 't' });
+  ok(de.family === 'everyday' && de.mode === 'aspirational', 'everyday direction: aspirational, no recurring face');
+  const ds = direct({ spec: { ...fspec, niche: 'football' }, content, styleId: 'feed', seed: 't' });
+  ok(ds.family === 'sport' && /young man|teenage boy/.test(ds.subject), 'sport direction: a young player');
+  // F29: the language line
+  const es = buildCopyRequest({ spec: { ...fspec, niche: 'GLP-1', requirements: { language: 'Spanish' } }, instruction: 'x', slides: 6 });
+  ok(/LANGUAGE: write every slide line[^]*in Spanish/.test(es.user) && /bathroom mirror/.test(es.user), 'a Spanish campaign gets the language line and the life direction');
+  ok(!/LANGUAGE:/.test(buildCopyRequest({ spec: fspec, instruction: 'x', slides: 6 }).user), 'an English campaign gets no language line');
+  ok(/killing your football career/.test(buildCopyRequest({ spec: { ...fspec, niche: 'football' }, instruction: 'x', slides: 6 }).user), 'a football campaign gets the sport direction');
+  ok(/Wearing wrinkled/.test(buildCopyRequest({ spec: fspec, instruction: 'x', slides: 6 }).user), 'a fashion campaign gets the fashion direction');
+  ok(/a desk by a window/i.test(buildCopyRequest({ spec: { ...fspec, niche: 'personal finance' }, instruction: 'x', slides: 6 }).user), 'personal finance gets the everyday direction, not the trading one');
+  // the numbers rule is off for fashion, sport and life; on for everyday
+  const nonum = { hook: { lines: ['7 fashion mistakes'], sub: [] }, ranked: [{ name: 'a', lines: ['wrinkles read careless'] }, { name: 'b', lines: ['loud logos look tacky'] }, { name: 'Bonus', lines: ['the app builds combos'], showsApp: true }, { name: 'd', lines: ['tailoring is everything'] }], closer: { lines: ['5. carry yourself well'], cta: 'follow for more' }, caption: 'x 👗 ✨', bio: '', hashtags: [] };
+  ok(!judgeCopy({ spec: fspec, data: JSON.parse(JSON.stringify(nonum)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /carry a number/.test(f)), 'fashion items need no numbers (0 of 20 reference items carry one)');
+  ok(judgeCopy({ spec: { ...fspec, niche: 'personal finance' }, data: JSON.parse(JSON.stringify(nonum)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /carry a number/.test(f)), 'everyday items still need numbers');
+  // toRenderable: the card slide, the closer as item N
+  const r = toRenderable(fspec, JSON.parse(JSON.stringify(nonum)), { appScreen: 'x.png' });
+  ok(r.content.ranked[2].card === true && r.content.ranked[2].bonus === true && !r.content.ranked[2].screen && !r.content.closer.screen && !r.content.closer.card, 'the fashion app slide is the App Store card (no screen), unnumbered, and the closer carries no second app');
+  ok(r.content.closerRank === 5 && r.content.ranked[0].rank === 1 && r.content.ranked[1].rank === 2 && r.content.ranked[3].rank === 3 && r.content.closer.lines[0] === 'carry yourself well', `the closer is item 5 and the items above count 1 → 3 (${r.content.ranked.map((x) => x.rank ?? '-').join(' ')})`);
+  const noapp = toRenderable(fspec, JSON.parse(JSON.stringify({ ...nonum, ranked: nonum.ranked.filter((x) => !x.showsApp) })), {});
+  ok(noapp.content.closer.card === true, 'a fashion set without an app slide puts the card on the closer');
+  const tspec = { ...spec, niche: 'trading', content: { style: 'feed' } };
+  ok(!toRenderable(tspec, JSON.parse(JSON.stringify(nonum)), { appIcon: 'i.png' }).content.ranked[2].card, 'a trading set keeps the icon device, never the card');
+  const { byId } = await import('../engine/styles/registry.mjs');
+  const feed = byId('feed');
+  ok(feed.canvasFor({ niche: 'fashion' }).h === 1920 && feed.canvasFor({ niche: 'trading' }).h === 1440, 'the feed canvas is 9:16 for the soft families and 4:5 for trading');
+}
+
 console.log(failed ? `\n${failed} failed` : '\nall passed');
 process.exit(failed ? 1 : 0);

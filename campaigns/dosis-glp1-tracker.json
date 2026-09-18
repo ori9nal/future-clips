@@ -1,0 +1,33 @@
+{
+  "id": "dosis-glp1-tracker",
+  "brand": "Dosis",
+  "product": "GLP-1 tracker app that logs your injections, side effects, meals and weight and reminds you of the next dose",
+  "niche": "GLP-1",
+  "advertiser": "Dosis Salud S.L.",
+  "agency": "Touchline Media",
+  "platforms": ["tiktok", "instagram"],
+  "payout": { "rate_usd": 1.0, "min_payout_usd": 20, "max_payout_usd": 250, "budget_total_usd": 8000, "budget_remaining_usd": 8000, "review_days": 14, "platforms": ["tiktok", "instagram"] },
+  "requirements": {
+    "min_slides": 6, "max_slides": 7, "aspect": "9:16", "required_mention": null, "must_show_app": true,
+    "app_placement": [ { "when_slides": [6, 7], "on_slides": [4, 5] } ],
+    "first_slide_must_be_hook": true, "language": "Spanish", "audience_tier1_pct": null
+  },
+  "rules": {
+    "required_phrase": "Dosis", "never_bare": null,
+    "banned_claims": ["pierde 10 kilos", "sin efectos secundarios", "aprobado por médicos", "sustituye a tu médico", "Dosis App", "la app Dosis"],
+    "banned_topics": ["consejo médico o dosis concretas", "compra o venta de medicación", "cifras de peso inventadas", "comparaciones con personas reales", "promesas de resultados"],
+    "tone": "Una chica contando lo que nadie te dice, en primera persona, frases cortas y reales, sin vender.",
+    "no_exclamation": false
+  },
+  "guidance": {
+    "hook_style": "Lo que nadie te dice de…, primera persona, una frase corta.",
+    "angles": ["lo que nadie te dice de las inyecciones (el hambre, los días malos, el pinchazo, el seguimiento)", "lo que cambió en mi semana", "lo que apunto cada día"],
+    "notes": ["Dosis aparece una vez: qué apuntó o qué recordó", "sin cifras de peso ni dosis", "todo en español"]
+  },
+  "assets": {
+    "palette": ["#7C5CFF", "#101014", "#F5F3FF"],
+    "app_store": { "title": "Dosis: GLP-1 Tracker", "subtitle": "Inyecciones, comidas y peso", "developer": "Dosis Salud S.L.", "theme": "dark" },
+    "mascot": null, "look": "phone"
+  },
+  "content": { "style": "feed" }
+}

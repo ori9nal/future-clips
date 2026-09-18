@@ -9,6 +9,7 @@
 // they reject it, so shipping one is worse than spending another call.
 import { completeJson } from './providers/claude.mjs';
 import { check, constraintsFor, repair, bareNameRx } from './compliance.mjs';
+import { familyFor, SOFT_FAMILIES } from './scenes.mjs';
 
 /** Expand a bare product name inside one string, mirroring repair(). */
 function expandIn(text, spec) {
@@ -323,6 +324,104 @@ const SCENE_DIRECTION = {
     'The whole set is ONE programme or ONE lesson: a weekly split, a muscle progression, a plan.',
     'Bold, instructional, no first-person story. No emoji.',
   ].join(' '),
+  // FOOTBALL / SOCCER / BASKETBALL (docs/QUALITY.md §3.12, four owner sets,
+  // 26 slides, read 2026-09-18): habits and drills in sentence case, one
+  // heading and a line or two under it, a "Bonus" app slide mid-set, the
+  // closer is the last numbered item. 0 of 19 items carry a number.
+  'feed:sport': [
+    'This is the TikTok slideshow format for football, soccer and basketball: one young player\'s camera',
+    'roll — his boots on the grass, cones on an empty pitch, a bowl of breakfast, recovery boots, an',
+    'indoor turf gym — with a photographer\'s match frame in between. Real posts to match, copied exactly:',
+    'hooks — "5 things that are killing your football career" · "Small habits that hold you back from',
+    'improving" · "5 ways to make quick progress in soccer" · "I grew to 6\'6 at 17. Everyone lies about',
+    'how to grow taller. Here\'s what actually worked. (For free)" · "HOW TO PLAY LIKE / LAMINE YAMAL".',
+    'items — "1. Sleeping late every night" · "2. Eating junk food before training" · "3. Only training',
+    'when motivated" · "4. Skipping recovery and stretching" · "1. Gooning / -Drains your dopamine, kills',
+    'motivation, and makes real goals feel boring." · "2. Staying up late / -Ruins recovery, lowers',
+    'testosterone, and makes you less productive the next day." · "1. Train hard every day and keep track',
+    'of your improvement" · "2. Stretch more / Lunges / Tuck jumps / Jump squats / Dead hangs / These are',
+    'the best IMO".',
+    'app lines — "Bonus - / That\'s why i started tracking my nutrition and training on footly to stay',
+    'disciplined." · "Bonus / -I\'ve been using Footly to take control of my nutrition. You just take a',
+    'photo of your food and it gives you all the macros." · "I\'ve been using this app for a while now and',
+    'it keeps me on track.".',
+    'closers — "5. Comparing yourself to other players" · "5. Remember there is always someone working',
+    'harder than you." · "These are the ones that make the biggest difference / Link in bio".',
+    'The items are habits, mistakes or drills named plainly in sentence case: one heading line and one or',
+    'two short lines under it (a dash list is fine). Numbers are welcome but NOT required. The app slide',
+    'is a "Bonus" line in the middle of the set, never numbered, its "name" is "Bonus" and its lines are',
+    'one or two plain sentences about what the app did. The closer IS the last numbered item — its first',
+    'line starts with the number ("5. …") — and "cta" is at most three words ("link in bio") or "".',
+    'Never name the apps in the examples; the campaign\'s app is the only app. The "subject" is one young',
+    'player described once — age, build, hair — no clothing.',
+    '"scene": one of boots | cones | back | night | gym | recovery | bowl | dribble | stands | run | sit |',
+    'bag | tunnel, then a clause.',
+  ].join(' '),
+  // FASHION / OUTFITS (§3.13, three owner sets, 20 slides, one app): one
+  // heading in sentence case and one sentence of advice; the app woven into
+  // one item's sentence; the closer is the last item plus a send-off.
+  'feed:fashion': [
+    'This is the TikTok slideshow format for outfits and style: one young woman\'s camera roll — a street',
+    'in a camel coat, a hallway mirror, a boutique shopfront, a marble vanity, her nails on a car seat —',
+    'in an old-money palette of cream, camel, black and brown. Real posts to match, copied exactly:',
+    'hooks — "7 Easy ways to always look classy & put together" · "7 Fashion Mistakes That Instantly',
+    'Cheapen Your Look" · "OLD MONEY OUTFITS / (swipe left →)".',
+    'items — "1. Dress for your body type. Clothes that fit you well always look expensive." · "2. Keep',
+    'your hair neat. Your hair can make or break your whole look." · "4. Moisturize + smell good. Glowing',
+    'skin and a nice scent = instant upgrade." · "5. Mind your nails. Clean, well-kept nails show attention',
+    'to detail." · "1. Wearing wrinkled clothes. / No matter how expensive the item is, wrinkles =',
+    'careless." · "2. Over-accessorizing. / Too many loud pieces at once can make you look overdone instead',
+    'of elevated." · "3. Too Much Branding. / Loud logos everywhere can look tacky instead of luxurious.".',
+    'app lines — "3. Curate your style. Choose timeless pieces, neutral tones, and tailored fits. Learn how',
+    'to mix and match, or simply use an app like Inspoy to help assemble your outfits." · "If you\'re',
+    'unsure, try an app like Inspoy, it uses AI to build the best combos out of what you already own." ·',
+    '"Wanna know where these outfit ideas come from? / Its this app inspoy, I just show it my closet and',
+    'it builds looks like these".',
+    'closers — "7. Carry yourself with grace. Good posture and confidence complete the look. / Save for',
+    'later 📌 / Share with your besties 👯‍♀️ / Follow for more 💜" · "6. Poorly Fitting Clothing / Clothes',
+    'that are too tight or baggy kill the vibe. Tailoring is everything. / Send this to your bestie who\'s',
+    'guilty of these mistakes, and follow for more 💜".',
+    'Every item is one heading line in sentence case ("1. Wearing wrinkled clothes.") and one plain',
+    'sentence of advice under it. No numbers needed. The app takes ONE slide with "name" "Bonus" and one',
+    'or two sentences that read as a tip ("if you\'re unsure, an app like X builds the combos from what you',
+    'already own"), never a sales pitch. The closer IS the last numbered item — its first line starts',
+    'with the number — then a two-line send-off ("save for later", "follow for more") as the cta.',
+    'Never name the apps in the examples; the campaign\'s app is the only app. The "subject" is one young',
+    'woman described once — age, hair, skin tone — no clothing.',
+    '"scene": one of street | mirror | hair | boutique | vanity | nails | cafe | crossing | collar | shirt |',
+    'car | rail | flatlay, then a clause.',
+  ].join(' '),
+  // LIFE — skin, GLP-1, wellness (§3.6 the Poky family, §3.14 the AcneTrack
+  // stories): a woman's own words, a list of habits or a story in order.
+  'feed:life': [
+    'This is the TikTok slideshow format for skin, weight and everyday health: one young woman\'s camera',
+    'roll — a bathroom mirror, the front seat of her car, her bed, a plate of eggs and toast, a bathroom',
+    'shelf, a beach selfie — told in her own words. Real posts to match, copied exactly:',
+    'hooks — "3 days before we broke up" · "THREE days before he broke up with me…" · "Small habits that',
+    'hold you back from improving" · (the Poky sets are Spanish) "Lo que nadie te dice de las inyecciones..".',
+    'lines — "10 days post break up / Started eating better and finding my routine" · "10 days',
+    'post-breakup / FINALLY decided to fix my diet & gut health for my own good" · "2 months later" ·',
+    '"It did." · "My weekly AcneTrack skin scan and routine builder literally saved me".',
+    'The set is a numbered list of habits OR a story in order ("numbering": "none"): a date line, what',
+    'changed, the app once, the after. Lines are short and first person; a lowercase "i" is fine. Numbers',
+    'where they are real (days, weeks, kg, a score), not required. The app slide has "name" "Bonus" and ONE',
+    'plain sentence about what it did or showed. The closer is the after — one or two lines — with a',
+    'short cta or "". Never name the apps in the examples; the campaign\'s app is the only app. The',
+    '"subject" is one young woman described once — age, hair, skin — no clothing.',
+    '"scene": one of bathroom | car | bed | hallway | plate | shelf | work | walk | beach | kitchen | scale |',
+    'sofa, then a clause.',
+  ].join(' '),
+  // EVERYDAY — finance, language, productivity, anything else (F26): places
+  // and hands off an ordinary week, never a face.
+  'feed:everyday': [
+    'This is a phone-photo slideshow about ordinary life: 9:16 frames off someone\'s camera roll — a desk',
+    'by a window, a phone in hand over a kitchen table, a café window, a laptop on a bed, a street in',
+    'daylight — and never a face. Lines are short, first person, specific: a number on at least half the',
+    'items (minutes, $, %, days, a time). The app slide has "name" "Bonus" and one plain sentence about',
+    'what it did. The closer is the last item or a one-line send-off. "subject" is "none".',
+    '"scene": one of desk | phone | street | cafe | bed | wardrobe | carseat | behind | notes | window |',
+    'hand | stairs, then a clause.',
+  ].join(' '),
 };
 
 const GYM_NICHE = /gym|fitness|calisthenic|physique|supplement|creatine|muscle|lifting/i;
@@ -385,10 +484,21 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
   // direction because the APEX file says native and make-set said feed.
   const styleId = wanted ?? spec.content?.style ?? 'native';
   const niche = spec.niche ?? '';
-  const sceneDirection = (styleId === 'feed' && GYM_NICHE.test(niche) && SCENE_DIRECTION['feed:fitness'])
-    || (styleId === 'native' && GYM_NICHE.test(niche) && SCENE_DIRECTION['feed:fitness'])
-    || (styleId === 'native' && FOOD_NICHE.test(niche) && SCENE_DIRECTION['native:food'])
+  // The family decides the direction for the phone formats (2026-09-18): gym
+  // and food as before, then sport / fashion / life / everyday from the
+  // owner's references, and the trading feed direction only for trading.
+  const family = familyFor(niche);
+  const phoneStyle = styleId === 'feed' || styleId === 'native';
+  const sceneDirection = (phoneStyle && family === 'gym' && SCENE_DIRECTION['feed:fitness'])
+    || (phoneStyle && family === 'food' && SCENE_DIRECTION['native:food'])
+    || (phoneStyle && SCENE_DIRECTION[`feed:${family}`])
     || SCENE_DIRECTION[styleId] || SCENE_DIRECTION.native;
+  // F29: the ingest shape carries requirements.language and nothing read it;
+  // the Poky family is entirely Spanish. Only the product name stays as written.
+  const lang = String(spec.requirements?.language ?? '').trim();
+  const langLine = lang && !/^en(glish)?\b/i.test(lang)
+    ? `LANGUAGE: write every slide line, the caption, the bio and the hashtags in ${lang}. Only the product name stays as written. The example lines show the voice, not the language.`
+    : null;
   const brief = [
     `Product: ${spec.brand} — ${spec.product}`,
     spec.niche ? `Niche: ${spec.niche}` : null,
@@ -396,6 +506,7 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
     spec.guidance?.angles?.length ? `Angles that work: ${spec.guidance.angles.join('; ')}` : null,
     '',
     `FORMAT: ${styleId}. ${sceneDirection}`,
+    langLine,
     '',
     'HARD RULES — a set that breaks any of these is rejected outright:',
     ...constraints.map((c) => `- ${c}`),
@@ -512,10 +623,13 @@ export function judgeCopy({ spec, data, range, styleId }) {
       if (data.closer?.lines?.[0]) data.closer.lines[0] = String(data.closer.lines[0]).replace(/^\s*(?:no\.?|#)?\s*(?:1|one)\s*[.:\-–—]\s*/i, '');
       notes.push('the list counted down with nothing rated or ranked; renumbered 1 → N');
     }
-    // specificity: at least half of the body items carry a number
+    // specificity: at least half of the body items carry a number — a gym,
+    // trading, food and everyday rule; 0 of 19 sport items and 0 of 20 fashion
+    // items in the owner's references carry one (docs/QUALITY.md §3.12–3.13)
+    const family = familyFor(spec.niche);
     const body = (data.ranked ?? []).filter((r) => !r.showsApp);
     const withNum = body.filter((r) => /\d/.test([r.score, ...(r.lines ?? [])].filter(Boolean).join(' ')));
-    if (body.length >= 2 && withNum.length * 2 < body.length) {
+    if (!/^(sport|fashion|life)$/.test(family) && body.length >= 2 && withNum.length * 2 < body.length) {
       verdict.failures.push(`only ${withNum.length} of ${body.length} items carry a number (sets x reps, kg, minutes, $, %, a time); at least half must`);
     }
   }
@@ -571,6 +685,10 @@ export const promisedCount = (content) => { const m = COUNT_RX.exec([...(content
 export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } = {}) {
   const styleId = spec.content?.style ?? 'native';
   const n = (content.ranked ?? []).length;
+  // the sport, fashion, life and everyday feeds show the app as an App Store
+  // card over an ordinary frame (4 of the 5 app slides in the owner's second
+  // batch), never as an icon on a pill or a phone on a bench
+  const soft = styleId === 'feed' && SOFT_FAMILIES.has(familyFor(spec.niche));
 
   // Photos are dealt BY SLIDE INDEX, never by call order. The generated frames
   // arrive in scene order — hook first, then each ranked item, closer last —
@@ -619,14 +737,17 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
     // The trading feed shows an app as an icon on a pill over a lifestyle
     // frame — that is the reference format (sets 01, 04, 14). A screenshot is
     // the gym-feed convention. So feed + icon → icon slide; otherwise screen.
-    const useIcon = showsApp && styleId === 'feed' && appIcon;
+    const card = showsApp && soft;
+    const useIcon = showsApp && styleId === 'feed' && appIcon && !card;
     return {
       // format-specific fields (bedrock: headline, pose, muscles, layout, levels) ride along
       ...r,
       name: r.name, score: cleanScore(r.score, rank), lines: r.lines ?? [],
       rank: hand, role: r.role, showsApp,
       icon: useIcon ? appIcon : undefined,
-      screen: showsApp && !useIcon && appScreen ? appScreen : undefined,
+      // the card slide is the unnumbered "Bonus" of the set
+      card: card || undefined, bonus: card ? true : r.bonus,
+      screen: showsApp && !useIcon && !card && appScreen ? appScreen : undefined,
       // the app slide keeps its frame too: for the phone formats that frame
       // is the app photographed on a phone, and the renderer prefers it
       photo: photoAt(i + 1),
@@ -636,20 +757,28 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
   // Only fall back to putting the app on the closer when no slide already
   // shows it — otherwise the app appears twice and the placement rule the
   // brief states for slide 4/5 is quietly broken by the last slide.
-  const appAlreadyShown = ranked.some((r) => r.screen || r.icon);
+  const appAlreadyShown = ranked.some((r) => r.screen || r.icon || r.card);
 
   // The reference countdown pays off ON the last slide: "1. Snake curls
   // 1000/10" is set 08's closer. The model writes it the same way — "1 —
   // Weighted chin-up" as the closer's first line — so when the closer is the
   // number one, say so structurally: the closer takes rank 1 and the ranked
   // items above it count down from n+1, never reaching 1 themselves.
-  const ONE = /^\s*(#|no\.?|number)?\s*(1|one)\s*[—–:.\-]\s*/i;
+  // 2026-09-18: the sport and fashion references close on the LAST item
+  // counting up ("5. Comparing yourself to other players"), so any number on
+  // the closer is its rank; unnumbered items above it are numbered 1 → N-1.
+  const ONE = /^\s*(#|no\.?|number)?\s*(\d+|one)\s*[—–:.\-]\s*/i;
   const closer = { ...content.closer, lines: [...((content.closer?.headline?.length ? content.closer.headline : content.closer?.lines) ?? [])] };
   let closerRank = 0;
-  if (closer.lines[0] && ONE.test(closer.lines[0])) {
+  let m1;
+  if (closer.lines[0] && (m1 = ONE.exec(closer.lines[0]))) {
     closer.lines[0] = closer.lines[0].replace(ONE, '');
-    closerRank = 1;
+    closerRank = /one/i.test(m1[2]) ? 1 : +m1[2];
     handNumbered = true;
+    if (closerRank > 1 && !ranked.some((r) => r.rank != null)) {
+      let k = 0;
+      for (const r of ranked) if (!r.screen && !r.card && !r.bonus) r.rank = ++k;
+    }
   }
 
   // "4 apps a beginner needs" followed by a fifth item that is not an app: the
@@ -658,7 +787,7 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
   const promised = promisedCount(content);
   if (promised) {
     let seen = 0;
-    for (const r of ranked) { if (r.screen) continue; seen++; if (seen > promised) { r.bonus = true; r.rank = undefined; } }
+    for (const r of ranked) { if (r.screen || r.card) continue; seen++; if (seen > promised) { r.bonus = true; r.rank = undefined; } }
   }
 
   return {
@@ -678,7 +807,9 @@ export function toRenderable(spec, content, { appScreen, appIcon, photos = [] } 
       // renderer prefers a generated phone-on-a-bench frame over the UI mock
       closer: appAlreadyShown
         ? { ...closer, photo: closerPhoto }
-        : { ...closer, screen: appScreen ?? undefined, photo: closerPhoto },
+        : soft && spec.requirements?.must_show_app
+          ? { ...closer, card: true, photo: closerPhoto }
+          : { ...closer, screen: appScreen ?? undefined, photo: closerPhoto },
       caption: content.caption, bio: content.bio, hashtags: content.hashtags,
     },
   };

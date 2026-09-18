@@ -65,7 +65,9 @@ const ASPIRE_GUARD = 'A phone photo, not staged, not a stock photo, not a render
  * naming the ordinary things is not. The anchor alone carries this, and every
  * later frame inherits the face from it.
  */
-const ORDINARY = 'An ordinary-looking person, not a model: some asymmetry in the face, uneven stubble, a spot or two, tired eyes, a shine on the forehead, a haircut that is a week overdue, the skin texture of a phone photo.';
+// 2026-09-18: written for any subject — the fashion, skin and GLP-1 families
+// are a young woman (F30), so no stubble here; the subject line carries it.
+const ORDINARY = 'An ordinary-looking person, not a model: some asymmetry in the face, a spot or two, tired eyes, a shine on the forehead, hair that needs a cut, the skin texture of a phone photo.';
 
 const SAME_PERSON = 'The SAME PERSON as the reference image: same face shape, same hair, same skin tone, same build, same body hair, same tattoos if any.';
 const RELEASE = 'Photographed on a DIFFERENT day: do not copy the reference\'s clothing, room, lighting, camera angle or framing.';
@@ -154,7 +156,7 @@ export function planSet(o) {
     // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
     // mirror selfie four times. So a close-up keeps the person by skin, build
     // and clothing, and is told outright that the face is not in the frame.
-    const closeUp = /no face|from behind|from the waist down|neck down|head out of frame|face is hidden|looking down from his own/i.test(scene);
+    const closeUp = /no face|from behind|from the waist down|neck down|head out of frame|face is hidden|looking down (?:from|at) (?:his|her|their) own|covering (?:half |part of )?(?:her|his|the) face/i.test(scene);
     // `days` mode: the person is the constant, everything else changes.
     const keep = days
       ? (closeUp
