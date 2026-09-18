@@ -22,11 +22,12 @@ const planFromSku = (sku: string | null) => (sku ? sku.replace(/_year$/, "") : n
 
 export async function POST(req: Request) {
   if (!dodoWebhookEnabled()) return Response.json({ error: "billing webhook not configured" }, { status: 503 });
-  if (!hasServiceRole()) return Response.json({ error: "service role not configured on this host" }, { status: 503 });
+  // the signature first: an unsigned request learns nothing about this host
   const raw = await req.text();
   let id: string, event: DodoEvent;
   try { ({ id, event } = verifyWebhook(req.headers, raw)); }
   catch (e: any) { return Response.json({ error: e?.message ?? "bad signature" }, { status: 400 }); }
+  if (!hasServiceRole()) return Response.json({ error: "signature ok; service role not configured on this host, nothing applied" }, { status: 503 });
 
   const db = adminClient();
   // idempotency: the first delivery wins; any other failure to record it is

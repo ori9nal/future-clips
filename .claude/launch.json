@@ -52,6 +52,15 @@
         "3100"
       ],
       "port": 3100
+    },
+    {
+      "name": "dodo-sim",
+      "runtimeExecutable": "bash",
+      "runtimeArgs": [
+        "-c",
+        "set -a; . ./.env.local; set +a; APP=http://127.0.0.1:3100 node tools/dodo-sim.mjs"
+      ],
+      "port": 3400
     }
   ]
 }

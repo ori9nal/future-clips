@@ -9,6 +9,7 @@ import "server-only";
  *   DODO_API_KEY          the business API key (Editor role)
  *   DODO_WEBHOOK_SECRET   the endpoint's signing secret (whsec_…)
  *   DODO_ENV              "test" (default) or "live"
+ *   DODO_API_BASE         laptops only: http://127.0.0.1:3400 for tools/dodo-sim.mjs
  *   DODO_PRODUCTS         plan/pack id → Dodo product id, comma-separated:
  *                         "solo=pdt_…,grind=pdt_…,agency=pdt_…,p100=pdt_…,p250=pdt_…,p600=pdt_…"
  *                         (yearly plans, if sold: "solo_year=pdt_…" etc.)
@@ -26,7 +27,11 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 export const dodoEnabled = () => !!process.env.DODO_API_KEY;
 export const dodoWebhookEnabled = () => !!process.env.DODO_WEBHOOK_SECRET;
 
-const BASE = () => (process.env.DODO_ENV === "live" ? "https://live.dodopayments.com" : "https://test.dodopayments.com");
+// DODO_API_BASE points the app at tools/dodo-sim.mjs on a laptop; never honoured in production
+const BASE = () => {
+  const override = process.env.NODE_ENV !== "production" ? process.env.DODO_API_BASE : undefined;
+  return override?.replace(/\/$/, "") || (process.env.DODO_ENV === "live" ? "https://live.dodopayments.com" : "https://test.dodopayments.com");
+};
 
 /** plan/pack id → Dodo product id, from DODO_PRODUCTS. */
 export function productMap(): Record<string, string> {

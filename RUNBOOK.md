@@ -32,6 +32,17 @@ database: Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`).
 
 **Site deploy files** now live in `deploy/site/` (`package.json`, `build.js`, `vercel.json`) — they were Vercel-only before. `build.js` names the object versions to pull from bucket `site`; bump them there. The homepage source is `design/site.html`, copied verbatim to `future-clips-site/index.html` (`design/build_site.py` refuses to run unless `FC_OLD_SITE=1`).
 
+## Billing on a laptop (the Dodo simulator)
+
+`tools/dodo-sim.mjs` stands in for Dodo Payments: it answers the app's two API calls, serves a hosted-checkout page with a Pay button, and on Pay sends the same signed webhooks Dodo sends (`subscription.active`, `payment.succeeded`) to the app. Nothing reaches the real Dodo.
+
+1. `.env.local` (laptop only): `DODO_ENV=test`, `DODO_API_KEY=sim`, `DODO_API_BASE=http://127.0.0.1:3400`, `DODO_WEBHOOK_SECRET=whsec_<any base64>`, `DODO_PRODUCTS=solo=pdt_sim_solo,grind=pdt_sim_grind,agency=pdt_sim_agency,p100=pdt_sim_p100,p250=pdt_sim_p250,p600=pdt_sim_p600`. The webhook needs `SUPABASE_SERVICE_ROLE_KEY` too (OWNER-ACTIONS 1); without it the app verifies the signature and answers 503 at the service-role gate.
+2. Start the app (`future-clips-prod` after `npx next build`, or `npm run dev`) and the simulator (`dodo-sim` launch config, or `set -a; . ./.env.local; set +a; APP=http://127.0.0.1:3100 node tools/dodo-sim.mjs`).
+3. Sign in as a workspace owner (`node tools/dev-login.mjs email=…`), open Settings → Plan, choose a plan or a pack: the app calls `/api/billing/checkout`, the simulator's checkout page opens, Pay sends the webhooks, the app applies the plan (`orgs.plan`, period, billing ids), credits the pack, and records the sale in the provider fund; `/admin` shows the fund, the return URL lands back on the plan tab.
+4. `http://127.0.0.1:3400/log` lists every webhook sent and the app's reply. A second Pay on the same session id shows the duplicate handling.
+
+Switching to the real Dodo is env only: remove `DODO_API_BASE`, set the real key, secret and product ids (OWNER-ACTIONS 14).
+
 ## Rollback
 
 - Site/app: Vercel → Deployments → promote the previous READY deployment (or redeploy the previous `index-vN` name).
