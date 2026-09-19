@@ -1,6 +1,7 @@
 // The request helpers behind /api/auth and /api/billing.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
 import { requestOrigin, sameOrigin, safeNext, loginError } from '../lib/login.ts';
 
 const req = (url, headers = {}) => new Request(url, { headers });
@@ -45,4 +46,27 @@ test('requestOrigin: the configured app URL wins in production, headers only on 
 test('sameOrigin refuses Sec-Fetch-Site: cross-site even without an Origin header', () => {
   assert.equal(sameOrigin(req('https://a.example/x', { host: 'a.example', 'sec-fetch-site': 'cross-site' })), false);
   assert.equal(sameOrigin(req('https://a.example/x', { host: 'a.example', 'sec-fetch-site': 'same-origin', origin: 'https://a.example' })), true);
+});
+
+/**
+ * The poller has to be reachable by a bearer token and nothing else.
+ *
+ * It sat behind the session check for weeks: Vercel's cron sends an
+ * Authorization header and no cookie, so the middleware turned it away before
+ * the route's own check ran, and no batch set ever advanced.
+ */
+test("the middleware lets the cron path through to its own gate", async () => {
+  const src = await readFile(new URL("../middleware.ts", import.meta.url), "utf8");
+  const block = src.slice(src.indexOf("const PUBLIC"), src.indexOf("];", src.indexOf("const PUBLIC")));
+  // one regex literal per line, taken whole rather than picked apart
+  const patterns = block.split("\n")
+    .map((l) => l.trim())
+    .filter((l) => l.startsWith("/^") && l.endsWith("/,"))
+    .map((l) => new RegExp(l.slice(1, -2)));
+  const open = (path) => patterns.some((rx) => rx.test(path));
+
+  assert.ok(patterns.length > 5, `expected the PUBLIC list, parsed ${patterns.length}`);
+  assert.ok(open("/api/cron/lanes"), "the poller must not need a session");
+  assert.ok(!open("/api/sets"), "making a set still does");
+  assert.ok(!open("/admin"), "admin still does");
 });

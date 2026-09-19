@@ -17,6 +17,12 @@ const PUBLIC = [
   /^\/api\/auth\//,
   /^\/api\/keepalive$/,
   /^\/api\/webhooks\//,
+  // the poller. Vercel's cron sends an Authorization header and no cookie, so
+  // a session check here stops it before its own bearer check ever runs — and
+  // a bearer the middleware rejects is a worker that never wakes up. The route
+  // authorises itself against CRON_SECRET in constant time and refuses
+  // outright when that variable is unset.
+  /^\/api\/cron\//,
   /^\/api\/health$/,
   // the five Trust and Legal pages: a policy behind a login is not published
   /^\/(terms|privacy|acceptable-use|refunds|accessibility)$/,
