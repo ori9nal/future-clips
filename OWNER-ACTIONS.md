@@ -1,8 +1,8 @@
-# OWNER-ACTIONS.md
+# Owner actions
 
-Things only the account owner can do, in the order they unblock work. Engineering keeps this list current; every item names the exact place, the exact names, and what it unblocks. Values that are secrets are never written here, never `NEXT_PUBLIC_`.
+What only you can do. Everything else is built and waiting on these.
 
-## Now: these gate local testing and every deploy
+**Live now** (2026-09-19): the site at https://www.thefutureclips.com (new hero, from git), the app at https://future-clips-app.vercel.app (`/api/health` answers, the engine is traced into the functions), the hidden demo at https://fc-demo-7byf1w5k97u.vercel.app. Both projects build from `dhxnx-7/future-clips`. The app cannot render or sign a demo visitor in until item 4's secrets exist: `/api/health` currently reports `serviceRole:false, anthropic:false, openai:false, cronSecret:false, dodo:false`.
 
 | # | Action | Where | Unblocks |
 |---|---|---|---|
