@@ -29,7 +29,17 @@ const nextConfig: NextConfig = {
   // The engine is ESM imported by file URL at runtime, so the bundler never
   // sees it; without this Vercel's function bundle would not carry it.
   outputFileTracingIncludes: {
-    "/api/**": ["./engine/**", "./assets/fonts/**", "./assets/campaigns/**"],
+    // The engine's .mjs files are copied as ASSETS, not traced as modules, so
+    // nothing follows their own imports. `serverExternalPackages` does not
+    // help: it only governs packages the bundler already knows about. Without
+    // naming them here the function ships the engine and none of the native
+    // code it calls — which is exactly what happened: every production render
+    // died on "Cannot find package '@resvg/resvg-js'" (2026-09-19).
+    "/api/**": [
+      "./engine/**", "./assets/fonts/**", "./assets/campaigns/**",
+      "./node_modules/@resvg/**", "./node_modules/opentype.js/**",
+      "./node_modules/sharp/**", "./node_modules/@img/**",
+    ],
     // the demo workspace's zip is built from the shipped slides
     "/api/sets/[id]/download": ["./public/demo/**"],
   },

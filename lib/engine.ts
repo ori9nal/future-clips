@@ -2,6 +2,7 @@ import "server-only";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { pathToFileURL } from "node:url";
 
 /**
  * Is the render engine present on this host?
@@ -18,6 +19,26 @@ export const ENGINE_ROOT = path.join(process.cwd(), "engine");
 
 export function engineAvailable(): boolean {
   return fs.existsSync(path.join(ENGINE_ROOT, "styles", "registry.mjs"));
+}
+
+/**
+ * Can the engine actually run here?
+ *
+ * `engineAvailable()` only says the .mjs files were copied. They were — and
+ * every production render still died, because the native packages they import
+ * were not in the function bundle (next.config.ts explains why). A file that
+ * exists and cannot load is worse than a missing one, so health asks the
+ * question that matters: does the renderer import?
+ */
+export async function engineLoads(): Promise<true | string> {
+  if (!engineAvailable()) return ENGINE_MISSING;
+  try {
+    const url = pathToFileURL(path.join(ENGINE_ROOT, "styles", "registry.mjs")).href;
+    await import(/* webpackIgnore: true */ url);
+    return true;
+  } catch (e) {
+    return e instanceof Error ? e.message : String(e);
+  }
 }
 
 export const ENGINE_MISSING = "the render engine is not deployed on this host yet";

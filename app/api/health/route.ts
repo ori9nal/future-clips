@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { engineAvailable } from "@/lib/engine";
+import { engineLoads } from "@/lib/engine";
 import { hasServiceRole } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
@@ -26,9 +26,12 @@ export async function GET() {
       db = false;
     }
   }
+  // not "are the files there" but "does the renderer import" — the first
+  // question answered yes for weeks while every render failed
+  const loads = await engineLoads();
   const ready = {
     db,
-    engine: engineAvailable(),
+    engine: loads === true,
     supabase: !!(base && key),
     serviceRole: hasServiceRole(),
     anthropic: !!process.env.ANTHROPIC_API_KEY,
@@ -42,6 +45,7 @@ export async function GET() {
       ok,
       ready,
       dbStatus,
+      engineError: loads === true ? null : loads,
       host: process.env.VERCEL ? "vercel" : "local",
       commit: (process.env.VERCEL_GIT_COMMIT_SHA ?? "").slice(0, 7) || null,
       at: new Date().toISOString(),
