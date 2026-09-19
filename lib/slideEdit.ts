@@ -142,6 +142,15 @@ export async function drawSlide(o: {
   edits: SlideEdits | null;
   canvas: { w: number; h: number };
 }): Promise<{ png: Buffer; blocks: Block[] }> {
+  // The engine is imported by file URL, so the bundler never sees which
+  // packages it needs and this function's bundle ships without them. Naming
+  // them in `outputFileTracingIncludes` is not enough either: that copies
+  // sharp and resvg but not what *they* import, and production answered
+  // "Cannot find package 'detect-libc'" (2026-09-19). Importing them here by
+  // name is what makes the tracer follow their whole graph. They are external
+  // packages (next.config.ts), so this loads them rather than bundling them —
+  // and the render below needs both anyway.
+  await Promise.all([import("sharp"), import("@resvg/resvg-js")]);
   const url = pathToFileURL(path.join(ENGINE_ROOT, "styles", "registry.mjs")).href;
   const registry: { rerenderSlide: (a: unknown) => { png: Buffer; blocks: Block[] } } =
     await import(/* webpackIgnore: true */ url);
