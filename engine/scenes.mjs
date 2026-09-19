@@ -347,7 +347,7 @@ export const BANK = {
     { kind: 'penthouse', times: ['day', 'dusk'],          scene: (L) => `A floor-to-ceiling window on a high floor over ${L.city}, a sofa and a coffee cup in the foreground, the phone's reflection in the glass` },
     { kind: 'plane',     times: ['day'],                  scene: () => `A laptop with a chart open on an airline tray table, the window and the wing beside it, a plastic cup of water` },
     { kind: 'lounge',    times: ['night', 'dusk'],        scene: (L) => `A man in ${L.hoodie} lying on a hotel sofa looking at his phone, face hidden by the hood, the room lit by a lamp` },
-    { kind: 'boat',      times: ['day'],                  scene: () => `The back of a boat on open water, a jet ski tied alongside, a cooler and a towel on the deck, shot on a phone in hard sun` },
+    { kind: 'boat',      wide: true, times: ['day'],                  scene: () => `The back of a boat on open water, a jet ski tied alongside, a cooler and a towel on the deck, shot on a phone in hard sun` },
     { kind: 'street',    times: ['day', 'dusk'],          scene: (L) => `A palm-lined waterfront in ${L.city}, people walking, a bike rack, shot on a phone at eye level` },
     { kind: 'garage',    times: ['night'],                scene: (L) => `${L.car} in an underground car park, a pillar and a bin in shot, the flash reflecting off the paint` },
     { kind: 'watch',     times: ['day', 'night'],         scene: (L) => `${L.watch} on a wrist resting on a car door, shot by the owner with the other hand, the street behind` },
@@ -389,11 +389,16 @@ export const sportFor = (niche) => (/basketball|hoop|dunk|taller|height/i.test(S
 // own boots on the grass, cones on an empty pitch, a bowl of breakfast,
 // recovery boots, an indoor turf gym — and a photographer's match frame in
 // between (`match: true` swaps the camera line). Nobody smiles at the lens.
+// `wide: true` marks a frame that is wide AND has nobody in it at all — the only
+// kind that survives a low-quality draw (measured 2026-09-19: low is $0.006 a
+// frame against $0.043; a face goes waxy, a hand turns to mush and a close shelf
+// loses its objects, but an empty pitch holds after the de-slop pass). A figure
+// in the distance disqualifies a frame: that is where the cheap draw breaks.
 BANK.sport = [
   { kind: 'boots',    scene: (S) => `Looking down from his own eye level at his own ${S.shoes} on ${S.ground}, a ${S.ball} beside them, a line of the ${S.field} across the frame, no face` },
-  { kind: 'cones',    scene: (S) => `An empty ${S.field} in flat daylight with training cones, a rebounder net and a bag of ${S.balls} left by the touchline, nobody in the frame` },
+  { kind: 'cones',    wide: true, scene: (S) => `An empty ${S.field} in flat daylight with training cones, a rebounder net and a bag of ${S.balls} left by the touchline, nobody in the frame` },
   { kind: 'back',     scene: (S) => `${S.player} from behind in ${S.kit}, walking across the ${S.field} towards ${S.goal}, a plain number on the back, floodlights on, shot on a phone from ten metres`, match: true },
-  { kind: 'night',    scene: (S) => `An empty floodlit ${S.field} at night, ${S.goal} and the fence, the lights blooming, nobody in the frame` },
+  { kind: 'night',    wide: true, scene: (S) => `An empty floodlit ${S.field} at night, ${S.goal} and the fence, the lights blooming, nobody in the frame` },
   { kind: 'gym',      scene: () => `An indoor performance gym with a strip of artificial turf, a rack of kettlebells and a sled, ceiling lights on, nobody in the frame` },
   { kind: 'recovery', scene: () => `Looking down at his own legs in black compression recovery boots on a treatment couch, a TV on the wall of the physio room, no face` },
   { kind: 'bowl',     scene: () => `A bowl of yoghurt, granola and berries held in one hand over a kitchen counter, shot looking down, no face` },
@@ -610,6 +615,7 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
     used.add(b.kind);
     return b;
   };
+  const wides = [];
   const STRONG = ['car', 'behind', 'petrol', 'garage', 'interior'];
   const r = hash(seed + '|hook') % STRONG.length;
   const hookOrder = [...STRONG.slice(r), ...STRONG.slice(0, r)];
@@ -618,10 +624,11 @@ export function enforce(scenes, { niche, appIndex = -1, seed = '', headings = []
     const hint = scene && !DREARY.test(scene) ? kindOf(scene, bank) : null;
     const b = i === 0 ? draw(times[0], hookOrder) : draw(times[i], hint ? [hint] : []);
     shots.push(b.kind);
+    wides.push(!!b.wide);
     const w = WORLDS[times[i] === 'day' ? (hash(seed + i) % 2 ? 'midday' : 'golden') : times[i] === 'dusk' ? 'bluehour' : 'night'];
     return `${b.scene(life)}. ${w.prompt} ${mistake(b.kind)}. ${CAMERA.wealth}`;
   });
-  return { scenes: out, world: { ...world, look: 'phone' }, replaced: scenes.map((_, i) => i), shots, life, times };
+  return { scenes: out, world: { ...world, look: 'phone' }, replaced: scenes.map((_, i) => i), shots, life, times, wides };
 }
 
 /**
@@ -696,7 +703,7 @@ function enforceGym(scenes, { appIndex, seed, headings, closerIsOne, world }) {
     const mis = type === 'phone' ? '' : ` ${mistakesFor(type).join(', ')}.`;
     return `${line}${mis} ${CAMERA.gym}`;
   });
-  return { scenes: out, world, replaced: out.map((_, i) => i), shots };
+  return { scenes: out, world, replaced: out.map((_, i) => i), shots, wides: out.map(() => false) };
 }
 
 /** The kitchen set: mostly objects, two frames with the cook in them, never the same kind twice. */
@@ -719,7 +726,7 @@ function enforceFood(scenes, { appIndex, seed, world }) {
     shots.push(b.kind);
     return `${b.scene()}. ${mistake()}. ${CAMERA.food}`;
   });
-  return { scenes: out, world, replaced: out.map((_, i) => i), shots };
+  return { scenes: out, world, replaced: out.map((_, i) => i), shots, wides: out.map(() => false) };
 }
 
 /**
@@ -751,7 +758,7 @@ function enforceFamily(scenes, { family, appIndex, seed, world, niche }) {
     return b;
   };
   const hookOrder = pick(FAMILY_HOOKS[family], seed + '|hook');
-  const shots = [];
+  const shots = [], wides = [];
   const out = scenes.map((scene, i) => {
     const hint = scene && !DREARY.test(scene) ? kindOf(scene, bank) : null;
     const b = i === 0 ? draw(hookOrder)
@@ -759,10 +766,11 @@ function enforceFamily(scenes, { family, appIndex, seed, world, niche }) {
       : i === scenes.length - 1 ? draw(FAMILY_CLOSER[family])
       : draw(hint ? [hint] : []);
     shots.push(b.kind);
+    wides.push(!!b.wide);
     const cam = b.match ? CAMERA.match : CAMERA[family];
     return `${b.scene(S)}. ${mistake()}. ${cam}`;
   });
-  return { scenes: out, world, replaced: out.map((_, i) => i), shots, family };
+  return { scenes: out, world, replaced: out.map((_, i) => i), shots, family, wides };
 }
 
 /**
@@ -783,11 +791,11 @@ export function direct({ spec, content, styleId, seed = '', look: wantLook, mode
   if (appIndex <= 0 && spec.assets?.app_screen && spec.requirements?.must_show_app) appIndex = scenes.length - 1;
   const ONE = /^\s*(#|no\.?|number)?\s*(1|one)\s*[—–:.\-]\s*/i;
   const closerIsOne = ONE.test(String(content.closer?.lines?.[0] ?? ''));
-  let world = null, shots = null, life = null;
+  let world = null, shots = null, life = null, wides = null;
   let look = wantLook ?? spec.assets?.look ?? 'phone';
   if (phone) {
     const e = enforce(scenes, { niche: spec.niche, appIndex: appIndex > 0 ? appIndex : -1, seed, headings: (content.ranked ?? []).map((r) => r.name), closerIsOne });
-    scenes = e.scenes; world = e.world; shots = e.shots; life = e.life ?? null;
+    scenes = e.scenes; world = e.world; shots = e.shots; life = e.life ?? null; wides = e.wides ?? null;
     // the phone formats are never graded: the reference is straight off the
     // camera roll, and the de-slop pass supplies the phone's own artefacts
     if (!wantLook) look = 'phone';
@@ -795,7 +803,7 @@ export function direct({ spec, content, styleId, seed = '', look: wantLook, mode
   // the rail style draws the Grow with Alex family: cinematic editorial
   // photographs with no recurring person and no phone-photo pass
   if (styleId === 'rail') {
-    return { scenes, world: { id: 'editorial', label: 'editorial', look: 'alex' }, look: wantLook ?? 'alex', mode: 'editorial', days: false, subject: 'none', shots: null, life: null, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood };
+    return { scenes, world: { id: 'editorial', label: 'editorial', look: 'alex' }, look: wantLook ?? 'alex', mode: 'editorial', days: false, subject: 'none', shots: null, life: null, wides: null, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood };
   }
   const family = familyFor(spec.niche);
   // sport, fashion and life hold one person across the set (F30: the
@@ -808,5 +816,5 @@ export function direct({ spec, content, styleId, seed = '', look: wantLook, mode
   const days = phone && mode === 'subject';
   const familySubject = phone && SOFT_FAMILIES.has(family) ? subjectFor(family, seed) : null;
   const subject = familySubject ?? (content.subject && content.subject !== 'none' ? content.subject : 'A lean muscular man in his early twenties, short dark hair, light stubble.');
-  return { scenes, world, look, mode, days, subject, shots, life, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood, family };
+  return { scenes, world, look, mode, days, subject, shots, life, wides, appIndex: appIndex > 0 ? appIndex : -1, isGym, isFood, family };
 }

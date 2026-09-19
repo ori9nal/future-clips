@@ -28,6 +28,10 @@ const W = 1080, H = 1350, M = 64;
 
 export default {
   id: 'bedrock',
+  /** this style prints the creator's handle in its own footer, so the sign-off is the avatar alone */
+  printsHandle: true,
+  /** above the call-to-action bar, left margin: the figure is centred and the header is top-left */
+  markAt(w, h) { const size = Math.round(w * 0.072); return { x: Math.round(w * 0.05), y: Math.round(h * 0.70), size }; },
   label: 'Bedrock',
   canvas: { w: W, h: H },
   niches: ['fitness', 'gym', 'calisthenics', 'supplements', 'health'],

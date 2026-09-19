@@ -51,7 +51,7 @@ if (args.art === 'ai') {
   const art = await generateSet({
     root: ROOT, cacheDir: path.join(ROOT, 'output/gen/cache'),
     subject: d.subject, scenes: d.scenes, look,
-    quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode: d.mode, days: d.days,
+    quality: args.quality ?? 'medium', w: 1080, h: 1920, id, mode: d.mode, days: d.days, wides: d.wides,
     appScreen: appScreenAbs && fs.existsSync(appScreenAbs) ? appScreenAbs : null,
   });
   artUsd = art.usd;

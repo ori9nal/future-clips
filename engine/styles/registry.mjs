@@ -95,7 +95,7 @@ export async function render({ spec, root, styleId, outDir, cacheDir }) {
   // all ten styles sign a deck alike; empty string when nothing was uploaded,
   // which leaves every existing set byte for byte as it was.
   if (bodies.length) {
-    const sign = signOff(spec, w, h);
+    const sign = signOff(spec, w, h, { nameAlready: !!style.printsHandle, at: style.markAt?.(w, h) ?? null });
     if (sign) bodies[bodies.length - 1] += sign;
   }
 

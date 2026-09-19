@@ -35,6 +35,20 @@ Product's rounds may have moved these (prompt changes, cache hits, `deslop` off,
 
 Reading: Clipper is right at 50% for the average customer and still profitable for a heavy one. Pro and Studio as sold today only hold 50% if customers use about half their allowance; a customer who uses everything leaves 29% / 18%. Two levers, in order: (1) bring the priority cost down (the reference image on every edit is $0.012 of the $0.027 frame; a cheaper anchor, fewer edits, cache hits), (2) set the allowances from the table at the utilisation the owner is comfortable with. Packs are safe at any use; the 600 pack is the thinnest.
 
+## The cost came down 30% (Product, 2026-09-19, P-23)
+
+Three levers, each measured: the copy model no longer writes scene prose the engine throws away, a rejection that is only about one line rewrites that line instead of the whole set, and a frame that is wide with nobody in it is drawn a tier cheaper. Verified on the same campaign and slide count: **$0.0635 → $0.0446 a priority slide, 30% down**, with the set reading as well as the one it replaces (round 30 against round 26).
+
+| Plan | Cost if fully used, before → after | Monthly, full use | Yearly rate, full use | Yearly, 60% use |
+|---|---|---|---|---|
+| Clipper | $5.44 → $4.16 | 59% | 54% (was 46%) | 64% |
+| Pro | $13.79 → $10.55 | 59% | 47% (was 37%) | 60% |
+| Studio | $33.02 → $25.26 | 55% | 48% (was 38%) | 61% |
+
+At the new cost every plan clears 50% on the monthly price even if a customer uses every slide, and comes within a couple of points of it on the yearly rate — which the old cost missed by 13 points on Pro. The allowances as sold (200 / 400 + 50 / 1,000 + 100) now sit close to the 50% line at the yearly rate rather than well under it: the line falls at 230, 354 and 925 batch slides, so Clipper has room and Pro and Studio are slightly over.
+
+Two cautions. The saving is measured on one set; the 18-set average is what to plan with until more land. And the batch figure above is scaled from the priority measurement, because the batch lane has still rendered exactly one set ever — that single $0.0272 underwrites about 80% of everything sold, and is the largest unverified number in this document.
+
 ## Applied (D-044 and D-048, 2026-09-19)
 
 Two prices per plan (D-048): monthly **$19.99 / $49.99 / $99.99**, or **$16 / $32 / $79 a month** paid yearly. Allowances are sized against the yearly rate because that is the least a customer can pay in a month, so the rule holds on either billing.

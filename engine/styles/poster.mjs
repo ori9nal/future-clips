@@ -38,6 +38,10 @@ function justified(faceKey, lines, x, y, w, o = {}) {
 
 export default {
   id: 'poster',
+  /** this style prints the creator's handle in its own footer, so the sign-off is the avatar alone */
+  printsHandle: true,
+  /** the mark sits in the empty band above the call-to-action bar, clear of the footer handle */
+  markAt(w, h) { const size = Math.round(w * 0.072); return { x: w - Math.round(w * 0.05) - size, y: Math.round(h * 0.70), size }; },
   label: 'Poster',
   canvas: { w: 1080, h: 1350 },
   niches: ['marketing', 'design', 'creator', 'social media', 'agency'],

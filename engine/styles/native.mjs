@@ -7,6 +7,8 @@ import { nativeSlides } from '../render-native.mjs';
 
 export default {
   id: 'native',
+  /** this style prints the creator's handle in its own footer, so the sign-off is the avatar alone */
+  printsHandle: true,
   label: 'Native',
   canvas: { w: 1080, h: 1920 },
   niches: ['fitness', 'gym', 'lifestyle', 'nutrition', 'supplements', 'creator'],

@@ -45,6 +45,8 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 
 export default {
   id: 'rail',
+  /** this style prints the creator's handle in its own footer, so the sign-off is the avatar alone */
+  printsHandle: true,
   label: 'Rail',
   canvas: { w: 1080, h: 1350 },
   niches: ['creator', 'design', 'marketing', 'travel', 'lifestyle', 'fashion', 'agency', 'mindset'],

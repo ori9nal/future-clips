@@ -1,94 +1,165 @@
 {
   "id": "signal-hooks",
   "brand": "SIGNAL",
-  "product": "creator toolkit",
   "niche": "marketing",
-  "status": "live",
-  "payout": {
-    "rate_usd": 1,
-    "min_payout_usd": 1,
-    "max_payout_usd": 500,
-    "budget_total_usd": 8000,
-    "budget_remaining_usd": 8000,
-    "review_days": 7,
-    "platforms": [
-      "instagram",
-      "tiktok"
-    ]
-  },
-  "requirements": {
-    "min_slides": 5,
-    "max_slides": 10,
-    "aspect": "4:5",
-    "required_mention": "@signal.studio",
-    "must_show_app": false
-  },
   "rules": {
+    "tone": "A working creator talking to another one: plain, a bit tired, specific about what they changed. Never agency voice.",
+    "disclosure": "#ad",
+    "never_bare": "Signal",
     "banned_claims": [
       "guaranteed",
       "medically proven",
       "cures",
-      "miracle"
-    ]
+      "miracle",
+      "go viral",
+      "guaranteed reach",
+      "beat the algorithm"
+    ],
+    "banned_topics": [
+      "buying followers or engagement",
+      "naming a competitor toolkit",
+      "invented view or save counts",
+      "promises about reach"
+    ],
+    "no_exclamation": true,
+    "required_phrase": "Signal Studio"
   },
+  "agency": "Halfmoon Social",
   "assets": {
+    "mascot": null,
+    "photos": {
+      "dir": "output/niche/money",
+      "credit": "Pexels"
+    },
     "palette": [
       "#0A0A0B",
       "#FFD426",
       "#FFFFFF"
     ],
-    "mascot": null,
-    "photos": {
-      "dir": "output/niche/money",
-      "credit": "Pexels"
+    "app_store": {
+      "age": "12+",
+      "theme": "dark",
+      "title": "Signal Studio: Hook Lab",
+      "rating": "4.7",
+      "ratings": "2.1K",
+      "category": "Productivity",
+      "subtitle": "Test a hook before you post",
+      "developer": "Signal Studio Ltd."
     }
   },
+  "payout": {
+    "rate_usd": 1.4,
+    "platforms": [
+      "tiktok",
+      "instagram"
+    ],
+    "review_days": 10,
+    "max_payout_usd": 400,
+    "min_payout_usd": 25,
+    "budget_total_usd": 9000,
+    "budget_remaining_usd": 9000
+  },
+  "status": "live",
   "content": {
-    "style": "poster",
     "hook": {
+      "sub": [
+        "here is what the saved ones do"
+      ],
       "lines": [
         "NOBODY",
         "SAVES A",
         "BORING",
         "CAROUSEL"
-      ],
-      "sub": [
-        "here is what the saved ones do"
+      ]
+    },
+    "style": "poster",
+    "closer": {
+      "cta": "Follow SIGNAL",
+      "lines": [
+        "SAVE THIS",
+        "THEN FIX",
+        "SLIDE ONE"
       ]
     },
     "ranked": [
       {
         "name": "Lead with a number",
-        "score": "01",
         "lines": [
           "A count tells the reader how long this will take. Four things gets swiped; some thoughts on does not.",
           "Put it in the first three words, not the second line."
-        ]
+        ],
+        "score": "01"
       },
       {
         "name": "Rank it worst to best",
-        "score": "02",
         "lines": [
           "A countdown gives the swipe a destination. Every slide promises the next one is better.",
           "Ranking forces you to have an opinion, which is the actual scarce thing."
-        ]
+        ],
+        "score": "02"
       },
       {
         "name": "One idea per slide",
-        "score": "03",
         "lines": [
           "Two ideas on a slide means neither is remembered. Split it and take the extra slide.",
           "If a slide needs a paragraph to explain, it is two slides."
-        ]
+        ],
+        "score": "03"
       }
+    ]
+  },
+  "product": "creator toolkit",
+  "guidance": {
+    "notes": [
+      "#ad belongs in the first line of the caption, never after the hashtags",
+      "Write Signal Studio in full the first time it appears on a slide",
+      "No screenshots of other people's analytics"
     ],
-    "closer": {
-      "lines": [
-        "SAVE THIS",
-        "THEN FIX",
-        "SLIDE ONE"
-      ],
-      "cta": "Follow SIGNAL"
+    "angles": [
+      "the four hooks that stopped working and what replaced them",
+      "what a saved carousel does in its first two slides",
+      "the edit i make to every first slide before posting"
+    ],
+    "hook_style": "Name the failure first, in the creator's own words, then the count. Never a question."
+  },
+  "wordmark": "Signal Studio",
+  "advertiser": "Signal Studio Ltd.",
+  "references": [
+    {
+      "url": "https://example.com/ref-1",
+      "kind": "post",
+      "note": "the cover states the failure before the promise"
+    },
+    {
+      "url": "https://example.com/ref-2",
+      "kind": "post",
+      "note": "every slide is one sentence and a number, nothing else"
     }
-  }
+  ],
+  "agency_code": "HALF-SIG-Q3",
+  "deliverables": {
+    "due": "2026-10-15",
+    "opens": "2026-09-20",
+    "closes": "2026-10-31",
+    "cta_url": "https://signalstudio.example/start",
+    "audience": "creators between five and fifty thousand followers who post carousels and cannot work out why their saves dried up",
+    "platforms": [
+      "tiktok",
+      "instagram"
+    ],
+    "sets_wanted": 3,
+    "tracking_url": "https://halfmoon.example/t/sig"
+  },
+  "requirements": {
+    "aspect": "4:5",
+    "language": "English",
+    "max_slides": 10,
+    "min_slides": 5,
+    "must_show_app": false,
+    "required_mention": "@signal.studio"
+  },
+  "agency_contact": "clips@halfmoon.example",
+  "advertiser_site": "https://signalstudio.example",
+  "advertiser_contact": "ops@signalstudio.example",
+  "agency_commission_pct": 15
 }
