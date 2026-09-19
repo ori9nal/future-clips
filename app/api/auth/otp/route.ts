@@ -13,13 +13,13 @@ import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
 const EMAIL = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/;
 
 export async function POST(req: NextRequest) {
-  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself." }, { status: 403 });
+  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself.", code: "FC_CROSS_SITE" }, { status: 403 });
   const body = (await req.json().catch(() => ({}))) as { email?: unknown; next?: unknown };
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   if (!EMAIL.test(email)) return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   // 10 requests per address per 10 minutes, 5 per email per hour (hashed keys)
   if (!(await allow(`otp:ip:${clientIp(req)}`, 10, 600)) || !(await allow(`otp:email:${email}`, 5, 3600))) {
-    return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+    return NextResponse.json({ error: TOO_MANY, code: "FC_RATE" }, { status: 429 });
   }
 
   const origin = requestOrigin(req);

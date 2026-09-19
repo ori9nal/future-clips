@@ -56,7 +56,7 @@ Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each
 | `FC_DEMO_LIMIT` | the app | the demo visitor's daily allowance (3) or the demo's (40) is used | 429 |
 | `FC_DEMO` | the app (`lib/demo.ts`), not SQL | the caller's workspace is the demo: generation, cancel and checkout are refused; reads come from shipped fixtures | 402 (generate), 409 (cancel), 403 (checkout) |
 
-Add codes; never rename one silently. New codes appear here and in `lib/sets.ts REASONS` (Product writes the sentence).
+Every refusal the app itself raises now carries a `code` too (R8): `AUTH` (401), `FC_NOT_OWNER`, `FC_CROSS_SITE`, `FC_NOT_FOUND`, `FC_RATE`, `FC_BAD_BODY`, `FC_NO_CAMPAIGN_PICKED`, `FC_NO_ASK`, `FC_ASK_LONG`, `FC_BAD_STYLE`, `FC_DEMO`, `FC_DEMO_LIMIT`, `FC_UNKNOWN`. Add codes; never rename one silently. New codes appear here and in `lib/sets.ts REASONS` (Product writes the sentence).
 
 ## Set row (`lib/sets.ts SetRow`)
 

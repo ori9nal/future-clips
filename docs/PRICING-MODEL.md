@@ -35,6 +35,12 @@ Product's rounds may have moved these (prompt changes, cache hits, `deslop` off,
 
 Reading: Clipper is right at 50% for the average customer and still profitable for a heavy one. Pro and Studio as sold today only hold 50% if customers use about half their allowance; a customer who uses everything leaves 29% / 18%. Two levers, in order: (1) bring the priority cost down (the reference image on every edit is $0.012 of the $0.027 frame; a cheaper anchor, fewer edits, cache hits), (2) set the allowances from the table at the utilisation the owner is comfortable with. Packs are safe at any use; the 600 pack is the thinnest.
 
-## Proposed numbers to decide (D-044)
+## Applied (D-044, 2026-09-19)
+
+Migration 0018 and the site: **Clipper $16 / 200**, **Pro $32 / 400 + 50 priority**, **Studio $79 / 1,000 + 100 priority**, packs unchanged. Margin at full use 46% / 37% / 38%; at the measured 60% utilisation 60% / 54% / 55%. Product's measured cost: $0.0582 a priority slide over 18 sets and 138 slides, copy billed per set (about $0.102), so a short set costs more per slide; 6 of those 18 sets paid for the copy twice because the first attempt was rejected.
+
+To raise the allowances, lower the cost first: repair a rejected copy attempt instead of paying for a new one, and drop the reference image on families that hold no single person (those frames draw at $0.038 against $0.050 for an edit). Each cent off a priority slide is about 165 more slides inside Studio's budget.
+
+## The earlier proposal (superseded)
 
 Keep the prices. If Product's current cost is at or under the measured one: Clipper 200, Pro 400 + 50 priority, Studio 1,000 + 100 priority hold 50% at 60% use and stay above 30% at full use. If Product's cost is lower, raise from the table. Packs unchanged. Whatever is chosen is one `update public.plans` per row (D-012 note) and one edit of the site's pricing cards.

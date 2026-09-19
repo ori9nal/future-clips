@@ -4,7 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 /** A partner's payout details (migration 0008). RLS scopes the row to the member's own workspace. */
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
-  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
   if (viewer.role !== "owner") return Response.json({ error: "only the workspace owner can change payout details" }, { status: 403 });
   let body: any = {};
   try { body = await req.json(); } catch { return Response.json({ error: "invalid JSON body" }, { status: 400 }); }

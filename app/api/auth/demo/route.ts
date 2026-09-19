@@ -13,8 +13,8 @@ import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
  */
 export async function GET(req: NextRequest) {
   const host = req.headers.get("x-forwarded-host") ?? req.headers.get("host");
-  if (!isDemoHost(host)) return NextResponse.json({ error: "not found" }, { status: 404 });
-  if (!(await allow(`demo-login:ip:${clientIp(req)}`, 20, 600))) return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+  if (!isDemoHost(host)) return NextResponse.json({ error: "not found", code: "FC_NOT_FOUND" }, { status: 404 });
+  if (!(await allow(`demo-login:ip:${clientIp(req)}`, 20, 600))) return NextResponse.json({ error: TOO_MANY, code: "FC_RATE" }, { status: 429 });
 
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();

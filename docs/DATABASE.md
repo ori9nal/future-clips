@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-19, after 0015)
+## Migration state (2026-09-19, after 0018)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -23,6 +23,8 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0013_demo_workspace.sql` | `demo_workspace` (2026-09-18) | yes | `orgs.is_demo`, the shared demo org (Clipper, 500 seats), `fc_demo_org_id()`, platform owners may read demo orgs, `orgs_protect_billing` also guards `is_demo` |
 | `0014_dev_accounts.sql` | `dev_accounts` (2026-09-19) | yes | "Product test workspace" (`grind`, 5 seats, $10 cap) and invite rows for `demo@` and `tester@thefutureclips.com` |
 | `0015_demo_generation.sql` | `demo_generation` (2026-09-19) | yes | `fc_reserve_set` reads the org first and accepts a 4-slide range for demo orgs (5 for everyone else), skips the priority allowance for demo orgs; demo org `spend_cap_usd` 15 |
+| `0017_rate_limit_peek.sql` | `rate_limit_peek` (2026-09-19) | yes | `fc_rate_limit_peek(key, limit, window_s)` reads a limiter without spending a slot (R16); service role only |
+| `0018_allowances_at_margin.sql` | `allowances_at_margin` (2026-09-19) | yes | D-044 applied: Clipper 200, Pro 400 + 50, Studio 1,000 + 100, `cogs_allowance_usd` recomputed |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 
@@ -46,7 +48,7 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | `signups` | the old waitlist (3 rows); no code reads or writes it | – | nobody (anon insert policy dropped in 0009) |
 | `creators`, `brand_kits`, `pairing_history`, `jobs` | schema for own-creator, brand lock, pairing rotation, a generic queue; unused by code | – | own org (jobs: no policies) |
 
-Live plan rows after 0010 (2026-09-18): `free` "No plan", 0 slides; `solo` "Clipper" $16, 200 slides; `grind` "Pro" $32, 500 slides + 50 priority, HD included (an HD slide draws 3), 1 seat; `agency` "Studio" $79, 1,500 slides + 150 priority, HD included, 5 seats. `packs`: p100 $8, p250 $18, p600 $40. `orgs.slide_balance` holds purchased slides (spent after the allowance, never expire); `sets.from_balance` records how many a set drew from it.
+Live plan rows after 0018 (2026-09-19): `free` "No plan", 0 slides; `solo` "Clipper" $16, 200 slides; `grind` "Pro" $32, 400 slides + 50 priority, HD included (an HD slide draws 3), 1 seat; `agency` "Studio" $79, 1,000 slides + 100 priority, HD included, 5 seats (D-044). `packs`: p100 $8, p250 $18, p600 $40. `orgs.slide_balance` holds purchased slides (spent after the allowance, never expire); `sets.from_balance` records how many a set drew from it.
 
 ## Functions
 
@@ -58,6 +60,7 @@ Live plan rows after 0010 (2026-09-18): `free` "No plan", 0 slides; `solo` "Clip
 | `fc_release_set(p_set, p_error, p_cost)` | definer | service role | fail the set, return every reserved slide, record partial cost |
 | `fc_period_start(uuid)`, `fc_reserve_rate(lane, hd)` | definer / invoker | service role | billing period; $0.03 batch, $0.06 priority, ×3 HD |
 | `fc_credit_pack(p_org, p_pack, p_note) → integer` | definer | service role (the webhook; the admin by hand) | adds a pack's slides to `orgs.slide_balance`, ledger `credit` |
+| `fc_rate_limit_peek(p_key, p_limit, p_window_s) → integer` | definer | service role | how many are left on a limiter, without spending one (R16) |
 | `fc_rate_limit(p_key, p_limit, p_window_s) → boolean` | definer | service role | true while the key is under the limit in the window; `lib/ratelimit.ts` hashes the key first; a laptop without the service role has no limiter |
 | `fc_record_sale(p_org, p_payment_id, p_sku, p_gross_usd, p_note) → numeric` | definer | service role | earmarks `gross × provider_reserve.share` in `fund_ledger`; a repeat payment id is ignored |
 | `fc_demo_org_id() → uuid` | definer, stable | authenticated | the demo workspace's id, for the admin's invite form |

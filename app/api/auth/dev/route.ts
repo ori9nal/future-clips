@@ -11,9 +11,9 @@ import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
 const WHO: Record<string, string> = { demo: "demo@thefutureclips.com", tester: "tester@thefutureclips.com" };
 
 export async function POST(req: NextRequest) {
-  if (process.env.NODE_ENV === "production" || process.env.FC_DEV_LOGIN !== "1") return NextResponse.json({ error: "not found" }, { status: 404 });
-  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself." }, { status: 403 });
-  if (!(await allow(`dev:ip:${clientIp(req)}`, 30, 600))) return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+  if (process.env.NODE_ENV === "production" || process.env.FC_DEV_LOGIN !== "1") return NextResponse.json({ error: "not found", code: "FC_NOT_FOUND" }, { status: 404 });
+  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself.", code: "FC_CROSS_SITE" }, { status: 403 });
+  if (!(await allow(`dev:ip:${clientIp(req)}`, 30, 600))) return NextResponse.json({ error: TOO_MANY, code: "FC_RATE" }, { status: 429 });
   const body = (await req.json().catch(() => ({}))) as { who?: unknown; next?: unknown };
   const email = WHO[String(body.who ?? "")];
   const password = process.env.FC_DEV_PASSWORD;

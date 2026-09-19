@@ -9,11 +9,11 @@ import { isDemo, DEMO_REASON } from "@/lib/demo";
  * Only an owner of the workspace may buy for it.
  */
 export async function POST(req: Request) {
-  if (!sameOrigin(req)) return Response.json({ error: "cross-site request" }, { status: 403 });
+  if (!sameOrigin(req)) return Response.json({ error: "cross-site request", code: "FC_CROSS_SITE" }, { status: 403 });
   const viewer = await viewerForRequest();
-  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
   if (isDemo(viewer)) return Response.json({ error: DEMO_REASON, code: "FC_DEMO", url: "https://www.thefutureclips.com/#pricing" }, { status: 403 });
-  if (viewer.role !== "owner") return Response.json({ error: "only the workspace owner can change billing" }, { status: 403 });
+  if (viewer.role !== "owner") return Response.json({ error: "only the workspace owner can change billing", code: "FC_NOT_OWNER" }, { status: 403 });
   if (!dodoEnabled()) return Response.json({ error: "checkout is not connected yet — email team@thefutureclips.com" }, { status: 503 });
   let body: any = {};
   try { body = await req.json(); } catch { /* empty */ }

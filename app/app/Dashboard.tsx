@@ -27,7 +27,7 @@ type Spec = {
   content?: { style?: string };
   guidance?: { angles?: string[]; hook_style?: string };
 };
-type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number };
+type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number; /** carousels this visitor has left today, and the daily allowance (R16); undefined when there is no limiter */ demoLeft?: number; demoPerVisitor?: number };
 type Page = "create" | "library" | "campaigns" | "insights" | "partners" | "settings";
 type Partners = { summary: AgencySummary; referred: ReferredOrg[]; commissions: Commission[] };
 type SetView = SetRow & { label?: string; urls?: string[] };

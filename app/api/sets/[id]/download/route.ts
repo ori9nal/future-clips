@@ -14,14 +14,14 @@ export const maxDuration = 60;
  */
 export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> }) {
   const viewer = await viewerForRequest();
-  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
   const { id } = await ctx.params;
   const files: { name: string; data: Uint8Array }[] = [];
   let set;
   if (isDemo(viewer) && id.startsWith("demo-")) {
     // the demo's shipped examples live under public/demo; resolve inside that folder only
     const d = demoWorkspaceSet(viewer.org.id, id);
-    if (!d) return Response.json({ error: "not found" }, { status: 404 });
+    if (!d) return Response.json({ error: "not found", code: "FC_NOT_FOUND" }, { status: 404 });
     const base = path.resolve(process.cwd(), "public", "demo");
     for (const url of d.urls) {
       const file = path.resolve(process.cwd(), "public", `.${url}`);
@@ -32,7 +32,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   } else {
     const sb = await createClient();
     set = await getSet(sb, id);
-    if (!set) return Response.json({ error: "not found" }, { status: 404 });
+    if (!set) return Response.json({ error: "not found", code: "FC_NOT_FOUND" }, { status: 404 });
     if (set.status !== "done" || !set.files_json?.length) return Response.json({ error: "not finished" }, { status: 409 });
     for (const p of set.files_json) {
       const { data, error } = await sb.storage.from("sets").download(p);

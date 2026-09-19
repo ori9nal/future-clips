@@ -17,8 +17,8 @@ export const maxDuration = 300;
  */
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
-  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
-  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only" }, { status: 403 });
+  if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
+  if (!viewer.isPlatformOwner) return Response.json({ error: "platform owners only", code: "FC_NOT_OWNER" }, { status: 403 });
   let body: any;
   try { body = await req.json(); } catch { return Response.json({ error: "invalid JSON body" }, { status: 400 }); }
 

@@ -32,15 +32,36 @@ async function engine() {
   return { lanes, image };
 }
 
-/** Storage-backed mirror of the frame cache (bucket `cache`, private). */
+/**
+ * Storage-backed mirror of the frame cache (bucket `cache`, private).
+ *
+ * Two kinds of object share it: a frame (`img-<id>.png`) and the record of
+ * what the metadata gate stripped from that frame (`img-<id>-stripped.json`,
+ * pushed under the id `<id>-stripped` by engine/providers/image.mjs). The
+ * name and the content type follow the id's suffix so a JSON record is not
+ * stored as a PNG (Product, 2026-09-19). Old objects written before this
+ * are still found: a miss on the new name falls back to the old one.
+ */
 function cacheStore(sb: SupabaseClient) {
+  const objectFor = (id: string) =>
+    id.endsWith("-stripped")
+      ? { path: `img-${id.slice(0, -"-stripped".length)}-stripped.json`, type: "application/json" }
+      : { path: `img-${id}.png`, type: "image/png" };
   return {
     async pull(id: string) {
-      const { data } = await sb.storage.from("cache").download(`img-${id}.png`);
-      return data ? Buffer.from(await data.arrayBuffer()) : null;
+      const { path, type } = objectFor(id);
+      const { data } = await sb.storage.from("cache").download(path);
+      if (data) return Buffer.from(await data.arrayBuffer());
+      if (type === "application/json") {
+        // written before the rename: the record lived under a .png name
+        const { data: old } = await sb.storage.from("cache").download(`img-${id}.png`);
+        if (old) return Buffer.from(await old.arrayBuffer());
+      }
+      return null;
     },
     async push(id: string, bytes: Buffer) {
-      await sb.storage.from("cache").upload(`img-${id}.png`, bytes, { contentType: "image/png", upsert: true });
+      const { path, type } = objectFor(id);
+      await sb.storage.from("cache").upload(path, bytes, { contentType: type, upsert: true });
     },
   };
 }

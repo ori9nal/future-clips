@@ -10,10 +10,10 @@ import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
  * /auth/callback?code=… like the magic link does.
  */
 export async function POST(req: NextRequest) {
-  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself." }, { status: 403 });
+  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself.", code: "FC_CROSS_SITE" }, { status: 403 });
   if (process.env.NEXT_PUBLIC_GOOGLE_AUTH !== "1") return NextResponse.json({ error: "Google sign-in is not enabled." }, { status: 404 });
   const body = (await req.json().catch(() => ({}))) as { next?: unknown };
-  if (!(await allow(`google:ip:${clientIp(req)}`, 20, 600))) return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+  if (!(await allow(`google:ip:${clientIp(req)}`, 20, 600))) return NextResponse.json({ error: TOO_MANY, code: "FC_RATE" }, { status: 429 });
 
   const origin = requestOrigin(req);
   const supabase = await createClient();

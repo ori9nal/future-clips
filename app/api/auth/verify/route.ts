@@ -12,7 +12,7 @@ import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
 const EMAIL = /^[^@\s]+@[^@\s.]+\.[^@\s]+$/;
 
 export async function POST(req: NextRequest) {
-  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself." }, { status: 403 });
+  if (!sameOrigin(req)) return NextResponse.json({ error: "Sign in from the app itself.", code: "FC_CROSS_SITE" }, { status: 403 });
   const body = (await req.json().catch(() => ({}))) as { email?: unknown; token?: unknown; next?: unknown };
   const email = typeof body.email === "string" ? body.email.trim().toLowerCase() : "";
   const token = typeof body.token === "string" ? body.token.replace(/\D/g, "") : "";
@@ -20,7 +20,7 @@ export async function POST(req: NextRequest) {
   if (token.length < 6) return NextResponse.json({ error: "Enter the 6-digit code from the email." }, { status: 400 });
   // a code has a million values: 10 tries per address per 10 minutes, 6 per email per 15 minutes
   if (!(await allow(`verify:ip:${clientIp(req)}`, 10, 600)) || !(await allow(`verify:email:${email}`, 6, 900))) {
-    return NextResponse.json({ error: TOO_MANY }, { status: 429 });
+    return NextResponse.json({ error: TOO_MANY, code: "FC_RATE" }, { status: 429 });
   }
 
   const supabase = await createClient();

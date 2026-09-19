@@ -4,9 +4,9 @@ import { requestOrigin, sameOrigin } from "@/lib/login";
 
 /** Dodo's customer portal for the workspace's subscription (card, invoices, cancel). */
 export async function POST(req: Request) {
-  if (!sameOrigin(req)) return Response.json({ error: "cross-site request" }, { status: 403 });
+  if (!sameOrigin(req)) return Response.json({ error: "cross-site request", code: "FC_CROSS_SITE" }, { status: 403 });
   const viewer = await viewerForRequest();
-  if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
   if (!dodoEnabled()) return Response.json({ error: "billing is not connected yet" }, { status: 503 });
   const customer = (viewer.org as any).billing_customer_id as string | null | undefined;
   if (!customer) return Response.json({ error: "no subscription on file for this workspace" }, { status: 404 });

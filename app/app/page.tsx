@@ -8,6 +8,8 @@ import { hasServiceRole } from "@/lib/supabase/admin";
 import { getAgencySummary, listReferred, listCommissions } from "@/lib/referrals";
 import { dodoEnabled } from "@/lib/billing/dodo";
 import { demo, demoAccount, demoPartners, demoSets, isDemo, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, demoGenerationOn, DEMO_SLIDES } from "@/lib/demo";
+import { headers } from "next/headers";
+import { remaining, DEMO_LIMITS } from "@/lib/ratelimit";
 import Dashboard from "./Dashboard";
 import PartnerDashboard from "./PartnerDashboard";
 
@@ -24,9 +26,13 @@ export default async function AppHome() {
   if (isDemo(viewer)) {
     // the examples ship with the app; anything this visitor made in the demo is a real row
     const mine = demoGenerationOn() ? await listSets(await createClient(), viewer.org.id, { userId: viewer.user.id }) : [];
+    // how many this visitor has left today, read without spending one (R16)
+    const h = await headers();
+    const ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "unknown";
+    const demoLeft = demoGenerationOn() ? await remaining(`demo:sets:ip:${ip}`, DEMO_LIMITS.perVisitor, DEMO_LIMITS.windowSeconds) : null;
     return (
       <Dashboard
-        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true, demoSlides: demoGenerationOn() ? DEMO_SLIDES : undefined }}
+        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true, demoSlides: demoGenerationOn() ? DEMO_SLIDES : undefined, demoLeft: demoLeft ?? undefined, demoPerVisitor: DEMO_LIMITS.perVisitor }}
         specs={demoWorkspaceSpecs()}
         account={demoWorkspaceAccount()}
         sets={[...mine, ...demoWorkspaceSets(viewer.org.id)]}

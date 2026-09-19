@@ -22,7 +22,7 @@ const TYPES: Record<string, string> = {
 export async function GET(_req: Request, ctx: { params: Promise<{ path: string[] }> }) {
   if (!devPreview()) {
     const viewer = await viewerForRequest();
-    if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+    if (!viewer) return Response.json({ error: "sign in required", code: "AUTH" }, { status: 401 });
   }
   const { path: parts } = await ctx.params;
   const { base } = workDirs();

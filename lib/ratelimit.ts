@@ -24,3 +24,24 @@ export function clientIp(req: Request): string {
 }
 
 export const TOO_MANY = "Too many sign-in requests from here. Wait a few minutes and try again.";
+
+/**
+ * How many the caller has left on a limiter, without spending one (R16).
+ * Returns null when there is no limiter on this host, so a caller can tell
+ * "unlimited here" apart from "none left".
+ */
+export async function remaining(key: string, limit: number, windowSeconds: number): Promise<number | null> {
+  if (!hasServiceRole()) return null;
+  const hashed = createHash("sha256").update(key).digest("hex");
+  const { data, error } = await adminClient().rpc("fc_rate_limit_peek", { p_key: hashed, p_limit: limit, p_window_s: windowSeconds });
+  if (error) { console.warn(`rate limiter unavailable: ${error.message}`); return null; }
+  return typeof data === "number" ? data : null;
+}
+
+/**
+ * What the demo allows in a day. One visitor's three carousels are the
+ * headline; the second number stops one busy day from spending the demo
+ * workspace's whole monthly budget (orgs.spend_cap_usd, migration 0015 —
+ * raising it is one update).
+ */
+export const DEMO_LIMITS = { perVisitor: 3, perDay: 15, windowSeconds: 86400 } as const;
