@@ -54,7 +54,12 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
         viewer={viewer}
         readOnly
         engineOn
-        fund={{ gross_usd: 1_249.83, reserve_usd: 437.44, spent_usd: 118.62, balance_usd: 318.82, sales: 37, share: 0.35, since: new Date(Date.now() - 24 * 86400000).toISOString() }}
+        fund={{
+          gross_usd: 1_249.83, reserve_usd: 437.44, spent_usd: 118.62, balance_usd: 318.82, sales: 37, share: 0.35,
+          since: new Date(Date.now() - 24 * 86400000).toISOString(),
+          anthropic_usd: 41.17, openai_usd: 77.45, unsplit_usd: 0,
+          anthropic_day: 1.37, openai_day: 2.58, anthropic_float: 41.1, openai_float: 77.4, float_days: 30,
+        }}
         specs={SPECS.map((c) => ({ id: c.id, brand: c.brand, niche: c.niche, status: "live", content: { style: (c as { content?: { style?: string } }).content?.style }, requirements: c.requirements }))}
         campaigns={[
           { id: "meridian-endurance", name: "Meridian Endurance", niche: "fitness", brand: { handle: "@meridian.endurance", colors: { ink: "#171512", accents: { rust: "#A8442A" } } }, rules: { min_slides: 5, max_slides: 10, zero_gen_mode: false }, agency: { code: "MERIDIAN25" } },

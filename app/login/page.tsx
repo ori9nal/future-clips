@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { planNext } from "@/lib/login";
 import { BrandMark } from "@/components/BrandMark";
 import { LoginForm } from "./LoginForm";
 import { DevLogin } from "./DevLogin";
@@ -15,8 +16,11 @@ export const dynamic = "force-dynamic";
  */
 export default async function LoginPage({
   searchParams,
-}: { searchParams: Promise<{ next?: string; error?: string }> }) {
-  const { next, error } = await searchParams;
+}: { searchParams: Promise<{ next?: string; error?: string; plan?: string }> }) {
+  const { next, error, plan } = await searchParams;
+  // the site's pricing cards link here with ?plan=clipper|pro|studio; keep that
+  // choice alive through sign-in instead of dropping the visitor on /app
+  const land = next ?? planNext(plan) ?? "/app";
   return (
     <main className="fc fc-login">
       <div className="fc-login-card">
@@ -28,8 +32,8 @@ export default async function LoginPage({
         <p className="fc-sub">
           We email you a link. No password. Access is by invite while we are in private beta.
         </p>
-        <LoginForm next={next ?? "/app"} initialError={error ?? null} googleEnabled={process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1"} />
-        {process.env.NODE_ENV !== "production" && process.env.FC_DEV_LOGIN === "1" && <DevLogin next={next ?? "/app"} />}
+        <LoginForm next={land} initialError={error ?? null} googleEnabled={process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1"} />
+        {process.env.NODE_ENV !== "production" && process.env.FC_DEV_LOGIN === "1" && <DevLogin next={land} />}
         <LegalFooter />
       </div>
     </main>

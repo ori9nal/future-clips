@@ -107,6 +107,9 @@ nav.mob.open{display:flex}
 .hero{text-align:center;padding-top:70px}
 .pill{display:inline-flex;align-items:center;gap:10px;background:#fff;border:1px solid #E6E3DB;border-radius:999px;padding:6px 16px 6px 7px;font-family:'IBM Plex Mono',monospace;font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--body);margin-bottom:26px}
 .pill b{background:var(--lime);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:10.5px;font-weight:500}
+.pill .t{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);letter-spacing:.04em}
+.pill.done b{background:var(--ink);color:var(--lime)}
+@media (max-width:560px){.pill .cd-tail{display:none}}
 h1{font-stretch:112%;font-weight:700;font-size:clamp(2.2rem,5.6vw,4.2rem);line-height:1.04;max-width:17ch;margin-inline:auto;text-wrap:balance}
 .mark{background:var(--lime);padding:0 .1em;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .sub{margin:24px auto 0;max-width:52ch;font-size:18.5px;line-height:1.55}
@@ -448,7 +451,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill rise"><b>Pre-launch</b> Founding prices locked</span>
+    <span class="pill rise cd" id="cd" data-at="2026-09-19T12:00:00Z"><b>Launch</b> <span id="cdt">in <time datetime="2026-09-19T12:00:00Z">19 Sep, 12:00 UTC</time></span><span class="cd-tail"> · founding prices locked</span></span>
     <h1 class="rise">Turn one idea into a <span class="mark">viral carousel</span> in two minutes</h1>
     <p class="sub rise">Enter a topic. Pick your style. Get a ready-to-post carousel with the same character on every slide, a hook that stops the scroll, and no AI watermark anywhere.</p>
     <div class="hbtns rise">
@@ -617,7 +620,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
       <div class="plan rv">
         <div class="ptop"><h3 class="pname">Clipper</h3></div>
         <p class="pprice"><b data-m="$19.99" data-y="$16">$16</b><span>/mo</span><del class="yonly">$19.99</del></p>
-        <p class="punit">200 slides a month · billed yearly, or $19.99 monthly</p>
+        <p class="punit"><span>200 slides a month</span> · <span class="pterm" data-m="billed monthly, or $16/mo paid yearly" data-y="billed yearly, or $19.99 monthly">billed yearly, or $19.99 monthly</span></p>
         <p class="pfor">~25 carousels. One account, posting daily.</p>
         <ul class="plist">
           <li><span class="tick">✓</span>200 slides a month</li>
@@ -635,7 +638,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
       <div class="plan pro rv">
         <div class="ptop"><h3 class="pname">Pro</h3><span class="pbadge">Most popular</span></div>
         <p class="pprice"><b data-m="$49.99" data-y="$32">$32</b><span>/mo</span><del class="yonly">$49.99</del></p>
-        <p class="punit">400 slides a month · billed yearly, or $49.99 monthly</p>
+        <p class="punit"><span>400 slides a month</span> · <span class="pterm" data-m="billed monthly, or $32/mo paid yearly" data-y="billed yearly, or $49.99 monthly">billed yearly, or $49.99 monthly</span></p>
         <p class="pfor">~62 carousels. Two posts a day, or two accounts.</p>
         <ul class="plist">
           <li><span class="tick">✓</span><b>400 slides a month — 2x more</b></li>
@@ -653,7 +656,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
       <div class="plan studio rv">
         <div class="ptop"><h3 class="pname">Studio</h3><span class="pbadge">For teams</span></div>
         <p class="pprice"><b data-m="$99.99" data-y="$79">$79</b><span>/mo</span><del class="yonly">$99.99</del></p>
-        <p class="punit">1,000 slides a month · billed yearly, or $99.99 monthly</p>
+        <p class="punit"><span>1,000 slides a month</span> · <span class="pterm" data-m="billed monthly, or $79/mo paid yearly" data-y="billed yearly, or $99.99 monthly">billed yearly, or $99.99 monthly</span></p>
         <p class="pfor">~187 carousels. Agencies running a roster.</p>
         <ul class="plist">
           <li><span class="tick">✓</span><b>1,000 slides a month</b></li>
@@ -801,6 +804,9 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
   function render(y){
     document.querySelectorAll('.pprice b').forEach(function(b){b.textContent=y?b.dataset.y:b.dataset.m;});
     document.querySelectorAll('.yonly').forEach(function(d){d.style.display=y?'inline':'none';});
+    // the line under the price has to follow the toggle too: on monthly it
+    // used to keep saying "billed yearly", which contradicted the price above it
+    document.querySelectorAll('.pterm').forEach(function(t){t.textContent=y?t.dataset.y:t.dataset.m;});
     lblY.classList.toggle('on',y);lblM.classList.toggle('on',!y);
     sw.setAttribute('aria-checked',y?'true':'false');
   }
@@ -874,6 +880,40 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
     el.style.transitionDelay=(Math.min(i%3,2)*70)+'ms';
     io.observe(el);
   });
+})();
+
+// launch countdown — the pill ticks down to the moment in its data-at, then
+// flips to "live". Everything is computed from Date.now(), so a visitor in any
+// timezone sees the same remaining time; the no-JS markup already names the
+// moment in UTC, which is what a reader needs if this never runs.
+(function(){
+  var el=document.getElementById('cd'), out=document.getElementById('cdt');
+  if(!el||!out) return;
+  var at=Date.parse(el.getAttribute('data-at'));
+  if(isNaN(at)) return;
+  var pad=function(n){ return n<10?'0'+n:''+n; };
+  var t=new Date(at);
+  var when=pad(t.getUTCHours())+':'+pad(t.getUTCMinutes())+' UTC';
+  var timer;
+  function tick(){
+    var left=at-Date.now();
+    if(left<=0){
+      el.classList.add('done');
+      el.querySelector('b').textContent='Live';
+      out.textContent='now';
+      var tail=el.querySelector('.cd-tail');
+      if(tail) tail.textContent=' · founding prices still locked';
+      clearInterval(timer);
+      return;
+    }
+    var s=Math.floor(left/1000), d=Math.floor(s/86400);
+    var h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), sec=s%60;
+    // the numbers alone do not say WHEN: a reader planning around it needs the
+    // moment as well as the distance to it
+    out.innerHTML='in <span class="t">'+(d?d+'d ':'')+pad(h)+':'+pad(m)+':'+pad(sec)+'</span> · '+when;
+  }
+  tick();
+  timer=setInterval(tick,1000);
 })();
 
 // casual image protection

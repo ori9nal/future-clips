@@ -123,6 +123,9 @@ html[data-theme="dark"] .meter .bar i { background: var(--lime); }
 .btn:disabled { opacity: .5; cursor: not-allowed; }
 .btn.primary { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
 .btn.primary:hover { filter: brightness(.96); }
+/* the plan the visitor picked on the site, carried through sign-in */
+.btn.go { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.btn.go:hover { filter: brightness(.96); }
 .btn.primary:disabled { background: var(--hover); border-color: var(--line); color: var(--text-3); opacity: 1; }
 .btn.quiet { border-color: transparent; background: transparent; color: var(--text-2); }
 .btn.quiet:hover { background: var(--hover); color: var(--text); }

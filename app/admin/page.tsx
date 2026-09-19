@@ -14,7 +14,13 @@ async function fundSummary(sb: Awaited<ReturnType<typeof createClient>>): Promis
     const row = (Array.isArray(data) ? data[0] : data) as Record<string, unknown> | undefined;
     if (!row) return null;
     const n = (k: string) => Number(row[k] ?? 0);
-    return { gross_usd: n("gross_usd"), reserve_usd: n("reserve_usd"), spent_usd: n("spent_usd"), balance_usd: n("balance_usd"), sales: n("sales"), share: n("share"), since: (row.since as string | null) ?? null };
+    return {
+      gross_usd: n("gross_usd"), reserve_usd: n("reserve_usd"), spent_usd: n("spent_usd"), balance_usd: n("balance_usd"),
+      sales: n("sales"), share: n("share"), since: (row.since as string | null) ?? null,
+      anthropic_usd: n("anthropic_usd"), openai_usd: n("openai_usd"), unsplit_usd: n("unsplit_usd"),
+      anthropic_day: n("anthropic_day"), openai_day: n("openai_day"),
+      anthropic_float: n("anthropic_float"), openai_float: n("openai_float"), float_days: n("float_days") || 30,
+    };
   } catch {
     return null;
   }

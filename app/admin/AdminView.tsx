@@ -8,7 +8,13 @@ import type { Viewer } from "@/lib/auth";
  * behind it) and `/design-preview?view=admin` (fixtures, no session) render
  * exactly the same thing. The page loads, this draws.
  */
-export type Fund = { gross_usd: number; reserve_usd: number; spent_usd: number; balance_usd: number; sales: number; share: number; since: string | null };
+export type Fund = {
+  gross_usd: number; reserve_usd: number; spent_usd: number; balance_usd: number; sales: number; share: number; since: string | null;
+  /** the split (migration 0021): what each provider has consumed, its daily burn, and what to keep loaded there */
+  anthropic_usd: number; openai_usd: number; unsplit_usd: number;
+  anthropic_day: number; openai_day: number;
+  anthropic_float: number; openai_float: number; float_days: number;
+};
 export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number } };
 export type AdminCampaign = { id: string; name: string; niche: string; brand: { handle?: string; colors: { ink: string; accents: Record<string, string> } }; rules: { min_slides: number; max_slides: number; zero_gen_mode?: boolean }; agency?: { code?: string } | null };
 
@@ -56,9 +62,38 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, re
                 </tr>
               </tbody>
             </table>
+            <div className="fc-grid" style={{ marginTop: 14 }}>
+              {[
+                { name: "Anthropic", what: "writes the copy", spent: fund.anthropic_usd, day: fund.anthropic_day, float: fund.anthropic_float, href: "https://console.anthropic.com/settings/billing" },
+                { name: "OpenAI", what: "draws the frames", spent: fund.openai_usd, day: fund.openai_day, float: fund.openai_float, href: "https://platform.openai.com/settings/organization/billing/overview" },
+              ].map((p) => (
+                <div key={p.name} className="fc-tile" style={{ cursor: "default" }}>
+                  <div>
+                    <h3>{p.name}</h3>
+                    <p className="fc-handle">{p.what}</p>
+                  </div>
+                  <div className="fc-meta">
+                    <div><span>Consumed</span><b>{usd(p.spent)}</b></div>
+                    <div><span>A day</span><b>{p.day > 0 ? usd(p.day) : "—"}</b></div>
+                    <div><span>Keep loaded</span><b>{usd(p.float)}</b></div>
+                  </div>
+                  <p className="fc-note" style={{ marginTop: 8 }}>
+                    {p.day > 0
+                      ? <>{fund.float_days} days at the measured rate. </>
+                      : <>No rendering measured yet, so this is the floor. </>}
+                    <a href={p.href} target="_blank" rel="noreferrer noopener">Top up →</a>
+                  </p>
+                </div>
+              ))}
+            </div>
             <p className="fc-note" style={{ marginTop: 10 }}>
-              Every Dodo payment earmarks this share for the model providers; rendering draws it down at real provider cost.
-              Keep auto-recharge on in both consoles and top them up from the balance. The share is <code>app_settings.provider_reserve</code>.
+              Every Dodo payment earmarks <b>{Math.round(fund.share * 100)}%</b> of it for the model providers; rendering draws the
+              earmark down at real provider cost, and each set records what it spent with each of them separately
+              (<code>spend_ledger.copy_usd</code> / <code>art_usd</code>, migration 0021). Providers cannot be paid by API, so
+              keep auto-recharge on in both consoles and hold the “keep loaded” figure there — it is {fund.float_days} days of the
+              measured burn, never less than the floor. The share is <code>app_settings.provider_reserve</code>; the float is
+              <code>app_settings.provider_float</code>.
+              {fund.unsplit_usd > 0 ? <> {usd(fund.unsplit_usd)} was spent before the split existed and is not attributed.</> : null}
             </p>
           </>
         ) : (

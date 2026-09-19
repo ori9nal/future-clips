@@ -124,6 +124,8 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [query, setQuery] = useState("");
   const [pickQ, setPickQ] = useState("");
   const [tab, setTab] = useState<"acct" | "plan" | "gen">("acct");
+  // the plan the visitor chose on the site, carried through sign-in (lib/login.ts)
+  const [want, setWant] = useState<"solo" | "grind" | "agency" | null>(null);
   const [engineGone, setEngineGone] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -142,8 +144,14 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     const pg = q.get("page") as Page | null, tb = q.get("tab");
     if (pg && pg in TITLES) setPage(pg);
     if (tb === "acct" || tb === "plan" || tb === "gen") setTab(tb);
+    // ?want= is the plan the visitor clicked on the site before signing in
+    const w = q.get("want");
+    if (w === "solo" || w === "grind" || w === "agency") setWant(w);
     if (q.get("checkout") === "done") window.setTimeout(() => say("Thanks. Your plan updates as soon as the payment is confirmed."), 400);
-    if (pg || tb || q.get("checkout")) window.history.replaceState(null, "", "/app");
+    // requirePlatformOwner() sends anyone else here; say so rather than
+    // dropping them on the dashboard with an unexplained query string
+    if (q.get("denied") === "admin") window.setTimeout(() => say("The admin area is for the Future Clips team."), 400);
+    if (pg || tb || w || q.get("checkout") || q.get("denied")) window.history.replaceState(null, "", "/app");
   }, [specs, say]);
   const applyTheme = (t: Theme) => {
     setTheme(t);
@@ -691,7 +699,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     <div className="rowi"><div className="l"><b>{label} plan</b><small>{account.plan.slides_per_month ? `${account.plan.slides_per_month} slides a month` : "No plan yet"}{account.plan.priority_slides_per_month ? `, ${account.plan.priority_slides_per_month} priority` : ""}{hdIncluded ? ", HD included" : ""}{account.periodEnd ? `, renews ${new Date(account.periodEnd).toLocaleDateString()}` : ""}</small></div>
                       <div className="r">
                         {(["solo", "grind", "agency"] as const).filter((p) => p !== account.plan.id).map((p) => (
-                          <button key={p} className="btn sm" disabled={busy} onClick={() => buy({ plan: p })}>{!paid ? "Choose" : ["solo", "grind", "agency"].indexOf(p) > ["solo", "grind", "agency"].indexOf(account.plan.id) ? "Upgrade to" : "Switch to"} {PLAN_LABELS[p]}</button>
+                          <button key={p} className={`btn sm${want === p ? " go" : ""}`} disabled={busy} onClick={() => buy({ plan: p })}>{want === p ? "Continue to" : !paid ? "Choose" : ["solo", "grind", "agency"].indexOf(p) > ["solo", "grind", "agency"].indexOf(account.plan.id) ? "Upgrade to" : "Switch to"} {PLAN_LABELS[p]}</button>
                         ))}
                         <a className="btn quiet sm" href="https://www.thefutureclips.com/#pricing">Compare plans</a>
                       </div></div>

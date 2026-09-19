@@ -57,3 +57,27 @@ export function loginError(message: string): { error: string; status: number } {
   }
   return { error: message, status: 400 };
 }
+
+/**
+ * The plan a visitor clicked on the site, as the app's own plan id.
+ *
+ * The pricing cards link to `/signup?plan=clipper|pro|studio`, which the site
+ * forwards to `/login?plan=…`. Nothing read it, so a visitor who picked a plan
+ * signed in and landed on an empty dashboard with their choice forgotten.
+ */
+const PLAN_IDS: Record<string, string> = {
+  clipper: "solo", solo: "solo",
+  pro: "grind", grind: "grind",
+  studio: "agency", agency: "agency",
+};
+
+export function planTarget(raw: unknown): string | null {
+  const key = String(raw ?? "").trim().toLowerCase();
+  return PLAN_IDS[key] ?? null;
+}
+
+/** Where a visitor who picked a plan should land once they are signed in. */
+export function planNext(raw: unknown): string | null {
+  const id = planTarget(raw);
+  return id ? `/app?page=settings&tab=plan&want=${id}` : null;
+}
