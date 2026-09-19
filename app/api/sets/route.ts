@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { listSets, reserveSet, ReserveError, type Lane } from "@/lib/sets";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { engineAvailable } from "@/lib/engine";
-import { isDemo, demoWorkspaceSets, DEMO_REASON, DEMO_SLIDES, demoGenerationOn } from "@/lib/demo";
+import { isDemo, demoWorkspaceSets, DEMO_REASON, DEMO_SLIDES, demoSlidesFor, demoGenerationOn } from "@/lib/demo";
 import { clientIp } from "@/lib/ratelimit";
 
 export const maxDuration = 300;
@@ -59,21 +59,30 @@ export async function POST(req: Request) {
   const sl = body?.slides;
   let min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
   let max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
-  // the demo: exactly DEMO_SLIDES slides, on the priority lane, never HD, whatever the form sent
+  // the demo: the brief's own shortest set, on the priority lane, never HD,
+  // whatever the form sent. The count comes from the campaign rather than a
+  // constant because a set under the brief's minimum cannot pass compliance
+  // (P-22); the brief is read below, once the campaign id is known.
   let lane = String(body?.lane ?? "batch") as Lane;
   let hd = !!body?.hd;
-  if (demo) { min = DEMO_SLIDES; max = DEMO_SLIDES; lane = "priority"; hd = false; }
+  if (demo) { lane = "priority"; hd = false; }
 
   if (!campaign) return Response.json({ error: "pick a campaign" }, { status: 400 });
   if (ask.length < 3) return Response.json({ error: "say what the set is about" }, { status: 400 });
   if (ask.length > 400) return Response.json({ error: "keep the ask under 400 characters" }, { status: 400 });
   if (!STYLES.has(style)) return Response.json({ error: `unknown style "${style}"` }, { status: 400 });
   if (!LANES.includes(lane)) return Response.json({ error: "lane must be batch or priority" }, { status: 400 });
-  if (!Number.isInteger(min) || !Number.isInteger(max) || min < (demo ? DEMO_SLIDES : 5) || max > 10 || min > max) {
+  if (!Number.isInteger(min) || !Number.isInteger(max) || (!demo && min < 5) || max > 10 || min > max) {
     return Response.json({ error: "slides must be a count or range between 5 and 10" }, { status: 400 });
   }
 
   const sb = await createClient();
+  if (demo) {
+    // the brief decides: a demo set is exactly its minimum, so it is the
+    // shortest set that can legally ship for that campaign
+    const { data: camp } = await sb.from("campaigns").select("data").eq("id", campaign).maybeSingle();
+    min = max = demoSlidesFor((camp?.data as { requirements?: { min_slides?: number } } | null)?.requirements?.min_slides);
+  }
   let id: string;
   try {
     id = await reserveSet(sb, { orgId: viewer.org.id, campaignId: campaign, ask, style, min, max, lane, hd });

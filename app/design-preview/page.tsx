@@ -49,6 +49,11 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
     plan: { id: "grind", price_usd_month: 32, slides_per_month: 500, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
     usage: { period_start: "2026-09-01", slides_used: 24, priority_slides_used: 8, hd_slides_used: 0, extra_slides_purchased: 0, extra_priority_slides_purchased: 0, extra_hd_slides_purchased: 0 },
     periodEnd: null, left: { batch: 476, priority: 42 }, cap: { batch: 500, priority: 50 }, balance: 0, packs: [],
+    sale: [
+      { id: "solo", label: "Clipper", price_usd_month: 16, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "grind", label: "Pro", price_usd_month: 32, slides_per_month: 500, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "agency", label: "Studio", price_usd_month: 79, slides_per_month: 1500, priority_slides_per_month: 150, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+    ],
   };
   const plan = q.plan && ["free", "solo", "grind", "agency"].includes(q.plan) ? q.plan : "grind";
   const account = demoAccount(base, plan);

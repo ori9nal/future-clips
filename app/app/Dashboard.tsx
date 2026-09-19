@@ -158,7 +158,11 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const go = (p: Page) => { setPage(p); setPop(null); setMenu(false); if (viewRef.current) viewRef.current.scrollTop = 0; };
 
   // the demo (D-045): one length, priority, never HD — the API forces the same
-  const demoN = viewer.demoSlides ?? 0;
+  // The demo makes the selected brief's own minimum, not a constant: a set
+  // under it cannot pass compliance (P-22). `viewer.demoSlides` is the
+  // default the server would use when no campaign is chosen yet.
+  const demoOn = (viewer.demoSlides ?? 0) > 0;
+  const demoN = demoOn ? Math.max(viewer.demoSlides ?? 5, active?.requirements?.min_slides ?? 0) : 0;
   useEffect(() => {
     if (!demoN) return;
     setNMin(demoN); setNMax(demoN); setLane("priority"); setHd(false);
@@ -170,6 +174,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const left = lane === "priority" ? account.left.priority : account.left.batch;
   // a plan or a pack balance; there is no free tier (DECISIONS D-108)
   const paid = account.plan.slides_per_month > 0 || account.balance > 0;
+  // the cheapest plan on sale, named from the database rather than from a
+  // sentence that goes stale the day the allowances change (D-044)
+  const cheapest = (account.sale ?? []).find((p) => p.slides_per_month > 0) ?? null;
   const renews = account.periodEnd ? new Date(account.periodEnd).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : null;
   const label = planLabel(account.plan);
 
@@ -406,7 +413,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                   <div className="notice warn"><span>Rendering on this host is switched off. Anything you queue is kept and starts as soon as it is on.</span><button className="x" onClick={() => setEngineGone(true)} aria-label="Dismiss">×</button></div>
                 )}
                 {!paid && !demoN && (
-                  <div className="notice"><span>Choose a plan to start making slideshows. Every plan opens all the campaigns and styles; Pro and Studio add priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
+                  <div className="notice"><span>Choose a plan to start making slideshows. {cheapest ? `${cheapest.label ?? PLAN_LABELS[cheapest.id] ?? cheapest.id} is $${cheapest.price_usd_month} a month for ${cheapest.slides_per_month} slides. ` : ""}Every plan opens all the campaigns and styles; Pro and Studio add priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
                 )}
                 {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>

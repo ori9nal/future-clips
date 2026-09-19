@@ -146,6 +146,13 @@ export async function cachePull(id, file) {
     if (!bytes) return false;
     fs.mkdirSync(path.dirname(file), { recursive: true });
     fs.writeFileSync(file, bytes);
+    // ...and what was stripped from it, so a set built on a host's shared
+    // cache reports the same counts as one drawn here. Without this the seal
+    // undercounts on exactly the machine customers use (Product, 2026-09-19).
+    try {
+      const rec = await store.pull(`${id}-stripped`);
+      if (rec) fs.writeFileSync(`${file}.stripped.json`, rec);
+    } catch { /* the record is optional; the frame is not */ }
     return true;
   } catch { return false; }
 }
@@ -153,6 +160,10 @@ export async function cachePull(id, file) {
 export async function cachePush(id, file) {
   if (!store) return;
   try { await store.push(id, fs.readFileSync(file)); } catch { /* next time */ }
+  try {
+    const rec = `${file}.stripped.json`;
+    if (fs.existsSync(rec)) await store.push(`${id}-stripped`, fs.readFileSync(rec));
+  } catch { /* next time */ }
 }
 
 /* ── generation ─────────────────────────────────────────────────────────── */

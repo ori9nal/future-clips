@@ -47,6 +47,13 @@ export type Account = {
   balance: number;
   /** 0006: the packs on sale; empty before the migration or until checkout */
   packs: Pack[];
+  /**
+   * Every plan on sale, cheapest first — so the app can name a real price and
+   * a real allowance instead of carrying them in a sentence. The no-plan
+   * banner said "Clipper is $16 a month for 200 slides" in hard-coded text,
+   * which would have gone stale the day D-044 lands (Product, 2026-09-19).
+   */
+  sale: PlanRow[];
 };
 
 export { PLAN_LABELS, planLabel } from "@/lib/plans";
@@ -68,10 +75,11 @@ export function periodStart(viewer: Viewer): string {
 
 export async function getAccount(sb: SupabaseClient, viewer: Viewer): Promise<Account> {
   const ps = periodStart(viewer);
-  const [{ data: plan }, { data: usage }, packsRes] = await Promise.all([
+  const [{ data: plan }, { data: usage }, packsRes, saleRes] = await Promise.all([
     sb.from("plans").select("*").eq("id", viewer.org.plan).single(),
     sb.from("usage").select("*").eq("org_id", viewer.org.id).eq("period_start", ps).maybeSingle(),
     sb.from("packs").select("id, slides, price_usd").eq("active", true).order("slides"),
+    sb.from("plans").select("*").gt("price_usd_month", 0).order("price_usd_month"),
   ]);
   const p = plan as PlanRow;
   const u = (usage as UsageRow | null) ?? EMPTY(ps);
@@ -86,5 +94,6 @@ export async function getAccount(sb: SupabaseClient, viewer: Viewer): Promise<Ac
     left: { batch: Math.max(0, cap.batch - u.slides_used) + balance, priority: Math.max(0, cap.priority - u.priority_slides_used) },
     balance,
     packs,
+    sale: saleRes.error ? [] : ((saleRes.data ?? []) as PlanRow[]),
   };
 }

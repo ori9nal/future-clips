@@ -162,6 +162,11 @@ export function demoWorkspaceAccount(): Account {
     left: { batch: Math.max(0, cap.batch - used), priority: 0 },
     cap, balance: 0,
     packs: [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }],
+    sale: [
+      { id: "solo", label: "Clipper", price_usd_month: 16, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "grind", label: "Pro", price_usd_month: 32, slides_per_month: 500, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "agency", label: "Studio", price_usd_month: 79, slides_per_month: 1500, priority_slides_per_month: 150, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+    ],
   };
 }
 
@@ -170,7 +175,20 @@ export function demoWorkspaceAccount(): Account {
  * visitor in as the demo account with no email; FC_DEMO_GENERATE=1 lets the
  * demo workspace make real sets of exactly DEMO_SLIDES slides. */
 export const DEMO_EMAIL = "demo@thefutureclips.com";
-export const DEMO_SLIDES = 4;
+export const DEMO_SLIDES = 5;
+
+/**
+ * How many slides the demo makes for one campaign.
+ *
+ * It was a flat 4, and a 4-slide set cannot be compliant: 16 of the 21 briefs
+ * set `min_slides` to 5 or 6, so `check()` in the engine refused every one —
+ * three paid runs on apex-strength each burned three copy attempts and showed
+ * the visitor a failure (Product, 2026-09-19, P-22). The demo therefore makes
+ * the brief's own minimum, which is the shortest set that can legally ship;
+ * the same ask at 5 slides passed on the first attempt.
+ */
+export const demoSlidesFor = (minSlides?: number | null) =>
+  Math.max(DEMO_SLIDES, Math.min(10, Math.round(Number(minSlides) || 0) || DEMO_SLIDES));
 export const isDemoHost = (host: string | null | undefined) => {
   const want = process.env.FC_DEMO_HOSTNAME?.toLowerCase();
   return !!want && (host ?? "").split(":")[0].toLowerCase() === want;
