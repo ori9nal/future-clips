@@ -54,12 +54,12 @@ export function LoginForm({ next, initialError, googleEnabled }: { next: string;
     return (
       <div className="fc-card" role="status">
         <h2>Check your inbox</h2>
-        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. Tap it, or enter the 6-digit code from the email here. Both work once and expire in an hour.</p>
+        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. Tap it, or type the code from the email here. Both work once and expire in an hour.</p>
         <form onSubmit={verify} className="fc-form" style={{ marginTop: 14 }}>
           <label>
             <span>Code</span>
-            <input type="text" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required
-              placeholder="123456" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+            <input type="text" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6,10}" maxLength={10} required
+              placeholder="the code from the email" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, "").slice(0, 10))} />
           </label>
           {error && <p className="fc-err-line" role="alert">{error}</p>}
           <button type="submit" className="fc-btn" disabled={busy || code.length < 6} style={{ justifySelf: "stretch" }}>
