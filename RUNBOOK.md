@@ -49,6 +49,10 @@ Prospects get a login that lands in a shared, read-only Clipper workspace (migra
 - Schema: migrations are additive; to undo 0004 drop the functions/columns it added (listed at the top of the file). Nothing so far destroys data.
 - Engine: `git revert`; the engine is plain files.
 
+## The poller on Hobby
+
+`vercel.json` runs `/api/cron/lanes` once a day (07:00 UTC) because a Hobby account may only schedule daily crons; the five-minute schedule the batch lane wants needs Vercel Pro. So today: a **priority** set renders inside its own request and is ready in a minute or two (this is what the demo uses), while a **batch** set waits for the daily tick. Ways out, in order: Vercel Pro (change the schedule back to `*/5 * * * *`), or `pg_cron` + `pg_net` in Supabase calling `/api/cron/lanes` with the `CRON_SECRET` bearer every five minutes (no Vercel plan needed), or an external pinger. Until then, tell customers batch means "within the day" — which is what the site says.
+
 ## The lanes (how a set is made)
 
 `engine/lanes.mjs` — one state machine: `copy:submit → copy:wait → art:anchor:submit → art:anchor:wait → art:frames:submit → art:frames:wait → render → done|failed`.
