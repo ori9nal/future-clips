@@ -17,7 +17,7 @@ const plex = IBM_Plex_Mono({ subsets: ["latin"], weight: ["400", "500"], variabl
 // This is the app, not the marketing page (that is future-clips-site/, static).
 // Nothing here is indexable: every route past /login is behind auth.
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://future-clips-app.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "https://app.thefutureclips.com"),
   title: { default: "Future Clips", template: "%s · Future Clips" },
   description: "Campaign-ready carousel sets from a few words. The Future Clips app.",
   applicationName: "Future Clips",

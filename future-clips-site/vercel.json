@@ -2,12 +2,12 @@
   "redirects": [
     {
       "source": "/login",
-      "destination": "https://future-clips-app.vercel.app/login",
+      "destination": "https://app.thefutureclips.com/login",
       "permanent": false
     },
     {
       "source": "/signup",
-      "destination": "https://future-clips-app.vercel.app/login",
+      "destination": "https://app.thefutureclips.com/login",
       "permanent": false
     }
   ],
