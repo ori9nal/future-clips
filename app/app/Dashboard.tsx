@@ -202,6 +202,12 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     if (!demoN) return;
     setNMin(demoN); setNMax(demoN); setLane("priority"); setHd(false);
   }, [demoN]);
+  // why the demo cannot make another one, if it cannot: the fixed budget is
+  // spent for everybody (0026), or this visitor has used their three today
+  // (R16). Both refuse at the API; saying so here saves the round trip.
+  const demoStop: "over" | "today" | null = !demoN ? null
+    : viewer.demoOver ? "over"
+    : (viewer.demoLeft ?? 1) <= 0 ? "today" : null;
   const canPriority = account.cap.priority > 0 || !!demoN;
   const canHd = account.plan.hd_per_slide_usd != null;
   const hdIncluded = account.plan.hd_per_slide_usd === 0;
@@ -533,9 +539,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           {demoN ? (
             // the demo does not spend the org's allowance and the visitor cannot move it,
             // so the header says what the demo gives instead of a meter (Product, 2026-09-19).
-            <span className="cred" title={viewer.demoOver ? "The demo has made every carousel it is going to make" : `${demoN} slides a carousel`}>
-              {I.bolt}{viewer.demoOver
-                ? <b>No carousels left</b>
+            <span className="cred" title={demoStop === "over" ? "The demo has made every carousel it is going to make" : demoStop === "today" ? `${viewer.demoPerVisitor ?? 3} a day, and you have made them` : `${demoN} slides a carousel`}>
+              {I.bolt}{demoStop === "over" ? <b>No carousels left</b>
+                : demoStop === "today" ? <b>None left today</b>
                 : <><b>{viewer.demoLeft ?? viewer.demoPerVisitor ?? 3}</b> left · {demoN} slides each</>}
             </span>
           ) : paid ? (
@@ -563,14 +569,19 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
                 )}
-                {viewer.demoOver && (
-                  // the demo's budget is spent (0026). The examples stay — they
-                  // were made by this engine — but nothing new is drawn.
-                  <div className="notice warn"><span>The demo has made every carousel it is going to make. Everything on this screen is real work from this engine; a plan makes your own.</span><a className="btn sm" href="https://www.thefutureclips.com/#pricing">See the plans</a></div>
+                {demoStop && (
+                  // nothing new is drawn, but the examples stay — they are real
+                  // work from this engine, which is the whole point of the demo.
+                  <div className="notice warn">
+                    <span>{demoStop === "over"
+                      ? "The demo has made every carousel it is going to make. Everything on this screen is real work from this engine; a plan makes your own."
+                      : `That is your ${viewer.demoPerVisitor ?? 3} for today. They come back tomorrow, or a plan lifts the limit entirely.`}</span>
+                    <a className="btn sm" href="https://www.thefutureclips.com/#pricing">See the plans</a>
+                  </div>
                 )}
                 <section className="hero" aria-label="Make a slideshow">
                   <div className="ghost" aria-hidden="true">futureclips</div>
-                  <h1>{viewer.demoOver ? "Look through what it made" : demoN ? "Try it on a real campaign" : "What are we posting today?"}</h1>
+                  <h1>{demoStop ? "Look through what it made" : demoN ? "Try it on a real campaign" : "What are we posting today?"}</h1>
                   <p className="sub">
                     Pick a campaign, choose an angle, and get a post-ready carousel.
                     <span className="kbd">↵</span>makes it
@@ -612,9 +623,12 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                           el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
                         }}
                         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
-                      <button className="send" disabled={!active || !paid || busy || !ask.trim() || !!viewer.demoOver} onClick={run}
-                        aria-label={busy ? "Starting" : viewer.demoOver ? "The demo has finished making carousels" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}
-                        title={busy ? "Starting" : viewer.demoOver ? "The demo has made every carousel it is going to make. The ones here are real — pick a plan to make your own." : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}>
+                      <button className="send" disabled={!active || !paid || busy || !ask.trim() || !!demoStop} onClick={run}
+                        aria-label={busy ? "Starting" : demoStop ? "The demo cannot make another one now" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}
+                        title={busy ? "Starting"
+                          : demoStop === "over" ? "The demo has made every carousel it is going to make. The ones here are real — pick a plan to make your own."
+                          : demoStop === "today" ? `That is your ${viewer.demoPerVisitor ?? 3} for today. They come back tomorrow.`
+                          : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}>
                         {busy ? <span className="spin" /> : I.send}
                       </button>
                     </div>
