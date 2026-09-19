@@ -27,9 +27,10 @@ import feed from './feed.mjs';
 export const STYLES = [feed, nativeStyle, mascot, bedrock, rail, clinical, editorial, documentStyle, poster, pastel];
 
 // What a customer may choose. Editorial and Mascot were retired by the owner
-// (2026-09-19): they stay above so a set already rendered in one still opens,
+// and Clinical with them (2026-09-19): they stay above so a set already
+// rendered in one still opens,
 // and byId() still finds them, but nothing offers them any more.
-export const RETIRED = new Set(['editorial', 'mascot']);
+export const RETIRED = new Set(['editorial', 'mascot', 'clinical']);
 export const pickable = () => STYLES.filter((s) => !RETIRED.has(s.id));
 
 export const byId = (id) => STYLES.find((s) => s.id === id) ?? null;

@@ -19,7 +19,6 @@ const SHOW = {
   native:   { set: 'apex-strength-native',  name: 'Native',   word: 'Phone photos, big captions',       for: 'The same look with the words bigger — best when the line IS the slide.' },
   bedrock:  { set: 'apex-strength-bedrock', name: 'Bedrock',  word: 'Illustrated character',            for: 'Programmes and how-to: a drawn figure doing the thing, muscles tinted.' },
   rail:     { set: 'northbound-trail-rail', name: 'Rail',     word: 'Designed poster series',           for: 'One named thing per page. Travel, fashion, creator, agency work.' },
-  clinical: { set: 'lumen-barrier-clinical',name: 'Clinical', word: 'Whitepaper explainer',             for: 'Reads as evidence: serif headline, labelled diagram, a named source.' },
   document: { set: 'ledger-pro-document',   name: 'Document', word: 'Numbered text pages',              for: 'When the value is the detail — tables, worked examples, a footnote.' },
   poster:   { set: 'lumen-barrier-poster',  name: 'Poster',   word: 'Loud display type',                for: 'Content about content: hooks, marketing, design education.' },
   pastel:   { set: 'ledger-pro-pastel',     name: 'Pastel',   word: 'Warm pages, serif questions',      for: 'Skincare, beauty, money-calm. Quiet where the others shout.' },

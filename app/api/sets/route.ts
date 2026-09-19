@@ -12,9 +12,10 @@ import { readInstructions, readOrgAssets } from "@/lib/uploads";
 export const maxDuration = 300;
 
 const LANES: Lane[] = ["batch", "priority"];
-// what a customer may ask for. "editorial" and "mascot" were retired (owner,
-// 2026-09-19); their renderers stay in the engine so older sets still open.
-const STYLES = new Set(["native", "feed", "bedrock", "clinical", "poster", "pastel", "document", "rail"]);
+// what a customer may ask for. "editorial", "mascot" and "clinical" were
+// retired (owner, 2026-09-19); their renderers stay in the engine so older
+// sets still open.
+const STYLES = new Set(["native", "feed", "bedrock", "poster", "pastel", "document", "rail"]);
 
 /** The org's sets, newest first. */
 export async function GET() {

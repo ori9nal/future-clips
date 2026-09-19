@@ -70,20 +70,6 @@ export const STYLE_CARDS: StyleCard[] = [
     "ratio": "1080x1350"
   },
   {
-    "id": "clinical",
-    "name": "Clinical",
-    "word": "Whitepaper explainer",
-    "for": "Reads as evidence: serif headline, labelled diagram, a named source.",
-    "niches": [
-      "health",
-      "longevity",
-      "fitness",
-      "supplements",
-      "medical"
-    ],
-    "ratio": "1080x1350"
-  },
-  {
     "id": "document",
     "name": "Document",
     "word": "Numbered text pages",
