@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback`, skipBrowserRedirect: true },
+    options: { redirectTo: `${origin}/auth/callback`, skipBrowserRedirect: true, queryParams: { prompt: "select_account" } },
   });
   if (error || !data?.url) {
     const e = loginError(error?.message ?? "Google sign-in is not available right now.");

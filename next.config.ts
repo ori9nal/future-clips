@@ -34,6 +34,29 @@ const nextConfig: NextConfig = {
     "/api/sets/[id]/download": ["./public/demo/**"],
   },
   serverExternalPackages: ["sharp", "@resvg/resvg-js", "opentype.js"],
+  // /signup on the app host is the door (the static site links to it; vercel.json does the same on the site host)
+  async redirects() {
+    return [{ source: "/signup", destination: "/login", permanent: false }];
+  },
+  // The local stack (RUNBOOK "The local stack"): with FC_SITE_PROXY set in
+  // development, the marketing site served next door appears at / on this
+  // origin, so home → login → product is one localhost. Never in production.
+  async rewrites() {
+    const proxy = process.env.NODE_ENV !== "production" ? process.env.FC_SITE_PROXY?.replace(/\/$/, "") : undefined;
+    if (!proxy) return [];
+    return {
+      beforeFiles: [
+        // the root, unless Supabase's Site-URL fallback brought a ?code (app/page.tsx forwards it)
+        { source: "/", destination: `${proxy}/`, missing: [{ type: "query", key: "code" }, { type: "query", key: "error" }, { type: "query", key: "error_description" }] },
+        { source: "/carousels/:path*", destination: `${proxy}/carousels/:path*` },
+        { source: "/fonts/:path*", destination: `${proxy}/fonts/:path*` },
+        { source: "/logo.png", destination: `${proxy}/logo.png` },
+        { source: "/og.png", destination: `${proxy}/og.png` },
+      ],
+      afterFiles: [],
+      fallback: [],
+    };
+  },
   // the same response headers the static site sends (future-clips-site/vercel.json);
   // HSTS is set by Vercel on *.vercel.app and custom domains, repeated here for other hosts
   async headers() {
