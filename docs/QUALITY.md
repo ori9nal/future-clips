@@ -5,6 +5,7 @@ Every prompt or style rule written from here on cites a count or a measurement f
 
 ## 0. Budget
 
+- **Cost per slide, measured 2026-09-19** (every lane set with a per-call ledger, `output/gauntlet/COSTS.md` and each set's `costs.json`): **priority $0.0582** over 18 sets and 138 slides (copy $0.0133 + frames $0.0449); batch is still Engineering's single set at $0.027. Copy is billed **per set** (~$0.102), not per slide, so a short set costs more a slide — the demo's 4-slide sets are about **$0.07**. 6 of the 18 sets paid for the copy twice on a rejected first attempt (~$0.025 a set). Written up as P-20.
 - Owner budget: **not set** (DECISIONS D-018 asks for a weekly amount and a ceiling). Until it is, a session spends at most **$5** and stops to ask.
 - Session 2026-09-18: **$10.85** over 25 paid rounds: $4.57 on the gauntlet (rounds 0–11, stopped under the $5 default) then $6.28 on one set per campaign (rounds 12–25) at the owner's explicit instruction; every run with its Claude and image dollars is in `output/gauntlet/COSTS.md`. The owner asked on 2026-09-18 for the loop to run "until we get great results" with the cost per run logged; Product keeps running and stops to ask at $15 (DECISIONS, Product note on D-018).
 - Rule of thumb: a 7–8 slide priority set is $0.45–0.50; batch halves it; a re-render is $0. Prompt text is a cache key, so any change to a string in engine/art.mjs, engine/scenes.mjs or the copy shape re-pays every frame downstream.
