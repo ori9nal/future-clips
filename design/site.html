@@ -451,7 +451,7 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill rise cd" id="cd" data-at="2026-09-19T12:00:00Z"><b>Launch</b> <span id="cdt">in <time datetime="2026-09-19T12:00:00Z">19 Sep, 12:00 UTC</time></span><span class="cd-tail"> · founding prices locked</span></span>
+    <span class="pill rise cd" id="cd" data-at="2026-09-19T12:00:00Z"><b>Launch</b> <span id="cdt"><time datetime="2026-09-19T12:00:00Z">today, 12:00 UTC</time></span><span class="cd-tail"> · founding prices locked</span></span>
     <h1 class="rise">Turn one idea into a <span class="mark">viral carousel</span> in two minutes</h1>
     <p class="sub rise">Enter a topic. Pick your style. Get a ready-to-post carousel with the same character on every slide, a hook that stops the scroll, and no AI watermark anywhere.</p>
     <div class="hbtns rise">
@@ -893,7 +893,17 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
   if(isNaN(at)) return;
   var pad=function(n){ return n<10?'0'+n:''+n; };
   var t=new Date(at);
+  // the numbers alone do not say WHEN: a reader planning around it needs the
+  // moment as well as the distance to it
   var when=pad(t.getUTCHours())+':'+pad(t.getUTCMinutes())+' UTC';
+  // The markup is built once and only the digits are written after that. An
+  // innerHTML every second re-parses the pill and re-lays out the hero around
+  // it, which is work a phone does not need to do 60 times a minute.
+  out.textContent='in ';
+  var num=document.createElement('span');
+  num.className='t';
+  out.appendChild(num);
+  out.appendChild(document.createTextNode(' · '+when));
   var timer;
   function tick(){
     var left=at-Date.now();
@@ -904,16 +914,18 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
       var tail=el.querySelector('.cd-tail');
       if(tail) tail.textContent=' · founding prices still locked';
       clearInterval(timer);
+      timer=null;
       return;
     }
     var s=Math.floor(left/1000), d=Math.floor(s/86400);
     var h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), sec=s%60;
-    // the numbers alone do not say WHEN: a reader planning around it needs the
-    // moment as well as the distance to it
-    out.innerHTML='in <span class="t">'+(d?d+'d ':'')+pad(h)+':'+pad(m)+':'+pad(sec)+'</span> · '+when;
+    num.textContent=(d?d+'d ':'')+pad(h)+':'+pad(m)+':'+pad(sec);
   }
-  tick();
-  timer=setInterval(tick,1000);
+  function run(){ if(!timer&&!el.classList.contains('done')){ tick(); timer=setInterval(tick,1000); } }
+  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
+  // nothing to count while the tab is in the background
+  document.addEventListener('visibilitychange',function(){ document.hidden?stop():run(); });
+  run();
 })();
 
 // casual image protection
