@@ -10,6 +10,7 @@ import { rect, line, text, stack, paragraph, plate, image, grain } from './kit.m
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 
+import { handle as creatorHandle } from '../creator.mjs';
 /** A campaign photo id under ctx.photoDir, or a generated frame's absolute path. */
 const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id));
 
@@ -56,7 +57,7 @@ export default {
 
     const chrome = (n) => rect(0, 0, W, H, { fill: paper })
       + grain(W, H, { op: 0.04 })
-      + text('mono', M, H - 64, spec.requirements.required_mention, { size: 21, fill: muted })
+      + text('mono', M, H - 64, creatorHandle(spec) ?? '', { size: 21, fill: muted })
       + text('mono', W - M, H - 64, `${n}/${total}`, { size: 21, fill: muted, anchor: 'end' });
 
     /* cover */

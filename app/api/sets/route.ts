@@ -7,6 +7,7 @@ import { hasServiceRole } from "@/lib/supabase/admin";
 import { engineAvailable } from "@/lib/engine";
 import { isDemo, demoWorkspaceSets, DEMO_REASON, DEMO_SLIDES, demoSlidesFor, demoGenerationOn } from "@/lib/demo";
 import { clientIp, DEMO_LIMITS } from "@/lib/ratelimit";
+import { readInstructions, readOrgAssets } from "@/lib/uploads";
 
 export const maxDuration = 300;
 
@@ -78,6 +79,8 @@ export async function POST(req: Request) {
   }
 
   const sb = await createClient();
+  // what the workspace uploaded, plus anything this set asked for on top
+  const instructions = readInstructions(body?.instructions, readOrgAssets((viewer.org as { assets?: unknown }).assets));
   if (demo) {
     // the brief decides: a demo set is exactly its minimum, so it is the
     // shortest set that can legally ship for that campaign
@@ -86,7 +89,7 @@ export async function POST(req: Request) {
   }
   let id: string;
   try {
-    id = await reserveSet(sb, { orgId: viewer.org.id, campaignId: campaign, ask, style, min, max, lane, hd });
+    id = await reserveSet(sb, { orgId: viewer.org.id, campaignId: campaign, ask, style, min, max, lane, hd, instructions });
   } catch (e: any) {
     if (e instanceof ReserveError) {
       const status = e.code === "FC_QUOTA" || e.code === "FC_SPEND_CAP" || e.code === "FC_NO_PLAN" || e.code === "FC_NO_HD" ? 402 : e.code === "FC_NOT_MEMBER" ? 403 : 400;

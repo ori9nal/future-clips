@@ -117,6 +117,29 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
   await sb.from("sets").update({ state_json: s, status: "rendering", stage: s.stage, started_at: row.started_at ?? new Date().toISOString() }).eq("id", row.id);
 
   const outDir = path.join(setsDir, row.org_id, row.id);
+
+  // the workspace's own logo, avatar and handle: pulled out of the private
+  // bucket into this set's work dir, so the renderer sees plain files and the
+  // engine never learns about Storage (migration 0020)
+  if (row.instructions) {
+    const creator: Record<string, string> = {};
+    for (const [key, field] of [["logo", "logo_path"], ["avatar", "avatar_path"]] as const) {
+      const p = (row.instructions as Record<string, string | undefined>)[field];
+      if (!p) continue;
+      const { data, error } = await sb.storage.from("uploads").download(p);
+      if (error || !data) { console.warn(`set ${row.id}: ${field} ${p} could not be read: ${error?.message}`); continue; }
+      const file = path.join(outDir, `creator-${key}${path.extname(p) || ".png"}`);
+      fs.mkdirSync(outDir, { recursive: true });
+      fs.writeFileSync(file, Buffer.from(await data.arrayBuffer()));
+      creator[key] = file;
+    }
+    const handle = (row.instructions as { handle?: string }).handle;
+    const note = (row.instructions as { note?: string }).note;
+    if (handle) creator.handle = handle;
+    if (note) creator.note = note;
+    if (Object.keys(creator).length) spec.assets = { ...(spec.assets ?? {}), creator };
+  }
+
   const ctx = { root: ROOT, spec, cacheDir, outDir, concurrency: 4 };
   const save = async () => {
     await sb.from("sets").update({ state_json: s, stage: s.stage, slides: s.copy?.count ?? null }).eq("id", row.id);

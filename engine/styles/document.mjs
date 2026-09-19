@@ -11,6 +11,7 @@ import { rect, line, text, stack, paragraph, grain, FACES } from './kit.mjs';
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 
+import { handle as creatorHandle } from '../creator.mjs';
 /** Column widths from the widest measured cell, then scaled to the target. */
 function table(rows, x, y, w, o = {}) {
   const size = o.size ?? 25, pad = o.pad ?? 20, rowH = o.rowH ?? 74;
@@ -69,7 +70,7 @@ export default {
 
     const chrome = (n) => rect(0, 0, W, H, { fill: '#FFFFFF' })
       + grain(W, H, { op: 0.03 })
-      + text('mono', M, H - 62, spec.requirements.required_mention, { size: 21, fill: muted })
+      + text('mono', M, H - 62, creatorHandle(spec) ?? '', { size: 21, fill: muted })
       + text('mono', W - M, H - 62, `${n} / ${total}`, { size: 21, fill: muted, anchor: 'end' });
 
     /* cover */

@@ -23,6 +23,7 @@ import { layoutWidth } from '../fit-text.mjs';
 import { FACES } from './kit.mjs';
 import { figure, figureRow } from '../character.mjs';
 
+import { handleBare as creatorHandleBare } from '../creator.mjs';
 const W = 1080, H = 1350, M = 64;
 
 export default {
@@ -208,7 +209,7 @@ export default {
       const f = await fig(total, C.closer.pose ?? 'standing, flexing both arms, front double biceps', C.closer.muscles ?? 'biceps and shoulders');
       s.push(await place(f, W / 2, H - 130, H - h.bottom - 200, W - M * 2));
       s.push(rect(M, H - 108, W - M * 2, 68, { r: 8, fill: ink }));
-      s.push(text('sansBold', W / 2, H - 64, C.closer.cta ?? `Follow @${spec.requirements?.required_mention?.replace('@', '') ?? spec.brand}`, { size: 28, fill: paper, anchor: 'middle' }));
+      s.push(text('sansBold', W / 2, H - 64, C.closer.cta ?? `Follow @${(creatorHandleBare(spec)) ?? spec.brand}`, { size: 28, fill: paper, anchor: 'middle' }));
       out.push(s.join(''));
     }
 

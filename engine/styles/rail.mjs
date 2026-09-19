@@ -27,6 +27,7 @@ import { layoutWidth } from '../fit-text.mjs';
 import { pickPairing } from '../pairings.mjs';
 import { scoreRegion } from '../caption.mjs';
 
+import { handleBare as creatorHandleBare } from '../creator.mjs';
 const ORANGE = '#F26B21';
 const CREAM = '#EFE9DD';
 const BLACK = '#141416';
@@ -66,7 +67,7 @@ export default {
     spec.content.pairing = { id: pair.id, head: LOUD, body: BODY, quiet: QUIET };
 
     const total = C.ranked.length + 2;
-    const handle = String(spec.requirements?.required_mention ?? '').replace(/^@/, '');
+    const handle = String(creatorHandleBare(spec) ?? '').replace(/^@/, '');
     const month = MONTHS[new Date().getMonth()];
 
     /** The header strip: three tiny tracked cells. */

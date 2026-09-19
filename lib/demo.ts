@@ -22,6 +22,7 @@ import type { Account } from "@/lib/account";
 import type { SetRow } from "@/lib/sets";
 import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
 import type { Viewer } from "@/lib/auth";
+import type { Spec } from "@/lib/specs";
 import manifest from "./demo-manifest";
 
 export function demo() {
@@ -37,9 +38,11 @@ export function demo() {
 /** The plans as the site sells them (migration 0006). */
 const PLANS: Record<string, Partial<Account["plan"]> & { balance?: number }> = {
   free:   { id: "free",   label: "No plan", price_usd_month: 0,  slides_per_month: 0,    priority_slides_per_month: 0,   hd_per_slide_usd: null, seats: 1, balance: 0 },
-  solo:   { id: "solo",   label: "Clipper", price_usd_month: 16, slides_per_month: 200,  priority_slides_per_month: 0,   hd_per_slide_usd: null, seats: 1 },
-  grind:  { id: "grind",  label: "Pro",     price_usd_month: 32, slides_per_month: 500,  priority_slides_per_month: 50,  hd_per_slide_usd: 0,    seats: 1 },
-  agency: { id: "agency", label: "Studio",  price_usd_month: 79, slides_per_month: 1500, priority_slides_per_month: 150, hd_per_slide_usd: 0,    seats: 5 },
+  // the shipped prices and allowances (D-048): the `plans` row is the truth,
+  // this table only mirrors it so a preview shows what a customer would pay
+  solo:   { id: "solo",   label: "Clipper", price_usd_month: 19.99, slides_per_month: 200,  priority_slides_per_month: 0,   hd_per_slide_usd: null, seats: 1 },
+  grind:  { id: "grind",  label: "Pro",     price_usd_month: 49.99, slides_per_month: 400,  priority_slides_per_month: 50,  hd_per_slide_usd: 0,    seats: 1 },
+  agency: { id: "agency", label: "Studio",  price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 100, hd_per_slide_usd: 0,    seats: 5 },
 };
 
 export function demoAccount(account: Account, plan: string): Account {
@@ -156,16 +159,16 @@ export function demoWorkspaceAccount(): Account {
   const p = PLANS.solo;
   const cap = { batch: p.slides_per_month!, priority: p.priority_slides_per_month! };
   return {
-    plan: { id: "solo", label: "Clipper", welcome_slides: 0, price_usd_month: 16, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+    plan: { id: "solo", label: "Clipper", welcome_slides: 0, price_usd_month: 19.99, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
     usage: { period_start: ps, slides_used: used, priority_slides_used: 0, hd_slides_used: 0, extra_slides_purchased: 0, extra_priority_slides_purchased: 0, extra_hd_slides_purchased: 0 },
     periodEnd: end,
     left: { batch: Math.max(0, cap.batch - used), priority: 0 },
     cap, balance: 0,
     packs: [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }],
     sale: [
-      { id: "solo", label: "Clipper", price_usd_month: 16, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
-      { id: "grind", label: "Pro", price_usd_month: 32, slides_per_month: 500, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
-      { id: "agency", label: "Studio", price_usd_month: 79, slides_per_month: 1500, priority_slides_per_month: 150, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "solo", label: "Clipper", price_usd_month: 19.99, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "grind", label: "Pro", price_usd_month: 49.99, slides_per_month: 400, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "agency", label: "Studio", price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 100, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
     ],
   };
 }
@@ -194,3 +197,68 @@ export const isDemoHost = (host: string | null | undefined) => {
   return !!want && (host ?? "").split(":")[0].toLowerCase() === want;
 };
 export const demoGenerationOn = () => process.env.FC_DEMO_GENERATE === "1";
+
+/**
+ * One brief with every field filled in, for `/design-preview?view=brief`.
+ * A fictional advertiser and a fictional agency — nothing here is a client.
+ */
+export const DEMO_BRIEF: Spec = {
+  id: "tradelens-app-reachify",
+  brand: "TradeLens",
+  wordmark: "TradeLens",
+  handle: "@tradelens.app",
+  product: "a chart reader that marks the levels a trader would draw by hand",
+  niche: "trading",
+  status: "live",
+  advertiser: "TradeLens Labs",
+  agency: "Reachify",
+  payout: {
+    rate_usd: 1.4, min_payout_usd: 25, max_payout_usd: 900,
+    budget_total_usd: 18000, budget_remaining_usd: 11420, review_days: 9,
+    platforms: ["instagram", "tiktok"],
+  },
+  requirements: { min_slides: 5, max_slides: 10, aspect: "9:16", required_mention: "@tradelens.app", must_show_app: true },
+  rules: {
+    banned_claims: ["guaranteed returns", "risk free", "signals that always win"],
+    banned_topics: ["leverage above 5x", "other people's account screenshots"],
+    tone: "Plain and unexcited. A trader explaining a habit, not a pitch.",
+    disclosure: "#ad",
+    required_phrase: "TradeLens", never_bare: "Lens", no_exclamation: true,
+  },
+  guidance: {
+    hook_style: "One line that names the mistake, then the fix on the next line.",
+    angles: ["levels I stopped drawing by hand", "the 4 charts I check before the open", "what I do on a red morning"],
+    notes: ["never show a live brokerage screen", "the app is a reader, not a signal service"],
+  },
+  client: {
+    agency: { name: "Reachify", contact: "campaigns@reachify.example", code: "REACHIFY25", commission_pct: 15 },
+    advertiser: { name: "TradeLens Labs", contact: "marketing@tradelens.example", site: "https://tradelens.example" },
+    opens: "2026-09-01", closes: "2026-11-30",
+    source: { name: "Reachify brief v3", url: "https://reachify.example/briefs/tradelens-q4", received: "2026-08-24" },
+  },
+  deliverables: {
+    sets_wanted: 40, due: "2026-10-15", platforms: ["instagram", "tiktok"],
+    cta_url: "https://tradelens.example/get", tracking_url: "https://rch.fy/tl-q4",
+    audience: "Traders one to three years in who already read charts and want their own levels back faster. Not beginners.",
+  },
+  references: [
+    { url: "https://instagram.example/p/levels-post", note: "the hook sits in the top third, nothing under it", kind: "post" },
+    { url: "https://instagram.example/p/morning-routine", note: "four panels, one habit each, no numbers", kind: "post" },
+  ],
+  app_store: {
+    title: "TradeLens", subtitle: "Read the chart, not the noise", developer: "TradeLens Labs",
+    rating: 4.8, ratings: "12.4K", age: "4+", category: "Finance", theme: "dark",
+  },
+  assets: {
+    palette: ["#0B0B0C", "#1F5EFF", "#F2F0EB"],
+    mascot: null,
+    photos: { dir: "", credit: "Pexels" },
+    look: "cinematic",
+  },
+  content: {
+    style: "native",
+    hook: { photo: 0, lines: ["I stopped drawing levels", "by hand"] },
+    ranked: [],
+    closer: { lines: ["The reader marks them"], cta: "TradeLens on the App Store" },
+  },
+};

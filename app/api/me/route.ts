@@ -2,6 +2,7 @@ import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { getAccount } from "@/lib/account";
 import { demo, demoAccount, isDemo, demoWorkspaceAccount } from "@/lib/demo";
+import { readOrgAssets } from "@/lib/uploads";
 
 /** Plan and this period's counters for the signed-in member (refreshed after every set). */
 export async function GET() {
@@ -12,5 +13,5 @@ export async function GET() {
   const real = await getAccount(sb, viewer);
   const d = demo(); // development-only overrides (lib/demo.ts)
   const account = d?.plan ? demoAccount(real, d.plan) : real;
-  return Response.json({ account, org: { id: viewer.org.id, name: viewer.org.name, plan: d?.plan ?? viewer.org.plan } });
+  return Response.json({ account, org: { id: viewer.org.id, name: viewer.org.name, plan: d?.plan ?? viewer.org.plan, assets: readOrgAssets((viewer.org as { assets?: unknown }).assets) } });
 }

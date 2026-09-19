@@ -32,6 +32,8 @@ export type SetRow = {
   files_json: string[] | null;
   content_json: any;
   compliance_json: any;
+  /** the logo, avatar, handle and note this set was made with (migration 0020) */
+  instructions?: { logo_path?: string; avatar_path?: string; handle?: string; note?: string } | null;
   error: string | null;
   cancel_requested: boolean;
   created_at: string;
@@ -41,7 +43,7 @@ export type SetRow = {
 };
 
 export const SET_COLS =
-  "id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, error, cancel_requested, created_at, started_at, finished_at, updated_at";
+  "id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, instructions, error, cancel_requested, created_at, started_at, finished_at, updated_at";
 
 /** The gate's refusals, as the sentence the member sees. */
 const REASONS: Record<string, string> = {
@@ -76,6 +78,8 @@ export type ReserveInput = {
   max: number;
   lane: Lane;
   hd?: boolean;
+  /** the workspace's logo, avatar, handle and note for this set (migration 0020) */
+  instructions?: Record<string, unknown> | null;
   creatorId?: string | null;
   look?: string | null;
 };
@@ -93,6 +97,7 @@ export async function reserveSet(sb: SupabaseClient, i: ReserveInput): Promise<s
     p_hd: !!i.hd,
     p_creator: i.creatorId ?? null,
     p_look: i.look ?? null,
+    p_instructions: i.instructions ?? null,
   });
   if (error) {
     const code = /FC_[A-Z_]+/.exec(error.message)?.[0] ?? "FC_UNKNOWN";

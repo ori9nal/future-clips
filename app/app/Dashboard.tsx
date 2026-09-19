@@ -14,6 +14,7 @@
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CleanSeal } from "@/components/CleanSeal";
+import { BrandKit } from "@/components/BrandKit";
 import Link from "next/link";
 import type { Account } from "@/lib/account";
 import { planLabel, PLAN_LABELS } from "@/lib/plans";
@@ -22,10 +23,16 @@ import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
 
 type Spec = {
   id: string; brand: string; product: string; niche: string;
-  requirements?: { min_slides?: number; max_slides?: number; required_mention?: string };
-  assets?: { palette?: string[] };
+  advertiser?: string; agency?: string;
+  requirements?: { min_slides?: number; max_slides?: number; required_mention?: string; aspect?: string; must_show_app?: boolean };
+  assets?: { palette?: string[]; logo?: string | null };
   content?: { style?: string };
-  guidance?: { angles?: string[]; hook_style?: string };
+  guidance?: { angles?: string[]; hook_style?: string; notes?: string[] };
+  payout?: { rate_usd?: number; max_payout_usd?: number; budget_remaining_usd?: number; review_days?: number; platforms?: string[] };
+  rules?: { banned_claims?: string[]; banned_topics?: string[]; tone?: string; disclosure?: string };
+  client?: { agency?: { name?: string }; advertiser?: { name?: string }; closes?: string | null };
+  deliverables?: { platforms?: string[]; due?: string | null; cta_url?: string | null; audience?: string | null };
+  references?: { url?: string | null; note?: string | null }[];
 };
 type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number; /** carousels this visitor has left today, and the daily allowance (R16); undefined when there is no limiter */ demoLeft?: number; demoPerVisitor?: number };
 type Page = "create" | "library" | "campaigns" | "insights" | "partners" | "settings";
@@ -358,6 +365,63 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     );
   };
 
+  /**
+   * What the chosen brief actually asks for. The picker only had brand,
+   * niche and a slide range; a brief carries the money, the dates, the rules
+   * and the posts it wants imitated, and a clipper writing to it should see
+   * all of it without leaving the composer.
+   */
+  const Brief = ({ s }: { s: Spec }) => {
+    const money = (v?: number) => (typeof v === "number" && v > 0 ? `$${v.toLocaleString("en-US")}` : null);
+    const day = (d?: string | null) => (d ? new Date(d).toLocaleDateString(undefined, { month: "short", day: "numeric" }) : null);
+    const platforms = s.deliverables?.platforms?.length ? s.deliverables.platforms : s.payout?.platforms ?? [];
+    const runBy = s.client?.agency?.name ?? s.agency;
+    const facts: [string, string][] = [
+      ["Pays", s.payout?.rate_usd ? `$${s.payout.rate_usd.toFixed(2)} per 1k views` : ""],
+      ["Budget left", money(s.payout?.budget_remaining_usd) ?? ""],
+      ["Closes", day(s.client?.closes) ?? ""],
+      ["Due", day(s.deliverables?.due) ?? ""],
+      ["Goes on", platforms.join(", ")],
+      ["Must mention", s.requirements?.required_mention ?? ""],
+      ["Disclosure", s.rules?.disclosure ?? ""],
+      ["Reviewed in", s.payout?.review_days ? `${s.payout.review_days} days` : ""],
+    ].filter(([, v]) => v) as [string, string][];
+    const avoid = [...(s.rules?.banned_claims ?? []), ...(s.rules?.banned_topics ?? [])].slice(0, 6);
+    const refs = (s.references ?? []).filter((r) => r.url || r.note);
+    if (!facts.length && !avoid.length && !refs.length && !s.deliverables?.audience) return null;
+    return (
+      <details className="brief">
+        <summary>
+          <b>What this brief wants</b>
+          {runBy ? <span>Run by {runBy}{s.client?.advertiser?.name ?? s.advertiser ? ` for ${s.client?.advertiser?.name ?? s.advertiser}` : ""}</span> : null}
+        </summary>
+        {facts.length > 0 && (
+          <dl className="briefFacts">
+            {facts.map(([k, v]) => <div key={k}><dt>{k}</dt><dd>{v}</dd></div>)}
+          </dl>
+        )}
+        {s.deliverables?.audience && <p className="briefLine"><span>Who it is for</span>{s.deliverables.audience}</p>}
+        {s.rules?.tone && <p className="briefLine"><span>Tone</span>{s.rules.tone}</p>}
+        {avoid.length > 0 && (
+          <p className="briefLine"><span>Never say</span>{avoid.join(" · ")}</p>
+        )}
+        {refs.length > 0 && (
+          <div className="briefRefs">
+            <span>Posts to imitate</span>
+            <ul>
+              {refs.map((r, i) => (
+                <li key={i}>
+                  {r.url ? <a href={r.url} target="_blank" rel="noreferrer noopener">Reference {i + 1}</a> : <b>Reference {i + 1}</b>}
+                  {r.note ? ` — ${r.note}` : ""}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </details>
+    );
+  };
+
   const Empty = ({ title, body, action }: { title: string; body: string; action?: React.ReactNode }) => (
     <div className="empty"><h3>{title}</h3><p>{body}</p>{action}</div>
   );
@@ -442,6 +506,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                       </div>
                     )}
                   </div>
+                  {active && <Brief s={active} />}
                   <div className="field">
                     <label className="label" htmlFor="ask">What should this slideshow be about?</label>
                     <textarea id="ask" className="textarea" ref={taRef} rows={3} value={ask} maxLength={400} disabled={!active}
@@ -454,6 +519,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                       </div>
                     )}
                   </div>
+                  {!demoN && <BrandKit />}
                   <div className="controls">
                     <div className="control">
                       <span>Slides</span>
@@ -526,6 +592,8 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                         <span className="pill">{s.niche}</span>
                         <span className="pill">{styleWord(s.content?.style ?? "native")}</span>
                         <span className="pill">{s.requirements?.min_slides ?? 5} to {s.requirements?.max_slides ?? 10} slides</span>
+                        {s.payout?.rate_usd ? <span className="pill">${s.payout.rate_usd.toFixed(2)} per 1k</span> : null}
+                        {s.client?.closes ? <span className="pill">closes {new Date(s.client.closes).toLocaleDateString(undefined, { month: "short", day: "numeric" })}</span> : null}
                       </div>
                     </button>
                   ))}

@@ -332,3 +332,20 @@ html[data-theme="dark"] .toast { background: var(--text); color: var(--paper); }
   .rows > .rowi { flex-direction: column; align-items: flex-start; }
   .rowi .r { justify-content: flex-start; }
 }
+
+/* ── what the chosen brief wants (composer) ───────────────────────────────── */
+.brief { border: 1px solid var(--line); border-radius: var(--r-control); background: var(--raised); padding: 0 14px; }
+.brief > summary { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 11px 0; cursor: pointer; font-size: 14px; list-style: none; }
+.brief > summary::-webkit-details-marker { display: none; }
+.brief > summary::after { content: "Show"; margin-left: auto; color: var(--text-3); font-size: 13px; }
+.brief[open] > summary::after { content: "Hide"; }
+.brief > summary span { color: var(--text-2); font-size: 13px; }
+.brief > *:last-child { margin-bottom: 14px; }
+.briefFacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px 16px; margin: 4px 0 12px; }
+.briefFacts dt { color: var(--text-3); font-size: 12px; }
+.briefFacts dd { margin: 2px 0 0; font-size: 14px; font-weight: 600; }
+.briefLine { margin: 0 0 10px; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.briefLine span { display: block; color: var(--text-3); font-size: 12px; }
+.briefRefs > span { display: block; color: var(--text-3); font-size: 12px; }
+.briefRefs ul { margin: 4px 0 0; padding-left: 18px; font-size: 14px; line-height: 1.5; color: var(--text-2); }
+.briefRefs a { color: inherit; }

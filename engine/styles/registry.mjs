@@ -11,6 +11,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { assertClean } from '../clean.mjs';
 import sharp from 'sharp';
 import { fontFiles } from './kit.mjs';
+import { signOff } from '../creator.mjs';
 
 import clinical from './clinical.mjs';
 import editorial from './editorial.mjs';
@@ -81,6 +82,15 @@ export async function render({ spec, root, styleId, outDir, cacheDir }) {
     photoDir: spec.assets?.photos?.dir ? path.join(root, spec.assets.photos.dir) : null,
   };
   const bodies = await style.slides(spec, ctx);
+
+  // The person posting it signs the last slide: the avatar or logo their
+  // workspace uploaded, and their own handle (migration 0020). One place, so
+  // all ten styles sign a deck alike; empty string when nothing was uploaded,
+  // which leaves every existing set byte for byte as it was.
+  if (bodies.length) {
+    const sign = signOff(spec, w, h);
+    if (sign) bodies[bodies.length - 1] += sign;
+  }
 
   const files = [];
   const fonts = fontFiles(root);

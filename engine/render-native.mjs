@@ -21,6 +21,7 @@ import { fitLines, layoutWidth } from './fit-text.mjs';
 import { captionBlock, placementsFor, breakToFit } from './caption.mjs';
 import { deslop } from './deslop.mjs';
 
+import { handle as creatorHandle } from './creator.mjs';
 export const W = 1080, H = 1920;
 
 // The caption face is the platform's own (TikTok "Classic", a Proxima Nova
@@ -246,6 +247,7 @@ export async function nativeSlides(spec, root, outDir) {
     out.push(s.join(''));
   }
 
+
   return out;
 }
 
@@ -293,7 +295,7 @@ export function mascotSlides(spec, root) {
   const M = path.join(root, spec.assets.mascot);
   if (!fs.existsSync(M)) throw new Error(`mascot asset missing: ${spec.assets.mascot}`);
   const C = spec.content, out = [];
-  const handle = spec.requirements.required_mention;
+  const handle = creatorHandle(spec) ?? '';
 
   // cover
   {

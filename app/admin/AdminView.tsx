@@ -79,6 +79,7 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, re
                 <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
                 <td>{s.status}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
+                  <Link className="fc-btn" data-variant="ghost" data-size="sm" href={`/admin/briefs/${s.id}`}>Edit</Link>{" "}
                   <form action={setBriefStatus.bind(null, s.id, s.status === "live" ? "paused" : "live")} style={{ display: "inline" }}>
                     <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>{s.status === "live" ? "Pause" : "Go live"}</button>
                   </form>{" "}

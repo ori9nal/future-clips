@@ -12,6 +12,7 @@ import { rect, text, stack, paragraph, aside, list, grain, FACES } from './kit.m
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 
+import { handle as creatorHandle } from '../creator.mjs';
 /**
  * Set each line at its own size so every line spans the full measure.
  * A single fitted size leaves short lines floating; per-line sizing is what
@@ -59,7 +60,7 @@ export default {
       + grain(W, H, { op: 0.06 })
       + text('monoBold', M, 103, spec.brand.toUpperCase(), { size: 26, fill: paper, ls: 3 })
       + chip(n)
-      + text('mono', M, H - 60, spec.requirements.required_mention, { size: 21, fill: muted });
+      + text('mono', M, H - 60, creatorHandle(spec) ?? '', { size: 21, fill: muted });
 
     /* cover — the loudest slide, accent on the last line */
     {

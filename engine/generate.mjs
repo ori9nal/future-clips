@@ -11,6 +11,12 @@ import { completeJson } from './providers/claude.mjs';
 import { check, constraintsFor, repair, bareNameRx } from './compliance.mjs';
 import { familyFor, SOFT_FAMILIES } from './scenes.mjs';
 
+/** The "take this from it" lines on a brief's reference posts, as one line. */
+function refNotes(spec) {
+  const notes = (spec.references ?? []).map((r) => r?.note).filter(Boolean);
+  return notes.length ? `Imitate these references: ${notes.join('; ')}` : null;
+}
+
 /** Expand a bare product name inside one string, mirroring repair(). */
 function expandIn(text, spec) {
   const def = bareNameRx(spec.rules ?? {});
@@ -519,6 +525,13 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
     spec.niche ? `Niche: ${spec.niche}` : null,
     spec.guidance?.hook_style ? `Hook style: ${spec.guidance.hook_style}` : null,
     spec.guidance?.angles?.length ? `Angles that work: ${spec.guidance.angles.join('; ')}` : null,
+    // A brief carries more than the renderer draws. These lines only appear
+    // when the brief actually fills the field in, so a campaign written before
+    // the richer brief keeps a byte-identical prompt — and its cached copy.
+    spec.deliverables?.audience ? `Who it is for: ${spec.deliverables.audience}` : null,
+    spec.guidance?.notes?.length ? `Notes from the brief: ${spec.guidance.notes.join('; ')}` : null,
+    refNotes(spec),
+    spec.assets?.creator?.note ? `What the clipper said about their angle: ${spec.assets.creator.note}` : null,
     '',
     `FORMAT: ${styleId}. ${sceneDirection}`,
     langLine,

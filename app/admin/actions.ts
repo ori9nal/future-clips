@@ -1,11 +1,12 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import type { Spec } from "@/lib/specs";
 import { redirect } from "next/navigation";
 import { requirePlatformOwner } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { type Campaign, emptyCampaign, slugify } from "@/lib/campaigns";
-import { getCampaign, saveCampaign, deleteCampaign } from "@/lib/db/campaigns";
+import { getCampaign, saveCampaign, deleteCampaign, getSpec, saveSpec } from "@/lib/db/campaigns";
 
 /**
  * Admin mutations. Each one re-checks that the caller is a platform owner
@@ -254,4 +255,154 @@ export async function removeBrief(id: string) {
   if (error) throw new Error(error.message);
   revalidatePath("/admin");
   revalidatePath("/app");
+}
+
+/* ── briefs: everything a campaign carries, edited in one form ─────────── */
+
+const num = (v: FormDataEntryValue | null) => { const n = Number(String(v ?? "").trim()); return Number.isFinite(n) && String(v ?? "").trim() !== "" ? n : null; };
+const str = (v: FormDataEntryValue | null, max = 400) => { const t = String(v ?? "").trim(); return t ? t.slice(0, max) : null; };
+
+/**
+ * Save a brief. The form carries every field the brief has; anything left
+ * blank is cleared rather than quietly kept, so the page is the truth. The
+ * authored `content` block (hook, ranked, closer) is never touched here —
+ * copy is generated per set, and a brief that still has authored copy keeps it.
+ */
+export async function saveBrief(id: string, fd: FormData) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const current = await getSpec(sb, id);
+  if (!current) throw new Error(`no brief "${id}"`);
+
+  const refs: NonNullable<Spec["references"]> = [];
+  for (let i = 0; i < 8; i++) {
+    const url = str(fd.get(`ref_url_${i}`), 500);
+    const path = str(fd.get(`ref_path_${i}`), 500);
+    const note = str(fd.get(`ref_note_${i}`), 300);
+    if (url || path || note) refs.push({ url, path, note, kind: (str(fd.get(`ref_kind_${i}`)) as "post" | undefined) ?? "post" });
+  }
+
+  const next: Spec = {
+    ...current,
+    brand: str(fd.get("brand"), 80) ?? current.brand,
+    wordmark: str(fd.get("wordmark"), 80) ?? undefined,
+    handle: str(fd.get("handle"), 60) ?? undefined,
+    product: str(fd.get("product"), 400) ?? current.product,
+    niche: str(fd.get("niche"), 60) ?? current.niche,
+    advertiser: str(fd.get("advertiser"), 120) ?? undefined,
+    agency: str(fd.get("agency"), 120) ?? undefined,
+    payout: {
+      ...current.payout,
+      rate_usd: num(fd.get("rate_usd")) ?? current.payout?.rate_usd ?? 0,
+      min_payout_usd: num(fd.get("min_payout_usd")) ?? current.payout?.min_payout_usd ?? 0,
+      max_payout_usd: num(fd.get("max_payout_usd")) ?? current.payout?.max_payout_usd ?? 0,
+      budget_total_usd: num(fd.get("budget_total_usd")) ?? current.payout?.budget_total_usd ?? 0,
+      budget_remaining_usd: num(fd.get("budget_remaining_usd")) ?? current.payout?.budget_remaining_usd ?? 0,
+      review_days: num(fd.get("review_days")) ?? current.payout?.review_days ?? 0,
+      platforms: list(fd.get("platforms")).length ? list(fd.get("platforms")) : (current.payout?.platforms ?? []),
+    },
+    requirements: {
+      ...current.requirements,
+      min_slides: num(fd.get("min_slides")) ?? current.requirements.min_slides,
+      max_slides: num(fd.get("max_slides")) ?? current.requirements.max_slides,
+      aspect: str(fd.get("aspect"), 12) ?? current.requirements.aspect,
+      required_mention: str(fd.get("required_mention"), 60) ?? "",
+      must_show_app: fd.get("must_show_app") === "on",
+    },
+    rules: {
+      ...current.rules,
+      banned_claims: list(fd.get("banned_claims")),
+      banned_topics: list(fd.get("banned_topics")),
+      tone: str(fd.get("tone"), 600) ?? undefined,
+      disclosure: str(fd.get("disclosure"), 200) ?? undefined,
+      required_phrase: str(fd.get("required_phrase"), 120),
+      never_bare: str(fd.get("never_bare"), 120),
+      no_exclamation: fd.get("no_exclamation") === "on",
+    },
+    guidance: {
+      hook_style: str(fd.get("hook_style"), 600) ?? undefined,
+      angles: list(fd.get("angles")),
+      notes: list(fd.get("notes")),
+    },
+    client: {
+      agency: {
+        name: str(fd.get("agency"), 120) ?? undefined,
+        contact: str(fd.get("agency_contact"), 160) ?? undefined,
+        code: str(fd.get("agency_code"), 40) ?? undefined,
+        commission_pct: num(fd.get("agency_commission_pct")) ?? undefined,
+      },
+      advertiser: {
+        name: str(fd.get("advertiser"), 120) ?? undefined,
+        contact: str(fd.get("advertiser_contact"), 160) ?? undefined,
+        site: str(fd.get("advertiser_site"), 300) ?? undefined,
+      },
+      opens: str(fd.get("opens"), 40),
+      closes: str(fd.get("closes"), 40),
+      source: { name: str(fd.get("source_name"), 200) ?? undefined, url: str(fd.get("source_url"), 500) ?? undefined },
+    },
+    deliverables: {
+      sets_wanted: num(fd.get("sets_wanted")),
+      due: str(fd.get("due"), 40),
+      platforms: list(fd.get("platforms")),
+      cta_url: str(fd.get("cta_url"), 500),
+      tracking_url: str(fd.get("tracking_url"), 500),
+      audience: str(fd.get("audience"), 400),
+    },
+    references: refs,
+    app_store: {
+      title: str(fd.get("app_title"), 60) ?? undefined,
+      subtitle: str(fd.get("app_subtitle"), 80) ?? undefined,
+      developer: str(fd.get("app_developer"), 80) ?? undefined,
+      rating: num(fd.get("app_rating")),
+      ratings: str(fd.get("app_ratings"), 20),
+      age: str(fd.get("app_age"), 10),
+      category: str(fd.get("app_category"), 40),
+      theme: (str(fd.get("app_theme"), 10) as "light" | "dark" | null) ?? null,
+    },
+    assets: {
+      ...current.assets,
+      palette: list(fd.get("palette")).length ? list(fd.get("palette")) : current.assets.palette,
+      look: str(fd.get("look"), 40),
+    },
+  };
+
+  await saveSpec(sb, next);
+  revalidatePath(`/admin/briefs/${id}`);
+  revalidatePath("/admin");
+}
+
+/** A picture the brief needs: the brand's logo, the app icon, or a reference to imitate. */
+export async function uploadBriefAsset(id: string, fd: FormData) {
+  await requirePlatformOwner();
+  const slot = String(fd.get("slot") || "");
+  const file = fd.get("file") as File | null;
+  if (!file || !file.size) return;
+  if (!/^(logo|app_icon|app_screen|ref_[0-7])$/.test(slot)) throw new Error(`unknown slot "${slot}"`);
+  if (file.size > 4 * 1024 * 1024) throw new Error("keep it under 4 MB");
+  const ext = (file.name.split(".").pop() || "png").toLowerCase();
+  if (!["png", "jpg", "jpeg", "webp"].includes(ext)) throw new Error(`use png, jpg or webp, not ".${ext}"`);
+
+  const sb = await createClient();
+  const current = await getSpec(sb, id);
+  if (!current) throw new Error(`no brief "${id}"`);
+  const key = `brief/${id}/${slot}.${ext}`;
+  const { error } = await sb.storage.from("assets").upload(key, Buffer.from(await file.arrayBuffer()), {
+    contentType: file.type || `image/${ext}`, upsert: true,
+  });
+  if (error) throw new Error(`upload failed: ${error.message}`);
+  const { data } = sb.storage.from("assets").getPublicUrl(key);
+
+  const next: Spec = { ...current };
+  if (slot === "logo") next.assets = { ...next.assets, logo: data.publicUrl };
+  else if (slot === "app_icon") next.assets = { ...next.assets, app_icon: data.publicUrl };
+  else if (slot === "app_screen") next.assets = { ...next.assets, app_screen: data.publicUrl };
+  else {
+    const i = Number(slot.slice(4));
+    const refs = [...(next.references ?? [])];
+    while (refs.length <= i) refs.push({});
+    refs[i] = { ...refs[i], path: data.publicUrl };
+    next.references = refs;
+  }
+  await saveSpec(sb, next);
+  revalidatePath(`/admin/briefs/${id}`);
 }

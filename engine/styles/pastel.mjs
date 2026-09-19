@@ -11,6 +11,7 @@ import { rect, text, stack, paragraph, aside, grain, plate, image, FACES } from 
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
 
+import { handle as creatorHandle } from '../creator.mjs';
 /** A dashed panel — the reference's "save this slide" device. */
 const dashed = (x, y, w, h, { stroke, r = 10 }) =>
   `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="none" ` +
@@ -49,7 +50,7 @@ export default {
     const chrome = () => rect(0, 0, W, H, { fill: paper })
       + grain(W, H, { op: 0.04 })
       + text('sansItalic', M, 82, spec.content.kicker ?? spec.brand.toLowerCase(), { size: 24, fill: muted })
-      + text('mono', W - M, 82, spec.requirements.required_mention, { size: 22, fill: muted, anchor: 'end' });
+      + text('mono', W - M, 82, creatorHandle(spec) ?? '', { size: 22, fill: muted, anchor: 'end' });
 
     /* cover — a question, because the style is answering one */
     {

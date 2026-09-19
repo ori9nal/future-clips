@@ -10,6 +10,7 @@ import path from 'node:path';
 // like a paper and cites nothing is worse than one that never pretended.
 import { rect, line, text, stack, paragraph, list, plate, image, grain } from './kit.mjs';
 
+import { handle as creatorHandle } from '../creator.mjs';
 /** A campaign photo id under ctx.photoDir, or a generated frame's absolute path. */
 const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id));
 
@@ -37,7 +38,7 @@ export default {
       + line(M, 96, W - M, 96, { stroke: rule, sw: 1.5 })
       + line(M, H - 118, W - M, H - 118, { stroke: rule, sw: 1.5 })
       + text('serifSemi', M, H - 76, source, { size: 24, fill: ink })
-      + text('mono', W - M, H - 76, spec.requirements.required_mention, { size: 20, fill: muted, anchor: 'end' });
+      + text('mono', W - M, H - 76, creatorHandle(spec) ?? '', { size: 20, fill: muted, anchor: 'end' });
 
     const total = C.ranked.length + 2;
 
