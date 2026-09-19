@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
+import { headers } from "next/headers";
 import type { Account } from "@/lib/account";
-import { demoAccount, demoPartners, demoSets, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, DEMO_SLIDES } from "@/lib/demo";
+import { demoAccount, demoPartners, demoSets, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, DEMO_SLIDES, isDemoHost } from "@/lib/demo";
+import AdminView from "../admin/AdminView";
+import type { Viewer } from "@/lib/auth";
 import Dashboard from "../app/Dashboard";
 import PartnerDashboard from "../app/PartnerDashboard";
 
@@ -14,6 +17,7 @@ export const dynamic = "force-dynamic";
  * Development only: 404 in production, and only when FC_DEMO_PREVIEW=1.
  *   /design-preview?view=clipper&plan=solo|grind|agency|free
  *   /design-preview?view=partner
+ *   /design-preview?view=admin         the admin surface (AdminView) on fixtures, forms disabled
  *   /design-preview?view=demo          the demo workspace (0013) on the shipped fixtures
  */
 const SPECS = [
@@ -26,10 +30,36 @@ const SPECS = [
 ];
 
 export default async function DesignPreview({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
-  if (process.env.NODE_ENV === "production" || process.env.FC_DEMO_PREVIEW !== "1") notFound();
+  // laptops with FC_DEMO_PREVIEW=1, and the hidden demo host in production —
+  // the owner's four links (D-048). Fixtures only: no session, no database.
+  const host = (await headers()).get("x-forwarded-host") ?? (await headers()).get("host");
+  const onDemoHost = isDemoHost(host);
+  if (!onDemoHost && (process.env.NODE_ENV === "production" || process.env.FC_DEMO_PREVIEW !== "1")) notFound();
   const q = await searchParams;
   const orgId = "00000000-0000-0000-0000-000000000000";
   const partners = demoPartners("FCDEMO42");
+  if (q.view === "admin") {
+    // the admin surface on fixtures: the same component the real /admin renders
+    const viewer = {
+      user: { id: "00000000-0000-0000-0000-0000000000aa", email: "you@thefutureclips.com" },
+      memberships: [], role: "owner", isPlatformOwner: true,
+      org: { id: "00000000-0000-0000-0000-0000000000ab", name: "Future Clips", plan: "agency", seat_limit: 10, is_platform: true, billing_status: "none", current_period_start: null, current_period_end: null },
+    } as unknown as Viewer;
+    return (
+      <AdminView
+        viewer={viewer}
+        readOnly
+        engineOn
+        fund={{ gross_usd: 1_249.83, reserve_usd: 437.44, spent_usd: 118.62, balance_usd: 318.82, sales: 37, share: 0.35, since: new Date(Date.now() - 24 * 86400000).toISOString() }}
+        specs={SPECS.map((c) => ({ id: c.id, brand: c.brand, niche: c.niche, status: "live", content: { style: (c as { content?: { style?: string } }).content?.style }, requirements: c.requirements }))}
+        campaigns={[
+          { id: "meridian-endurance", name: "Meridian Endurance", niche: "fitness", brand: { handle: "@meridian.endurance", colors: { ink: "#171512", accents: { rust: "#A8442A" } } }, rules: { min_slides: 5, max_slides: 10, zero_gen_mode: false }, agency: { code: "MERIDIAN25" } },
+          { id: "quiet-mindset", name: "Quiet Hours", niche: "mindset", brand: { handle: "@quiet.hours", colors: { ink: "#15171B", accents: { primary: "#5A6B3C" } } }, rules: { min_slides: 5, max_slides: 8, zero_gen_mode: true }, agency: { code: "QUIET25" } },
+          { id: "signal-creator", name: "Signal Studio", niche: "creator", brand: { handle: "@signal.studio", colors: { ink: "#121212", accents: { primary: "#D93A56" } } }, rules: { min_slides: 6, max_slides: 10 }, agency: { code: "SIGNAL25" } },
+        ]}
+      />
+    );
+  }
   if (q.view === "demo") {
     // what an invited prospect sees in the demo workspace (0013)
     return (

@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-19, after 0018)
+## Migration state (2026-09-19, after 0019)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -25,6 +25,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0015_demo_generation.sql` | `demo_generation` (2026-09-19) | yes | `fc_reserve_set` reads the org first and accepts a 4-slide range for demo orgs (5 for everyone else), skips the priority allowance for demo orgs; demo org `spend_cap_usd` 15 |
 | `0017_rate_limit_peek.sql` | `rate_limit_peek` (2026-09-19) | yes | `fc_rate_limit_peek(key, limit, window_s)` reads a limiter without spending a slot (R16); service role only |
 | `0018_allowances_at_margin.sql` | `allowances_at_margin` (2026-09-19) | yes | D-044 applied: Clipper 200, Pro 400 + 50, Studio 1,000 + 100, `cogs_allowance_usd` recomputed |
+| `0019_monthly_and_yearly_prices.sql` | `monthly_and_yearly_prices` (2026-09-19) | yes | `plans.price_usd_year`; monthly 19.99/49.99/99.99, yearly 192/384/948 (D-048) |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 
@@ -48,7 +49,7 @@ File numbers are not the apply order. Apply through the Supabase MCP `apply_migr
 | `signups` | the old waitlist (3 rows); no code reads or writes it | – | nobody (anon insert policy dropped in 0009) |
 | `creators`, `brand_kits`, `pairing_history`, `jobs` | schema for own-creator, brand lock, pairing rotation, a generic queue; unused by code | – | own org (jobs: no policies) |
 
-Live plan rows after 0018 (2026-09-19): `free` "No plan", 0 slides; `solo` "Clipper" $16, 200 slides; `grind` "Pro" $32, 400 slides + 50 priority, HD included (an HD slide draws 3), 1 seat; `agency` "Studio" $79, 1,000 slides + 100 priority, HD included, 5 seats (D-044). `packs`: p100 $8, p250 $18, p600 $40. `orgs.slide_balance` holds purchased slides (spent after the allowance, never expire); `sets.from_balance` records how many a set drew from it.
+Live plan rows after 0018 (2026-09-19): `free` "No plan", 0 slides; `solo` "Clipper" $19.99 monthly / $192 a year, 200 slides; `grind` "Pro" $49.99 monthly / $384 a year, 400 slides + 50 priority, HD included (an HD slide draws 3), 1 seat; `agency` "Studio" $99.99 monthly / $948 a year, 1,000 slides + 100 priority, HD included, 5 seats (D-044). `packs`: p100 $8, p250 $18, p600 $40. `orgs.slide_balance` holds purchased slides (spent after the allowance, never expire); `sets.from_balance` records how many a set drew from it.
 
 ## Functions
 
