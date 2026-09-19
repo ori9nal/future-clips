@@ -10,6 +10,17 @@ import "server-only";
  */
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+/** one piece of text on a slide, as the renderer found it (migration 0027) */
+export type SlideBlock = {
+  id: string;
+  lines: string[];
+  box: { x: number; y: number; w: number; h: number };
+  size: number;
+  anchor: string;
+  fill: string;
+};
+export type SlideLayout = { slide: number; canvas: { w: number; h: number }; art: number; blocks: SlideBlock[] };
+
 export type Lane = "batch" | "priority";
 
 export type SetRow = {
@@ -35,6 +46,12 @@ export type SetRow = {
   /** the logo, avatar, handle and note this set was made with (migration 0020) */
   /** a campaign sample: rendered by us, its first three slides published (0023) */
   is_sample?: boolean;
+  /** who made it, within the workspace — the shared demo has many (0013) */
+  user_id?: string | null;
+  /** the text blocks on each slide, and what the member changed about them (0027) */
+  layout_json?: SlideLayout[] | null;
+  edits_json?: Record<string, Record<string, { lines?: string[]; dx?: number; dy?: number }>> | null;
+  edited_at?: string | null;
   instructions?: { logo_path?: string; avatar_path?: string; handle?: string; note?: string } | null;
   error: string | null;
   cancel_requested: boolean;
@@ -45,7 +62,26 @@ export type SetRow = {
 };
 
 export const SET_COLS =
-  "id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, instructions, is_sample, error, cancel_requested, created_at, started_at, finished_at, updated_at";
+  "id, org_id, user_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, instructions, is_sample, layout_json, edits_json, edited_at, error, cancel_requested, created_at, started_at, finished_at, updated_at";
+
+/**
+ * Signed URLs for a finished set's slides.
+ *
+ * An edited slide keeps its path — every link to the set holds — which means
+ * a cache keyed on that path can go on serving the slide as it was before the
+ * edit. The edit's own timestamp rides along as `v`, so a slide that has been
+ * redrawn is a different URL to every cache between here and the customer,
+ * and an untouched set signs exactly as it always did.
+ */
+export async function signedSlides(sb: SupabaseClient, set: SetRow, seconds = 3600): Promise<string[]> {
+  if (set.status !== "done" || !set.files_json?.length) return [];
+  const { data } = await sb.storage.from("sets").createSignedUrls(set.files_json, seconds);
+  const v = set.edited_at ? Date.parse(set.edited_at) : 0;
+  return (data ?? [])
+    .map((d) => d.signedUrl)
+    .filter((u): u is string => !!u)
+    .map((u) => (v ? `${u}${u.includes("?") ? "&" : "?"}v=${v}` : u));
+}
 
 /** The gate's refusals, as the sentence the member sees. */
 const REASONS: Record<string, string> = {

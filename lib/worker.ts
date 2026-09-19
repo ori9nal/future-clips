@@ -119,6 +119,30 @@ async function publishSample(
   if (error) throw new Error(`sample not recorded on ${campaignId}: ${error.message}`);
 }
 
+/**
+ * The editable copy of a set: `slide-N.svg` (the words, a kilobyte) and
+ * `slide-N.art-K.jpeg` (the picture under them). `/api/sets/:id/slides/:n`
+ * pulls these back, applies the customer's edit and rasterises — no model
+ * call, nothing regenerated.
+ */
+const EDITABLE_TYPES: Record<string, string> = {
+  ".svg": "image/svg+xml", ".jpeg": "image/jpeg", ".jpg": "image/jpeg",
+  ".png": "image/png", ".webp": "image/webp",
+};
+
+async function putEditable(sb: SupabaseClient, prefix: string, outDir: string): Promise<void> {
+  if (!fs.existsSync(outDir)) return;
+  for (const name of fs.readdirSync(outDir)) {
+    if (!/^slide-\d+(\.art-\d+)?\.(svg|jpe?g|png|webp)$/.test(name) || /^slide-\d+\.png$/.test(name)) continue;
+    const type = EDITABLE_TYPES[path.extname(name).toLowerCase()];
+    if (!type) continue;
+    const { error } = await sb.storage.from("sets").upload(`${prefix}/${name}`, fs.readFileSync(path.join(outDir, name)), { contentType: type, upsert: true });
+    // an editable copy that did not land costs the customer the edit button,
+    // never the set: the slides are already up and the money is committed
+    if (error) console.warn(`set ${prefix}: ${name} not kept for editing — ${error.message}`);
+  }
+}
+
 export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: any }): Promise<Tick> {
   const { lanes, image } = await engine();
   const { cacheDir, setsDir } = workDirs();
@@ -208,6 +232,11 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
       if (error) throw new Error(`upload ${name}: ${error.message}`);
       files.push(`${prefix}/${name}`);
     }
+    // what a customer needs to move a line or rewrite it later: the SVG that
+    // drew the words, and the picture it draws them over (migration 0027).
+    // Together about a tenth of the slides they rebuild, so every set keeps
+    // them rather than only the ones somebody opens.
+    await putEditable(sb, prefix, outDir);
     const post = JSON.parse(fs.readFileSync(path.join(outDir, "post.json"), "utf8"));
     await sb.storage.from("sets").upload(`${prefix}/post.json`, Buffer.from(JSON.stringify(post)), { contentType: "application/json", upsert: true });
     const { error } = await sb.rpc("fc_commit_set", {
@@ -216,7 +245,7 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
       p_cost_json: { copy: s.copy.usd, art: s.art.usd, total: s.usd, lane: s.lane, log: s.log }, p_storage_prefix: prefix,
     });
     if (error) throw error;
-    await sb.from("sets").update({ state_json: { ...s, lock: 0, files: undefined } }).eq("id", row.id);
+    await sb.from("sets").update({ state_json: { ...s, lock: 0, files: undefined }, layout_json: s.layout ?? null }).eq("id", row.id);
     if (row.is_sample) await publishSample(sb, row.campaign_id, row.id, s.files as string[], s.copy.content.caption);
     return { id: row.id, before, after: "done", ok: true, note: `${files.length} slides $${Number(s.usd).toFixed(4)}${row.is_sample ? " (sample)" : ""}` };
   }

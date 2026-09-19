@@ -8,10 +8,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { Resvg } from '@resvg/resvg-js';
-import { assertClean } from '../clean.mjs';
+import { assertClean, inspectPng } from '../clean.mjs';
 import sharp from 'sharp';
 import { fontFiles } from './kit.mjs';
 import { signOff } from '../creator.mjs';
+import { applyEdits, readBlocks, splitArt, joinArt, artMissing } from '../layout.mjs';
 
 import clinical from './clinical.mjs';
 import editorial from './editorial.mjs';
@@ -67,8 +68,64 @@ export function stylesFor(niche) {
     }));
 }
 
+/* ── one slide, drawn from its SVG ───────────────────────────────────────── */
+
+const wrap = (body, w, h) =>
+  `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
+
+const rasterise = (svg, w, fonts) => new Resvg(svg, {
+  fitTo: { mode: 'width', value: w },
+  font: { loadSystemFonts: false, defaultFontFamily: 'Archivo', fontFiles: fonts },
+}).render().asPng();
+
+/**
+ * A picture, small enough to keep a copy of per slide.
+ *
+ * A full-canvas frame is a 1.5 MB PNG, and every set would carry one per
+ * slide on top of the slides themselves. Opaque pictures become JPEG, which
+ * is a tenth of that and which resvg reads back just as happily; anything
+ * with transparency (a cut-out figure, an icon) keeps its alpha and is small
+ * already. The frame has been through deslop's own JPEG pass by this point,
+ * so the extra encode is not a visible loss.
+ */
+async function keepable(a) {
+  if (a.ext !== 'png') return a;
+  try {
+    const img = sharp(a.buf);
+    if ((await img.metadata()).hasAlpha) return a;
+    return { ...a, ext: 'jpeg', buf: await img.jpeg({ quality: 92, chromaSubsampling: '4:4:4' }).toBuffer() };
+  } catch { return a; }
+}
+
+/** What the editor is shown: the words, the box, and nothing about the SVG. */
+const publicBlock = (b) => ({ id: b.id, lines: b.lines, box: b.box, size: b.size, anchor: b.anchor, fill: b.fill });
+
+/**
+ * Draw one slide again from the pieces `render` kept, with the customer's
+ * edits applied. No model call, no photograph processed — the picture is the
+ * one already drawn, and only the type is laid out again.
+ *
+ * @param {object} o
+ * @param {string} o.body   the light SVG body (`slide-N.svg`)
+ * @param {{k:number,ext:string,buf:Buffer}[]} o.art  its pictures
+ * @param {object} o.edits  `{ b0: { lines, dx, dy }, … }`
+ * @param {{w:number,h:number}} o.canvas
+ * @returns {{ png: Buffer, blocks: object[], body: string }}
+ */
+export function rerenderSlide({ body, art = [], edits, canvas, root }) {
+  const { w, h } = canvas;
+  const edited = applyEdits(body, edits, { root, canvasW: w });
+  const missing = artMissing(edited).filter((k) => !art.some((a) => a.k === k));
+  if (missing.length) throw new Error(`slide is missing its picture${missing.length > 1 ? 's' : ''} (${missing.join(', ')})`);
+  const png = rasterise(wrap(joinArt(edited, art), w, h), w, fontFiles(root));
+  // the same gate every first render passes: pixels only, nothing else
+  const clean = inspectPng(png);
+  if (!clean.clean) throw new Error(`metadata gate: the edited slide carries ${clean.offending.map((o) => o.chunk).join(', ')}`);
+  return { png, blocks: readBlocks(edited, { root }).map(publicBlock), body: edited };
+}
+
 /** Render one campaign in one style. */
-export async function render({ spec, root, styleId, outDir, cacheDir }) {
+export async function render({ spec, root, styleId, outDir, cacheDir, edits }) {
   const style = byId(styleId);
   if (!style) throw new Error(`unknown style "${styleId}"`);
   // a style may size its canvas per campaign (feed: 9:16 for the families
@@ -101,17 +158,29 @@ export async function render({ spec, root, styleId, outDir, cacheDir }) {
 
   const files = [];
   const fonts = fontFiles(root);
-  bodies.forEach((body, i) => {
-    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">${body}</svg>`;
-    const file = path.join(outDir, `slide-${i + 1}.png`);
-    fs.writeFileSync(file, new Resvg(svg, {
-      fitTo: { mode: 'width', value: w },
-      font: { loadSystemFonts: false, defaultFontFamily: 'Archivo', fontFiles: fonts },
-    }).render().asPng());
+  // What the words are and where they sit, plus a copy of each slide light
+  // enough to keep: the picture comes out to its own file and the document
+  // that draws the type stays a few kilobytes. Together they are everything
+  // needed to move a line or rewrite it later without drawing anything again
+  // (`rerenderSlide`). Editing is a feature of the product, so this is kept
+  // for every set, not only the ones somebody opens.
+  const layout = [];
+  for (let i = 0; i < bodies.length; i++) {
+    const n = i + 1;
+    const edited = applyEdits(bodies[i], edits?.[n] ?? edits?.[String(n)], { root, canvasW: w });
+    const file = path.join(outDir, `slide-${n}.png`);
+    fs.writeFileSync(file, rasterise(wrap(edited, w, h), w, fonts));
     files.push(file);
-  });
+    const { body: light, art } = splitArt(edited);
+    fs.writeFileSync(path.join(outDir, `slide-${n}.svg`), light);
+    for (const a of art) {
+      const k = await keepable(a);
+      fs.writeFileSync(path.join(outDir, `slide-${n}.art-${a.k}.${k.ext}`), k.buf);
+    }
+    layout.push({ slide: n, canvas: { w, h }, art: art.length, blocks: readBlocks(edited, { root }).map(publicBlock) });
+  }
   // Pixels only: no C2PA manifest, no EXIF, no text chunks. Throws if a
   // renderer ever starts leaking provider metadata into a slide.
   assertClean(files);
-  return { files, canvas: { w, h }, style: style.id, artUsd: ctx.artUsd ?? 0 };
+  return { files, canvas: { w, h }, style: style.id, artUsd: ctx.artUsd ?? 0, layout };
 }

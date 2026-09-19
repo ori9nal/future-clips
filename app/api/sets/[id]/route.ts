@@ -1,6 +1,6 @@
 import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { cancelSet, getSet, stageLabel } from "@/lib/sets";
+import { cancelSet, getSet, signedSlides, stageLabel } from "@/lib/sets";
 import { adminClient, hasServiceRole } from "@/lib/supabase/admin";
 import { isDemo, demoWorkspaceSet, DEMO_REASON } from "@/lib/demo";
 
@@ -22,12 +22,7 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const sb = await createClient();
   const set = await getSet(sb, id);
   if (!set) return Response.json({ error: "not found", code: "FC_NOT_FOUND" }, { status: 404 });
-  let slides: string[] = [];
-  if (set.status === "done" && set.files_json?.length) {
-    const { data } = await sb.storage.from("sets").createSignedUrls(set.files_json, 60 * 60);
-    slides = (data ?? []).map((d) => d.signedUrl).filter((u): u is string => !!u);
-  }
-  return Response.json({ set, label: stageLabel(set), slides });
+  return Response.json({ set, label: stageLabel(set), slides: await signedSlides(sb, set) });
 }
 
 /**

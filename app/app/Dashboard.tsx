@@ -20,6 +20,7 @@ import Link from "next/link";
 import type { Account } from "@/lib/account";
 import { planLabel, PLAN_LABELS } from "@/lib/plans";
 import type { SetRow, Lane } from "@/lib/sets";
+import SlideEditor, { type SlideEdits } from "./SlideEditor";
 import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
 
 type Spec = {
@@ -73,6 +74,7 @@ const I = {
   chev: <svg viewBox="0 0 12 8" width="12" height="8"><path d="M1 1.5l5 5 5-5" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" /></svg>,
   search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>,
   down: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11M7 10l5 5 5-5M4 19h16" /></svg>,
+  type: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M4 7V5h16v2M12 5v14M9 19h6" /></svg>,
 };
 
 const initial = (s: string) => (s.trim()[0] ?? "?").toUpperCase();
@@ -136,6 +138,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToastText] = useState<string | null>(null);
   const [drawer, setDrawer] = useState<{ set: SetView; i: number } | null>(null);
+  // the slide the member is moving type around on (0027); the words are ours,
+  // not pixels the model drew, so this is an edit rather than a new render
+  const [editing, setEditing] = useState(false);
   const [query, setQuery] = useState("");
   const [pickQ, setPickQ] = useState("");
   const [tab, setTab] = useState<"acct" | "plan" | "gen">("acct");
@@ -220,6 +225,12 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const cheapest = (account.sale ?? []).find((p) => p.slides_per_month > 0) ?? null;
   const renews = account.periodEnd ? new Date(account.periodEnd).toLocaleDateString(undefined, { month: "long", day: "numeric" }) : null;
   const label = planLabel(account.plan);
+
+  /** Change one set in place — the drawer holds a reference to the same row. */
+  const patchSet = useCallback((id: string, f: (s: SetView) => SetView) => {
+    setSets((prev) => prev.map((p) => (p.id === id ? f(p) : p)));
+    setDrawer((d) => (d && d.set.id === id ? { ...d, set: f(d.set) } : d));
+  }, []);
 
   // ── polling: any set that is not finished is asked about every few seconds ──
   const refreshAccount = useCallback(async () => {
@@ -937,28 +948,54 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
 
       {/* slide drawer */}
       <button className={`scrim${drawer ? " open" : ""}`} onClick={() => setDrawer(null)} aria-label="Close" tabIndex={-1} />
-      <aside className={`drawer${drawer ? " open" : ""}`} aria-hidden={!drawer}>
+      <aside className={`drawer${drawer ? " open" : ""}${editing ? " editing" : ""}`} aria-hidden={!drawer}>
         {drawer && (() => {
           const { set, i } = drawer;
           const c = set.content_json;
           const slideText = c ? (i === 0 ? [...(c.hook?.lines ?? []), ...(c.hook?.sub ?? [])].join(" ") : i <= (c.ranked?.length ?? 0) ? [c.ranked[i - 1]?.name, ...(c.ranked[i - 1]?.lines ?? [])].filter(Boolean).join(". ") : [...(c.closer?.lines ?? []), c.closer?.cta].filter(Boolean).join(" ")) : null;
           const url = set.urls?.[i];
           const total = set.urls?.length ?? 0;
+          const slideLayout = set.layout_json?.find((l) => l.slide === i + 1) ?? null;
           return (
             <>
-              <div className="dh"><h3>Slide {i + 1} of {total}</h3><button className="btn quiet sm" onClick={() => setDrawer(null)} aria-label="Close">Close</button></div>
-              <div className="db">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <div className="prev">{url && <img src={url} alt={`Slide ${i + 1}`} />}</div>
-                {slideText && <><span className="label">Text on the slide</span><div className="txt">{slideText}</div></>}
-                {i === 0 && set.caption && <><span className="label">Caption</span><div className="txt">{set.caption}</div></>}
-                <div className="drow">
-                  <button className="btn" disabled={i === 0} onClick={() => setDrawer({ set, i: i - 1 })}>Previous</button>
-                  <button className="btn" disabled={i >= total - 1} onClick={() => setDrawer({ set, i: i + 1 })}>Next</button>
-                  <span className="grow" style={{ flex: 1 }} />
-                  {url && <a className="btn" href={url} download={`slide-${i + 1}.png`} target="_blank" rel="noreferrer">{I.down} Download</a>}
-                </div>
+              <div className="dh">
+                <h3>{editing ? `Editing slide ${i + 1}` : `Slide ${i + 1} of ${total}`}</h3>
+                <button className="btn quiet sm" onClick={() => { setEditing(false); setDrawer(null); }} aria-label="Close">Close</button>
               </div>
+              {editing && slideLayout && url ? (
+                <SlideEditor
+                  setId={set.id} slide={i + 1} url={url} layout={slideLayout}
+                  saved={(set.edits_json?.[String(i + 1)] as SlideEdits) ?? null}
+                  onClose={() => setEditing(false)}
+                  onSaved={({ url: fresh, edits }) => {
+                    // the slide keeps its path, so only the cache-busted URL
+                    // changes. `layout_json` is the baseline the edits are
+                    // measured from and stays exactly as the renderer left it.
+                    patchSet(set.id, (old) => ({
+                      ...old,
+                      urls: fresh ? (old.urls ?? []).map((u, k) => (k === i ? fresh : u)) : old.urls,
+                      edits_json: { ...(old.edits_json ?? {}), [String(i + 1)]: edits },
+                    }));
+                    say("Saved. The slide is redrawn — download it again to get the new one.");
+                  }}
+                />
+              ) : (
+                <div className="db">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <div className="prev">{url && <img src={url} alt={`Slide ${i + 1}`} />}</div>
+                  {slideText && <><span className="label">Text on the slide</span><div className="txt">{slideText}</div></>}
+                  {i === 0 && set.caption && <><span className="label">Caption</span><div className="txt">{set.caption}</div></>}
+                  <div className="drow">
+                    <button className="btn" disabled={i === 0} onClick={() => setDrawer({ set, i: i - 1 })}>Previous</button>
+                    <button className="btn" disabled={i >= total - 1} onClick={() => setDrawer({ set, i: i + 1 })}>Next</button>
+                    <span className="grow" style={{ flex: 1 }} />
+                    {slideLayout?.blocks.length ? (
+                      <button className="btn" onClick={() => setEditing(true)}>{I.type} Edit the text</button>
+                    ) : null}
+                    {url && <a className="btn" href={url} download={`slide-${i + 1}.png`} target="_blank" rel="noreferrer">{I.down} Download</a>}
+                  </div>
+                </div>
+              )}
             </>
           );
         })()}

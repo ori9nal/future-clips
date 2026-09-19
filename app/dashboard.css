@@ -313,14 +313,21 @@ html[data-theme="dark"] {
 .pill.lime { background: var(--lime-soft); color: var(--text); border-color: transparent; }
 
 /* ── set cards ──────────────────────────────────────────────────────────── */
-.setList { display: flex; flex-direction: column; gap: 22px; }
-.set { display: flex; flex-direction: column; gap: 12px; }
-.set .head { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; }
+/* One carousel is one card.
+ *
+ * The caption, the hashtags, the metadata seal and the slides were four
+ * panels in a column with a 22px gap between sets and a 12px gap inside one —
+ * so a reader could not tell which caption belonged to which strip of slides
+ * (owner, 2026-09-19). Each set now has its own edge, and the gap between
+ * them is wider than any gap within one. */
+.setList { display: flex; flex-direction: column; gap: 30px; }
+.set { display: flex; flex-direction: column; gap: 12px; padding: 16px 16px 18px; border: 1px solid var(--line); border-radius: 16px; background: var(--raised); }
+.set .head { display: flex; align-items: center; gap: 11px; flex-wrap: wrap; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
 .set .head .t { min-width: 0; display: flex; align-items: baseline; gap: 11px; flex-wrap: wrap; }
 .set .head h3 { font-family: var(--font-head); font-size: 15px; font-weight: 600; max-width: 42ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .set .head .meta { font-family: var(--font-mono); font-size: 11px; color: var(--text-3); }
 .set .head .actions { display: flex; gap: 8px; margin-left: auto; flex-wrap: wrap; }
-.strip { display: flex; align-items: center; gap: 14px; padding: 11px 14px; border-radius: 11px; background: var(--surface); border: 1px solid var(--line); }
+.strip { display: flex; align-items: center; gap: 14px; padding: 11px 14px; border-radius: 11px; background: var(--hover); border: 1px solid var(--line); }
 .steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; flex: 1; }
 .steps span { display: flex; flex-direction: column; gap: 6px; font-size: 11.5px; color: var(--text-3); }
 .steps span i { display: block; height: 4px; border-radius: 999px; background: var(--line); }
@@ -486,3 +493,35 @@ html[data-theme="dark"] {
   .pline { grid-template-columns: minmax(0, 1fr) auto; }
   .pline .k { grid-column: 1 / -1; }
 }
+
+/* ── the slide editor ──────────────────────────────────────────────────────
+ *
+ * Boxes over the slide, one per piece of text, at the position the renderer
+ * reported. They are drawn in the slide's own coordinates and scaled to
+ * whatever width the drawer is, so a drag means the same on a phone as on a
+ * desktop. Nothing is drawn client-side: the slide behind is the real PNG,
+ * and saving redraws it on the server.
+ */
+.drawer.editing { width: min(560px, 96vw); }
+.sed { flex: 1; overflow-y: auto; display: flex; flex-direction: column; }
+.sed-frame { position: relative; margin: 14px 16px 0; border-radius: 12px; overflow: hidden; background: var(--hover); border: 1px solid var(--line); touch-action: none; user-select: none; }
+.sed-frame img { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; }
+.sed-box {
+  position: absolute; border: 1.5px dashed rgba(255, 255, 255, .85); border-radius: 6px;
+  box-shadow: 0 0 0 1.5px rgba(14, 14, 16, .55); cursor: grab; touch-action: none;
+  background: rgba(14, 14, 16, .06); transition: background .12s, border-color .12s;
+}
+.sed-box:hover { background: rgba(216, 255, 71, .16); }
+.sed-box.on { border-style: solid; border-color: var(--lime); box-shadow: 0 0 0 1.5px rgba(14, 14, 16, .7), 0 0 0 4px rgba(216, 255, 71, .25); cursor: grabbing; background: rgba(216, 255, 71, .14); }
+.sed-box.edited { border-color: var(--lime); }
+.sed-box:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.sed-grip { position: absolute; top: -9px; left: -9px; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--lime); color: var(--lime-ink); opacity: 0; transition: opacity .12s; pointer-events: none; }
+.sed-box.on .sed-grip, .sed-box:hover .sed-grip { opacity: 1; }
+.sed-side { padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.sed-h { display: flex; align-items: center; gap: 10px; }
+.sed-h .label { flex: 1; }
+.sed-txt { font-size: 14px; line-height: 1.5; resize: vertical; }
+.sed-note { font-size: 12.5px; line-height: 1.55; color: var(--text-3); }
+.sed-empty { padding: 14px; border-radius: var(--r-control); background: var(--surface); border: 1px solid var(--line); }
+.sed-err { margin: 0; }
+.sed-row { display: flex; gap: 8px; align-items: center; margin-top: 2px; }

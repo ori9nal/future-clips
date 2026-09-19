@@ -265,6 +265,8 @@ async function renderStage(s, { root, spec, outDir, cacheDir }) {
   fs.writeFileSync(path.join(outDir, 'post.json'), JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(outDir, 'post.json'), 'utf8')), clean: s.clean }, null, 2));
   s.files = r.files;
   s.canvas = r.canvas;
+  // where the words ended up, so they can be moved or rewritten later (0027)
+  s.layout = r.layout ?? null;
   s.stage = 'done';
   note(s, `rendered ${r.files.length} slides, total $${s.usd.toFixed(4)}`);
   return s;
