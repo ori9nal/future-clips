@@ -547,12 +547,34 @@ export function buildCopyRequest({ spec, instruction, slides, styleId: wanted, f
 export function judgeCopy({ spec, data, range, styleId }) {
   // The phone formats never carry an em dash on a slide (none in 237
   // reference slides); the model writes one on most. Repair, don't reject.
+  let trimNote = null;
   const phone = styleId ? /^(feed|native)$/.test(styleId) : !/^bedrock$/.test(spec.content?.style ?? '');
   if (phone) {
     const fix = (t) => (t == null ? t : String(t).replace(/\s*[—–]\s*/g, ', ').replace(/;\s*/g, ', '));
     if (data.hook) { data.hook.lines = (data.hook.lines ?? []).map(fix); data.hook.sub = (data.hook.sub ?? []).map(fix); }
     for (const r of data.ranked ?? []) { r.name = fix(r.name); r.lines = (r.lines ?? []).map(fix); }
     if (data.closer) { data.closer.lines = (data.closer.lines ?? []).map(fix); data.closer.cta = fix(data.closer.cta); }
+  }
+  // A set that is TOO LONG is trimmed here — before the shape is folded and
+  // before compliance runs, so the gate judges exactly what will ship — the
+  // way the numbering rule is repaired rather than rejected. The demo asks
+  // for exactly 4 slides (D-045) and the model would not write 4: two paid
+  // runs on apex-strength, one with a counted ask and one without, came back
+  // 5 and 7 slides and each failed after three attempts — $0.31 of copy for
+  // no slides (2026-09-19). Trimming is only safe when the hook promises no
+  // number, so that is checked; a hook that says "5 things" is still
+  // rejected and rewritten. The app slide is kept wherever it sat.
+  if (range?.max && (data.ranked?.length ?? 0) + 2 > range.max && !promisedCount(data)) {
+    const keep = range.max - 2;
+    const ranked = data.ranked ?? [];
+    if (keep >= 1 && ranked.length > keep) {
+      const idx = ranked.map((_, i) => i).slice(0, keep);
+      const app = ranked.findIndex((r) => r.showsApp);
+      if (app >= 0 && !idx.includes(app)) idx[idx.length - 1] = app;
+      const trimmed = idx.sort((x, y) => x - y).map((i) => ranked[i]);
+      trimNote = `${ranked.length + 2} slides returned for an ask of ${range.max}; the last ${ranked.length - trimmed.length} dropped rather than paying for another attempt`;
+      data.ranked = trimmed;
+    }
   }
   // fold the generated content into the shape compliance expects
   const slides = [
@@ -567,6 +589,7 @@ export function judgeCopy({ spec, data, range, styleId }) {
   // repair the mechanical violations first, then judge what is left — a
   // whole regeneration is too expensive to spend on a missing string
   const { copy: repaired, notes } = repair(spec, { slides, caption: data.caption, bio: data.bio });
+  if (trimNote) notes.push(trimNote);
   // a "score" that is not a rating is a tag line the reference never carries
   // (round 2, 2026-09-18: "news first" under "4. Forex Factory"); blanked, not rejected
   if (phone) for (const r of data.ranked ?? []) {

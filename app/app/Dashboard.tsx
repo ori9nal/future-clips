@@ -288,7 +288,12 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const recent = sets.slice(0, 4);
   const madeThisPeriod = sets.filter((s) => s.status === "done" && s.created_at >= account.usage.period_start).length;
   const avg = (() => { const d = sets.filter((s) => s.status === "done" && s.slides != null); return d.length ? (d.reduce((a, s) => a + (s.slides ?? 0), 0) / d.length).toFixed(1) : "–"; })();
-  const angles = active?.guidance?.angles ?? [];
+  // A demo set is exactly four slides — hook, two items, closer — so an ask that
+  // promises five things cannot fit: the model writes the five it was asked for,
+  // the judge rejects the count three times and the set fails having paid for
+  // three copy attempts (~$0.17, measured 2026-09-19). The demo therefore offers
+  // no counted angles and no counted example. R17 asks the engine to trim instead.
+  const angles = demoN ? [] : (active?.guidance?.angles ?? []);
   const lo = Math.max(RMIN, active?.requirements?.min_slides ?? RMIN), hi = Math.min(RMAX, active?.requirements?.max_slides ?? RMAX);
   const rangeWord = nMin === nMax ? `${nMin} slides` : `${nMin} to ${nMax} slides`;
   const usedPct = account.cap.batch ? Math.min(100, Math.round((account.usage.slides_used / account.cap.batch) * 100)) : 0;
@@ -433,7 +438,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                   <div className="field">
                     <label className="label" htmlFor="ask">What should this slideshow be about?</label>
                     <textarea id="ask" className="textarea" ref={taRef} rows={3} value={ask} maxLength={400} disabled={!active}
-                      placeholder={active ? (angles.length ? "Pick an angle below, or write your own. Enter makes it, Shift+Enter is a new line." : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Choose a campaign first"}
+                      placeholder={active ? (demoN ? `One angle, in your own words. For example: what changed my ${active.niche} this year` : angles.length ? "Pick an angle below, or write your own. Enter makes it, Shift+Enter is a new line." : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Choose a campaign first"}
                       onChange={(e) => setAsk(e.target.value)}
                       onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
                     {angles.length > 0 && (

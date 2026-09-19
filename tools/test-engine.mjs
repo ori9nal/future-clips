@@ -296,5 +296,25 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   ok(feed.canvasFor({ niche: 'fashion' }).h === 1920 && feed.canvasFor({ niche: 'trading' }).h === 1440, 'the feed canvas is 9:16 for the soft families and 4:5 for trading');
 }
 
+// 12. the demo's short sets: an over-long set is trimmed, not rejected (2026-09-19)
+{
+  const dspec = { ...spec, niche: 'fitness', content: { style: 'feed' }, requirements: { ...spec.requirements, min_slides: 4, max_slides: 10, must_show_app: true }, rules: {} };
+  const five = () => ({ hook: { lines: ['what changed my training this year'], sub: [] },
+    ranked: [{ name: 'a', lines: ['3 x 10'] }, { name: 'b', lines: ['2 x a week'] }, { name: 'Bonus', lines: ['the app tracked it'], showsApp: true }],
+    closer: { lines: ['z'], cta: 'go' }, caption: 'x 💪 🔥', bio: '', hashtags: [] });
+  const j = judgeCopy({ spec: dspec, data: five(), range: slideRange(dspec, 4), styleId: 'feed' });
+  ok(j.count === 4 && j.data.ranked.length === 2, `a 5-slide set for an ask of 4 is trimmed to 4 (${j.count} slides, ${j.data.ranked.length} ranked)`);
+  ok(j.data.ranked.some((r) => r.showsApp), 'the app slide survives the trim wherever it sat');
+  ok(j.verdict.repairs.some((r) => /dropped rather than paying/.test(r)), 'the trim is recorded as a repair');
+  ok(!j.verdict.failures.some((f) => /slides returned/.test(f)), `the count no longer fails (${j.verdict.failures.join('; ') || 'no failures'})`);
+  // a hook that promises a number must not be trimmed under it: the hook would lie
+  const counted = { ...five(), hook: { lines: ['5 things that changed my training'], sub: [] } };
+  const jc = judgeCopy({ spec: dspec, data: counted, range: slideRange(dspec, 4), styleId: 'feed' });
+  ok(jc.data.ranked.length === 3 && jc.verdict.failures.some((f) => /slides returned/.test(f)), 'a hook that promises a count is rejected, never trimmed under its own promise');
+  // a set inside the range is untouched
+  const ok8 = judgeCopy({ spec, data: five(), range: slideRange(spec, { min: 5, max: 8 }), styleId: 'feed' });
+  ok(ok8.data.ranked.length === 3 && !ok8.verdict.repairs.some((r) => /dropped rather/.test(r)), 'a set already inside the range is not trimmed');
+}
+
 console.log(failed ? `\n${failed} failed` : '\nall passed');
 process.exit(failed ? 1 : 0);
