@@ -54,6 +54,7 @@ const REASONS: Record<string, string> = {
   FC_QUOTA: "Not enough slides left this period.",
   FC_SPEND_CAP: "This workspace has reached its spend cap for the period. Email team@thefutureclips.com to raise it.",
   FC_DEMO: "This is the demo workspace: everything here was made with The Future Clips. Pick a plan to make your own.",
+  FC_DEMO_LIMIT: "The demo makes up to three carousels a day per visitor. Pick a plan to make as many as you like.",
 };
 
 export class ReserveError extends Error {
@@ -100,8 +101,10 @@ export async function reserveSet(sb: SupabaseClient, i: ReserveInput): Promise<s
   return data as string;
 }
 
-export async function listSets(sb: SupabaseClient, orgId: string, { limit = 50 } = {}): Promise<SetRow[]> {
-  const { data, error } = await sb.from("sets").select(SET_COLS).eq("org_id", orgId).order("created_at", { ascending: false }).limit(limit);
+export async function listSets(sb: SupabaseClient, orgId: string, { limit = 50, userId }: { limit?: number; userId?: string } = {}): Promise<SetRow[]> {
+  let q = sb.from("sets").select(SET_COLS).eq("org_id", orgId);
+  if (userId) q = q.eq("user_id", userId);
+  const { data, error } = await q.order("created_at", { ascending: false }).limit(limit);
   if (error) throw error;
   return (data ?? []) as SetRow[];
 }

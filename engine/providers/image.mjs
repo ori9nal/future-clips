@@ -16,7 +16,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import crypto from 'node:crypto';
-import { stripPng } from '../clean.mjs';
+import { stripPng, inspectPng } from '../clean.mjs';
 
 const API = 'https://api.openai.com/v1';
 
@@ -248,8 +248,11 @@ export async function generate(o) {
   const b64 = json.data?.[0]?.b64_json;
   if (!b64) throw new Error(`image API returned no b64_json for "${label}"`);
   // the provider's C2PA manifest (caBX) is dropped here, so nothing
-  // downstream ever sees a frame that carries one
-  fs.writeFileSync(out, stripPng(Buffer.from(b64, 'base64')));
+  // downstream ever sees a frame that carries one; what was removed is
+  // recorded next to the frame for the set's clean record (lanes.mjs)
+  const raw = Buffer.from(b64, 'base64');
+  try { fs.writeFileSync(`${out}.stripped.json`, JSON.stringify(inspectPng(raw).offending)); } catch { /* the record is optional */ }
+  fs.writeFileSync(out, stripPng(raw));
   await cachePush(id, out);
   const usd = bill(label, json.usage);
   return { file: out, cached: false, usd, usage: json.usage };

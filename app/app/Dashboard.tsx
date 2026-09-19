@@ -13,6 +13,7 @@
  * action on each screen.
  */
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { CleanSeal } from "@/components/CleanSeal";
 import Link from "next/link";
 import type { Account } from "@/lib/account";
 import { planLabel, PLAN_LABELS } from "@/lib/plans";
@@ -26,7 +27,7 @@ type Spec = {
   content?: { style?: string };
   guidance?: { angles?: string[]; hook_style?: string };
 };
-type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean };
+type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number };
 type Page = "create" | "library" | "campaigns" | "insights" | "partners" | "settings";
 type Partners = { summary: AgencySummary; referred: ReferredOrg[]; commissions: Commission[] };
 type SetView = SetRow & { label?: string; urls?: string[] };
@@ -137,7 +138,13 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
 
   const go = (p: Page) => { setPage(p); setPop(null); setMenu(false); if (viewRef.current) viewRef.current.scrollTop = 0; };
 
-  const canPriority = account.cap.priority > 0;
+  // the demo (D-045): one length, priority, never HD — the API forces the same
+  const demoN = viewer.demoSlides ?? 0;
+  useEffect(() => {
+    if (!demoN) return;
+    setNMin(demoN); setNMax(demoN); setLane("priority"); setHd(false);
+  }, [demoN]);
+  const canPriority = account.cap.priority > 0 || !!demoN;
   const canHd = account.plan.hd_per_slide_usd != null;
   const hdIncluded = account.plan.hd_per_slide_usd === 0;
   const need = hd && hdIncluded ? 3 : 1;
@@ -195,7 +202,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     if (!active) { say("Pick a campaign first"); setPop("camp"); return; }
     const topic = ask.trim();
     if (!topic) { say("Say what the slideshow is about"); taRef.current?.focus(); return; }
-    if (left < nMax * need) { setErr(`Not enough slides left: ${left} on the ${lane === "priority" ? "priority" : "monthly"} allowance, and this set needs up to ${nMax * need}${need > 1 ? " (HD uses 3 per slide)" : ""}.`); return; }
+    if (!demoN && left < nMax * need) { setErr(`Not enough slides left: ${left} on the ${lane === "priority" ? "priority" : "monthly"} allowance, and this set needs up to ${nMax * need}${need > 1 ? " (HD uses 3 per slide)" : ""}.`); return; }
     setBusy(true); setErr(null);
     try {
       const r = await fetch("/api/sets", { method: "POST", headers: { "content-type": "application/json" },
@@ -300,6 +307,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
         )}
         {s.status === "failed" && !cancelled && <p className="err">{s.error}. The slides went back to your balance.</p>}
         {s.status === "done" && s.caption && <p className="caption"><span className="k">Caption</span><span>{s.caption}</span></p>}
+        {s.status === "done" && <CleanSeal clean={(s.compliance_json as { clean?: React.ComponentProps<typeof CleanSeal>["clean"] } | null)?.clean} slides={s.slides ?? undefined} />}
         {(open || (s.status === "done" && s.urls?.length)) && (
           <div className="strip" data-ratio={({ native: "9:16", mascot: "9:16", bedrock: "4:5", clinical: "4:5", editorial: "4:5", document: "4:5", pastel: "4:5", poster: "4:5", rail: "4:5" } as Record<string, string>)[s.style] ?? "3:4"}>
             {s.status === "done" && s.urls?.length
@@ -403,20 +411,22 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     <div className="control">
                       <span>Slides</span>
                       <div className="seg" role="radiogroup" aria-label="Slides">
-                        {PRESETS.map(([l, a, b]) => {
-                          const A = Math.max(lo, a), B = Math.min(hi, b);
-                          return <button key={l} role="radio" aria-checked={A === nMin && B === nMax} className={A === nMin && B === nMax ? "on" : ""} disabled={A > B} onClick={() => { setNMin(A); setNMax(B); }}>{l}</button>;
-                        })}
+                        {demoN
+                          ? <button role="radio" aria-checked className="on" disabled>Demo · {demoN} slides</button>
+                          : PRESETS.map(([l, a, b]) => {
+                            const A = Math.max(lo, a), B = Math.min(hi, b);
+                            return <button key={l} role="radio" aria-checked={A === nMin && B === nMax} className={A === nMin && B === nMax ? "on" : ""} disabled={A > B} onClick={() => { setNMin(A); setNMax(B); }}>{l}</button>;
+                          })}
                       </div>
-                      <span className="with">{rangeWord}{nMin !== nMax ? ", we pick the best fit" : ""}{active && (lo > RMIN || hi < RMAX) ? `. This brief allows ${lo} to ${hi}.` : ""}</span>
+                      <span className="with">{demoN ? "The demo makes a short carousel from any campaign." : <>{rangeWord}{nMin !== nMax ? ", we pick the best fit" : ""}{active && (lo > RMIN || hi < RMAX) ? `. This brief allows ${lo} to ${hi}.` : ""}</>}</span>
                     </div>
                     <div className="control">
                       <span>Delivery</span>
                       <div className="seg" role="radiogroup" aria-label="Delivery">
-                        <button role="radio" aria-checked={lane === "batch"} className={lane === "batch" ? "on" : ""} onClick={() => setLane("batch")}>Within the day</button>
+                        <button role="radio" aria-checked={lane === "batch"} className={lane === "batch" ? "on" : ""} disabled={!!demoN} onClick={() => setLane("batch")}>Within the day</button>
                         <button role="radio" aria-checked={lane === "priority"} className={lane === "priority" ? "on" : ""} disabled={!canPriority} onClick={() => setLane("priority")}>Priority</button>
                       </div>
-                      <span className="with">{canPriority ? (lane === "priority" ? "A minute or two, from your priority allowance" : "Back within the day, from your monthly allowance") : "Priority delivery comes with Pro and Studio"}</span>
+                      <span className="with">{demoN ? "A minute or two. The demo always renders now." : canPriority ? (lane === "priority" ? "A minute or two, from your priority allowance" : "Back within the day, from your monthly allowance") : "Priority delivery comes with Pro and Studio"}</span>
                     </div>
                     <div className="control">
                       <span>HD</span>
@@ -424,7 +434,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     </div>
                   </div>
                   <div className="foot">
-                    <span className={`cost${left < nMax * need ? " bad" : ""}`}>{paid ? (left < nMax * need ? `This needs up to ${nMax * need} slides and you have ${left} left.` : `Uses up to ${nMax * need} of your ${left} slides.`) : "Needs a plan."}</span>
+                    <span className={`cost${!demoN && left < nMax * need ? " bad" : ""}`}>{demoN ? `A real carousel, ${demoN} slides, on us. Pick a plan for full-length ones.` : paid ? (left < nMax * need ? `This needs up to ${nMax * need} slides and you have ${left} left.` : `Uses up to ${nMax * need} of your ${left} slides.`) : "Needs a plan."}</span>
                     <button className="btn primary lg" disabled={!active || !paid || busy || !ask.trim()} onClick={run}>{busy ? "Starting" : "Make the slideshow"}</button>
                   </div>
                   {err && <p className="err" role="alert">{err}</p>}

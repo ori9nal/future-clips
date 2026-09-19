@@ -18,8 +18,8 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const { id } = await ctx.params;
   const files: { name: string; data: Uint8Array }[] = [];
   let set;
-  if (isDemo(viewer)) {
-    // the demo's slides ship with the app under public/demo; resolve inside that folder only
+  if (isDemo(viewer) && id.startsWith("demo-")) {
+    // the demo's shipped examples live under public/demo; resolve inside that folder only
     const d = demoWorkspaceSet(viewer.org.id, id);
     if (!d) return Response.json({ error: "not found" }, { status: 404 });
     const base = path.resolve(process.cwd(), "public", "demo");

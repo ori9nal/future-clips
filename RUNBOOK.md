@@ -18,19 +18,11 @@ database: Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`).
 
 **Rotation:** replace in Vercel → redeploy (env changes need a new deployment) → replace in `.env.local`. Anthropic keys should be workspace-scoped so a leak is bounded by the workspace's spend limit.
 
-## Deploy
+## Publishing (from git, through the Vercel API)
 
-**Site** (until the GitHub↔Vercel link exists — OWNER-ACTIONS B):
-1. Edit `design/site.html` (never `future-clips-site/index.html`), then `cp design/site.html future-clips-site/index.html`; legal pages: edit `legal/*.md`, run `node design/build_legal.mjs`. Fonts are self-hosted from `future-clips-site/fonts/` (`node tools/fetch-site-fonts.mjs` refreshes them and `design/fonts.css`). Before every site commit: `node tools/site-check.mjs` (links, share meta, alt text, one h1, no free-tier wording) and a Lighthouse pass on the folder served locally, e.g. `CHROME_PATH=/usr/bin/chromium npx lighthouse http://127.0.0.1:3323/ --chrome-flags="--headless=new --no-sandbox" --output=json --output-path=/tmp/lh.json` (the bar: 95+ in every category on mobile and desktop; the local server sends no gzip, Vercel does).
-2. Upload changed files to bucket `site` **under a new name** through the Supabase dashboard (Storage → `site` → Upload) or with the service role: `index-vN.html`, `legal-vN/<slug>.html`, `404-vN.html`, `fonts-vN/<file>.woff2` (the list `deploy/site/build.js` expects is in OWNER-ACTIONS 13). Anonymous uploads were removed on 2026-09-18 (migration 0009). No charset in the content type.
-3. Deploy via the Vercel MCP `deploy_to_vercel` with the three files in HANDOFF-SITE.md, bumping the names in `build.js`.
-4. Verify: `curl -sI https://www.thefutureclips.com/terms` → 200.
+Both Vercel projects build from `dhxnx-7/future-clips` (the Vercel GitHub app is installed for that account): **the-future-clips** (root directory `future-clips-site/`, `node build.js`, output `public/`; www.thefutureclips.com) and **future-clips-app** (repo root, Next.js; future-clips-app.vercel.app and the hidden demo host). A push to `main` deploys both once the projects are linked in the dashboard; until then Engineering creates a deployment from `main` through the Vercel API (Composio `VERCEL_CREATE_NEW_DEPLOYMENT` with `gitSource {type: github, repoId: 1375315078, ref: main}`, target production) and polls it to READY. Before every publish: the four checks, `node tools/site-check.mjs`, a Lighthouse pass on the site (RUNBOOK "The local stack"). Verify after: `curl -sI https://www.thefutureclips.com/` (200, the new `<title>`), `/terms` 200, the app's `/login` 200 and `/api/health`.
 
-**App** (same caveat): `node scripts/pack-deploy.mjs` lists the tracked source; the MCP deploy carries plain text files only (no engine, no fonts, no binaries), so the hosted app runs without the engine until B. After B, `git push origin main` deploys everything, with `next.config.ts` tracing `engine/**` and `assets/**` into the functions.
-
-**Database:** `supabase/migrations/*.sql` mirrors what was applied through the Supabase MCP (`apply_migration`), in parts when large. Apply new ones the same way; the file is the record. **Pending as of 2026-09-13: 0005 (agency referrals) and 0006 (plans match the site)** — see OWNER-ACTIONS D.
-
-**Site deploy files** now live in `deploy/site/` (`package.json`, `build.js`, `vercel.json`) — they were Vercel-only before. `build.js` names the object versions to pull from bucket `site`; bump them there. The homepage source is `design/site.html`, copied verbatim to `future-clips-site/index.html` (`design/build_site.py` refuses to run unless `FC_OLD_SITE=1`).
+Secrets never travel through the API from this machine: the owner sets them in the Vercel dashboard (OWNER-ACTIONS 4, 14). Rollback: Vercel → Deployments → promote the previous READY deployment.
 
 ## Billing on a laptop (the Dodo simulator)
 

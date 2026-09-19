@@ -115,7 +115,7 @@ export function demoSets(root: string, orgId: string): (SetRow & { urls: string[
  * refused with FC_DEMO. */
 
 export type DemoSpec = { id: string; brand: string; product: string; niche: string; requirements: { min_slides: number; max_slides: number }; assets: { palette: string[] }; content: { style?: string }; guidance?: { angles?: string[]; hook_style?: string } };
-type ManifestSet = { id: string; name: string; campaign_id: string; style: string; lane: "batch" | "priority"; slides: number; ask: string; caption: string | null; hashtags: string[]; bio: string | null; cost_usd: number | null; days_ago: number; urls: string[] };
+type ManifestSet = { id: string; name: string; campaign_id: string; style: string; lane: "batch" | "priority"; slides: number; ask: string; caption: string | null; hashtags: string[]; bio: string | null; cost_usd: number | null; days_ago: number; urls: string[]; clean?: { frames?: number; slides?: number; stripped?: { chunk: string; what: string; count: number }[]; verified?: boolean } };
 type ManifestSpec = Omit<DemoSpec, "content" | "guidance"> & { content: { style: string | null }; guidance: DemoSpec["guidance"] | null };
 const M = manifest as unknown as { built_at: string; sets: ManifestSet[]; specs: ManifestSpec[] };
 
@@ -132,7 +132,7 @@ function demoRow(m: ManifestSet, orgId: string): SetRow & { urls: string[] } {
     id: m.id, org_id: orgId, campaign_id: m.campaign_id, style: m.style, ask: m.ask,
     slides: m.slides, slides_min: 6, slides_max: 8, reserved_slides: 8, quality: "medium", lane: m.lane, hd: false,
     status: "done", stage: "done", caption: m.caption, cost_usd: m.cost_usd,
-    files_json: m.urls, content_json: { caption: m.caption, hashtags: m.hashtags, bio: m.bio }, compliance_json: null, error: null,
+    files_json: m.urls, content_json: { caption: m.caption, hashtags: m.hashtags, bio: m.bio }, compliance_json: m.clean ? { pass: true, clean: m.clean } : null, error: null,
     cancel_requested: false, created_at: at, started_at: at, finished_at: at, updated_at: at,
     urls: m.urls,
   };
@@ -164,3 +164,15 @@ export function demoWorkspaceAccount(): Account {
     packs: [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }],
   };
 }
+
+/* ── the demo host (D-045) ───────────────────────────────────────────────────
+ * One hidden hostname on the app project (FC_DEMO_HOSTNAME) signs every
+ * visitor in as the demo account with no email; FC_DEMO_GENERATE=1 lets the
+ * demo workspace make real sets of exactly DEMO_SLIDES slides. */
+export const DEMO_EMAIL = "demo@thefutureclips.com";
+export const DEMO_SLIDES = 4;
+export const isDemoHost = (host: string | null | undefined) => {
+  const want = process.env.FC_DEMO_HOSTNAME?.toLowerCase();
+  return !!want && (host ?? "").split(":")[0].toLowerCase() === want;
+};
+export const demoGenerationOn = () => process.env.FC_DEMO_GENERATE === "1";

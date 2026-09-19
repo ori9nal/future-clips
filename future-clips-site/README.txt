@@ -18,4 +18,8 @@ https://www.thefutureclips.com
 
 To change the homepage: edit ../design/site.html, then `cp design/site.html future-clips-site/index.html`.
 To change a policy: edit ../legal/<slug>.md, then `node design/build_legal.mjs`.
-Deploy: see ../RUNBOOK.md (git-connected Vercel project once OWNER-ACTIONS B is done).
+  build.js                Vercel's build: copies this folder into public/ (no bucket fetch)
+
+Deploy: the Vercel project the-future-clips builds this folder from the repo (root directory
+future-clips-site/, `node build.js`, output public/). A push to main deploys; Engineering can also
+trigger a deployment from the repo through the Vercel API (RUNBOOK "Publishing").

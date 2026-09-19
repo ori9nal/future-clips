@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import type { Account } from "@/lib/account";
-import { demoAccount, demoPartners, demoSets, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs } from "@/lib/demo";
+import { demoAccount, demoPartners, demoSets, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, DEMO_SLIDES } from "@/lib/demo";
 import Dashboard from "../app/Dashboard";
 import PartnerDashboard from "../app/PartnerDashboard";
 
@@ -34,7 +34,7 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
     // what an invited prospect sees in the demo workspace (0013)
     return (
       <Dashboard
-        viewer={{ email: "you@example.com", orgName: "Demo workspace", plan: "solo", billing: "none", checkout: false, isPlatformOwner: false, engine: true }}
+        viewer={{ email: "you@example.com", orgName: "Demo workspace", plan: "solo", billing: "none", checkout: false, isPlatformOwner: false, engine: true, demoSlides: DEMO_SLIDES }}
         specs={demoWorkspaceSpecs()}
         account={demoWorkspaceAccount()}
         sets={demoWorkspaceSets("0d3e0000-0000-4000-8000-000000000001")}

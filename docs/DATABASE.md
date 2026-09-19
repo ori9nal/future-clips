@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-19, after 0014)
+## Migration state (2026-09-19, after 0015)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -22,6 +22,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0012_provider_fund.sql` | `provider_fund` (2026-09-18) | yes | `fund_ledger`, `app_settings.provider_reserve` (share 0.35), `fc_record_sale` (service role), `fc_fund_summary` (platform owner, checked inside) |
 | `0013_demo_workspace.sql` | `demo_workspace` (2026-09-18) | yes | `orgs.is_demo`, the shared demo org (Clipper, 500 seats), `fc_demo_org_id()`, platform owners may read demo orgs, `orgs_protect_billing` also guards `is_demo` |
 | `0014_dev_accounts.sql` | `dev_accounts` (2026-09-19) | yes | "Product test workspace" (`grind`, 5 seats, $10 cap) and invite rows for `demo@` and `tester@thefutureclips.com` |
+| `0015_demo_generation.sql` | `demo_generation` (2026-09-19) | yes | `fc_reserve_set` reads the org first and accepts a 4-slide range for demo orgs (5 for everyone else), skips the priority allowance for demo orgs; demo org `spend_cap_usd` 15 |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 

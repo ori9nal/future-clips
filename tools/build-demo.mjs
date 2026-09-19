@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
+import { inspectPng } from '../engine/clean.mjs';
 
 const ROOT = process.cwd();
 const OUT = path.join(ROOT, 'public', 'demo');
@@ -58,7 +59,12 @@ for (const name of picks) {
     execFileSync(magick, [path.join(dir, f), '-resize', '540x', '-quality', '74', path.join(OUT, name, outName)], { stdio: ['ignore', 'ignore', 'inherit'] });
     urls.push(`/demo/${name}/${outName}`);
   }
+  // what the metadata gate did for this set: its own record when the render
+  // wrote one, and in every case a fresh check that the shipped slides are pixels
+  const verified = slides.every((f) => { try { return inspectPng(path.join(dir, f)).clean; } catch { return false; } });
+  const clean = { ...(post.clean ?? { frames: 0, stripped: [] }), slides: slides.length, verified };
   sets.push({
+    clean,
     id: `demo-${name}`, name, campaign_id: campaign, style, lane, slides: slides.length,
     ask: content?.hook?.lines?.join(' ') ?? name.replace(/-/g, ' '),
     caption: post.caption ?? content?.caption ?? null,

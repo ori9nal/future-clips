@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Archivo, Manrope } from "next/font/google";
 import "./app.css";
 import "./dashboard.css";
+import "./clean-seal.css";
 
 // The product surface uses Archivo for headlines and Manrope for body — the
 // same pairing as the live site, read off its computed styles rather than

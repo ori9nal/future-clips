@@ -7,7 +7,7 @@ import { engineAvailable } from "@/lib/engine";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { getAgencySummary, listReferred, listCommissions } from "@/lib/referrals";
 import { dodoEnabled } from "@/lib/billing/dodo";
-import { demo, demoAccount, demoPartners, demoSets, isDemo, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs } from "@/lib/demo";
+import { demo, demoAccount, demoPartners, demoSets, isDemo, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, demoGenerationOn, DEMO_SLIDES } from "@/lib/demo";
 import Dashboard from "./Dashboard";
 import PartnerDashboard from "./PartnerDashboard";
 
@@ -22,12 +22,14 @@ export default async function AppHome() {
   const viewer = await requireViewer();
   // the demo workspace (0013): shipped fixtures, nothing read from the database, nothing generated
   if (isDemo(viewer)) {
+    // the examples ship with the app; anything this visitor made in the demo is a real row
+    const mine = demoGenerationOn() ? await listSets(await createClient(), viewer.org.id, { userId: viewer.user.id }) : [];
     return (
       <Dashboard
-        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true }}
+        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true, demoSlides: demoGenerationOn() ? DEMO_SLIDES : undefined }}
         specs={demoWorkspaceSpecs()}
         account={demoWorkspaceAccount()}
-        sets={demoWorkspaceSets(viewer.org.id)}
+        sets={[...mine, ...demoWorkspaceSets(viewer.org.id)]}
         partners={null}
       />
     );
