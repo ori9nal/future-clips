@@ -327,3 +327,8 @@ button, input, select, textarea { font: inherit; }
 /* Google's sign-in button: their mark, their spacing, never recoloured */
 .fc-btn.fc-google { gap: 12px; font-weight: 500; }
 .fc-btn.fc-google svg { flex: none; }
+
+/* the fund's runway chip: how long the earmark still covers rendering */
+.fc-tag[data-tone="ok"] { background: var(--fc-good-soft, #E3F5EC); color: var(--fc-good, #0E7C4A); }
+.fc-tag[data-tone="warn"] { background: var(--warn-soft, #FFF4D6); color: var(--warn, #9A6700); }
+.fc-tag[data-tone="danger"] { background: var(--fc-bad-soft, #FDECEE); color: var(--fc-bad, #C4344A); }

@@ -67,6 +67,25 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, de
                 </tr>
               </tbody>
             </table>
+            {(() => {
+              // A day of burn across both providers turns the balance into the
+              // only number that answers "when do I have to act": days of
+              // rendering the earmark still covers.
+              const day = (fund.anthropic_day ?? 0) + (fund.openai_day ?? 0);
+              if (day <= 0) return null;
+              const days = Math.floor(fund.balance_usd / day);
+              const tone = days < 7 ? "danger" : days < 21 ? "warn" : "ok";
+              return (
+                <p className={`fc-note`} style={{ marginTop: 12 }}>
+                  <span className="fc-tag" data-tone={tone}>{days} days of runway</span>{" "}
+                  at {usd(day)} a day across both providers. {days < 7
+                    ? "Top both consoles up now — rendering stops when either account empties."
+                    : days < 21
+                      ? "Worth topping up on your next billing day."
+                      : "No action needed."}
+                </p>
+              );
+            })()}
             <div className="fc-grid" style={{ marginTop: 14 }}>
               {[
                 { name: "Anthropic", what: "writes the copy", spent: fund.anthropic_usd, day: fund.anthropic_day, float: fund.anthropic_float, href: "https://console.anthropic.com/settings/billing" },
