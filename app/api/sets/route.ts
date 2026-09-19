@@ -1,9 +1,12 @@
 import { after } from "next/server";
 import { viewerForRequest } from "@/lib/auth";
+import { allow } from "@/lib/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import { listSets, reserveSet, ReserveError, type Lane } from "@/lib/sets";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { engineAvailable } from "@/lib/engine";
+import { isDemo, demoWorkspaceSets, DEMO_REASON, DEMO_SLIDES, demoGenerationOn } from "@/lib/demo";
+import { clientIp } from "@/lib/ratelimit";
 
 export const maxDuration = 300;
 
@@ -15,6 +18,11 @@ export async function GET() {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
   const sb = await createClient();
+  if (isDemo(viewer)) {
+    // the shipped examples, then whatever this visitor made in the demo
+    const mine = demoGenerationOn() ? await listSets(sb, viewer.org.id, { userId: viewer.user.id }) : [];
+    return Response.json({ sets: [...mine, ...demoWorkspaceSets(viewer.org.id)] });
+  }
   return Response.json({ sets: await listSets(sb, viewer.org.id) });
 }
 
@@ -28,6 +36,17 @@ export async function GET() {
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
+  const demo = isDemo(viewer);
+  if (demo && !demoGenerationOn()) return Response.json({ error: DEMO_REASON, code: "FC_DEMO" }, { status: 402 });
+  if (demo) {
+    // a visitor makes up to 3 short sets a day; the whole demo up to 40 (and the org's spend cap after that)
+    if (!(await allow(`demo:sets:ip:${clientIp(req)}`, 3, 86400)) || !(await allow("demo:sets:all", 40, 86400))) {
+      return Response.json({ error: "The demo makes up to three carousels a day per visitor. Pick a plan to make as many as you like.", code: "FC_DEMO_LIMIT" }, { status: 429 });
+    }
+  }
+  if (!(await allow(`sets:user:${viewer.user.id}`, 30, 600))) {
+    return Response.json({ error: "Too many requests in a short time. Wait a few minutes and try again." }, { status: 429 });
+  }
   let body: any;
   try {
     body = await req.json();
@@ -37,18 +56,20 @@ export async function POST(req: Request) {
   const campaign = String(body?.campaign ?? "").trim();
   const ask = String(body?.ask ?? "").trim();
   const style = String(body?.style ?? "native");
-  const lane = String(body?.lane ?? "batch") as Lane;
-  const hd = !!body?.hd;
   const sl = body?.slides;
-  const min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
-  const max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
+  let min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
+  let max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
+  // the demo: exactly DEMO_SLIDES slides, on the priority lane, never HD, whatever the form sent
+  let lane = String(body?.lane ?? "batch") as Lane;
+  let hd = !!body?.hd;
+  if (demo) { min = DEMO_SLIDES; max = DEMO_SLIDES; lane = "priority"; hd = false; }
 
   if (!campaign) return Response.json({ error: "pick a campaign" }, { status: 400 });
   if (ask.length < 3) return Response.json({ error: "say what the set is about" }, { status: 400 });
   if (ask.length > 400) return Response.json({ error: "keep the ask under 400 characters" }, { status: 400 });
   if (!STYLES.has(style)) return Response.json({ error: `unknown style "${style}"` }, { status: 400 });
   if (!LANES.includes(lane)) return Response.json({ error: "lane must be batch or priority" }, { status: 400 });
-  if (!Number.isInteger(min) || !Number.isInteger(max) || min < 5 || max > 10 || min > max) {
+  if (!Number.isInteger(min) || !Number.isInteger(max) || min < (demo ? DEMO_SLIDES : 5) || max > 10 || min > max) {
     return Response.json({ error: "slides must be a count or range between 5 and 10" }, { status: 400 });
   }
 
@@ -75,5 +96,5 @@ export async function POST(req: Request) {
       await runWorker({ ids: [id] });
     });
   }
-  return Response.json({ id, lane, started: lane === "priority" && canRunHere }, { status: 201 });
+  return Response.json({ id, lane, slides: max, started: lane === "priority" && canRunHere }, { status: 201 });
 }

@@ -144,6 +144,12 @@ export async function addInvite(fd: FormData) {
   const platform = viewer.memberships.find((m) => m.org.is_platform)?.org;
   const row: any = { email, note: String(fd.get("note") || "").trim() || null, invited_by: viewer.user.id };
   if (scope === "platform_owner" && platform) { row.org_id = platform.id; row.role = "owner"; }
+  if (scope === "demo") {
+    // the shared demo workspace (0013): a member, never an owner
+    const { data: demoOrg, error: de } = await sb.rpc("fc_demo_org_id");
+    if (de || !demoOrg) throw new Error("the demo workspace does not exist yet (migration 0013)");
+    row.org_id = demoOrg; row.role = "member";
+  }
   const { error } = await sb.from("allowed_emails").insert(row);
   if (error) throw new Error(error.message);
   revalidatePath("/admin/invites");

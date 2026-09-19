@@ -21,6 +21,8 @@ import path from "node:path";
 import type { Account } from "@/lib/account";
 import type { SetRow } from "@/lib/sets";
 import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
+import type { Viewer } from "@/lib/auth";
+import manifest from "./demo-manifest";
 
 export function demo() {
   if (process.env.NODE_ENV === "production") return null;
@@ -104,3 +106,73 @@ export function demoSets(root: string, orgId: string): (SetRow & { urls: string[
   }
   return out.sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
 }
+
+/* ── the demo workspace (migration 0013): production, shipped fixtures ────────
+ * A shared org on the Clipper plan that invited prospects join as members.
+ * Everything it shows comes from lib/demo-manifest.ts and public/demo/
+ * (built by tools/build-demo.mjs from sets this machine rendered), so the
+ * hosted demo needs no Storage, no engine and no provider spend. Writes are
+ * refused with FC_DEMO. */
+
+export type DemoSpec = { id: string; brand: string; product: string; niche: string; requirements: { min_slides: number; max_slides: number }; assets: { palette: string[] }; content: { style?: string }; guidance?: { angles?: string[]; hook_style?: string } };
+type ManifestSet = { id: string; name: string; campaign_id: string; style: string; lane: "batch" | "priority"; slides: number; ask: string; caption: string | null; hashtags: string[]; bio: string | null; cost_usd: number | null; days_ago: number; urls: string[]; clean?: { frames?: number; slides?: number; stripped?: { chunk: string; what: string; count: number }[]; verified?: boolean } };
+type ManifestSpec = Omit<DemoSpec, "content" | "guidance"> & { content: { style: string | null }; guidance: DemoSpec["guidance"] | null };
+const M = manifest as unknown as { built_at: string; sets: ManifestSet[]; specs: ManifestSpec[] };
+
+export const isDemo = (viewer: Pick<Viewer, "org">) => !!viewer.org.is_demo;
+export const DEMO_REASON = "This is the demo workspace: everything here was made with The Future Clips. Pick a plan to make your own.";
+
+export function demoWorkspaceSpecs(): DemoSpec[] {
+  return M.specs.map((s) => ({ ...s, content: { style: s.content.style ?? undefined }, guidance: s.guidance ?? undefined }));
+}
+
+function demoRow(m: ManifestSet, orgId: string): SetRow & { urls: string[] } {
+  const at = new Date(Date.now() - m.days_ago * 86400000 - (m.days_ago * 7919) % 86400000).toISOString();
+  return {
+    id: m.id, org_id: orgId, campaign_id: m.campaign_id, style: m.style, ask: m.ask,
+    slides: m.slides, slides_min: 6, slides_max: 8, reserved_slides: 8, quality: "medium", lane: m.lane, hd: false,
+    status: "done", stage: "done", caption: m.caption, cost_usd: m.cost_usd,
+    files_json: m.urls, content_json: { caption: m.caption, hashtags: m.hashtags, bio: m.bio }, compliance_json: m.clean ? { pass: true, clean: m.clean } : null, error: null,
+    cancel_requested: false, created_at: at, started_at: at, finished_at: at, updated_at: at,
+    urls: m.urls,
+  };
+}
+
+export function demoWorkspaceSets(orgId: string): (SetRow & { urls: string[] })[] {
+  return M.sets.map((m) => demoRow(m, orgId)).sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+}
+
+export function demoWorkspaceSet(orgId: string, id: string): (SetRow & { urls: string[] }) | null {
+  const m = M.sets.find((x) => x.id === id);
+  return m ? demoRow(m, orgId) : null;
+}
+
+/** The Clipper plan with this month's example sets counted as used. */
+export function demoWorkspaceAccount(): Account {
+  const now = new Date();
+  const ps = `${now.getUTCFullYear()}-${String(now.getUTCMonth() + 1).padStart(2, "0")}-01`;
+  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth() + 1, 1)).toISOString();
+  const used = M.sets.filter((m) => m.days_ago < now.getUTCDate()).reduce((n, m) => n + m.slides, 0);
+  const p = PLANS.solo;
+  const cap = { batch: p.slides_per_month!, priority: p.priority_slides_per_month! };
+  return {
+    plan: { id: "solo", label: "Clipper", welcome_slides: 0, price_usd_month: 16, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+    usage: { period_start: ps, slides_used: used, priority_slides_used: 0, hd_slides_used: 0, extra_slides_purchased: 0, extra_priority_slides_purchased: 0, extra_hd_slides_purchased: 0 },
+    periodEnd: end,
+    left: { batch: Math.max(0, cap.batch - used), priority: 0 },
+    cap, balance: 0,
+    packs: [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }],
+  };
+}
+
+/* ── the demo host (D-045) ───────────────────────────────────────────────────
+ * One hidden hostname on the app project (FC_DEMO_HOSTNAME) signs every
+ * visitor in as the demo account with no email; FC_DEMO_GENERATE=1 lets the
+ * demo workspace make real sets of exactly DEMO_SLIDES slides. */
+export const DEMO_EMAIL = "demo@thefutureclips.com";
+export const DEMO_SLIDES = 4;
+export const isDemoHost = (host: string | null | undefined) => {
+  const want = process.env.FC_DEMO_HOSTNAME?.toLowerCase();
+  return !!want && (host ?? "").split(":")[0].toLowerCase() === want;
+};
+export const demoGenerationOn = () => process.env.FC_DEMO_GENERATE === "1";

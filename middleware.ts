@@ -14,6 +14,7 @@ const PUBLIC = [
   /^\/$/,
   /^\/login(\/|$)/,
   /^\/auth\//,
+  /^\/api\/auth\//,
   /^\/api\/keepalive$/,
   /^\/api\/webhooks\//,
   /^\/api\/health$/,
@@ -41,7 +42,8 @@ export async function middleware(request: NextRequest) {
         setAll(list: { name: string; value: string; options: CookieOptions }[]) {
           list.forEach(({ name, value }) => request.cookies.set(name, value));
           response = NextResponse.next({ request });
-          list.forEach(({ name, value, options }) => response.cookies.set(name, value, options));
+          const secure = (request.headers.get("x-forwarded-proto") ?? request.nextUrl.protocol.replace(":", "")).split(",")[0].trim() === "https";
+          list.forEach(({ name, value, options }) => response.cookies.set(name, value, { ...options, httpOnly: true, secure, sameSite: "lax", path: options.path ?? "/" }));
         },
       },
     },

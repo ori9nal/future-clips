@@ -2,6 +2,7 @@ import { runWorker } from "@/lib/worker";
 
 export const maxDuration = 300;
 export const dynamic = "force-dynamic";
+import { bearerMatches } from "@/lib/secrets";
 
 /**
  * The poller. Vercel's cron calls it with `Authorization: Bearer $CRON_SECRET`
@@ -14,7 +15,7 @@ function authorised(req: Request) {
   const secret = process.env.CRON_SECRET;
   if (!secret) return false; // no secret, no worker: never run an unauthenticated poller
   const auth = req.headers.get("authorization") ?? "";
-  return auth === `Bearer ${secret}`;
+  return bearerMatches(auth, secret);
 }
 
 export async function GET(req: Request) {

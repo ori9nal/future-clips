@@ -1,0 +1,40 @@
+# Pricing model
+
+Engineering keeps the arithmetic here; Product measures the costs; the owner sets the numbers (D-003, D-044). Run `node tools/pricing.mjs` for the current table; pass `batch=`, `priority=`, `margin=`, `agency=`, `fees=`, `use=` to try others.
+
+## The rule
+
+For a plan priced **P** a month, three fixed shares leave first: the agency's commission (**15%**, D-026), payment fees (**about 5%**: Dodo as merchant of record), and the margin the business keeps (**50%**, owner's rule). What is left, **30% of P**, is the most the plan's slides may cost at the model providers.
+
+```
+provider budget   = P × (1 − 0.50 − 0.15 − 0.05) = 0.30 × P
+cost at full use  = batch_slides × c_batch + priority_slides × c_priority     (HD draws 3 slides, so it is already counted)
+allowance         = budget ÷ (c × utilisation)
+```
+
+Utilisation is the share of the allowance a typical customer actually uses in a month. At 100% the margin is guaranteed whatever a customer does; at a measured 60% the same margin holds for the average customer while the heavy user is still profitable (their margin falls to the 100% column, never below).
+
+## Measured cost per slide (this machine, 2026-09-18)
+
+| Lane | $/slide | Sample | Notes |
+|---|---|---|---|
+| batch | 0.027 | 1 set (COST.md: $0.2179 for 8) | Message Batches for copy, low-priority frames |
+| priority | 0.058 | 18 sets, min 0.034, max 0.108 | realtime copy, 1 anchor + N edits at medium |
+| HD | ×3 | not measured | high-quality frames are 3× the edit price |
+
+Product's rounds may have moved these (prompt changes, cache hits, `deslop` off, low-quality anchors); the table below must be re-run with their current numbers.
+
+## What the table says today (`node tools/pricing.mjs`)
+
+| Plan | Price | Budget (30%) | Today | Cost at 100% | Margin at 100% | Margin at 60% use | Max batch slides at 100% | at 60% use |
+|---|---|---|---|---|---|---|---|---|
+| Clipper | $16 | $4.80 | 200 | $5.40 | 46% | 60% | 177 | 296 |
+| Pro | $32 | $9.60 | 500 + 50 priority | $16.40 | 29% | 49% | 248 (keeping 50 priority) | 485 |
+| Studio | $79 | $23.70 | 1,500 + 150 priority | $49.20 | 18% | 43% | 555 (keeping 150 priority) | 1,140 |
+| Packs | $8 / $18 / $40 | – | 100 / 250 / 600 | $2.70 / $6.75 / $16.20 | 46% / 42% / 39% | (packs are always fully used) | | |
+
+Reading: Clipper is right at 50% for the average customer and still profitable for a heavy one. Pro and Studio as sold today only hold 50% if customers use about half their allowance; a customer who uses everything leaves 29% / 18%. Two levers, in order: (1) bring the priority cost down (the reference image on every edit is $0.012 of the $0.027 frame; a cheaper anchor, fewer edits, cache hits), (2) set the allowances from the table at the utilisation the owner is comfortable with. Packs are safe at any use; the 600 pack is the thinnest.
+
+## Proposed numbers to decide (D-044)
+
+Keep the prices. If Product's current cost is at or under the measured one: Clipper 200, Pro 400 + 50 priority, Studio 1,000 + 100 priority hold 50% at 60% use and stay above 30% at full use. If Product's cost is lower, raise from the table. Packs unchanged. Whatever is chosen is one `update public.plans` per row (D-012 note) and one edit of the site's pricing cards.

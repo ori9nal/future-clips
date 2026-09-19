@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "prebuild": "node tools/fetch-fonts.mjs",
-    "test": "node tools/test-engine.mjs"
+    "test": "node tools/test-engine.mjs && node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON --import ./tools/test-hooks.mjs --test tests/",
+    "test:app": "node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON --import ./tools/test-hooks.mjs --test tests/"
   },
   "dependencies": {
     "@resvg/resvg-js": "^2.6.2",
@@ -29,5 +30,8 @@
     "eslint-config-next": "^15.5.24",
     "playwright-core": "1.50",
     "typescript": "^5.9.2"
+  },
+  "overrides": {
+    "postcss": ">=8.5.23"
   }
 }

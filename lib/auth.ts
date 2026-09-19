@@ -30,6 +30,8 @@ export type Org = {
   referral_code?: string;
   /** 0008: an affiliate-only workspace — refers, never generates */
   is_partner?: boolean;
+  /** 0013: the shared demo workspace — example results, never generates */
+  is_demo?: boolean;
 };
 
 export type Membership = { org: Org; role: "owner" | "member" };
@@ -62,7 +64,13 @@ export async function getViewer(): Promise<Viewer | null> {
   const isPlatformOwner = memberships.some((m) => m.org.is_platform && m.role === "owner");
   // A platform admin also has a personal org to try the product as a customer;
   // that personal org is what the customer surface acts for.
-  const primary = memberships.find((m) => !m.org.is_platform) ?? memberships[0];
+  // A prospect invited into the demo workspace also owns an empty personal
+  // org (the bootstrap trigger); the demo is what they came to see, until
+  // a workspace of their own has a plan.
+  const primary =
+    memberships.find((m) => !m.org.is_platform && !m.org.is_demo && m.org.plan !== "free") ??
+    memberships.find((m) => m.org.is_demo) ??
+    memberships.find((m) => !m.org.is_platform) ?? memberships[0];
 
   return {
     user: { id: user.id, email: user.email },

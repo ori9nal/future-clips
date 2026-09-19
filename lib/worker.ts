@@ -134,7 +134,7 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
     await sb.storage.from("sets").upload(`${prefix}/post.json`, Buffer.from(JSON.stringify(post)), { contentType: "application/json", upsert: true });
     const { error } = await sb.rpc("fc_commit_set", {
       p_set: row.id, p_made: files.length, p_cost: +Number(s.usd).toFixed(4),
-      p_caption: s.copy.content.caption, p_files: files, p_content: s.copy.content, p_compliance: s.copy.verdict,
+      p_caption: s.copy.content.caption, p_files: files, p_content: s.copy.content, p_compliance: { ...(s.copy.verdict ?? {}), clean: s.clean ?? post.clean ?? null },
       p_cost_json: { copy: s.copy.usd, art: s.art.usd, total: s.usd, lane: s.lane, log: s.log }, p_storage_prefix: prefix,
     });
     if (error) throw error;

@@ -13,6 +13,7 @@
 // the set row and calls `step` once per cron tick. Nothing here blocks on a
 // batch. Every dollar in `state.usd` comes from a provider usage block.
 import fs from 'node:fs';
+import { inspectPng } from './clean.mjs';
 import path from 'node:path';
 import { buildCopyRequest, judgeCopy, feedbackFor, toRenderable } from './generate.mjs';
 import { completeJson, extractJson } from './providers/claude.mjs';
@@ -47,7 +48,14 @@ const fail = (s, m) => { s.error = m; s.stage = 'failed'; note(s, `FAILED ${m}`)
 
 async function copySubmit(s, { root, spec }) {
   if (s.copy.attempts >= 3) return fail(s, `copy non-compliant after 3 attempts: ${s.copy.verdict?.failures.join(' | ')}`);
-  const req = buildCopyRequest({ spec, instruction: s.instruction, slides: s.slides, styleId: s.styleId, feedback: s.copy.feedback });
+  // a set whose asked range sits below the brief's minimum (the demo's 4-slide
+  // sets) is honoured: the gate already accepted the range for this org
+  const askedMax = typeof s.slides === 'number' ? s.slides : Number(s.slides?.max ?? 0);
+  const askedMin = typeof s.slides === 'number' ? s.slides : Number(s.slides?.min ?? askedMax);
+  const specForRange = askedMax && spec.requirements?.min_slides > askedMax
+    ? { ...spec, requirements: { ...spec.requirements, min_slides: askedMin } }
+    : spec;
+  const req = buildCopyRequest({ spec: specForRange, instruction: s.instruction, slides: s.slides, styleId: s.styleId, feedback: s.copy.feedback });
   s.copy.range = req.range;
   s.copy.attempts += 1;
   if (s.lane === 'priority') {
@@ -236,11 +244,34 @@ async function renderStage(s, { root, spec, outDir, cacheDir }) {
     compliance: s.copy.verdict, world: s.art.world, look: s.art.look, lane: s.lane,
     cost: { copy: +s.copy.usd.toFixed(4), art: +s.art.usd.toFixed(4), total: +s.usd.toFixed(4) },
   }, null, 2));
+  s.clean = cleanRecord(s.art.files ?? [], r.files);
+  fs.writeFileSync(path.join(outDir, 'post.json'), JSON.stringify({ ...JSON.parse(fs.readFileSync(path.join(outDir, 'post.json'), 'utf8')), clean: s.clean }, null, 2));
   s.files = r.files;
   s.canvas = r.canvas;
   s.stage = 'done';
   note(s, `rendered ${r.files.length} slides, total $${s.usd.toFixed(4)}`);
   return s;
+}
+
+/**
+ * What the metadata gate removed and verified: the provider frames' non-pixel
+ * chunks (recorded by providers/image.mjs next to each frame as
+ * `<frame>.stripped.json`) and the slides as shipped (pixels only).
+ */
+function cleanRecord(frames, slides) {
+  const counts = new Map();
+  for (const f of frames) {
+    try {
+      for (const o of JSON.parse(fs.readFileSync(`${f}.stripped.json`, 'utf8'))) {
+        const k = `${o.chunk}|${o.what}`;
+        counts.set(k, (counts.get(k) ?? 0) + 1);
+      }
+    } catch { /* a cached frame has no record: it was stripped when first drawn */ }
+  }
+  const stripped = [...counts].map(([k, count]) => { const [chunk, what] = k.split('|'); return { chunk, what, count }; });
+  let verified = true;
+  for (const f of slides) { try { if (!inspectPng(f).clean) verified = false; } catch { verified = false; } }
+  return { frames: frames.length, slides: slides.length, stripped, verified };
 }
 
 /* ── the machine ────────────────────────────────────────────────────────── */

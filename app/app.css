@@ -31,7 +31,7 @@ button, input, select, textarea { font: inherit; }
   --fc-card:    var(--surface, #FFFFFF);
   --fc-ink:     var(--text, #151517);
   --fc-body:    var(--text-2, #5B5B60);
-  --fc-muted:   var(--text-3, #8A8A90);
+  --fc-muted:   var(--text-3, #707076);
   --fc-line:    var(--line, #E4E2DC);
   --fc-line-2:  var(--line-strong, #CFCDC6);
   --fc-lime:    var(--lime, #C6F135);
@@ -86,7 +86,7 @@ button, input, select, textarea { font: inherit; }
 .fc-brand b { font-family: var(--font-archivo), Archivo, sans-serif; font-weight: 700; font-size: 16px; letter-spacing: -0.032em; color: var(--fc-ink); }
 .fc-brand small {
   display: block; font-family: var(--font-manrope), Manrope, sans-serif; font-weight: 600;
-  font-size: 8.5px; letter-spacing: 0.34em; text-transform: uppercase; color: #9B9890; line-height: 1; margin-bottom: 2px;
+  font-size: 8.5px; letter-spacing: 0.34em; text-transform: uppercase; color: var(--fc-body); line-height: 1; margin-bottom: 2px;
 }
 .fc-links { display: flex; gap: 4px; margin-left: auto; }
 .fc-links a {
@@ -291,7 +291,7 @@ button, input, select, textarea { font: inherit; }
 .fc-legal { max-width: 760px; margin: 0 auto; padding: 18px 18px 60px; }
 .fc-legal-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0 4px; }
 .fc-legal-nav { display: flex; flex-wrap: wrap; gap: 4px 14px; margin: 26px 0 10px; }
-.fc-legal-nav a { font-family: inherit; font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--fc-muted); padding: 6px 0; border-bottom: 2px solid transparent; }
+.fc-legal-nav a { font-family: inherit; font-size: 12px; letter-spacing: 0; text-transform: none; color: var(--fc-body); padding: 6px 0; min-height: 24px; display: inline-flex; align-items: center; border-bottom: 2px solid transparent; }
 .fc-legal-nav a[aria-current] { color: var(--fc-ink); border-bottom-color: var(--fc-lime); }
 .fc-legal-body { color: var(--fc-body); font-size: 16px; line-height: 1.6; }
 .fc-legal-body h1 { color: var(--fc-ink); font-size: clamp(30px, 6vw, 44px); line-height: 1.05; letter-spacing: -.03em; margin: 8px 0 6px; }
@@ -308,6 +308,10 @@ button, input, select, textarea { font: inherit; }
 .fc-legal-body th, .fc-legal-body td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--fc-line); vertical-align: top; }
 .fc-legal-body th { font-family: inherit; font-size: 11px; letter-spacing: 0; text-transform: none; color: var(--fc-muted); font-weight: 500; }
 .fc-legal-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 18px; margin-top: 44px; padding: 18px 0 0; border-top: 1px solid var(--fc-line); font-family: inherit; font-size: 11px; letter-spacing: .06em; text-transform: none; color: var(--fc-muted); }
+/* every link in the Trust and Legal strip is a 24px target and reads at 4.5:1 */
+.fc-legal-foot nav a, .fc-legal-foot nav a[href^="mailto"] { min-height: 24px; display: inline-flex; align-items: center; padding: 4px 2px; color: var(--fc-body); }
+.fc-legal-foot-label { color: var(--fc-body); }
+
 .fc-legal-foot nav { display: flex; flex-wrap: wrap; gap: 6px 16px; }
 .fc-legal-foot a:hover { color: var(--fc-ink); }
 .fc-legal-foot-copy { margin-left: auto; }

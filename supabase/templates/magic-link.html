@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>Sign in to The Future Clips</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF9F6;">
+<!-- preheader (hidden in the body, shown as the inbox snippet) -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#FAF9F6;">Your sign-in link and code. It works once and expires in an hour.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF9F6;">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+      <tr><td style="padding:0 6px 22px 6px;">
+        <a href="https://www.thefutureclips.com" style="text-decoration:none;">
+          <img src="https://www.thefutureclips.com/logo.png" width="168" height="56" alt="The Future Clips" style="display:block;border:0;width:168px;height:auto;">
+        </a>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border:1px solid #E9E6DE;border-radius:20px;padding:34px 34px 30px 34px;">
+        <h1 style="margin:0 0 12px 0;font-family:Archivo,Helvetica,Arial,sans-serif;font-size:24px;line-height:1.2;letter-spacing:-0.02em;color:#0E0E10;">Sign in to The Future Clips</h1>
+        <p style="margin:0 0 24px 0;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:15.5px;line-height:1.6;color:#57554F;">Tap the button to open your workspace. No password, nothing to remember.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="background:#0E0E10;border-radius:999px;">
+            <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=magiclink" style="display:inline-block;padding:15px 28px;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:15.5px;font-weight:700;color:#D8FF47;text-decoration:none;border-radius:999px;">Sign in</a>
+          </td></tr>
+        </table>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:26px;width:100%;">
+          <tr><td style="font-family:Manrope,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#57554F;padding-bottom:8px;">Or enter this code on the sign-in page:</td></tr>
+          <tr><td style="background:#F3F1EA;border:1px solid #E9E6DE;border-radius:12px;padding:14px 18px;font-family:'IBM Plex Mono',Menlo,Consolas,monospace;font-size:26px;letter-spacing:0.28em;color:#0E0E10;">{{ .Token }}</td></tr>
+        </table>
+        <p style="margin:24px 0 0 0;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#8C8981;">This link works once and expires in an hour. If you did not ask to sign in, you can ignore this email; nobody can use it without access to your inbox.</p>
+      </td></tr>
+      <tr><td style="padding:22px 6px 0 6px;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:#8C8981;">
+        The Future Clips · <a href="https://www.thefutureclips.com" style="color:#8C8981;">thefutureclips.com</a><br>
+        <a href="https://www.thefutureclips.com/terms" style="color:#8C8981;">Terms</a> · <a href="https://www.thefutureclips.com/privacy" style="color:#8C8981;">Privacy</a> · <a href="mailto:team@thefutureclips.com" style="color:#8C8981;">team@thefutureclips.com</a><br>
+        You received this because someone entered {{ .Email }} on our sign-in page.
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

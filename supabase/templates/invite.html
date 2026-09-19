@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<meta name="supported-color-schemes" content="light">
+<title>You are invited to The Future Clips</title>
+</head>
+<body style="margin:0;padding:0;background:#FAF9F6;">
+<!-- preheader (hidden in the body, shown as the inbox snippet) -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#FAF9F6;">Someone added you to their workspace.</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#FAF9F6;">
+  <tr><td align="center" style="padding:40px 16px;">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:520px;">
+      <tr><td style="padding:0 6px 22px 6px;">
+        <a href="https://www.thefutureclips.com" style="text-decoration:none;">
+          <img src="https://www.thefutureclips.com/logo.png" width="168" height="56" alt="The Future Clips" style="display:block;border:0;width:168px;height:auto;">
+        </a>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border:1px solid #E9E6DE;border-radius:20px;padding:34px 34px 30px 34px;">
+        <h1 style="margin:0 0 12px 0;font-family:Archivo,Helvetica,Arial,sans-serif;font-size:24px;line-height:1.2;letter-spacing:-0.02em;color:#0E0E10;">You have been invited</h1>
+        <p style="margin:0 0 24px 0;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:15.5px;line-height:1.6;color:#57554F;">Someone added you to their workspace on The Future Clips. Accept the invite and you are in.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+          <tr><td style="background:#0E0E10;border-radius:999px;">
+            <a href="{{ .SiteURL }}/auth/callback?token_hash={{ .TokenHash }}&type=invite" style="display:inline-block;padding:15px 28px;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:15.5px;font-weight:700;color:#D8FF47;text-decoration:none;border-radius:999px;">Accept the invite</a>
+          </td></tr>
+        </table>
+        
+        <p style="margin:24px 0 0 0;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:13px;line-height:1.6;color:#8C8981;">The invite link works once and expires in 24 hours. If you were not expecting it, ignore this email.</p>
+      </td></tr>
+      <tr><td style="padding:22px 6px 0 6px;font-family:Manrope,Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:#8C8981;">
+        The Future Clips · <a href="https://www.thefutureclips.com" style="color:#8C8981;">thefutureclips.com</a><br>
+        <a href="https://www.thefutureclips.com/terms" style="color:#8C8981;">Terms</a> · <a href="https://www.thefutureclips.com/privacy" style="color:#8C8981;">Privacy</a> · <a href="mailto:team@thefutureclips.com" style="color:#8C8981;">team@thefutureclips.com</a><br>
+        Sent to {{ .Email }} by the workspace that invited you.
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body>
+</html>

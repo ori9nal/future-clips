@@ -49,14 +49,14 @@ No sentence anywhere says "free".
 ### 2.6 Out of slides
 Meter at 0 turns the bar empty; the cost line says "You have 0 slides left this period. Add a pack or wait for {renew date}." with "Add a pack" → Settings → Plan.
 
-### 2.7 The single-image post (D-044)
+### 2.7 The single-image post (P-12)
 A second thing a clipper can make, next to the slideshow: **one image plus the description**. The composer gets a format choice above Slides: **Slideshow** (5–10 slides) or **Single image**. With Single image the slides control disappears, the cost line reads "Uses 1 slide", and the result card shows one tile, the hook, and the description in full with a copy button. The zip carries `image.png` and `post.txt`.
 
 What the engine makes (from the Poky reference, QUALITY.md §3.7): a 9:16 selfie-style frame in the campaign's family with the hook on it in two lines (white or the campaign accent with a white outline) at the top third; a description of 500–700 words in the campaign's language with the hook line, N numbered items (✅) each with a one-line personal reason and three 👉 bullets, the app named two or three times with its full name and where to get it, a save line, a question to the comments, and 3–5 hashtags. The same description can be reused with a different image: "Make another" keeps the description and draws a new frame ($0.04).
 
 Engineering needs: `sets.format` (`slideshow` | `single`), `slides = 1` allowed by the gate for that format, and the download route's zip naming (R12).
 
-## 3. Instructions on a set (D-037, request R3)
+## 3. Instructions on a set (P-05, request R3)
 
 The composer gets a fourth block, **Instructions** (collapsed by default, "Add your logo, avatar or handle"):
 
@@ -69,7 +69,7 @@ The composer gets a fourth block, **Instructions** (collapsed by default, "Add y
 
 Rendering rules: the handle never covers the hook; the logo never replaces a campaign-mandated app icon; an avatar that is not a face is rejected with "Use a photo where your face is visible". The preview of each is shown in the composer block (tiny) so the clipper knows it is on.
 
-## 4. The idea helper — decided: not now (D-038)
+## 4. The idea helper — decided: not now (P-06)
 The brief's angles give three ready asks per campaign for $0. A helper would need an endpoint and cost about a cent a call. Revisit if Insights shows empty-ask abandonment. What Create does instead: the placeholder suggests the shape ("An angle, a list, a lesson. For example: the 5 nutrition habits that finally stuck"), and the hook patterns from QUALITY.md §4 seed the angles the admin writes into a brief.
 
 ## 5. Out of scope
@@ -89,7 +89,7 @@ Screenshots: `output/gauntlet/2026-09-18/app/`. No finding below is from the rea
 | 6 | Priority + HD on | the cost in one honest line | "Uses up to 24 of your 42 slides." — the 3× for HD and the switch to the priority allowance are not said. | preview | product (this session) |
 | 7 | Make on Clipper with HD/priority | disabled with a reason | Disabled controls carry "Comes with Pro and Studio" — good. | preview | keep |
 | 8 | Make the slideshow (preview has no session) | a sentence | The raw API string "sign in required" in red. Every non-FC error is shown raw. | preview | product: map codes to sentences (this session); R8 for codes |
-| 9 | Create → Recent | a glance at recent sets | Each recent set is a 3-column wall of full-size tiles; four sets = a very long page before the Library. | preview | D-039 (owner); product proposes a strip |
+| 9 | Create → Recent | a glance at recent sets | Each recent set is a 3-column wall of full-size tiles; four sets = a very long page before the Library. | preview | P-07 (owner); product proposes a strip |
 | 10 | Library → tile → drawer | slide, text, caption, prev/next, download | Works: "Slide 2 of 8", text on the slide, caption on slide 1, Previous/Next, Download, Escape closes. | preview | keep. Verify on the real app that Download saves rather than opens (cross-origin `download` attribute). |
 | 11 | Insights | numbers match what I did | Tiles render; in preview the fixture usage (24 used) and the demo sets (4 × 7.8) do not reconcile, which is an artefact of fixtures, not a bug. Needs the real app. | preview | verify after R1 |
 | 12 | Settings → Plan | honest plan state | "Pro plan · 500 slides a month, 50 priority, HD included", Switch/Upgrade/Compare, packs, "Checkout is being connected, so the buttons email us for now", Billing "Email us". Clear. | preview | keep |

@@ -15,8 +15,10 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.dirname(HERE);
 const DIST = path.join(ROOT, 'future-clips-site');
 
-const FONTS = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>'
-  + '<link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,700&family=IBM+Plex+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">';
+// the site's fonts, self-hosted under /fonts (tools/fetch-site-fonts.mjs writes both the files and design/fonts.css)
+const FONTS = '<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/archivo-500_800-latin.woff2">'
+  + '<link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/manrope-400_700-latin.woff2">'
+  + `<style>${fs.readFileSync(path.join(ROOT, 'design/fonts.css'), 'utf8')}</style>`;
 
 const CSS = `
 *{box-sizing:border-box}
@@ -29,7 +31,7 @@ header.top .wrap{display:flex;align-items:center;justify-content:space-between;h
 .brand{display:flex;align-items:center;gap:11px;text-decoration:none;color:#0E0E10}
 .brand svg{height:26px;width:auto;display:block;flex:0 0 auto}
 .bt{display:flex;flex-direction:column;line-height:1}
-.bt small{font-family:"Manrope",sans-serif;font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:#9B9890;font-weight:600;margin-bottom:2px}
+.bt small{font-family:"Manrope",sans-serif;font-size:8.5px;letter-spacing:.34em;text-transform:uppercase;color:#6E6B63;font-weight:600;margin-bottom:2px}
 .bt b{font-family:"Archivo",sans-serif;font-stretch:112%;font-weight:700;font-size:19px;color:#0E0E10;letter-spacing:-.032em}
 .mono{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:#6E6B63}
 nav.legal{display:flex;flex-wrap:wrap;gap:6px 14px;margin:clamp(28px,5vw,44px) 0 8px}
@@ -64,12 +66,25 @@ function page(p, body) {
 <title>${p.title} — The Future Clips</title>
 <meta name="description" content="${p.title} for The Future Clips, effective 12 September 2026.">
 <meta name="robots" content="index,follow">
+<meta name="theme-color" content="#FAF9F6">
+<link rel="canonical" href="https://www.thefutureclips.com/${p.slug}">
+<meta property="og:type" content="article">
+<meta property="og:url" content="https://www.thefutureclips.com/${p.slug}">
+<meta property="og:site_name" content="the futureclips">
+<meta property="og:title" content="${p.title} — The Future Clips">
+<meta property="og:description" content="${p.title} for The Future Clips, effective 12 September 2026.">
+<meta property="og:image" content="https://www.thefutureclips.com/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="${p.title} — The Future Clips">
+<meta name="twitter:image" content="https://www.thefutureclips.com/og.png">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 92 64'%3E%3Crect x='0' y='21' width='55' height='39' rx='7' fill='%23D9D7D1'/%3E%3Crect x='14' y='12' width='55' height='39' rx='7' fill='%238E8D89'/%3E%3Crect x='31' y='2' width='55' height='39' rx='7' fill='%230E0E10'/%3E%3C/svg%3E">
 ${FONTS}
 <style>${CSS}</style>
 </head>
 <body>
-<header class="top"><div class="wrap"><a class="brand" href="/" aria-label="The Future Clips home"><svg viewBox="0 0 92 64" aria-hidden="true"><rect x="0" y="21" width="55" height="39" rx="7" fill="#D9D7D1"/><rect x="14" y="12" width="55" height="39" rx="7" fill="#8E8D89"/><rect x="31" y="2" width="55" height="39" rx="7" fill="#0E0E10"/></svg><span class="bt"><small>The</small><b>futureclips</b></span></a><a class="mono" href="/#pricing" style="text-decoration:none">Pricing</a></div></header>
+<header class="top"><div class="wrap"><a class="brand" href="/"><svg viewBox="0 0 92 64" aria-hidden="true"><rect x="0" y="21" width="55" height="39" rx="7" fill="#D9D7D1"/><rect x="14" y="12" width="55" height="39" rx="7" fill="#8E8D89"/><rect x="31" y="2" width="55" height="39" rx="7" fill="#0E0E10"/></svg><span class="bt"><small>The</small><b>futureclips</b></span></a><a class="mono" href="/#pricing" style="text-decoration:none">Pricing</a></div></header>
 <main><div class="wrap">
 <nav class="legal" aria-label="Trust and Legal">${nav}</nav>
 ${body}

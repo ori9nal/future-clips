@@ -2,6 +2,7 @@ import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { cancelSet, getSet, stageLabel } from "@/lib/sets";
 import { adminClient, hasServiceRole } from "@/lib/supabase/admin";
+import { isDemo, demoWorkspaceSet, DEMO_REASON } from "@/lib/demo";
 
 /**
  * One set, with signed slide URLs once it is done. RLS scopes the row to the
@@ -12,6 +13,12 @@ export async function GET(_req: Request, ctx: { params: Promise<{ id: string }> 
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
   const { id } = await ctx.params;
+  if (isDemo(viewer) && id.startsWith("demo-")) {
+    const d = demoWorkspaceSet(viewer.org.id, id);
+    if (!d) return Response.json({ error: "not found" }, { status: 404 });
+    const { urls, ...set } = d;
+    return Response.json({ set, label: stageLabel(set), slides: urls });
+  }
   const sb = await createClient();
   const set = await getSet(sb, id);
   if (!set) return Response.json({ error: "not found" }, { status: 404 });
@@ -33,6 +40,7 @@ export async function DELETE(_req: Request, ctx: { params: Promise<{ id: string 
   const viewer = await viewerForRequest();
   if (!viewer) return Response.json({ error: "sign in required" }, { status: 401 });
   const { id } = await ctx.params;
+  if (isDemo(viewer) && id.startsWith("demo-")) return Response.json({ cancelled: false, error: DEMO_REASON }, { status: 409 });
   const sb = await createClient();
   const ok = await cancelSet(sb, id);
   if (!ok) return Response.json({ cancelled: false }, { status: 409 });

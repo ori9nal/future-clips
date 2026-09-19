@@ -1,58 +1,72 @@
 "use client";
 
 import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
-/** The error Supabase returns when the invite-gate trigger refuses an insert. */
-const INVITE_REFUSED = /database error saving new user|FC_INVITE_ONLY/i;
+/**
+ * The sign-in form. The email goes to /api/auth/otp, which asks Supabase for
+ * the magic link from the server, so this page ships no Supabase client to
+ * the browser. Whether an email may sign up at all is decided in the
+ * database (allowed_emails + the invite gate), not here.
+ */
+type Reply = { ok?: boolean; url?: string; next?: string; error?: string };
+
+async function post(path: string, body: Record<string, string>): Promise<Reply> {
+  try {
+    const res = await fetch(path, { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(body) });
+    return (await res.json()) as Reply;
+  } catch {
+    return { error: "We could not reach the sign-in service. Check your connection and try again." };
+  }
+}
 
 export function LoginForm({ next, initialError, googleEnabled }: { next: string; initialError: string | null; googleEnabled: boolean }) {
   const [email, setEmail] = useState("");
   const [busy, setBusy] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(initialError);
-
-  // The redirect URL carries no query so it matches an exact allow-list entry in
-  // Supabase; where the member wanted to land rides in a short-lived cookie.
-  const callback = () => {
-    const dest = next.startsWith("/") && !next.startsWith("//") ? next : "/app";
-    document.cookie = `fc_next=${encodeURIComponent(dest)}; max-age=3600; path=/; samesite=lax${window.location.protocol === "https:" ? "; secure" : ""}`;
-    return `${window.location.origin}/auth/callback`;
-  };
+  const [code, setCode] = useState("");
 
   async function sendLink(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true); setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email: email.trim().toLowerCase(),
-      options: { emailRedirectTo: callback() },
-    });
+    const r = await post("/api/auth/otp", { email: email.trim().toLowerCase(), next });
     setBusy(false);
-    if (error) {
-      setError(INVITE_REFUSED.test(error.message)
-        ? "That email is not on the invite list. Ask whoever runs your workspace to add it."
-        : /rate limit/i.test(error.message)
-          ? "Too many sign-in emails in the last hour. Use the link already in your inbox, or try again in a little while."
-          : error.message);
-      return;
-    }
+    if (r.error) { setError(r.error); return; }
     setSent(true);
   }
 
   async function google() {
     setBusy(true); setError(null);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithOAuth({ provider: "google", options: { redirectTo: callback() } });
-    if (error) { setBusy(false); setError(error.message); }
+    const r = await post("/api/auth/google", { next });
+    if (r.url) { window.location.assign(r.url); return; }
+    setBusy(false); setError(r.error ?? "Google sign-in is not available right now.");
+  }
+
+  async function verify(e: React.FormEvent) {
+    e.preventDefault();
+    setBusy(true); setError(null);
+    const r = await post("/api/auth/verify", { email: email.trim().toLowerCase(), token: code, next });
+    if (r.ok) { window.location.assign(r.next ?? next); return; }
+    setBusy(false); setError(r.error ?? "That code did not work.");
   }
 
   if (sent) {
     return (
       <div className="fc-card" role="status">
         <h2>Check your inbox</h2>
-        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. It works once and expires in an hour.</p>
-        <p className="fc-note" style={{ marginTop: 12 }}>No email? Check spam, then <button type="button" className="fc-link" onClick={() => setSent(false)}>try again</button>.</p>
+        <p className="fc-sub">We sent a sign-in link to <b>{email}</b>. Tap it, or enter the 6-digit code from the email here. Both work once and expire in an hour.</p>
+        <form onSubmit={verify} className="fc-form" style={{ marginTop: 14 }}>
+          <label>
+            <span>Code</span>
+            <input type="text" name="code" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} required
+              placeholder="123456" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))} />
+          </label>
+          {error && <p className="fc-err-line" role="alert">{error}</p>}
+          <button type="submit" className="fc-btn" disabled={busy || code.length < 6} style={{ justifySelf: "stretch" }}>
+            {busy ? "Checking…" : "Sign in with the code"}
+          </button>
+        </form>
+        <p className="fc-note" style={{ marginTop: 12 }}>No email? Check spam, then <button type="button" className="fc-link" onClick={() => { setSent(false); setCode(""); setError(null); }}>try again</button>.</p>
       </div>
     );
   }
