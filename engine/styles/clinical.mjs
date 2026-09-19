@@ -16,6 +16,10 @@ const src = (ctx, id) => (path.isAbsolute(String(id)) ? String(id) : src(ctx, id
 
 export default {
   id: 'clinical',
+  /** this style prints the creator's handle in its own footer, so the sign-off is the avatar alone */
+  printsHandle: true,
+  /** the mark sits in the empty band above the call-to-action bar, clear of the footer handle */
+  markAt(w, h) { const size = Math.round(w * 0.072); return { x: w - Math.round(w * 0.05) - size, y: Math.round(h * 0.70), size }; },
   label: 'Clinical',
   canvas: { w: 1080, h: 1350 },
   niches: ['health', 'longevity', 'fitness', 'supplements', 'medical'],

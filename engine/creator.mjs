@@ -78,14 +78,25 @@ export function ownHandle(spec) {
  * It lives here, and is applied once in styles/registry.mjs, so all ten
  * styles sign a deck the same way instead of each growing its own corner.
  */
-export function signOff(spec, w, h) {
+export function signOff(spec, w, h, { nameAlready = false, at = null } = {}) {
   const has = hasMark(spec);
-  const name = ownHandle(spec);
+  // Seven of the ten styles already print the creator's handle in their own
+  // footer, and the first pass drew a second one on top of it — the rail set
+  // rendered "@mira.clips" over "FOLLOW @MIRA.CLIPS ... TO RECEIVE" (Product,
+  // 2026-09-19). Where the style prints the name, the sign-off is the avatar
+  // alone, lifted clear of that footer; where it does not, it is both.
+  const name = nameAlready ? null : ownHandle(spec);
   if (!has && !name) return '';
   // proportional to the canvas: the styles run 1080x1350, 1080x1440 and 1080x1920
-  const size = Math.round(w * 0.078);
+  const size = at?.size ?? Math.round(w * 0.078);
   const pad = Math.round(w * 0.05);
-  const x = pad, y = h - size - pad;
+  // Where it goes is the STYLE's call: a designed page has a call-to-action
+  // bar across the bottom and its own handle in the margin, and a mark dropped
+  // at a fixed bottom-left landed on both (Product, 2026-09-19). A style that
+  // knows its layout returns a point from `markAt(w, h)`; the photo styles,
+  // which have nothing down there but picture, keep the bottom-left corner.
+  const x = at ? at.x : pad;
+  const y = at ? at.y : h - size - pad;
   const parts = [];
   if (has) parts.push(mark(spec, x, y, size));
   if (name) {
