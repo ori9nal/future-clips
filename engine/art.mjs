@@ -113,8 +113,21 @@ const APPSHOT = /^An iPhone lying face up on/;
 export function planSet(o) {
   const {
     subject, scenes, look = 'phone', quality = 'medium', w = 1080, h = 1920, id = 'set',
-    mode = 'subject', days = false, appScreen = null,
+    mode = 'subject', days = false, appScreen = null, wides = null,
   } = o;
+  /**
+   * A wide, person-free place shot is drawn at `low`.
+   *
+   * Measured 2026-09-19 on the same prompt and seed: low is $0.0055 a frame
+   * against $0.0419 for medium. On a face it goes waxy and the hand holding
+   * the phone turns to mush; on a close shelf the bottles lose their pumps and
+   * the toothbrush its bristles. On a wide pitch, after the de-slop pass we
+   * actually ship, it holds. So the banks tag the frames that are wide, hold
+   * no person and no close detail (engine/scenes.mjs `wide: true`), and only
+   * those drop a tier. Everything with a face, a hand or a near object stays
+   * at medium, which is the floor for this product.
+   */
+  const qualityAt = (i) => (wides?.[i] ? 'low' : quality);
   const size = sizeFor(w, h);
   const style = LOOK[look] ?? LOOK.phone;
 
@@ -125,13 +138,13 @@ export function planSet(o) {
 
   if (mode === 'editorial') {
     // every frame its own generation; coherence comes from the look, the page and the type
-    const indep = (scene, i) => (appScreen && APPSHOT.test(scene) ? appFrame(scene, i) : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${EDITORIAL_GUARD}` });
+    const indep = (scene, i) => (appScreen && APPSHOT.test(scene) ? appFrame(scene, i) : { i, label: `${id}-a${i}`, refs: [], quality: qualityAt(i), prompt: `${style} ${scene} ${EDITORIAL_GUARD}` });
     return { mode, size, quality, anchor: null, frames: () => scenes.map(indep) };
   }
   if (mode === 'aspirational') {
     const indep = (scene, i) => (appScreen && APPSHOT.test(scene)
       ? appFrame(scene, i)
-      : { i, label: `${id}-a${i}`, refs: [], prompt: `${style} ${scene} ${ASPIRE_GUARD}` });
+      : { i, label: `${id}-a${i}`, refs: [], quality: qualityAt(i), prompt: `${style} ${scene} ${ASPIRE_GUARD}` });
     // the hook names the life's car → it is the anchor and the other car frames are edits of it
     const car = LIVES.map((L) => L.car).find((c) => String(scenes[0] ?? '').includes(c));
     if (!car) return { mode, size, quality, anchor: null, frames: () => scenes.map(indep) };
@@ -150,7 +163,7 @@ export function planSet(o) {
   const frames = (anchorFile) => scenes.slice(1).map((scene, n) => {
     const i = n + 1;
     if (appScreen && APPSHOT.test(scene)) return appFrame(scene, i);
-    if (NOBODY.test(scene)) return { i, label: `${id}-o${i}`, refs: [], prompt: `${style} ${scene} ${OBJECT_GUARD}` };
+    if (NOBODY.test(scene)) return { i, label: `${id}-o${i}`, refs: [], quality: qualityAt(i), prompt: `${style} ${scene} ${OBJECT_GUARD}` };
     // A close-up is asked for by the scene, and "keep the same face" pulls
     // the model straight back to the anchor's full-body framing — round one
     // of the gym gauntlet rendered "a tight close-up of a bicep" as the same
@@ -198,7 +211,7 @@ export async function generateSet(o) {
     const files = [];
     let usd = 0, cached = 0;
     for (const f of plan.frames()) {
-      const r = await generate({ root, cacheDir, size, quality, label: f.label, refs: f.refs, prompt: f.prompt });
+      const r = await generate({ root, cacheDir, size, quality: f.quality ?? quality, label: f.label, refs: f.refs, prompt: f.prompt });
       files.push(r.file);
       usd += r.usd ?? 0;
       if (r.cached) cached++;
@@ -218,7 +231,7 @@ export async function generateSet(o) {
   const files = [anchor.file];
   let usd = anchor.usd ?? 0, cached = anchor.cached ? 1 : 0;
   for (const f of plan.frames(anchor.file)) {
-    const r = await generate({ root, cacheDir, size, quality, label: f.label, refs: f.refs, prompt: f.prompt });
+    const r = await generate({ root, cacheDir, size, quality: f.quality ?? quality, label: f.label, refs: f.refs, prompt: f.prompt });
     files.push(r.file);
     usd += r.usd ?? 0;
     if (r.cached) cached++;

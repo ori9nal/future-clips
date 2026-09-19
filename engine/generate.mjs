@@ -26,9 +26,9 @@ function expandIn(text, spec) {
 
 const SHAPE = `{
   "subject": "one locked sentence describing the person in the set: age, hair, facial hair, one plain outfit. No names, no brands.",
-  "hook":   { "lines": ["2-3 short lines, hand-broken"], "sub": [], "scene": "shot type then one clause: mirror | pov | crop | friend | object | outdoors — e.g. \"mirror, locker room, phone at chest\"" },
+  "hook":   { "lines": ["2-3 short lines, hand-broken"], "sub": [], "scene": "ONE word, nothing else: mirror | pov | crop | friend | object | outdoors" },
   "ranked": [ { "name": "slide heading", "score": "an x/10 rating ONLY when the ask rates or ranks things (\"8/10\", \"-2/10\", \"1000/10\"); otherwise \"\". Never a tag line", "lines": ["1-4 short lines"],
-                "role": "body | app | proof", "showsApp": false, "scene": "shot type then one clause" } ],
+                "role": "body | app | proof", "showsApp": false, "scene": "ONE word from the same list" } ],
   "numbering": "countdown | up | none",
   "closer": { "lines": ["1-2 short lines"], "cta": "the call to action" },
   "caption": "the post caption: one short natural line in the same voice as the slides, with 2-3 emojis that fit the topic woven in, never a row of emojis at the end",
@@ -117,12 +117,10 @@ const RULES_NATIVE = `How to write it:
   of habits, lessons or rules backwards — no real post does.
 - "subject" is written ONCE and describes the only person in the set. Every slide is the same
   person, so it must be plain and specific enough to recognise: no accessories that come and go.
-- Every slide has a "scene": where the person is, what they are doing, how they are framed. One
-  sentence. Describe a real moment a phone camera would catch, not a stock-photo pose — no
-  thumbs up, no arms crossed smiling at the lens, no laptop-and-coffee cliché.
-- Scenes must differ from each other in place, time of day and framing. A set where every frame
-  is the same room reads as one photo repeated.
-- The app slide's scene is ignored (it renders the app screenshot), so keep it short.
+- "scene" is ONE WORD and nothing else — the shot type, from the list you are given. The engine
+  writes the frame itself from that word (the room, the outfit, the light, the framing mistake),
+  so a sentence here is thrown away. "mirror". "crop". "boots". Not "mirror, locker room, phone
+  at chest height, morning".
 - The caption is under 20 words, first person, and carries 2-3 fitting emojis placed naturally.
 - Slide count: if you are given a RANGE, choose the count the topic genuinely needs inside it -
   never pad with filler slides and never exceed it. If you are given ONE number, return exactly that.
@@ -217,8 +215,8 @@ const SCENE_DIRECTION = {
     'Webull, Stocktwits — alongside the campaign product. The hook is a count plus a promise or a quoted',
     'DM, two short lines, never a confession. Numbers on at least half the items: pairs, months, $,',
     '%, a time of day. The "subject" field is unused for this format; write "none".',
-    '"scene" is a hint only: one of car | interior | desk | feetup | pool | penthouse | plane | boat |',
-    'street | garage | watch | rooftop | behind, then a clause.',
+    '"scene" is ONE WORD and nothing else, from: car | interior | desk | feetup | pool | penthouse | plane |',
+    'boat | street | garage | watch | rooftop | behind. The engine writes the frame from it.',
   ].join(' '),
   // The gym feed IS one person across many days, shot on a phone: mirror
   // selfies, close crops with the head out of frame, looking down at his own
@@ -259,14 +257,14 @@ const SCENE_DIRECTION = {
     'day of the week, "twice a week". Lowercase "lol" energy is fine; exclamation marks are not.',
     'The "subject" field IS used: one lifter, described once — age, build, hair, skin tone, facial hair.',
     'NO clothing: he wears something different in every frame. Just the person.',
-    '"scene" per slide: one of mirror | pov | crop | friend | object | outdoors, then a clause.',
+    '"scene" per slide is ONE WORD from: mirror | pov | crop | friend | object | outdoors. Nothing else.',
   ].join(' '),
   native: [
     'This is a phone-photo slideshow: 9:16 frames off someone\'s camera roll with a small caption on',
     'each. Scenes are real moments a phone would catch — a mirror, looking down at your own hands, a',
     'friend shooting from across the room, an object on a counter. Vary the shot every slide.',
     'Numbers on at least half the items. "scene": one of mirror | pov | crop | friend | object |',
-    'outdoors, then a clause.',
+    'outdoors. Nothing else.',
   ].join(' '),
   // Food and meal prep: mostly objects (containers, the pan, the plate) and
   // two frames with the cook in them from behind. Measured off set-15 (the
@@ -284,8 +282,8 @@ const SCENE_DIRECTION = {
     'the night before". Blunt, first person, a lowercase "i" is fine. No recipe-blog voice, no "delicious",',
     'no "nourish", no "fuel your day".',
     'The "subject" is one person described once — age, build, hair, skin tone. No clothing.',
-    '"scene": one of plate | containers | pan | fridge | board | scale | cook | hands | car | oven | bag,',
-    'then a clause.',
+    '"scene" is ONE WORD from: plate | containers | pan | fridge | board | scale | cook | hands | car |',
+    'oven | bag. Nothing else.',
   ].join(' '),
   // The Grow with Alex family (docs/QUALITY.md §3.4): named things, a qualifier,
   // three notes and a verdict per slide; a cinematic cover; an ask to close.
@@ -360,8 +358,8 @@ const SCENE_DIRECTION = {
     'line starts with the number ("5. …") — and "cta" is at most three words ("link in bio") or "".',
     'Never name the apps in the examples; the campaign\'s app is the only app. The "subject" is one young',
     'player described once — age, build, hair — no clothing.',
-    '"scene": one of boots | cones | back | night | gym | recovery | bowl | dribble | stands | run | sit |',
-    'bag | tunnel, then a clause.',
+    '"scene" is ONE WORD from: boots | cones | back | night | gym | recovery | bowl | dribble | stands |',
+    'run | sit | bag | tunnel. Nothing else.',
   ].join(' '),
   // FASHION / OUTFITS (§3.13, three owner sets, 20 slides, one app): one
   // heading in sentence case and one sentence of advice; the app woven into
@@ -394,8 +392,8 @@ const SCENE_DIRECTION = {
     'with the number — then a two-line send-off ("save for later", "follow for more") as the cta.',
     'Never name the apps in the examples; the campaign\'s app is the only app. The "subject" is one young',
     'woman described once — age, hair, skin tone — no clothing.',
-    '"scene": one of street | mirror | hair | boutique | vanity | nails | cafe | crossing | collar | shirt |',
-    'car | rail | flatlay, then a clause.',
+    '"scene" is ONE WORD from: street | mirror | hair | boutique | vanity | nails | cafe | crossing |',
+    'collar | shirt | car | rail | flatlay. Nothing else.',
   ].join(' '),
   // LIFE — skin, GLP-1, wellness (§3.6 the Poky family, §3.14 the AcneTrack
   // stories): a woman's own words, a list of habits or a story in order.
@@ -414,8 +412,8 @@ const SCENE_DIRECTION = {
     'plain sentence about what it did or showed. The closer is the after — one or two lines — with a',
     'short cta or "". Never name the apps in the examples; the campaign\'s app is the only app. The',
     '"subject" is one young woman described once — age, hair, skin — no clothing.',
-    '"scene": one of bathroom | car | bed | hallway | plate | shelf | work | walk | beach | kitchen | scale |',
-    'sofa, then a clause.',
+    '"scene" is ONE WORD from: bathroom | car | bed | hallway | plate | shelf | work | walk | beach |',
+    'kitchen | scale | sofa. Nothing else.',
   ].join(' '),
   // EVERYDAY — finance, language, productivity, anything else (F26): places
   // and hands off an ordinary week, never a face.
@@ -425,8 +423,8 @@ const SCENE_DIRECTION = {
     'daylight — and never a face. Lines are short, first person, specific: a number on at least half the',
     'items (minutes, $, %, days, a time). The app slide has "name" "Bonus" and one plain sentence about',
     'what it did. The closer is the last item or a one-line send-off. "subject" is "none".',
-    '"scene": one of desk | phone | street | cafe | bed | wardrobe | carseat | behind | notes | window |',
-    'hand | stairs, then a clause.',
+    '"scene" is ONE WORD from: desk | phone | street | cafe | bed | wardrobe | carseat | behind | notes |',
+    'window | hand | stairs. Nothing else.',
   ].join(' '),
 };
 
@@ -692,6 +690,95 @@ export function judgeCopy({ spec, data, range, styleId }) {
   return { data, verdict, slides: repaired.slides, count: n };
 }
 
+/**
+ * The rules that a single line can break, and that a rewrite of THAT LINE fixes.
+ *
+ * Measured over 36 rounds: 7 of the 10 copy rejections were the lift check, and
+ * every phrase it caught was ordinary — "junk food before training", "skipping
+ * recovery and stretching", "and i'll send". The check is worth keeping (a
+ * clipper must not post another creator's sentence word for word) but paying
+ * $0.076 to regenerate a whole set because four ordinary words collided is
+ * not. So a verdict whose failures are ALL line-level asks the model to redo
+ * just those lines, which is a ~200-token call instead of a ~2,500-token one.
+ */
+const LINE_LEVEL = /repeats a reference post word for word|repeats the heading|a brand word no real post uses/;
+
+/** Can this verdict be fixed by rewriting single lines? */
+export const lineFixable = (verdict) =>
+  verdict.failures.length > 0 && verdict.failures.every((f) => LINE_LEVEL.test(f));
+
+/** Every line of a set, addressed so a fix can be put back exactly where it came from. */
+function linesOf(data) {
+  const out = [];
+  (data.hook?.lines ?? []).forEach((l, i) => out.push({ at: `hook.lines.${i}`, text: l }));
+  (data.hook?.sub ?? []).forEach((l, i) => out.push({ at: `hook.sub.${i}`, text: l }));
+  (data.ranked ?? []).forEach((r, n) => {
+    out.push({ at: `ranked.${n}.name`, text: r.name });
+    (r.lines ?? []).forEach((l, i) => out.push({ at: `ranked.${n}.lines.${i}`, text: l }));
+  });
+  (data.closer?.lines ?? []).forEach((l, i) => out.push({ at: `closer.lines.${i}`, text: l }));
+  if (data.closer?.cta) out.push({ at: 'closer.cta', text: data.closer.cta });
+  return out.filter((x) => x.text != null && String(x.text).trim());
+}
+
+/** The lines a line-level verdict actually objects to, with the reason. */
+export function offendingLines(data, verdict) {
+  const all = linesOf(data);
+  const want = [];
+  for (const f of verdict.failures) {
+    const quoted = /\("([^"]+)"\)/.exec(f)?.[1] ?? /says "([^"]+)"/.exec(f)?.[1];
+    for (const l of all) {
+      const hit = quoted
+        ? String(l.text).toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').includes(quoted.toLowerCase())
+        : false;
+      if (hit && !want.some((w) => w.at === l.at)) want.push({ ...l, why: f });
+    }
+  }
+  return want;
+}
+
+/** A small call that rewrites only the offending lines. Pure. */
+export function buildFixRequest({ spec, data, verdict, styleId }) {
+  const bad = offendingLines(data, verdict);
+  if (!bad.length) return null;
+  const system = `You rewrite single lines of carousel copy for a paid creator campaign.
+
+Return ONE JSON object and nothing else, shaped exactly like this:
+
+{ "fixes": { "<the id you were given>": "the rewritten line" } }
+
+Rules:
+- Rewrite ONLY the lines you are given. Same meaning, same length, same voice, same numbers.
+- The reason each one was rejected is given. Fix that reason and change nothing else.
+- A line rejected for repeating a reference post must not reuse any four words in a row from it.
+- No em dashes, no semicolons, no hashtags, at most one emoji, sentence case.`;
+  const user = [
+    `Product: ${spec.brand} — ${spec.product}`,
+    spec.niche ? `Niche: ${spec.niche}` : null,
+    '',
+    'Rewrite these lines:',
+    ...bad.map((b) => `- id "${b.at}"\n  line: ${b.text}\n  rejected because: ${b.why}`),
+  ].filter(Boolean).join('\n');
+  return { system, user, maxTokens: 700, ids: bad.map((b) => b.at) };
+}
+
+/** Put the rewritten lines back where they came from. Returns how many landed. */
+export function applyFixes(data, fixes) {
+  let n = 0;
+  for (const [at, text] of Object.entries(fixes ?? {})) {
+    if (typeof text !== 'string' || !text.trim()) continue;
+    const p = at.split('.');
+    try {
+      if (p[0] === 'hook' && (p[1] === 'lines' || p[1] === 'sub')) { data.hook[p[1]][+p[2]] = text; n++; }
+      else if (p[0] === 'ranked' && p[2] === 'name') { data.ranked[+p[1]].name = text; n++; }
+      else if (p[0] === 'ranked' && p[2] === 'lines') { data.ranked[+p[1]].lines[+p[3]] = text; n++; }
+      else if (p[0] === 'closer' && p[1] === 'lines') { data.closer.lines[+p[2]] = text; n++; }
+      else if (p[0] === 'closer' && p[1] === 'cta') { data.closer.cta = text; n++; }
+    } catch { /* a stale id: the line moved, leave it for the full retry */ }
+  }
+  return n;
+}
+
 /** Failures handed back verbatim - a general "try again" repeats the violation. */
 export const feedbackFor = (verdict) =>
   `\nYour previous attempt was REJECTED for these reasons. Fix every one:\n` + verdict.failures.map((f) => `- ${f}`).join('\n');
@@ -714,9 +801,22 @@ export async function generateContent({ root, spec, instruction, slideCount, sli
       system: req.system, user: req.user,
     });
     spent += usd;
-    const judged = judgeCopy({ spec, data, range: req.range, styleId: req.styleId });
+    let judged = judgeCopy({ spec, data, range: req.range, styleId: req.styleId });
     last = judged;
     if (judged.verdict.pass) return { content: judged.data, verdict: judged.verdict, usd: spent, attempts: i + 1, count: judged.count };
+    // only single lines are wrong: rewrite those instead of the whole set
+    if (lineFixable(judged.verdict)) {
+      const fix = buildFixRequest({ spec, data: judged.data, verdict: judged.verdict, styleId: req.styleId });
+      if (fix) {
+        const r = await completeJson({ root, model, label: `generate:${spec.id}:fix${i}`, maxTokens: fix.maxTokens, system: fix.system, user: fix.user });
+        spent += r.usd;
+        if (applyFixes(judged.data, r.data?.fixes)) {
+          judged = judgeCopy({ spec, data: judged.data, range: req.range, styleId: req.styleId });
+          last = judged;
+          if (judged.verdict.pass) return { content: judged.data, verdict: judged.verdict, usd: spent, attempts: i + 1, fixed: true, count: judged.count };
+        }
+      }
+    }
     feedback = feedbackFor(judged.verdict);
   }
 

@@ -7,7 +7,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { inspectPng, stripPng, assertClean } from '../engine/clean.mjs';
-import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable, liftedFrom } from '../engine/generate.mjs';
+import { slideRange, judgeCopy, EMOJI_RX, buildCopyRequest, BRAND_SPEAK, toRenderable, liftedFrom, lineFixable, offendingLines, buildFixRequest, applyFixes } from '../engine/generate.mjs';
 import { enforce, direct, SHOTS } from '../engine/scenes.mjs';
 import { systemFor } from '../engine/generate.mjs';
 import { planSet } from '../engine/art.mjs';
@@ -314,6 +314,50 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   // a set inside the range is untouched
   const ok8 = judgeCopy({ spec, data: five(), range: slideRange(spec, { min: 5, max: 8 }), styleId: 'feed' });
   ok(ok8.data.ranked.length === 3 && !ok8.verdict.repairs.some((r) => /dropped rather/.test(r)), 'a set already inside the range is not trimmed');
+}
+
+// 13. the three cost levers (2026-09-19): a one-word scene, low quality on wide frames, a line rewrite instead of a new set
+{
+  // A — the scene is one word: enforce() replaces every scene on the phone formats and reads
+  // only the shot word, so the clause was paid for and thrown away (18% of copy output)
+  for (const st of ['native', 'feed']) {
+    const sys = systemFor(st);
+    ok(/ONE word/.test(sys) && !/shot type then one clause/.test(sys), `${st}: the shape asks for a one-word scene`);
+  }
+  ok(/thrown away/.test(systemFor('native')), 'the rules say why a sentence is wasted');
+  // the rail format still writes real scenes: its frames ARE the model's scenes
+  ok(/cover photograph/.test(systemFor('rail')), 'rail keeps its written scenes');
+  // a one-word scene still steers the bank
+  const e1 = enforce(['outdoors', 'x', 'x', 'x', 'x', 'x'], { niche: 'fitness', seed: 't', headings: ['a', 'b', 'c', 'd'] });
+  ok(e1.scenes.length === 6, 'a one-word scene is accepted by the gym enforcer');
+
+  // B — wide, person-free frames drop to low
+  const sp = enforce(new Array(7).fill('x'), { niche: 'football', appIndex: 3, seed: 't' });
+  ok(Array.isArray(sp.wides) && sp.wides.length === 7, 'the enforcer reports which frames are wide');
+  ok(sp.wides.some(Boolean), `a football set draws at least one wide frame (${sp.shots.filter((_, i) => sp.wides[i]).join(', ') || 'none'})`);
+  const gym = enforce(new Array(7).fill('x'), { niche: 'fitness', appIndex: 3, seed: 't' });
+  ok(gym.wides.every((w) => !w), 'a gym set has no wide frames: every one is a person or a close object');
+  const life = enforce(new Array(7).fill('x'), { niche: 'skincare', appIndex: 3, seed: 't' });
+  ok(life.wides.every((w) => !w), 'a skin set has no wide frames either (the close shelf is where low quality fails)');
+  const plan = planSet({ subject: 'a man', scenes: sp.scenes, mode: 'subject', quality: 'medium', wides: sp.wides, id: 'p' });
+  const fr = plan.frames('/tmp/anchor.png');
+  const lows = fr.filter((f) => f.quality === 'low').length;
+  ok(lows > 0 && fr.every((f) => f.quality === 'low' || f.quality === undefined || f.quality === 'medium'), `${lows} frame(s) planned at low, the rest at medium`);
+  const noWides = planSet({ subject: 'a man', scenes: sp.scenes, mode: 'subject', quality: 'medium', id: 'p' });
+  ok(noWides.frames('/tmp/a.png').every((f) => f.quality !== 'low'), 'with no wide flags nothing drops a tier');
+
+  // C — a line-level verdict is fixed by rewriting the line, not the set
+  const v = { failures: ['slide 3 repeats a reference post word for word ("junk food before training"); the examples show the voice, not the words — say it your own way with your own numbers'] };
+  ok(lineFixable(v), 'a verdict made only of lift failures is line-fixable');
+  ok(!lineFixable({ failures: ['5 slides returned; the ask is exactly 4 (hook + 2 ranked + closer)'] }), 'a slide-count failure is not line-fixable');
+  ok(!lineFixable({ failures: [v.failures[0], '5 slides returned; the ask is exactly 4'] }), 'a mixed verdict falls back to a full retry');
+  const d = { hook: { lines: ['5 things'], sub: [] }, ranked: [{ name: 'a', lines: ['x'] }, { name: 'b', lines: ['junk food before training kills it'] }], closer: { lines: ['z'], cta: 'go' } };
+  const bad = offendingLines(d, v);
+  ok(bad.length === 1 && bad[0].at === 'ranked.1.lines.0', `the offending line is found by its text (${bad[0]?.at})`);
+  const req = buildFixRequest({ spec, data: d, verdict: v, styleId: 'feed' });
+  ok(req && req.maxTokens <= 700 && /ranked\.1\.lines\.0/.test(req.user) && /rejected because/.test(req.user), 'the fix request names the line and the reason, and is small');
+  ok(applyFixes(d, { 'ranked.1.lines.0': 'eating rubbish before a session ruins it' }) === 1 && d.ranked[1].lines[0] === 'eating rubbish before a session ruins it', 'a fix lands back on the exact line');
+  ok(applyFixes(d, { 'ranked.9.lines.0': 'nope' }) === 0, 'a stale id changes nothing');
 }
 
 console.log(failed ? `\n${failed} failed` : '\nall passed');

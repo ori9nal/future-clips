@@ -15,7 +15,7 @@
 import fs from 'node:fs';
 import { inspectPng } from './clean.mjs';
 import path from 'node:path';
-import { buildCopyRequest, judgeCopy, feedbackFor, toRenderable } from './generate.mjs';
+import { buildCopyRequest, judgeCopy, feedbackFor, toRenderable, lineFixable, buildFixRequest, applyFixes } from './generate.mjs';
 import { completeJson, extractJson } from './providers/claude.mjs';
 import * as claudeBatch from './providers/claude-batch.mjs';
 import { generate } from './providers/image.mjs';
@@ -61,7 +61,7 @@ async function copySubmit(s, { root, spec }) {
   if (s.lane === 'priority') {
     const { data, usd } = await completeJson({ root, model: s.model, label: `lane:${s.id}:copy${s.copy.attempts}`, maxTokens: req.maxTokens, system: req.system, user: req.user });
     s.copy.usd += usd; s.usd += usd;
-    return copyJudge(s, { spec, data });
+    return copyJudge(s, { root, spec, data });
   }
   const b = await claudeBatch.submitBatch(root, [{ customId: `${s.id}-copy-${s.copy.attempts}`.replace(/[^a-zA-Z0-9_-]/g, '-').slice(0, 64), model: s.model, system: req.system, user: req.user, maxTokens: req.maxTokens }]);
   s.copy.batchId = b.id;
@@ -84,11 +84,28 @@ async function copyWait(s, { root, spec }) {
     s.stage = 'copy:submit';
     return s;
   }
-  return copyJudge(s, { spec, data });
+  return copyJudge(s, { root, spec, data });
 }
 
-function copyJudge(s, { spec, data }) {
-  const judged = judgeCopy({ spec, data, range: s.copy.range, styleId: s.styleId });
+async function copyJudge(s, { root, spec, data }) {
+  let judged = judgeCopy({ spec, data, range: s.copy.range, styleId: s.styleId });
+  // Only single lines are wrong (a phrase that collided with a reference post,
+  // a brand word): rewrite those rather than pay for the whole set again. A
+  // fix call is ~200 output tokens against ~2,500 for a regeneration, and 7 of
+  // the 10 rejections across 36 rounds were exactly this (Product 2026-09-19).
+  if (!judged.verdict.pass && lineFixable(judged.verdict)) {
+    const fix = buildFixRequest({ spec, data: judged.data, verdict: judged.verdict, styleId: s.styleId });
+    if (fix) {
+      try {
+        const r = await completeJson({ root, model: s.model, label: `lane:${s.id}:fix${s.copy.attempts}`, maxTokens: fix.maxTokens, system: fix.system, user: fix.user });
+        s.copy.usd += r.usd; s.usd += r.usd;
+        if (applyFixes(judged.data, r.data?.fixes)) {
+          judged = judgeCopy({ spec, data: judged.data, range: s.copy.range, styleId: s.styleId });
+          if (judged.verdict.pass) note(s, `${fix.ids.length} line${fix.ids.length === 1 ? '' : 's'} rewritten for $${r.usd.toFixed(4)} instead of a new set`);
+        }
+      } catch { /* the fix call failed: fall through to a normal retry */ }
+    }
+  }
   s.copy.verdict = judged.verdict;
   s.copy.count = judged.count;
   if (!judged.verdict.pass) {
@@ -118,10 +135,10 @@ function artPlan(s, { spec, root }) {
   s.art.shots = d.shots;
   s.art.mode = d.mode;
   const appScreen = spec.assets?.app_screen ? path.join(root, spec.assets.app_screen) : null;
-  return planSet({ subject: d.subject, scenes: d.scenes, look: d.look, quality: s.quality, w: 1080, h: 1920, id: s.id, mode: d.mode, days: d.days, appScreen: appScreen && fs.existsSync(appScreen) ? appScreen : null });
+  return planSet({ subject: d.subject, scenes: d.scenes, look: d.look, quality: s.quality, w: 1080, h: 1920, id: s.id, mode: d.mode, days: d.days, wides: d.wides, appScreen: appScreen && fs.existsSync(appScreen) ? appScreen : null });
 }
 
-const withSize = (plan, f) => ({ ...f, size: plan.size, quality: plan.quality });
+const withSize = (plan, f) => ({ ...f, size: plan.size, quality: f.quality ?? plan.quality });
 
 /** Run `fn` over `items` with at most `n` in flight; results in input order. */
 async function pool(items, n, fn) {
