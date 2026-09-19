@@ -452,3 +452,20 @@ html[data-theme="dark"] {
 /* the brand panel sits under the composer, on the same column */
 .bkwrap { max-width: 620px; margin: 0 auto; }
 .mini.on { border-color: var(--accent-text); color: var(--text); background: var(--hover); }
+
+/* ── the styles page: one real cover per look ─────────────────────────────── */
+.looks { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; }
+.look { display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden; cursor: pointer;
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-card);
+  transition: transform .16s, border-color .16s; }
+.look:hover { border-color: var(--text-3); transform: translateY(-2px); }
+.look.on { border-color: var(--accent-text); box-shadow: inset 0 0 0 1px var(--accent-text); }
+.look img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top center; display: block; border-bottom: 1px solid var(--line); }
+.look .lk { padding: 13px 14px 15px; display: flex; flex-direction: column; gap: 6px; }
+.look .lh { display: flex; align-items: center; gap: 8px; }
+.look .lh b { font-family: var(--font-head); font-weight: 600; font-size: 15px; color: var(--text); }
+.look small { font-family: var(--font-mono); font-size: 10px; letter-spacing: .07em; text-transform: uppercase; color: var(--text-3); }
+.look p { font-size: 13px; color: var(--text-2); line-height: 1.45; }
+.look .tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 2px; }
+.look .tags .pill { font-size: 11px; font-weight: 400; }
+@media (max-width: 860px) { .looks { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; } .look p { display: none; } }

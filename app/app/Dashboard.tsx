@@ -15,6 +15,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { CleanSeal } from "@/components/CleanSeal";
 import { BrandKit } from "@/components/BrandKit";
+import { STYLE_CARDS, STYLE_IDS } from "@/lib/styles-manifest";
 import Link from "next/link";
 import type { Account } from "@/lib/account";
 import { planLabel, PLAN_LABELS } from "@/lib/plans";
@@ -35,7 +36,7 @@ type Spec = {
   references?: { url?: string | null; note?: string | null }[];
 };
 type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number; /** carousels this visitor has left today, and the daily allowance (R16); undefined when there is no limiter */ demoLeft?: number; demoPerVisitor?: number };
-type Page = "create" | "library" | "campaigns" | "insights" | "partners" | "settings";
+type Page = "create" | "library" | "campaigns" | "styles" | "insights" | "partners" | "settings";
 type Partners = { summary: AgencySummary; referred: ReferredOrg[]; commissions: Commission[] };
 type SetView = SetRow & { label?: string; urls?: string[] };
 type Theme = "light" | "dark";
@@ -44,7 +45,7 @@ const RMIN = 5, RMAX = 10;
 /** The agency "Refer and earn" page stays off the clipper's surface until DECISIONS.md enables it. */
 const REFER_ENABLED = process.env.NEXT_PUBLIC_FC_REFER === "1";
 const PRESETS: [string, number, number][] = [["Short", 5, 6], ["Standard", 6, 8], ["Long", 8, 10]];
-const TITLES: Record<Page, string> = { create: "Create", library: "Library", campaigns: "Campaigns", insights: "Insights", partners: "Refer and earn", settings: "Settings" };
+const TITLES: Record<Page, string> = { create: "Create", library: "Library", campaigns: "Campaigns", styles: "Styles", insights: "Insights", partners: "Refer and earn", settings: "Settings" };
 
 const I = {
   create: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14" /></svg>,
@@ -55,6 +56,7 @@ const I = {
   settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.7a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.7a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z" /></svg>,
   admin: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z" /></svg>,
   menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>,
+  styles: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="8" height="18" rx="2" /><rect x="13" y="3" width="8" height="10" rx="2" /><path d="M13 17h8" /></svg>,
   bolt: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11l-1 8.5L18.5 10.5H12z" /></svg>,
   send: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h13" /><path d="M12 5l7 7-7 7" /></svg>,
   slides: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="12" height="16" rx="2" /><path d="M18 7v10" /><path d="M21 9v6" /></svg>,
@@ -137,6 +139,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [tab, setTab] = useState<"acct" | "plan" | "gen">("acct");
   // the plan the visitor chose on the site, carried through sign-in (lib/login.ts)
   const [want, setWant] = useState<"solo" | "grind" | "agency" | null>(null);
+  // null means "whatever the brief says" — the campaign's own look, which is
+  // what a clipper wants until they have a reason to override it
+  const [look, setLook] = useState<string | null>(null);
   const [engineGone, setEngineGone] = useState(false);
   const taRef = useRef<HTMLTextAreaElement>(null);
   const viewRef = useRef<HTMLDivElement>(null);
@@ -149,6 +154,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       const t = document.documentElement.dataset.theme; if (t === "light" || t === "dark") setTheme(t);
       const r = localStorage.getItem("fc.range"); if (r) { const [a, b] = r.split(",").map(Number); if (a >= RMIN && b <= RMAX && a <= b) { setNMin(a); setNMax(b); } }
       const c = localStorage.getItem("fc.campaign"); if (c) { const s = specs.find((x) => x.id === c); if (s) setActive(s); }
+      const lk = localStorage.getItem("fc.look"); if (lk && STYLE_IDS.includes(lk)) setLook(lk);
     } catch { /* private mode */ }
     // deep links: /app?page=settings&tab=plan
     const q = new URLSearchParams(window.location.search);
@@ -171,6 +177,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   };
   useEffect(() => { try { localStorage.setItem("fc.range", `${nMin},${nMax}`); } catch { /* ignore */ } }, [nMin, nMax]);
   useEffect(() => { try { if (active) localStorage.setItem("fc.campaign", active.id); } catch { /* ignore */ } }, [active]);
+  useEffect(() => { try { if (look) localStorage.setItem("fc.look", look); else localStorage.removeItem("fc.look"); } catch { /* ignore */ } }, [look]);
   // the campaign list closes on Escape and on any press outside it
   useEffect(() => {
     if (!pop) return;
@@ -260,11 +267,11 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     setBusy(true); setErr(null);
     try {
       const r = await fetch("/api/sets", { method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ campaign: active.id, ask: topic, style: active.content?.style ?? "native", slides: nMin === nMax ? nMin : { min: nMin, max: nMax }, lane, hd }) });
+        body: JSON.stringify({ campaign: active.id, ask: topic, style: chosenStyle, slides: nMin === nMax ? nMin : { min: nMin, max: nMax }, lane, hd }) });
       const j = await r.json();
       if (!r.ok) { setErr(sentence(j, "Could not start the slideshow. Try again in a moment.")); return; }
       const row: SetView = {
-        id: j.id, org_id: "", campaign_id: active.id, style: active.content?.style ?? "native", ask: topic, slides: null, slides_min: nMin, slides_max: nMax,
+        id: j.id, org_id: "", campaign_id: active.id, style: chosenStyle, ask: topic, slides: null, slides_min: nMin, slides_max: nMax,
         reserved_slides: nMax, quality: hd ? "high" : "medium", lane, hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
         files_json: null, content_json: null, compliance_json: null, error: null, cancel_requested: false, created_at: new Date().toISOString(),
         started_at: null, finished_at: null, updated_at: new Date().toISOString(), label: j.started ? "Starting" : "In the queue",
@@ -329,6 +336,10 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const angles = demoN ? [] : (active?.guidance?.angles ?? []);
   const lo = Math.max(RMIN, active?.requirements?.min_slides ?? RMIN), hi = Math.min(RMAX, active?.requirements?.max_slides ?? RMAX);
   const rangeWord = nMin === nMax ? `${nMin} slides` : `${nMin} to ${nMax} slides`;
+  // the brief names a look; a clipper may override it for this workspace
+  const briefStyle = active?.content?.style && STYLE_IDS.includes(active.content.style) ? active.content.style : "native";
+  const chosenStyle = look ?? briefStyle;
+  const styleCard = STYLE_CARDS.find((c) => c.id === chosenStyle);
 
   const SetCard = ({ s, full }: { s: SetView; full: boolean }) => {
     const spec = specById[s.campaign_id];
@@ -452,7 +463,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           {I.logo}<span className="nm">futureclips</span>
         </button>
         <nav className="nav" aria-label="Main">
-          {(["create", "library", "campaigns", "insights"] as Page[]).map((id) => (
+          {(["create", "library", "campaigns", "styles", "insights"] as Page[]).map((id) => (
             <button key={id} className={page === id ? "on" : ""} onClick={() => go(id)} title={TITLES[id]}>{I[id]}<em>{TITLES[id]}</em></button>
           ))}
           {partners && REFER_ENABLED && <button className={page === "partners" ? "on" : ""} onClick={() => go("partners")} title="Refer and earn">{I.partners}<em>Refer</em></button>}
@@ -610,6 +621,10 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                         )}
                       </div>
 
+                      <button className="mini" onClick={() => go("styles")} title="Pick the look on the Styles page">
+                        <b>{styleCard ? styleCard.name : "Look"}</b>{look ? "yours" : "from the brief"}
+                      </button>
+
                       <button className={`mini${hd ? " on" : ""}`} disabled={!canHd} onClick={() => setHd(!hd)} aria-pressed={hd}
                         title={canHd ? (hdIncluded ? "Sharper frames, uses 3 slides each" : `Sharper frames, +$${account.plan.hd_per_slide_usd} a slide`) : "Comes with Pro and Studio"}>
                         <b>HD</b>{hd ? "on" : "off"}
@@ -676,6 +691,48 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                   ))}
                 </div>
                 {!filteredSpecs.length && <Empty title="No campaign matches" body="Try another word, or clear the search." />}
+              </>
+            )}
+
+            {/* ══ STYLES ══ */}
+            {page === "styles" && (
+              <>
+                <header>
+                  <div>
+                    <h1>Pick how it looks</h1>
+                    <p>Every cover below was made by this engine, not a mock-up. Your choice sticks until you change it{active ? `, and ${active.brand} asks for ${styleWord(briefStyle)} by default` : ""}.</p>
+                  </div>
+                  {look && <button className="btn" onClick={() => { setLook(null); say("Back to whatever the brief asks for"); }}>Use the brief&rsquo;s look</button>}
+                </header>
+
+                <div className="looks">
+                  {STYLE_CARDS.map((c) => {
+                    const on = chosenStyle === c.id;
+                    const fromBrief = !look && briefStyle === c.id;
+                    return (
+                      <button key={c.id} className={`look${on ? " on" : ""}`} aria-pressed={on}
+                        onClick={() => { setLook(c.id); say(`${c.name} it is`); }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={`/styles/${c.id}.webp`} alt={`A cover slide in the ${c.name} style`} loading="lazy" decoding="async" />
+                        <div className="lk">
+                          <div className="lh">
+                            <b>{c.name}</b>
+                            {on && <span className="pill lime">{fromBrief ? "from the brief" : "yours"}</span>}
+                          </div>
+                          <small>{c.word}</small>
+                          <p>{c.for}</p>
+                          <div className="tags">{c.niches.slice(0, 3).map((n) => <span key={n} className="pill">{n}</span>)}</div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <p className="hint">
+                  A style is the drawing, never the words &mdash; the copy is written to the brief either way, and the rules it
+                  must follow do not change with the look. Some briefs read better in one than another; the tags say which
+                  niches each was measured against.
+                </p>
               </>
             )}
 

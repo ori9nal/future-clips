@@ -26,6 +26,12 @@ import feed from './feed.mjs';
 
 export const STYLES = [feed, nativeStyle, mascot, bedrock, rail, clinical, editorial, documentStyle, poster, pastel];
 
+// What a customer may choose. Editorial and Mascot were retired by the owner
+// (2026-09-19): they stay above so a set already rendered in one still opens,
+// and byId() still finds them, but nothing offers them any more.
+export const RETIRED = new Set(['editorial', 'mascot']);
+export const pickable = () => STYLES.filter((s) => !RETIRED.has(s.id));
+
 export const byId = (id) => STYLES.find((s) => s.id === id) ?? null;
 
 /**
@@ -48,7 +54,7 @@ export function stylesFor(niche) {
   const famOf = (x) => Object.entries(family).find(([, list]) => list.includes(x))?.[0];
   const myFam = famOf(n);
 
-  return STYLES.map((s) => {
+  return pickable().map((s) => {
     let score = 0;
     if (s.niches.includes(n)) score += 100;
     if (myFam && s.niches.some((x) => famOf(x) === myFam)) score += 40;
