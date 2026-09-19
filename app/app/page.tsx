@@ -74,6 +74,12 @@ export default async function AppHome() {
         id: s.id, brand: s.brand, product: s.product, niche: s.niche,
         requirements: s.requirements, assets: { palette: s.assets?.palette }, content: { style: s.content?.style },
         guidance: (s as any).guidance,
+        // the three public slides a campaign shows before anyone has a plan
+        sample: (s as any).sample ?? null,
+        payout: s.payout ? { rate_usd: s.payout.rate_usd, budget_remaining_usd: s.payout.budget_remaining_usd, platforms: s.payout.platforms } : undefined,
+        client: (s as any).client, deliverables: (s as any).deliverables, references: (s as any).references,
+        rules: s.rules ? { banned_claims: s.rules.banned_claims, banned_topics: s.rules.banned_topics, tone: s.rules.tone, disclosure: s.rules.disclosure } : undefined,
+        advertiser: s.advertiser, agency: s.agency,
       }))}
       account={account}
       sets={sets}

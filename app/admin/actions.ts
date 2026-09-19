@@ -452,3 +452,19 @@ export async function revokeDevice(id: string) {
   if (error) throw new Error(`could not revoke that device: ${error.message}`);
   revalidatePath("/admin");
 }
+
+/**
+ * Make (or remake) a campaign's sample: three slides anyone can see before
+ * they have a plan.
+ *
+ * It queues one real set at the brief's own minimum — a three-slide set cannot
+ * pass compliance, since most briefs ask for five or six — and the worker
+ * publishes its first three frames when it lands (migration 0023).
+ */
+export async function makeSample(id: string) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.rpc("fc_queue_sample", { p_campaign: id });
+  if (error) throw new Error(`could not queue a sample for "${id}": ${error.message}`);
+  revalidatePath("/admin");
+}

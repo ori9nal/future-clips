@@ -85,6 +85,40 @@ async function openSets(sb: SupabaseClient, ids?: string[]): Promise<SetRow[]> {
  * Advance one set as far as it can go in this tick: a priority set runs to
  * the end; a batch set runs until it is waiting on a provider batch.
  */
+/**
+ * A campaign's sample: the first three slides of a finished sample set, copied
+ * into the public `samples` bucket and written onto the campaign row.
+ *
+ * Three slides, the same three for everyone, and public — a sample behind a
+ * signed URL is not a sample. The set itself stays private like any other;
+ * only these three frames are published (migration 0023).
+ */
+const SAMPLE_SLIDES = 3;
+
+async function publishSample(
+  sb: SupabaseClient,
+  campaignId: string,
+  setId: string,
+  files: string[],
+  caption: string | null,
+): Promise<void> {
+  const sharp = (await import("sharp")).default;
+  const urls: string[] = [];
+  for (const f of files.slice(0, SAMPLE_SLIDES)) {
+    // a card shows these at about 200px; a full-size PNG would make the
+    // campaigns page cost tens of megabytes to open
+    const webp = await sharp(fs.readFileSync(f)).resize(720).webp({ quality: 80 }).toBuffer();
+    const key = `${campaignId}/${path.basename(f).replace(/\.png$/, ".webp")}`;
+    const { error } = await sb.storage.from("samples").upload(key, webp, { contentType: "image/webp", upsert: true });
+    if (error) throw new Error(`sample upload ${key}: ${error.message}`);
+    urls.push(sb.storage.from("samples").getPublicUrl(key).data.publicUrl);
+  }
+  const { error } = await sb.from("campaigns")
+    .update({ sample: { urls, caption: caption ?? null, set_id: setId, at: new Date().toISOString() } })
+    .eq("id", campaignId);
+  if (error) throw new Error(`sample not recorded on ${campaignId}: ${error.message}`);
+}
+
 export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: any }): Promise<Tick> {
   const { lanes, image } = await engine();
   const { cacheDir, setsDir } = workDirs();
@@ -183,7 +217,8 @@ export async function tickSet(sb: SupabaseClient, row: SetRow & { state_json: an
     });
     if (error) throw error;
     await sb.from("sets").update({ state_json: { ...s, lock: 0, files: undefined } }).eq("id", row.id);
-    return { id: row.id, before, after: "done", ok: true, note: `${files.length} slides $${Number(s.usd).toFixed(4)}` };
+    if (row.is_sample) await publishSample(sb, row.campaign_id, row.id, s.files as string[], s.copy.content.caption);
+    return { id: row.id, before, after: "done", ok: true, note: `${files.length} slides $${Number(s.usd).toFixed(4)}${row.is_sample ? " (sample)" : ""}` };
   }
   if (s.stage === "failed") {
     await sb.rpc("fc_release_set", { p_set: row.id, p_error: String(s.error).slice(0, 500), p_cost: +Number(s.usd).toFixed(4) });

@@ -33,6 +33,8 @@ export type SetRow = {
   content_json: any;
   compliance_json: any;
   /** the logo, avatar, handle and note this set was made with (migration 0020) */
+  /** a campaign sample: rendered by us, its first three slides published (0023) */
+  is_sample?: boolean;
   instructions?: { logo_path?: string; avatar_path?: string; handle?: string; note?: string } | null;
   error: string | null;
   cancel_requested: boolean;
@@ -43,7 +45,7 @@ export type SetRow = {
 };
 
 export const SET_COLS =
-  "id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, instructions, error, cancel_requested, created_at, started_at, finished_at, updated_at";
+  "id, org_id, campaign_id, style, ask, slides, slides_min, slides_max, reserved_slides, quality, lane, hd, status, stage, caption, cost_usd, files_json, content_json, compliance_json, instructions, is_sample, error, cancel_requested, created_at, started_at, finished_at, updated_at";
 
 /** The gate's refusals, as the sentence the member sees. */
 const REASONS: Record<string, string> = {

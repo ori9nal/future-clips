@@ -30,7 +30,7 @@ export type CampaignRow = {
   updated_at: string;
 };
 
-const COLS = "id, org_id, kind, data, status, art_mode, photo_dir_available, updated_at";
+const COLS = "id, org_id, kind, data, status, art_mode, photo_dir_available, sample, updated_at";
 
 export async function listSpecs(sb: SupabaseClient, { liveOnly = false } = {}): Promise<(Spec & { org_id: string | null; status: string })[]> {
   let q = sb.from("campaigns").select(COLS).eq("kind", "spec");
@@ -38,7 +38,7 @@ export async function listSpecs(sb: SupabaseClient, { liveOnly = false } = {}): 
   const { data, error } = await q;
   if (error) throw error;
   return (data as CampaignRow[])
-    .map((r) => ({ ...(r.data as Spec), id: r.id, org_id: r.org_id, status: r.status }))
+    .map((r) => ({ ...(r.data as Spec), id: r.id, org_id: r.org_id, status: r.status, sample: (r as unknown as { sample?: unknown }).sample ?? null }))
     .sort((a, b) => String(a.brand).localeCompare(String(b.brand)));
 }
 

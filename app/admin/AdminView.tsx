@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { createCampaign, setBriefStatus, removeBrief, revokeDevice } from "./actions";
+import { createCampaign, setBriefStatus, removeBrief, revokeDevice, makeSample } from "./actions";
 import type { Viewer } from "@/lib/auth";
 
 /**
@@ -16,7 +16,7 @@ export type Fund = {
   anthropic_float: number; openai_float: number; float_days: number;
 };
 export type AdminDeviceRow = { id: string; label: string | null; agent: string | null; created_ip: string | null; created_at: string; last_seen_at: string | null; current?: boolean };
-export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number } };
+export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number }; sample?: { urls?: string[] } | null };
 export type AdminCampaign = { id: string; name: string; niche: string; brand: { handle?: string; colors: { ink: string; accents: Record<string, string> } }; rules: { min_slides: number; max_slides: number; zero_gen_mode?: boolean }; agency?: { code?: string } | null };
 
 const usd = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
@@ -166,7 +166,7 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, de
       <section className="fc-card">
         <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>
         <table className="fc-table">
-          <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Status</th><th /></tr></thead>
+          <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Sample</th><th>Status</th><th /></tr></thead>
           <tbody>
             {specs.map((s) => (
               <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
@@ -174,6 +174,17 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, de
                 <td>{s.niche}</td>
                 <td>{s.content?.style ?? "—"}</td>
                 <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {s.sample?.urls?.length
+                    ? <span className="fc-tag">{s.sample.urls.length} slides</span>
+                    : <span className="fc-note">none</span>}{" "}
+                  <form action={makeSample.bind(null, s.id)} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly || s.status !== "live"}
+                      title={s.status === "live" ? "Render three public slides for this brief" : "Only a live brief gets a sample"}>
+                      {s.sample?.urls?.length ? "Remake" : "Make"}
+                    </button>
+                  </form>
+                </td>
                 <td>{s.status}</td>
                 <td style={{ whiteSpace: "nowrap" }}>
                   <Link className="fc-btn" data-variant="ghost" data-size="sm" href={`/admin/briefs/${s.id}`}>Edit</Link>{" "}

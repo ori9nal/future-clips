@@ -29,6 +29,8 @@ type Spec = {
   assets?: { palette?: string[]; logo?: string | null };
   content?: { style?: string };
   guidance?: { angles?: string[]; hook_style?: string; notes?: string[] };
+  /** three public slides, the same three for everyone (migration 0023) */
+  sample?: { urls?: string[]; caption?: string | null } | null;
   payout?: { rate_usd?: number; max_payout_usd?: number; budget_remaining_usd?: number; review_days?: number; platforms?: string[] };
   rules?: { banned_claims?: string[]; banned_topics?: string[]; tone?: string; disclosure?: string };
   client?: { agency?: { name?: string }; advertiser?: { name?: string }; closes?: string | null };
@@ -674,12 +676,22 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
             {/* ══ CAMPAIGNS ══ */}
             {page === "campaigns" && (
               <>
-                <header><div><h1>Live campaigns</h1><p>Every brief you can write to. Pick one to start a slideshow.</p></div></header>
+                <header><div><h1>Live campaigns</h1><p>{paid
+                  ? "Every brief you can write to. Pick one to start a slideshow."
+                  : "Every brief, with three real slides each so you can see what one turns into. Choose a plan and the next one is yours."}</p></div></header>
                 <div className="search">{I.search}<input className="input" type="search" placeholder="Search by brand or niche" value={query} onChange={(e) => setQuery(e.target.value)} /></div>
                 <div className="cgrid">
                   {filteredSpecs.map((s) => (
                     <button key={s.id} className={`ccard${active?.id === s.id ? " on" : ""}`} onClick={() => { pickCamp(s); go("create"); }}>
                       <div className="ch"><span className="mark" style={{ background: swatch(s), color: readable(swatch(s)) }}>{initial(s.brand)}</span><span><b>{s.brand}</b><small>{s.product}</small></span></div>
+                      {s.sample?.urls?.length ? (
+                        <div className="sample" aria-label={`Three sample slides for ${s.brand}`}>
+                          {s.sample.urls.slice(0, 3).map((u, i) => (
+                            /* eslint-disable-next-line @next/next/no-img-element */
+                            <img key={u} src={u} alt={`Sample slide ${i + 1} of a ${s.brand} carousel`} loading="lazy" decoding="async" />
+                          ))}
+                        </div>
+                      ) : null}
                       <div className="tags">
                         <span className="pill">{s.niche}</span>
                         <span className="pill">{styleWord(s.content?.style ?? "native")}</span>
