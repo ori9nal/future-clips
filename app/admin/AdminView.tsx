@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { createCampaign, setBriefStatus, removeBrief, revokeDevice, makeSample } from "./actions";
+import { createCampaign, setBriefStatus, removeBrief, makeSample, endAdminSessions, resetAuthenticator } from "./actions";
 import type { Viewer } from "@/lib/auth";
 
 /**
@@ -15,22 +15,29 @@ export type Fund = {
   anthropic_day: number; openai_day: number;
   anthropic_float: number; openai_float: number; float_days: number;
 };
-export type AdminDeviceRow = { id: string; label: string | null; agent: string | null; created_ip: string | null; created_at: string; last_seen_at: string | null; current?: boolean };
+export type DemoActivity = {
+  madeToday: number; perDay: number; perVisitor: number;
+  spentThisMonth: number; budget: number;
+  recent: { id: string; campaign: string; ask: string; status: string; slides: number | null; cost: number | null; at: string }[];
+};
+export type AdminSession = { id: string; agent: string | null; ip: string | null; created_at: string; expires_at: string };
 export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number }; sample?: { urls?: string[] } | null };
 export type AdminCampaign = { id: string; name: string; niche: string; brand: { handle?: string; colors: { ink: string; accents: Record<string, string> } }; rules: { min_slides: number; max_slides: number; zero_gen_mode?: boolean }; agency?: { code?: string } | null };
 
 const usd = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function AdminView({ viewer, specs, campaigns, fund, engineOn, devices = [], gateOn = false, readOnly = false }: {
+export default function AdminView({ viewer, specs, campaigns, fund, engineOn, sessions = [], demo = null, unlockHours = 8, readOnly = false }: {
   viewer: Viewer;
   specs: AdminSpec[];
   campaigns: AdminCampaign[];
   fund: Fund | null;
   engineOn: boolean;
-  /** the devices this owner has trusted (migration 0022) */
-  devices?: AdminDeviceRow[];
-  /** whether the second factor is switched on for this host */
-  gateOn?: boolean;
+  /** admin sessions open right now for this owner (migration 0025) */
+  sessions?: AdminSession[];
+  /** what strangers have made in the shared demo workspace */
+  demo?: DemoActivity | null;
+  /** how long one code keeps admin open */
+  unlockHours?: number;
   /** the preview renders the same markup with the forms disabled */
   readOnly?: boolean;
 }) {
@@ -126,42 +133,69 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, de
       </section>
 
       <section className="fc-card">
-        <h2>Trusted devices <span className="fc-tag">{gateOn ? `${devices.length} of 5` : "not switched on"}</span></h2>
-        {gateOn ? (
-          <>
-            <table className="fc-table">
-              <thead><tr><th>Device</th><th>Browser</th><th>From</th><th>Trusted</th><th>Last seen</th><th /></tr></thead>
+        <h2>Admin access <span className="fc-tag">a code every time</span></h2>
+        <p className="fc-note">
+          Admin opens on a six-digit code from your authenticator and stays open on that browser for
+          {" "}{unlockHours} hours. The code is generated on your phone, so reaching your mailbox is not enough to
+          reach your campaigns, your fund or your customers. A code works once — one seen over your shoulder
+          cannot be used again inside its ninety seconds.
+        </p>
+        {sessions.length > 0 && (
+          <table className="fc-table" style={{ marginTop: 12 }}>
+            <thead><tr><th>Open since</th><th>Until</th><th>Browser</th><th>From</th></tr></thead>
+            <tbody>
+              {sessions.map((u) => (
+                <tr key={u.id}>
+                  <td>{new Date(u.created_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td>
+                  <td>{new Date(u.expires_at).toLocaleString("en-US", { hour: "numeric", minute: "2-digit" })}</td>
+                  <td>{u.agent ?? "—"}</td>
+                  <td className="fc-note">{u.ip ?? "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
+          <form action={endAdminSessions}>
+            <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>
+              Sign out of admin everywhere
+            </button>
+          </form>
+          <form action={resetAuthenticator}>
+            <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>
+              Set up a new authenticator
+            </button>
+          </form>
+        </div>
+      </section>
+
+      {demo && (
+        <section className="fc-card">
+          <h2>The demo <span className="fc-tag" data-tone={demo.madeToday >= demo.perDay ? "warn" : undefined}>{demo.madeToday} of {demo.perDay} today</span></h2>
+          <p className="fc-note">
+            Everyone you send the link to shares one workspace, so this is every carousel strangers have made
+            with it. Each visitor may make {demo.perVisitor} a day and the workspace {demo.perDay}; between them they
+            have spent {usd(demo.spentThisMonth)} of the {usd(demo.budget)} this month allows. When either runs out the
+            demo stops making anything until the cap resets — the examples stay on screen.
+          </p>
+          {demo.recent.length > 0 ? (
+            <table className="fc-table" style={{ marginTop: 12 }}>
+              <thead><tr><th>What they asked for</th><th>Campaign</th><th>Slides</th><th>Cost</th><th>When</th></tr></thead>
               <tbody>
-                {devices.map((d) => (
-                  <tr key={d.id}>
-                    <td><b>{d.label ?? "Unnamed"}</b>{d.current ? <span className="fc-tag" style={{ marginLeft: 8 }}>this one</span> : null}</td>
-                    <td>{d.agent ?? "—"}</td>
-                    <td className="fc-note">{d.created_ip ?? "—"}</td>
-                    <td>{new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
-                    <td>{d.last_seen_at ? new Date(d.last_seen_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
-                    <td style={{ whiteSpace: "nowrap" }}>
-                      <form action={revokeDevice.bind(null, d.id)} style={{ display: "inline" }}>
-                        <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>Revoke</button>
-                      </form>
-                    </td>
+                {demo.recent.map((r) => (
+                  <tr key={r.id} data-bad={r.status === "failed" ? "1" : undefined}>
+                    <td><b>{r.ask}</b></td>
+                    <td className="fc-note">{r.campaign}</td>
+                    <td>{r.slides ?? (r.status === "failed" ? "—" : "…")}</td>
+                    <td className="n">{r.cost === null ? "—" : usd(r.cost)}</td>
+                    <td className="fc-note">{new Date(r.at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td>
                   </tr>
                 ))}
-                {!devices.length && <tr><td colSpan={6} className="fc-note">No device is trusted yet.</td></tr>}
               </tbody>
             </table>
-            <p className="fc-note" style={{ marginTop: 10 }}>
-              Admin opens only on these devices. Each one was enrolled by typing the admin passphrase
-              (<code>FC_ADMIN_SECRET</code>) and holds an http-only cookie for three months; only the hash of that
-              cookie is stored. Revoking one sends it back to the passphrase on its next request.
-            </p>
-          </>
-        ) : (
-          <p className="fc-note">
-            <code>FC_ADMIN_SECRET</code> is not set on this host, so admin is open to every platform owner —
-            one factor, the mailbox. Set it in the host&rsquo;s environment and each device has to be trusted once.
-          </p>
-        )}
-      </section>
+          ) : <p className="fc-note" style={{ marginTop: 10 }}>Nobody has made anything with the demo yet.</p>}
+        </section>
+      )}
 
       <section className="fc-card">
         <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>

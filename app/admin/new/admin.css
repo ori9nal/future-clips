@@ -29,3 +29,12 @@
 .brief-asset-box em{color:var(--muted);font-size:.75rem;font-style:normal;letter-spacing:.1em;text-transform:uppercase}
 .brief-asset input[type=file]{font-size:.75rem;padding:.35rem}
 .brief-artwork{margin-top:1.6rem}
+.totp { display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start; margin-bottom: 16px; }
+.totp .qr { background: #fff; padding: 10px; border-radius: 10px; line-height: 0; flex: none; }
+.totp .qr svg { display: block; width: 176px; height: 176px; }
+.totp-help { flex: 1; min-width: 230px; font-size: .9rem; }
+.totp-help p { margin: 0 0 8px; }
+.setupkey { display: block; font-family: ui-monospace, monospace; font-size: 1rem; letter-spacing: .08em;
+  background: var(--ground); border: 1px solid var(--line); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px;
+  user-select: all; word-break: break-all; }
+.codebox { font-family: ui-monospace, monospace; font-size: 1.5rem; letter-spacing: .5em; text-align: center; max-width: 12ch; }

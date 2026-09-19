@@ -60,6 +60,13 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
           anthropic_usd: 41.17, openai_usd: 77.45, unsplit_usd: 0,
           anthropic_day: 1.37, openai_day: 2.58, anthropic_float: 41.1, openai_float: 77.4, float_days: 30,
         }}
+        demo={{
+          madeToday: 4, perDay: 15, perVisitor: 3, spentThisMonth: 1.48, budget: 15,
+          recent: [
+            { id: "d1", campaign: "apex-strength", ask: "the 3 gym habits that finally stuck for me", status: "done", slides: 5, cost: 0.3482, at: new Date(Date.now() - 42 * 60000).toISOString() },
+            { id: "d2", campaign: "northbound-trail", ask: "one thing i wish i packed", status: "done", slides: 6, cost: 0.27, at: new Date(Date.now() - 96 * 60000).toISOString() },
+          ],
+        }}
         specs={SPECS.map((c) => ({ id: c.id, brand: c.brand, niche: c.niche, status: "live", content: { style: (c as { content?: { style?: string } }).content?.style }, requirements: c.requirements }))}
         campaigns={[
           { id: "meridian-endurance", name: "Meridian Endurance", niche: "fitness", brand: { handle: "@meridian.endurance", colors: { ink: "#171512", accents: { rust: "#A8442A" } } }, rules: { min_slides: 5, max_slides: 10, zero_gen_mode: false }, agency: { code: "MERIDIAN25" } },

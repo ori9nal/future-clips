@@ -12,7 +12,7 @@ import "server-only";
  */
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { deviceTrusted } from "@/lib/adminDevice";
+import { adminUnlocked } from "@/lib/adminGate";
 
 export type Plan = "free" | "solo" | "grind" | "agency";
 
@@ -90,17 +90,19 @@ export async function requireViewer(): Promise<Viewer> {
 }
 
 /**
- * For /admin: a platform owner, on a device that has been trusted once.
+ * For /admin: a platform owner who has entered a code.
  *
- * Two factors. The first is the membership itself, which rests on a mailbox;
- * the second is the device cookie from migration 0022, which does not. Where
- * `FC_ADMIN_SECRET` is unset the second factor is off and this behaves as it
- * always did (lib/adminDevice.ts explains why it fails open there).
+ * Two factors. The first is the membership, which rests entirely on a mailbox;
+ * the second is a six-digit code from an authenticator, which does not
+ * (lib/adminGate.ts, migration 0025). Unlike the passphrase-and-trusted-device
+ * gate it replaced, this one asks every time — an unlock lasts hours.
  */
 export async function requirePlatformOwner(): Promise<Viewer> {
   const v = await requirePlatformOwnerOnly();
   const sb = await createClient();
-  if (!(await deviceTrusted(sb))) redirect("/admin/device");
+  // a code from an authenticator, every time — the unlock it buys lasts hours,
+  // not months, and nothing about it depends on the mailbox (migration 0025)
+  if (!(await adminUnlocked(sb))) redirect("/admin/unlock");
   return v;
 }
 

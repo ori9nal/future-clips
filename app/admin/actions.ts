@@ -5,7 +5,8 @@ import type { Spec } from "@/lib/specs";
 import { redirect } from "next/navigation";
 import { cookies, headers } from "next/headers";
 import { requirePlatformOwner, requirePlatformOwnerOnly } from "@/lib/auth";
-import { DEVICE_COOKIE, DEVICE_MAX_AGE, describeAgent, hashToken, newToken, passphraseMatches } from "@/lib/adminDevice";
+import { UNLOCK_COOKIE, UNLOCK_HOURS, hashToken, newToken } from "@/lib/adminGate";
+import { STEP_SECONDS, verifyCode } from "@/lib/totp";
 import { allow } from "@/lib/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import { type Campaign, emptyCampaign, slugify } from "@/lib/campaigns";
@@ -410,49 +411,6 @@ export async function uploadBriefAsset(id: string, fd: FormData) {
   revalidatePath(`/admin/briefs/${id}`);
 }
 
-/* ── trusted devices (migration 0022) ──────────────────────────────────── */
-
-/**
- * Trust the browser this form was submitted from.
- *
- * The passphrase is compared in constant time and never written anywhere; what
- * is stored is the SHA-256 of a fresh random token, and the token itself goes
- * back as an http-only cookie. Attempts are rate limited per IP, so the
- * passphrase cannot be ground down from the open internet.
- */
-export async function trustThisDevice(fd: FormData) {
-  await requirePlatformOwnerOnly();
-  const h = await headers();
-  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
-  if (!(await allow(`admindev:${ip}`, 8, 3600))) redirect("/admin/device?e=rate");
-  if (!passphraseMatches(String(fd.get("secret") ?? ""))) redirect("/admin/device?e=bad");
-
-  const token = newToken();
-  const sb = await createClient();
-  const { error } = await sb.rpc("fc_trust_device", {
-    p_hash: hashToken(token),
-    p_label: String(fd.get("label") ?? "").trim() || describeAgent(h.get("user-agent")),
-    p_agent: h.get("user-agent") ?? "",
-    p_ip: ip,
-  });
-  if (error) redirect(`/admin/device?e=${/TOO_MANY/.test(error.message) ? "many" : "err"}`);
-
-  (await cookies()).set(DEVICE_COOKIE, token, {
-    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",
-    path: "/", maxAge: DEVICE_MAX_AGE,
-  });
-  redirect("/admin");
-}
-
-/** Revoke a device. The next request from it lands back on the passphrase. */
-export async function revokeDevice(id: string) {
-  await requirePlatformOwner();
-  const sb = await createClient();
-  const { error } = await sb.from("admin_devices").update({ revoked_at: new Date().toISOString() }).eq("id", id);
-  if (error) throw new Error(`could not revoke that device: ${error.message}`);
-  revalidatePath("/admin");
-}
-
 /**
  * Make (or remake) a campaign's sample: three slides anyone can see before
  * they have a plan.
@@ -467,4 +425,65 @@ export async function makeSample(id: string) {
   const { error } = await sb.rpc("fc_queue_sample", { p_campaign: id });
   if (error) throw new Error(`could not queue a sample for "${id}": ${error.message}`);
   revalidatePath("/admin");
+}
+
+/* ── the code gate (migration 0025) ─────────────────────────────────────── */
+
+/**
+ * Check a code from the authenticator and open an unlock.
+ *
+ * The same action does enrolment and daily entry: the first correct code for a
+ * new secret confirms it, every code after that opens a session. The step the
+ * code belongs to is recorded, so the same code cannot be used twice inside
+ * its ninety seconds.
+ */
+export async function unlockAdmin(fd: FormData) {
+  await requirePlatformOwnerOnly();
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  if (!(await allow(`adminunlock:${ip}`, 10, 900))) redirect("/admin/unlock?e=rate");
+
+  const code = String(fd.get("code") ?? "").replace(/\D/g, "");
+  const sb = await createClient();
+  const { data: secret, error: se } = await sb.rpc("fc_totp_secret");
+  if (se || !secret) redirect("/admin/unlock?e=none");
+  if (!verifyCode(String(secret), code)) redirect("/admin/unlock?e=bad");
+
+  const token = newToken();
+  const { error } = await sb.rpc("fc_totp_unlock", {
+    p_step: Math.floor(Date.now() / 1000 / STEP_SECONDS),
+    p_hash: hashToken(token),
+    p_hours: UNLOCK_HOURS,
+    p_agent: h.get("user-agent") ?? "",
+    p_ip: ip,
+  });
+  if (error) redirect(`/admin/unlock?e=${/CODE_USED/.test(error.message) ? "used" : "err"}`);
+
+  (await cookies()).set(UNLOCK_COOKIE, token, {
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",
+    path: "/", maxAge: UNLOCK_HOURS * 3600,
+  });
+  redirect("/admin");
+}
+
+/** Start again with a new authenticator. Only possible from inside an unlock. */
+export async function resetAuthenticator() {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  await sb.from("admin_unlocks").update({ ended_at: new Date().toISOString() }).is("ended_at", null);
+  const admin = await createClient();
+  const { error } = await admin.rpc("fc_totp_reset");
+  if (error) throw new Error(`could not reset the authenticator: ${error.message}`);
+  (await cookies()).set(UNLOCK_COOKIE, "", { path: "/", maxAge: 0 });
+  redirect("/admin/unlock");
+}
+
+/** End every open admin session for this account, including this one. */
+export async function endAdminSessions() {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("admin_unlocks").update({ ended_at: new Date().toISOString() }).is("ended_at", null);
+  if (error) throw new Error(`could not end the sessions: ${error.message}`);
+  (await cookies()).set(UNLOCK_COOKIE, "", { path: "/", maxAge: 0 });
+  redirect("/admin/unlock");
 }

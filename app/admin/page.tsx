@@ -2,8 +2,9 @@ import { requirePlatformOwner } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { engineAvailable } from "@/lib/engine";
 import { listCampaigns, listSpecs } from "@/lib/db/campaigns";
-import AdminView, { type AdminCampaign, type AdminDeviceRow, type AdminSpec, type Fund } from "./AdminView";
-import { deviceGateOn, deviceToken, describeAgent, hashToken } from "@/lib/adminDevice";
+import AdminView, { type AdminCampaign, type AdminSession, type AdminSpec, type DemoActivity, type Fund } from "./AdminView";
+import { DEMO_LIMITS } from "@/lib/ratelimit";
+import { UNLOCK_HOURS, describeAgent } from "@/lib/adminGate";
 
 export const dynamic = "force-dynamic";
 
@@ -33,19 +34,38 @@ export default async function AdminHome() {
   const sb = await createClient();
   const [campaigns, specs, fund] = await Promise.all([listCampaigns(sb), listSpecs(sb), fundSummary(sb)]);
 
-  // the devices this owner has trusted, newest first, with the one being used marked
-  let devices: AdminDeviceRow[] = [];
-  if (deviceGateOn()) {
-    const here = await deviceToken();
-    const hash = here ? hashToken(here) : null;
-    const { data } = await sb.from("admin_devices")
-      .select("id, label, agent, created_ip, created_at, last_seen_at, token_sha256")
-      .is("revoked_at", null).order("created_at", { ascending: false });
-    devices = (data ?? []).map((d) => ({
-      id: d.id, label: d.label, agent: describeAgent(d.agent), created_ip: d.created_ip,
-      created_at: d.created_at, last_seen_at: d.last_seen_at,
-      current: !!hash && d.token_sha256 === hash,
-    }));
+  // the admin sessions open right now, newest first
+  const { data: rows } = await sb.from("admin_unlocks")
+    .select("id, agent, ip, created_at, expires_at")
+    .is("ended_at", null).gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+  const sessions: AdminSession[] = (rows ?? []).map((u) => ({ ...u, agent: describeAgent(u.agent) }));
+
+  // what the demo has been doing. Every visitor shares one workspace, so this
+  // is the whole picture: what strangers made, what it cost, what is left.
+  let demo: DemoActivity | null = null;
+  {
+    const { data: org } = await sb.from("orgs").select("id, spend_cap_usd").eq("is_demo", true).maybeSingle();
+    if (org) {
+      const dayAgo = new Date(Date.now() - 24 * 3600_000).toISOString();
+      const [{ data: recent }, { count }, { data: use }] = await Promise.all([
+        sb.from("sets").select("id, campaign_id, ask, status, slides, cost_usd, created_at")
+          .eq("org_id", org.id).order("created_at", { ascending: false }).limit(8),
+        sb.from("sets").select("id", { count: "exact", head: true }).eq("org_id", org.id).gt("created_at", dayAgo),
+        sb.from("usage").select("cogs_usd").eq("org_id", org.id).order("period_start", { ascending: false }).limit(1).maybeSingle(),
+      ]);
+      demo = {
+        madeToday: count ?? 0,
+        perDay: DEMO_LIMITS.perDay,
+        perVisitor: DEMO_LIMITS.perVisitor,
+        spentThisMonth: Number(use?.cogs_usd ?? 0),
+        budget: Number(org.spend_cap_usd ?? 0),
+        recent: (recent ?? []).map((r) => ({
+          id: r.id, campaign: r.campaign_id, ask: r.ask, status: r.status,
+          slides: r.slides, cost: r.cost_usd === null ? null : Number(r.cost_usd), at: r.created_at,
+        })),
+      };
+    }
   }
 
   return (
@@ -55,8 +75,9 @@ export default async function AdminHome() {
       campaigns={campaigns as unknown as AdminCampaign[]}
       fund={fund}
       engineOn={engineAvailable()}
-      devices={devices}
-      gateOn={deviceGateOn()}
+      sessions={sessions}
+      demo={demo}
+      unlockHours={UNLOCK_HOURS}
     />
   );
 }
