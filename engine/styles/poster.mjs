@@ -11,8 +11,8 @@
 import { rect, text, stack, paragraph, aside, list, grain, FACES } from './kit.mjs';
 import { loadFace } from '../fonts.mjs';
 import { layoutWidth } from '../fit-text.mjs';
-
 import { handle as creatorHandle } from '../creator.mjs';
+
 /**
  * Set each line at its own size so every line spans the full measure.
  * A single fitted size leaves short lines floating; per-line sizing is what
