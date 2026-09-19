@@ -278,6 +278,10 @@ ok(/between 6 and 8 slides/.test(req.user) && /2-3 emojis/.test(req.user), 'requ
   // the numbers rule is off for fashion, sport and life; on for everyday
   const nonum = { hook: { lines: ['7 fashion mistakes'], sub: [] }, ranked: [{ name: 'a', lines: ['wrinkles read careless'] }, { name: 'b', lines: ['loud logos look tacky'] }, { name: 'Bonus', lines: ['the app builds combos'], showsApp: true }, { name: 'd', lines: ['tailoring is everything'] }], closer: { lines: ['5. carry yourself well'], cta: 'follow for more' }, caption: 'x 👗 ✨', bio: '', hashtags: [] };
   ok(!judgeCopy({ spec: fspec, data: JSON.parse(JSON.stringify(nonum)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /carry a number/.test(f)), 'fashion items need no numbers (0 of 20 reference items carry one)');
+  // F31: a reference heading reused word for word (three words never form a 4-gram)
+  const lifted = { ...nonum, ranked: nonum.ranked.map((x, i) => (i === 0 ? { ...x, name: '1. Wearing wrinkled clothes.' } : x)) };
+  ok(judgeCopy({ spec: fspec, data: JSON.parse(JSON.stringify(lifted)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /reference post's own heading/.test(f)), 'a reference post\'s heading on an item is rejected (F31)');
+  ok(!judgeCopy({ spec: fspec, data: JSON.parse(JSON.stringify(nonum)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /own heading/.test(f)), 'an original heading passes');
   ok(judgeCopy({ spec: { ...fspec, niche: 'personal finance' }, data: JSON.parse(JSON.stringify(nonum)), range: slideRange(fspec, 6), styleId: 'feed' }).verdict.failures.some((f) => /carry a number/.test(f)), 'everyday items still need numbers');
   // toRenderable: the card slide, the closer as item N
   const r = toRenderable(fspec, JSON.parse(JSON.stringify(nonum)), { appScreen: 'x.png' });

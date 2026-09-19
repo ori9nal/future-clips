@@ -442,6 +442,21 @@ const EXAMPLE_GRAMS = (() => {
 })();
 /** The first 4-word run `text` shares with a reference example, or null. */
 export const liftedFrom = (text) => grams4(words(text)).find((g) => EXAMPLE_GRAMS.has(g)) ?? null;
+/**
+ * F31 (round 27, 2026-09-18): the fashion set came back with the reference's
+ * item headings word for word — "Wearing wrinkled clothes", "Over-accessorizing",
+ * "Too much branding" — because a three-word heading never forms a 4-gram.
+ * Every numbered heading quoted in the directions ("1. Sleeping late every
+ * night", "2. Keep your hair neat.") is a fingerprint of its own; a ranked
+ * item named exactly the same is rejected.
+ */
+const EXAMPLE_HEADS = (() => {
+  const all = new Set();
+  for (const text of Object.values(SCENE_DIRECTION)) for (const m of text.matchAll(/["„]\s*\d+\.\s*([^"/]+?)(?:\s*\/|\.\s|"|$)/g)) { const w = words(m[1]).join(' '); if (w.split(' ').length >= 2) all.add(w); }
+  return all;
+})();
+/** True when a ranked heading is one of the quoted example headings verbatim. */
+export const liftedHeading = (name) => { const w = words(String(name ?? '').replace(/^\s*(?:no\.?|#)?\s*\d+\s*[.:\-–—]\s*/i, '')).join(' '); return w && EXAMPLE_HEADS.has(w) ? w : null; };
 const FOOD_NICHE = /food|meal|nutrition|kitchen|cook|recipe|diet/i;
 
 /**
@@ -593,6 +608,10 @@ export function judgeCopy({ spec, data, range, styleId }) {
       const g = liftedFrom(sl.text);
       if (g) verdict.failures.push(`slide ${sl.index} repeats a reference post word for word ("${g}"); the examples show the voice, not the words — say it your own way with your own numbers`);
     }
+    (data.ranked ?? []).forEach((r, i) => {
+      const h = liftedHeading(r.name);
+      if (h) verdict.failures.push(`slide ${i + 2} is headed "${r.name}", a reference post's own heading; name the mistake or the habit in your own words`);
+    });
   }
   if (phone) {
     // brand-speak on any slide

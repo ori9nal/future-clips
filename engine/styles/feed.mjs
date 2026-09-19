@@ -60,7 +60,8 @@ const SIZE = 1.4;
 const SOFT_SIZES = {
   sport:    { head: 48, body: 36 },
   fashion:  { head: 38, body: 31 },
-  life:     { head: 42, body: 34 },
+  // the Poky family (§3.6) runs 3–8 lines a slide in a 44–48 px band; round 29 at 42/34 read small beside it
+  life:     { head: 46, body: 40 },
   everyday: { head: 42, body: 34 },
 };
 const SOFT_DEFS = '<defs><filter id="softsh" x="-10%" y="-40%" width="120%" height="180%">' +
@@ -159,8 +160,9 @@ export default {
     const softPx = (kind) => (kind === 'hook' ? Math.round(SZ.head * 1.12) : kind === 'body' ? SZ.body : kind === 'cta' ? Math.round(SZ.body * 0.92) : SZ.head);
     /** One soft block: centred lines under a drop shadow, no outline. `dry` measures only. */
     const softCaption = (lines, cy, { kind = 'head', fill = '#FFFFFF', lh = 1.32, dry = false } = {}) => {
-      // the fashion references run the body a weight lighter than the heading
-      const key = kind === 'body' || kind === 'cta' ? (family === 'fashion' ? 'phoneMed' : BODY) : HEAD;
+      // the fashion references run the body a weight lighter than the heading;
+      // the football references run the heading a weight heavier (TikTok Classic bold)
+      const key = kind === 'body' || kind === 'cta' ? (family === 'fashion' ? 'phoneMed' : BODY) : (family === 'sport' && HEAD === 'phoneSemi' ? 'phoneBold' : HEAD);
       const f = FACES[key];
       const ff = loadFace(f.file);
       const size = softPx(kind);

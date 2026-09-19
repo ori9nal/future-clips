@@ -430,15 +430,17 @@ BANK.fashion = [
 BANK.life = [
   { kind: 'bathroom', scene: () => 'Mirror selfie in a small bathroom: hair tied up, a plain t-shirt, the phone held at chin height, the sink and a few bottles on the shelf, front-camera softness' },
   { kind: 'car',      scene: () => 'Selfie in the front seat of a parked car in daylight, seatbelt on, sunglasses pushed up, looking slightly off the lens, the window and the street behind' },
-  { kind: 'bed',      scene: () => 'Lying in bed in the morning, the phone held above her face, pyjamas, the duvet and a pillow filling the frame, soft window light' },
+  // round 28 (2026-09-19): the image API's safety filter refused the beach anchor (a woman, a towel, midday) as
+  // [sexual]; every life frame now names ordinary clothes outright and the beach is a walk on the sand, dressed
+  { kind: 'bed',      scene: () => 'Sat up in bed in the morning in an oversized grey t-shirt, the phone held up, the duvet over her legs, a pillow and a lamp behind, soft window light' },
   { kind: 'hallway',  scene: () => 'Mirror selfie in a hallway in a cap and a scarf, the phone covering part of the face, a coat rack behind' },
   { kind: 'plate',    scene: () => 'A plate of fried eggs, toast, blackberries and sliced cucumber on a kitchen table, shot from above at a slight angle, a fork beside it, nobody in the frame' },
   { kind: 'shelf',    scene: () => 'A cluttered bathroom shelf: a cleanser, a moisturiser tube, a hair tie and a toothbrush cup, shot on a phone with the flash on, nobody in the frame' },
   { kind: 'work',     scene: () => 'Selfie at work in scrubs or a plain uniform, in a break room, the phone held low, looking at the screen not the lens' },
   { kind: 'walk',     scene: () => 'Looking down at her own trainers on a pavement mid-walk, a water bottle in the other hand, no face' },
-  { kind: 'beach',    scene: () => 'A selfie on a beach in sunglasses, hair blown across the face, the sea and a towel behind, hard midday light' },
+  { kind: 'beach',    scene: () => 'A selfie on a windy beach walk in a hoodie and sunglasses, hair blown across the face, the sea and a dog walker behind, hard midday light' },
   { kind: 'kitchen',  scene: () => 'Standing at a kitchen counter in a hoodie making a smoothie, shot by a flatmate from the doorway, back mostly to the camera' },
-  { kind: 'scale',    scene: () => 'Looking down at her own feet on a bathroom scale on a tiled floor, pyjama bottoms, no face' },
+  { kind: 'scale',    scene: () => 'Looking down at her own socked feet on a bathroom scale on a tiled floor, grey jogging bottoms, no face' },
   { kind: 'sofa',     scene: () => 'Curled up on a sofa under a blanket looking at her phone, shot from the side by a friend, a mug on the table, a lamp on' },
 ];
 
@@ -730,7 +732,7 @@ function enforceFood(scenes, { appIndex, seed, world }) {
 const FAMILY_HOOKS = {
   sport:    [['back', 'run', 'dribble', 'boots'], ['boots', 'back', 'stands'], ['run', 'tunnel', 'back']],
   fashion:  [['street', 'crossing', 'mirror'], ['mirror', 'street', 'cafe'], ['cafe', 'street', 'mirror']],
-  life:     [['bathroom', 'car', 'beach'], ['car', 'bathroom', 'bed'], ['beach', 'bathroom', 'car']],
+  life:     [['bathroom', 'car', 'hallway'], ['car', 'bathroom', 'bed'], ['bathroom', 'hallway', 'car']],
   everyday: [['desk', 'street', 'phone'], ['phone', 'cafe', 'desk'], ['street', 'desk', 'notes']],
 };
 const FAMILY_APP = { sport: ['night', 'gym', 'cones'], fashion: ['boutique', 'vanity', 'flatlay'], life: ['shelf', 'plate', 'bed'], everyday: ['desk', 'cafe', 'notes'] };
