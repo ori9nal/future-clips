@@ -323,3 +323,7 @@ button, input, select, textarea { font: inherit; }
 .fc-mono { font-family: inherit; font-size: 12px; }
 .fc-btn[data-size="sm"] { padding: 6px 12px; font-size: 12px; height: auto; }
 .fc-card[data-tone="warn"] { border-color: transparent; background: var(--warn-soft, #FFF4D6); }
+
+/* Google's sign-in button: their mark, their spacing, never recoloured */
+.fc-btn.fc-google { gap: 12px; font-weight: 500; }
+.fc-btn.fc-google svg { flex: none; }

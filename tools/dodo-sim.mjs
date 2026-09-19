@@ -20,9 +20,11 @@ if (!SECRET) { console.error('set DODO_WEBHOOK_SECRET (whsec_ + base64) to the s
 const KEY = Buffer.from(SECRET.replace(/^whsec_/, ''), 'base64');
 
 const PRODUCTS = {
-  pdt_sim_solo:   { name: 'Clipper',    cents: 1600,  kind: 'plan', slides: 200 },
-  pdt_sim_grind:  { name: 'Pro',        cents: 3200,  kind: 'plan', slides: 500 },
-  pdt_sim_agency: { name: 'Studio',     cents: 7900,  kind: 'plan', slides: 1500 },
+  // the shipped monthly prices and allowances (D-048); the yearly rate is a
+  // separate product in the live business
+  pdt_sim_solo:   { name: 'Clipper',    cents: 1999,  kind: 'plan', slides: 200 },
+  pdt_sim_grind:  { name: 'Pro',        cents: 4999,  kind: 'plan', slides: 400 },
+  pdt_sim_agency: { name: 'Studio',     cents: 9999,  kind: 'plan', slides: 1000 },
   pdt_sim_p100:   { name: '100 slides', cents: 800,   kind: 'pack' },
   pdt_sim_p250:   { name: '250 slides', cents: 1800,  kind: 'pack' },
   pdt_sim_p600:   { name: '600 slides', cents: 4000,  kind: 'pack' },
