@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { createCampaign, setBriefStatus, removeBrief } from "./actions";
+import { createCampaign, setBriefStatus, removeBrief, revokeDevice } from "./actions";
 import type { Viewer } from "@/lib/auth";
 
 /**
@@ -15,17 +15,22 @@ export type Fund = {
   anthropic_day: number; openai_day: number;
   anthropic_float: number; openai_float: number; float_days: number;
 };
+export type AdminDeviceRow = { id: string; label: string | null; agent: string | null; created_ip: string | null; created_at: string; last_seen_at: string | null; current?: boolean };
 export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number } };
 export type AdminCampaign = { id: string; name: string; niche: string; brand: { handle?: string; colors: { ink: string; accents: Record<string, string> } }; rules: { min_slides: number; max_slides: number; zero_gen_mode?: boolean }; agency?: { code?: string } | null };
 
 const usd = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function AdminView({ viewer, specs, campaigns, fund, engineOn, readOnly = false }: {
+export default function AdminView({ viewer, specs, campaigns, fund, engineOn, devices = [], gateOn = false, readOnly = false }: {
   viewer: Viewer;
   specs: AdminSpec[];
   campaigns: AdminCampaign[];
   fund: Fund | null;
   engineOn: boolean;
+  /** the devices this owner has trusted (migration 0022) */
+  devices?: AdminDeviceRow[];
+  /** whether the second factor is switched on for this host */
+  gateOn?: boolean;
   /** the preview renders the same markup with the forms disabled */
   readOnly?: boolean;
 }) {
@@ -62,6 +67,25 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, re
                 </tr>
               </tbody>
             </table>
+            {(() => {
+              // A day of burn across both providers turns the balance into the
+              // only number that answers "when do I have to act": days of
+              // rendering the earmark still covers.
+              const day = (fund.anthropic_day ?? 0) + (fund.openai_day ?? 0);
+              if (day <= 0) return null;
+              const days = Math.floor(fund.balance_usd / day);
+              const tone = days < 7 ? "danger" : days < 21 ? "warn" : "ok";
+              return (
+                <p className={`fc-note`} style={{ marginTop: 12 }}>
+                  <span className="fc-tag" data-tone={tone}>{days} days of runway</span>{" "}
+                  at {usd(day)} a day across both providers. {days < 7
+                    ? "Top both consoles up now — rendering stops when either account empties."
+                    : days < 21
+                      ? "Worth topping up on your next billing day."
+                      : "No action needed."}
+                </p>
+              );
+            })()}
             <div className="fc-grid" style={{ marginTop: 14 }}>
               {[
                 { name: "Anthropic", what: "writes the copy", spent: fund.anthropic_usd, day: fund.anthropic_day, float: fund.anthropic_float, href: "https://console.anthropic.com/settings/billing" },
@@ -98,6 +122,44 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, re
           </>
         ) : (
           <p className="fc-note">The fund appears after the first Dodo payment (migration 0012, webhook <code>payment.succeeded</code>).</p>
+        )}
+      </section>
+
+      <section className="fc-card">
+        <h2>Trusted devices <span className="fc-tag">{gateOn ? `${devices.length} of 5` : "not switched on"}</span></h2>
+        {gateOn ? (
+          <>
+            <table className="fc-table">
+              <thead><tr><th>Device</th><th>Browser</th><th>From</th><th>Trusted</th><th>Last seen</th><th /></tr></thead>
+              <tbody>
+                {devices.map((d) => (
+                  <tr key={d.id}>
+                    <td><b>{d.label ?? "Unnamed"}</b>{d.current ? <span className="fc-tag" style={{ marginLeft: 8 }}>this one</span> : null}</td>
+                    <td>{d.agent ?? "—"}</td>
+                    <td className="fc-note">{d.created_ip ?? "—"}</td>
+                    <td>{new Date(d.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</td>
+                    <td>{d.last_seen_at ? new Date(d.last_seen_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }) : "—"}</td>
+                    <td style={{ whiteSpace: "nowrap" }}>
+                      <form action={revokeDevice.bind(null, d.id)} style={{ display: "inline" }}>
+                        <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>Revoke</button>
+                      </form>
+                    </td>
+                  </tr>
+                ))}
+                {!devices.length && <tr><td colSpan={6} className="fc-note">No device is trusted yet.</td></tr>}
+              </tbody>
+            </table>
+            <p className="fc-note" style={{ marginTop: 10 }}>
+              Admin opens only on these devices. Each one was enrolled by typing the admin passphrase
+              (<code>FC_ADMIN_SECRET</code>) and holds an http-only cookie for three months; only the hash of that
+              cookie is stored. Revoking one sends it back to the passphrase on its next request.
+            </p>
+          </>
+        ) : (
+          <p className="fc-note">
+            <code>FC_ADMIN_SECRET</code> is not set on this host, so admin is open to every platform owner —
+            one factor, the mailbox. Set it in the host&rsquo;s environment and each device has to be trusted once.
+          </p>
         )}
       </section>
 

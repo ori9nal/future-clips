@@ -55,6 +55,17 @@ const I = {
   settings: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14 3h-4l-.5 2.7a7 7 0 0 0-2 1.2l-2.4-1-2 3.4 2 1.5A7 7 0 0 0 5 12c0 .4 0 .8.1 1.2l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2L10 21h4l.5-2.7a7 7 0 0 0 2-1.2l2.4 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z" /></svg>,
   admin: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z" /></svg>,
   menu: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="M4 7h16M4 12h16M4 17h16" /></svg>,
+  bolt: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L4.5 13.5H11l-1 8.5L18.5 10.5H12z" /></svg>,
+  send: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h13" /><path d="M12 5l7 7-7 7" /></svg>,
+  slides: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><rect x="3" y="4" width="12" height="16" rx="2" /><path d="M18 7v10" /><path d="M21 9v6" /></svg>,
+  theme: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>,
+  logo: (
+    <svg viewBox="0 0 92 64" aria-hidden>
+      <rect x="0" y="21" width="55" height="39" rx="7" fill="var(--logo-1)" />
+      <rect x="14" y="12" width="55" height="39" rx="7" fill="var(--logo-2)" />
+      <rect x="31" y="2" width="55" height="39" rx="7" fill="var(--logo-3)" />
+    </svg>
+  ),
   chev: <svg viewBox="0 0 12 8" width="12" height="8"><path d="M1 1.5l5 5 5-5" stroke="currentColor" strokeWidth="1.6" fill="none" strokeLinecap="round" /></svg>,
   search: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><path d="M20 20l-3.5-3.5" /></svg>,
   down: <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 4v11M7 10l5 5 5-5M4 19h16" /></svg>,
@@ -116,7 +127,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [nMax, setNMax] = useState(8);
   const [lane, setLane] = useState<Lane>("batch");
   const [hd, setHd] = useState(false);
-  const [pop, setPop] = useState<"camp" | null>(null);
+  const [pop, setPop] = useState<"camp" | "slides" | "lane" | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToastText] = useState<string | null>(null);
@@ -318,7 +329,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const angles = demoN ? [] : (active?.guidance?.angles ?? []);
   const lo = Math.max(RMIN, active?.requirements?.min_slides ?? RMIN), hi = Math.min(RMAX, active?.requirements?.max_slides ?? RMAX);
   const rangeWord = nMin === nMax ? `${nMin} slides` : `${nMin} to ${nMax} slides`;
-  const usedPct = account.cap.batch ? Math.min(100, Math.round((account.usage.slides_used / account.cap.batch) * 100)) : 0;
 
   const SetCard = ({ s, full }: { s: SetView; full: boolean }) => {
     const spec = specById[s.campaign_id];
@@ -438,41 +448,46 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     <div className={`app${menu ? " menu" : ""}`}>
       <button className="sideScrim" aria-label="Close menu" onClick={() => setMenu(false)} />
       <aside className="side">
-        <button className="ws" onClick={() => go("settings")} title="Workspace settings">
-          <span className="mark">{initial(viewer.orgName)}</span>
-          <span className="name">{viewer.orgName}</span>
-          <span className="plan">{label}</span>
+        <button className="slogo" onClick={() => go("create")} aria-label="Future Clips">
+          {I.logo}<span className="nm">futureclips</span>
         </button>
         <nav className="nav" aria-label="Main">
           {(["create", "library", "campaigns", "insights"] as Page[]).map((id) => (
-            <button key={id} className={page === id ? "on" : ""} onClick={() => go(id)}>{I[id]}{TITLES[id]}</button>
+            <button key={id} className={page === id ? "on" : ""} onClick={() => go(id)} title={TITLES[id]}>{I[id]}<em>{TITLES[id]}</em></button>
           ))}
-          {partners && REFER_ENABLED && <button className={page === "partners" ? "on" : ""} onClick={() => go("partners")}>{I.partners}Refer and earn</button>}
+          {partners && REFER_ENABLED && <button className={page === "partners" ? "on" : ""} onClick={() => go("partners")} title="Refer and earn">{I.partners}<em>Refer</em></button>}
         </nav>
+        <div className="gap" />
         <div className="foot nav">
-          {viewer.isPlatformOwner && <Link href="/admin">{I.admin}Admin</Link>}
-          <button className={page === "settings" ? "on" : ""} onClick={() => go("settings")}>{I.settings}Settings</button>
-          <div className="themeRow"><span>Dark theme</span><button className={`sw${theme === "dark" ? " on" : ""}`} role="switch" aria-checked={theme === "dark"} aria-label="Dark theme" onClick={() => applyTheme(theme === "dark" ? "light" : "dark")} /></div>
+          {viewer.isPlatformOwner && <Link href="/admin" title="Admin">{I.admin}<em>Admin</em></Link>}
+          <button onClick={() => applyTheme(theme === "dark" ? "light" : "dark")} title={theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme"} aria-label={theme === "dark" ? "Switch to the light theme" : "Switch to the dark theme"}>{I.theme}<em>Theme</em></button>
+          <button className={page === "settings" ? "on" : ""} onClick={() => go("settings")} title="Settings">{I.settings}<em>Settings</em></button>
         </div>
+        <div className="sdiv" />
+        <button className="ws" onClick={() => go("settings")} title="Workspace settings">
+          <span className="mark">{initial(viewer.orgName)}</span>
+          <span className="who"><b>{viewer.orgName}</b><small>{label}</small></span>
+        </button>
       </aside>
 
       <div className="main">
         <header className="top">
-          <button className="btn quiet burger" onClick={() => setMenu(true)} aria-label="Menu">{I.menu}</button>
+          {/* one control: it widens the rail on a desktop and opens it on a phone */}
+          <button className="burger" onClick={() => setMenu(!menu)} aria-label={menu ? "Collapse the menu" : "Expand the menu"} aria-expanded={menu}>{I.menu}</button>
           <h1>{TITLES[page]}</h1>
           <span className="grow" />
           {demoN ? (
             // the demo does not spend the org's allowance and the visitor cannot move it,
             // so the header says what the demo gives instead of a meter (Product, 2026-09-19).
-            // The three-a-day cap lives in the rate limiter; R16 asks for the live count.
-            <div className="meter demo">
-              <div className="row"><span>Demo</span><b className="num">{demoN} slides a carousel, up to 3 a day</b></div>
-            </div>
+            <span className="cred">{I.bolt}<b>{demoN}</b> slides a carousel, 3 a day</span>
           ) : paid ? (
-            <div className="meter" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
-              <div className="row"><span>Slides left</span><b className="num">{account.left.batch}{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}{canPriority ? <span className="prio">, {account.left.priority} priority</span> : null}</b></div>
-              <div className="bar"><i style={{ width: `${100 - usedPct}%` }} /></div>
-            </div>
+            <>
+              <span className="cred" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
+                {I.bolt}<b>{account.left.batch}</b>{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}
+                {canPriority ? <span className="prio">· {account.left.priority} priority</span> : null}
+              </span>
+              <button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Add slides</button>
+            </>
           ) : <button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button>}
         </header>
 
@@ -490,84 +505,138 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
                 )}
-                <section className="composer" aria-label="Make a slideshow">
-                  <div className="field campaignSel">
-                    <span className="label">Campaign</span>
-                    <button className="campaignBtn" onClick={() => setPop(pop === "camp" ? null : "camp")} aria-haspopup="listbox" aria-expanded={pop === "camp"}>
-                      <span className="mark" style={active ? { background: swatch(active), color: readable(swatch(active)) } : { background: "var(--hover)", color: "var(--text-3)" }}>{active ? initial(active.brand) : "?"}</span>
-                      <span className="t"><b>{active ? active.brand : "Choose a campaign"}</b><small>{active ? `${active.product}, ${active.niche}` : "The brief the slideshow is written to"}</small></span>
-                      <span className="chev">{I.chev}</span>
-                    </button>
-                    {pop === "camp" && (
-                      <div className="pop list" role="listbox">
-                        {specs.length > 8 && (
-                          <div className="search pick"><input className="input" type="search" autoFocus placeholder="Search brand, product or niche" value={pickQ} onChange={(e) => setPickQ(e.target.value)} aria-label="Search campaigns" /></div>
+                <section className="hero" aria-label="Make a slideshow">
+                  <div className="ghost" aria-hidden="true">futureclips</div>
+                  <h1>{demoN ? "Try it on a real campaign" : "What are we posting today?"}</h1>
+                  <p className="sub">
+                    Pick a campaign, choose an angle, and get a post-ready carousel.
+                    <span className="kbd">↵</span>makes it
+                  </p>
+
+                  <div className="composer">
+                    <div className="field campaignSel">
+                      <button className="campaignBtn" onClick={() => setPop(pop === "camp" ? null : "camp")} aria-haspopup="listbox" aria-expanded={pop === "camp"}>
+                        <span className="mark" style={active ? { background: swatch(active), color: readable(swatch(active)) } : { background: "var(--hover)", color: "var(--text-3)" }}>{active ? initial(active.brand) : "?"}</span>
+                        <span className="t"><b>{active ? active.brand : "Choose a campaign"}</b><small>{active ? `${active.product}, ${active.niche}` : "The brief the slideshow is written to"}</small></span>
+                        <span className="chev">{I.chev}</span>
+                      </button>
+                      {pop === "camp" && (
+                        <div className="pop list" role="listbox">
+                          {specs.length > 8 && (
+                            <div className="search pick"><input className="input" type="search" autoFocus placeholder="Search brand, product or niche" value={pickQ} onChange={(e) => setPickQ(e.target.value)} aria-label="Search campaigns" /></div>
+                          )}
+                          {specs.filter((s) => !pickQ.trim() || `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())).map((s) => (
+                            <button key={s.id} className={`mi${active?.id === s.id ? " sel" : ""}`} role="option" aria-selected={active?.id === s.id} onClick={() => { pickCamp(s); setPickQ(""); }}>
+                              <span className="mark" style={{ background: swatch(s), color: readable(swatch(s)) }}>{initial(s.brand)}</span>
+                              <span><b>{s.brand}</b><small>{s.product}, {styleWord(s.content?.style ?? "native")}</small></span>
+                            </button>
+                          ))}
+                          {!specs.length && <div className="mi">No live campaigns yet.</div>}
+                          {specs.length > 0 && pickQ.trim() && !specs.some((s) => `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())) && <div className="mi">No campaign matches &ldquo;{pickQ.trim()}&rdquo;.</div>}
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="ask">
+                      <textarea id="ask" className="textarea" ref={taRef} rows={1} value={ask} maxLength={400} disabled={!active}
+                        aria-label="What should this slideshow be about?"
+                        placeholder={active ? (demoN ? `One angle, in your own words. For example: what changed my ${active.niche} this year` : angles.length ? "Pick an angle below, or write your own" : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Pick a campaign to start"}
+                        onChange={(e) => {
+                          setAsk(e.target.value);
+                          // one line until there is more to show, then it grows with the ask
+                          const el = e.currentTarget;
+                          el.style.height = "auto";
+                          el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
+                        }}
+                        onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
+                      <button className="send" disabled={!active || !paid || busy || !ask.trim()} onClick={run}
+                        aria-label={busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}
+                        title={busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}>
+                        {busy ? <span className="spin" /> : I.send}
+                      </button>
+                    </div>
+
+                    <div className="boxfoot">
+                      {/* length, delivery and HD as three small chips instead of three rows */}
+                      <div style={{ position: "relative" }}>
+                        <button className="mini" disabled={!!demoN} onClick={() => setPop(pop === "slides" ? null : "slides")} aria-haspopup="dialog" aria-expanded={pop === "slides"}>
+                          {I.slides}<b>{demoN ? demoN : nMin === nMax ? nMin : `${nMin}–${nMax}`}</b> slides{!demoN && I.chev}
+                        </button>
+                        {pop === "slides" && !demoN && (
+                          <div className="pop slidepop" role="dialog" aria-label="How many slides">
+                            <div className="sh">
+                              <span className="sv">{nMin === nMax ? nMin : `${nMin} – ${nMax}`}</span>
+                              <span className="su">slides</span>
+                              <span className="grow" />
+                              <span className="car">{nMin === nMax ? "fixed count" : "we pick the best fit"}</span>
+                            </div>
+                            <div className="dual">
+                              <div className="track" />
+                              <div className="fillbar" style={{ left: `calc(${((nMin - RMIN) / (RMAX - RMIN)) * 100}% - 9px)`, width: `calc(${((nMax - nMin) / (RMAX - RMIN)) * 100}% + 18px)` }} />
+                              <input type="range" min={RMIN} max={RMAX} step={1} value={nMin} aria-label="Fewest slides"
+                                onChange={(e) => { const v = Math.max(lo, Math.min(+e.target.value, nMax)); setNMin(v); }} />
+                              <input type="range" min={RMIN} max={RMAX} step={1} value={nMax} aria-label="Most slides"
+                                onChange={(e) => { const v = Math.min(hi, Math.max(+e.target.value, nMin)); setNMax(v); }} />
+                            </div>
+                            <div className="ticks">
+                              {[5, 6, 7, 8, 9, 10].map((v) => <span key={v} className={v >= nMin && v <= nMax ? "in" : ""}>{v}</span>)}
+                            </div>
+                            <div className="presets">
+                              {PRESETS.map(([l, a, b]) => {
+                                const A = Math.max(lo, a), B = Math.min(hi, b);
+                                return <button key={l} className={`pst${A === nMin && B === nMax ? " on" : ""}`} disabled={A > B} onClick={() => { setNMin(A); setNMax(B); }}>{l}</button>;
+                              })}
+                            </div>
+                            <p className="note">{nMin === nMax
+                              ? `Uses exactly ${nMin} slides.`
+                              : `${nMin}–${nMax} depending on the topic. You are only charged for what is made.`}{active && (lo > RMIN || hi < RMAX) ? ` This brief allows ${lo} to ${hi}.` : ""}</p>
+                          </div>
                         )}
-                        {specs.filter((s) => !pickQ.trim() || `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())).map((s) => (
-                          <button key={s.id} className={`mi${active?.id === s.id ? " sel" : ""}`} role="option" aria-selected={active?.id === s.id} onClick={() => { pickCamp(s); setPickQ(""); }}>
-                            <span className="mark" style={{ background: swatch(s), color: readable(swatch(s)) }}>{initial(s.brand)}</span>
-                            <span><span>{s.brand}</span><small>{s.product}, {styleWord(s.content?.style ?? "native")}</small></span>
-                          </button>
-                        ))}
-                        {!specs.length && <div className="mi">No live campaigns yet.</div>}
-                        {specs.length > 0 && pickQ.trim() && !specs.some((s) => `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())) && <div className="mi">No campaign matches "{pickQ.trim()}".</div>}
                       </div>
-                    )}
-                  </div>
-                  {active && <Brief s={active} />}
-                  <div className="field">
-                    <label className="label" htmlFor="ask">What should this slideshow be about?</label>
-                    <textarea id="ask" className="textarea" ref={taRef} rows={3} value={ask} maxLength={400} disabled={!active}
-                      placeholder={active ? (demoN ? `One angle, in your own words. For example: what changed my ${active.niche} this year` : angles.length ? "Pick an angle below, or write your own. Enter makes it, Shift+Enter is a new line." : `An angle, a list, a lesson. For example: the 5 ${active.niche} habits that finally stuck`) : "Choose a campaign first"}
-                      onChange={(e) => setAsk(e.target.value)}
-                      onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
-                    {angles.length > 0 && (
-                      <div className="angles" style={{ marginTop: 10 }}>
-                        {angles.map((a) => <button key={a} className={ask === a ? "on" : ""} onClick={() => { setAsk(a); taRef.current?.focus(); }}>{a}</button>)}
+
+                      <div style={{ position: "relative" }}>
+                        <button className="mini" disabled={!!demoN} onClick={() => setPop(pop === "lane" ? null : "lane")} aria-haspopup="listbox" aria-expanded={pop === "lane"}>
+                          <b>{demoN ? "Now" : lane === "priority" ? "Priority" : "Within the day"}</b>{!demoN && I.chev}
+                        </button>
+                        {pop === "lane" && !demoN && (
+                          <div className="pop" role="listbox">
+                            <button className={`mi${lane === "batch" ? " sel" : ""}`} role="option" aria-selected={lane === "batch"} onClick={() => { setLane("batch"); setPop(null); }}>
+                              <span><b>Within the day</b><small>From your monthly allowance</small></span>
+                            </button>
+                            <button className={`mi${lane === "priority" ? " sel" : ""}`} role="option" aria-selected={lane === "priority"} disabled={!canPriority} onClick={() => { setLane("priority"); setPop(null); }}>
+                              <span><b>Priority</b><small>{canPriority ? "A minute or two, from your priority allowance" : "Comes with Pro and Studio"}</small></span>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                  {!demoN && <BrandKit />}
-                  <div className="controls">
-                    <div className="control">
-                      <span>Slides</span>
-                      <div className="seg" role="radiogroup" aria-label="Slides">
-                        {demoN
-                          ? <button role="radio" aria-checked className="on" disabled>Demo · {demoN} slides</button>
-                          : PRESETS.map(([l, a, b]) => {
-                            const A = Math.max(lo, a), B = Math.min(hi, b);
-                            return <button key={l} role="radio" aria-checked={A === nMin && B === nMax} className={A === nMin && B === nMax ? "on" : ""} disabled={A > B} onClick={() => { setNMin(A); setNMax(B); }}>{l}</button>;
-                          })}
-                      </div>
-                      <span className="with">{demoN ? "The demo makes a short carousel from any campaign." : <>{rangeWord}{nMin !== nMax ? ", we pick the best fit" : ""}{active && (lo > RMIN || hi < RMAX) ? `. This brief allows ${lo} to ${hi}.` : ""}</>}</span>
+
+                      <button className={`mini${hd ? " on" : ""}`} disabled={!canHd} onClick={() => setHd(!hd)} aria-pressed={hd}
+                        title={canHd ? (hdIncluded ? "Sharper frames, uses 3 slides each" : `Sharper frames, +$${account.plan.hd_per_slide_usd} a slide`) : "Comes with Pro and Studio"}>
+                        <b>HD</b>{hd ? "on" : "off"}
+                      </button>
+
+                      <span className="grow" />
+                      <span className={`cost${!demoN && paid && left < nMax * need ? " bad" : ""}`}>{demoN
+                        ? `${demoN} slides, on us`
+                        : !paid
+                          ? "Needs a plan"
+                          : left < nMax * need
+                            ? `needs ${nMax * need}, ${left} left`
+                            : `${left - nMax * need} left after this`}</span>
                     </div>
-                    <div className="control">
-                      <span>Delivery</span>
-                      <div className="seg" role="radiogroup" aria-label="Delivery">
-                        <button role="radio" aria-checked={lane === "batch"} className={lane === "batch" ? "on" : ""} disabled={!!demoN} onClick={() => setLane("batch")}>Within the day</button>
-                        <button role="radio" aria-checked={lane === "priority"} className={lane === "priority" ? "on" : ""} disabled={!canPriority} onClick={() => setLane("priority")}>Priority</button>
-                      </div>
-                      <span className="with">{demoN ? "A minute or two. The demo always renders now." : canPriority ? (lane === "priority" ? "A minute or two, from your priority allowance" : "Back within the day, from your monthly allowance") : "Priority delivery comes with Pro and Studio"}</span>
-                    </div>
-                    <div className="control">
-                      <span>HD</span>
-                      <div className="with"><button className={`sw${hd ? " on" : ""}`} role="switch" aria-checked={hd} aria-label="HD" disabled={!canHd} onClick={() => setHd(!hd)} /><span>{canHd ? (hdIncluded ? "Sharper frames, uses 3 slides each" : `Sharper frames, +$${account.plan.hd_per_slide_usd} a slide`) : "Comes with Pro and Studio"}</span></div>
-                    </div>
+
+                    {active && <Brief s={active} />}
                   </div>
-                  <div className="foot">
-                    <span className={`cost${!demoN && paid && left < nMax * need ? " bad" : ""}`}>{demoN
-                      ? `A real carousel, ${demoN} slides, on us. Pick a plan for full-length ones.`
-                      : !paid
-                        ? "Needs a plan."
-                        : left < nMax * need
-                          ? `This needs up to ${nMax * need} ${lane === "priority" ? "priority " : ""}slides and you have ${left} left.`
-                          : need > 1
-                            ? `${rangeWord} at HD, up to ${nMax * need} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`
-                            : `Uses up to ${nMax} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`}</span>
-                    <button className="btn primary lg" disabled={!active || !paid || busy || !ask.trim()} onClick={run}>{busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}</button>
-                  </div>
-                  {err && <p className="err" role="alert">{err}</p>}
+
+                  {angles.length > 0 && (
+                    <div className="angles">
+                      {angles.map((a) => <button key={a} className={ask === a ? "on" : ""} onClick={() => { setAsk(a); taRef.current?.focus(); }}>{a}</button>)}
+                    </div>
+                  )}
+                  {err && <p className="err" role="alert" style={{ marginTop: 14 }}>{err}</p>}
                 </section>
+
+                {!demoN && <div className="bkwrap"><BrandKit /></div>}
 
                 {recent.length > 0 && (
                   <section>

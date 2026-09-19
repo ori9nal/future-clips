@@ -12,6 +12,7 @@ import "server-only";
  */
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { deviceTrusted } from "@/lib/adminDevice";
 
 export type Plan = "free" | "solo" | "grind" | "agency";
 
@@ -88,8 +89,26 @@ export async function requireViewer(): Promise<Viewer> {
   return v;
 }
 
-/** For /admin: a platform owner or a 404-shaped redirect (no hint that /admin exists). */
+/**
+ * For /admin: a platform owner, on a device that has been trusted once.
+ *
+ * Two factors. The first is the membership itself, which rests on a mailbox;
+ * the second is the device cookie from migration 0022, which does not. Where
+ * `FC_ADMIN_SECRET` is unset the second factor is off and this behaves as it
+ * always did (lib/adminDevice.ts explains why it fails open there).
+ */
 export async function requirePlatformOwner(): Promise<Viewer> {
+  const v = await requirePlatformOwnerOnly();
+  const sb = await createClient();
+  if (!(await deviceTrusted(sb))) redirect("/admin/device");
+  return v;
+}
+
+/**
+ * The owner check WITHOUT the device check — for the enrolment page itself,
+ * which an owner has to reach from a device that is not trusted yet.
+ */
+export async function requirePlatformOwnerOnly(): Promise<Viewer> {
   const v = await requireViewer();
   if (!v.isPlatformOwner) redirect("/app?denied=admin");
   return v;

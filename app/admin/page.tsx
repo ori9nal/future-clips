@@ -2,7 +2,8 @@ import { requirePlatformOwner } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { engineAvailable } from "@/lib/engine";
 import { listCampaigns, listSpecs } from "@/lib/db/campaigns";
-import AdminView, { type AdminCampaign, type AdminSpec, type Fund } from "./AdminView";
+import AdminView, { type AdminCampaign, type AdminDeviceRow, type AdminSpec, type Fund } from "./AdminView";
+import { deviceGateOn, deviceToken, describeAgent, hashToken } from "@/lib/adminDevice";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +32,22 @@ export default async function AdminHome() {
   const viewer = await requirePlatformOwner();
   const sb = await createClient();
   const [campaigns, specs, fund] = await Promise.all([listCampaigns(sb), listSpecs(sb), fundSummary(sb)]);
+
+  // the devices this owner has trusted, newest first, with the one being used marked
+  let devices: AdminDeviceRow[] = [];
+  if (deviceGateOn()) {
+    const here = await deviceToken();
+    const hash = here ? hashToken(here) : null;
+    const { data } = await sb.from("admin_devices")
+      .select("id, label, agent, created_ip, created_at, last_seen_at, token_sha256")
+      .is("revoked_at", null).order("created_at", { ascending: false });
+    devices = (data ?? []).map((d) => ({
+      id: d.id, label: d.label, agent: describeAgent(d.agent), created_ip: d.created_ip,
+      created_at: d.created_at, last_seen_at: d.last_seen_at,
+      current: !!hash && d.token_sha256 === hash,
+    }));
+  }
+
   return (
     <AdminView
       viewer={viewer}
@@ -38,6 +55,8 @@ export default async function AdminHome() {
       campaigns={campaigns as unknown as AdminCampaign[]}
       fund={fund}
       engineOn={engineAvailable()}
+      devices={devices}
+      gateOn={deviceGateOn()}
     />
   );
 }

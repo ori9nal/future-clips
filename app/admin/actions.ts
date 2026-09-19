@@ -3,7 +3,10 @@
 import { revalidatePath } from "next/cache";
 import type { Spec } from "@/lib/specs";
 import { redirect } from "next/navigation";
-import { requirePlatformOwner } from "@/lib/auth";
+import { cookies, headers } from "next/headers";
+import { requirePlatformOwner, requirePlatformOwnerOnly } from "@/lib/auth";
+import { DEVICE_COOKIE, DEVICE_MAX_AGE, describeAgent, hashToken, newToken, passphraseMatches } from "@/lib/adminDevice";
+import { allow } from "@/lib/ratelimit";
 import { createClient } from "@/lib/supabase/server";
 import { type Campaign, emptyCampaign, slugify } from "@/lib/campaigns";
 import { getCampaign, saveCampaign, deleteCampaign, getSpec, saveSpec } from "@/lib/db/campaigns";
@@ -405,4 +408,47 @@ export async function uploadBriefAsset(id: string, fd: FormData) {
   }
   await saveSpec(sb, next);
   revalidatePath(`/admin/briefs/${id}`);
+}
+
+/* ── trusted devices (migration 0022) ──────────────────────────────────── */
+
+/**
+ * Trust the browser this form was submitted from.
+ *
+ * The passphrase is compared in constant time and never written anywhere; what
+ * is stored is the SHA-256 of a fresh random token, and the token itself goes
+ * back as an http-only cookie. Attempts are rate limited per IP, so the
+ * passphrase cannot be ground down from the open internet.
+ */
+export async function trustThisDevice(fd: FormData) {
+  await requirePlatformOwnerOnly();
+  const h = await headers();
+  const ip = h.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
+  if (!(await allow(`admindev:${ip}`, 8, 3600))) redirect("/admin/device?e=rate");
+  if (!passphraseMatches(String(fd.get("secret") ?? ""))) redirect("/admin/device?e=bad");
+
+  const token = newToken();
+  const sb = await createClient();
+  const { error } = await sb.rpc("fc_trust_device", {
+    p_hash: hashToken(token),
+    p_label: String(fd.get("label") ?? "").trim() || describeAgent(h.get("user-agent")),
+    p_agent: h.get("user-agent") ?? "",
+    p_ip: ip,
+  });
+  if (error) redirect(`/admin/device?e=${/TOO_MANY/.test(error.message) ? "many" : "err"}`);
+
+  (await cookies()).set(DEVICE_COOKIE, token, {
+    httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production",
+    path: "/", maxAge: DEVICE_MAX_AGE,
+  });
+  redirect("/admin");
+}
+
+/** Revoke a device. The next request from it lands back on the passphrase. */
+export async function revokeDevice(id: string) {
+  await requirePlatformOwner();
+  const sb = await createClient();
+  const { error } = await sb.from("admin_devices").update({ revoked_at: new Date().toISOString() }).eq("id", id);
+  if (error) throw new Error(`could not revoke that device: ${error.message}`);
+  revalidatePath("/admin");
 }
