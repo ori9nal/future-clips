@@ -16,11 +16,20 @@ const ROOT = process.cwd();
 const OUT = path.join(ROOT, 'public', 'demo');
 const MANIFEST = path.join(ROOT, 'lib', 'demo-manifest.ts');
 const STYLES = 'feed|native|bedrock|mascot|rail|clinical|editorial|document|poster|pastel';
+// Re-picked by Product 2026-09-19 (E11) against the visual target. Out:
+// vestra-closet (a fashion brief rendered as night-city cars, Product 3/10),
+// ledger-money (the same fault, 5), meridian-vo2 (near-empty clinical pages
+// with one repeated face, 5), summit-craft (abstract design cards, 4),
+// signal-hooks (striking, but marketing is not a clipping niche, 5) — all
+// five are QUALITY.md F26/F27. In: the four families built from the owner's
+// own references (86 / 87 / 84 / 83 against those references) and the
+// illustrated programme, which shows a style that is not photography.
 const DEFAULT = [
-  'apex-strength-feed-priority', 'tradelens-app-reachify-feed-priority', 'fuel-prep-native-priority',
-  'signal-hooks-poster-priority', 'northbound-trail-rail-priority', 'ledger-money-native-priority',
-  'meridian-vo2-clinical-priority', 'core-creatine-feed-priority', 'summit-craft-rail-priority',
-  'vestra-closet-q2-carousel-push-native-priority',
+  'apex-strength-feed-priority', 'tradelens-app-reachify-feed-priority',
+  'attire-outfit-planner-feed-priority', 'pitchly-football-coach-feed-priority',
+  'clearlog-skin-tracker-feed-priority', 'dosis-glp1-tracker-feed-priority',
+  'core-creatine-feed-priority', 'fuel-prep-native-priority',
+  'northbound-trail-rail-priority', 'bedrock-form-bedrock-priority',
 ];
 const picks = process.argv.slice(2).length ? process.argv.slice(2) : DEFAULT;
 const magick = fs.existsSync('/usr/bin/magick') ? 'magick' : 'convert';

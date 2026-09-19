@@ -14,6 +14,11 @@ import { useEffect, useRef, useState } from "react";
  * watermark, nothing stamped into the file") becomes something a member can
  * see. A set rendered before the record existed still went through the same
  * gate, so it shows the check rather than the counts.
+ *
+ * The peel plays ONCE, on the set that just landed (`fresh`): four seals all
+ * peeling as the Recent list scrolled by turned the moment into wallpaper
+ * (Product, 2026-09-19). Every other card carries the closed seal — shield
+ * drawn, no tags — with the same words and the same detail table.
  */
 export type CleanRecord = {
   frames?: number;
@@ -30,19 +35,19 @@ const CHECKED: { chunk: string; what: string }[] = [
   { chunk: "tEXt", what: "text" },
 ];
 
-export function CleanSeal({ clean, slides }: { clean?: CleanRecord | null; slides?: number }) {
+export function CleanSeal({ clean, slides, fresh = false }: { clean?: CleanRecord | null; slides?: number; fresh?: boolean }) {
   const [seen, setSeen] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (!el || seen) return;
+    if (!el || seen || !fresh) return;
     if (typeof IntersectionObserver === "undefined") { setSeen(true); return; }
     const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setSeen(true); io.disconnect(); } }, { threshold: 0.4 });
     io.observe(el);
     return () => io.disconnect();
-  }, [seen]);
+  }, [seen, fresh]);
 
   const stripped = (clean?.stripped ?? []).filter((s) => s.count > 0);
   const measured = stripped.length > 0;
@@ -51,7 +56,7 @@ export function CleanSeal({ clean, slides }: { clean?: CleanRecord | null; slide
   const n = clean?.slides ?? slides ?? 0;
 
   return (
-    <div className={`fc-seal${seen ? " in" : ""}`} ref={ref}>
+    <div className={`fc-seal${seen ? " in" : ""}${fresh ? "" : " settled"}`} ref={ref}>
       <button type="button" className="fc-seal-row" onClick={() => setOpen((v) => !v)} aria-expanded={open}>
         <span className="fc-seal-mark" aria-hidden="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">

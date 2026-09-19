@@ -101,6 +101,8 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [page, setPage] = useState<Page>("create");
   const [account, setAccount] = useState(account0);
   const [sets, setSets] = useState<SetView[]>(sets0);
+  /** sets that finished while this page was open: the metadata seal tells its story once, on those (Product, 2026-09-19) */
+  const [justLanded, setJustLanded] = useState<Set<string>>(() => new Set());
   const [active, setActive] = useState<Spec | null>(null);
   const [ask, setAsk] = useState("");
   const [nMin, setNMin] = useState(6);
@@ -185,7 +187,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           const r = await fetch(`/api/sets/${s.id}`); if (!r.ok) continue;
           const j = await r.json();
           setSets((prev) => prev.map((p) => (p.id === s.id ? { ...p, ...j.set, label: j.label, urls: j.slides } : p)));
-          if (j.set.status === "done") { say(`${j.set.slides} slides are ready`); refreshAccount(); }
+          if (j.set.status === "done") { say(`${j.set.slides} slides are ready`); setJustLanded((p) => new Set(p).add(s.id)); refreshAccount(); }
           if (j.set.status === "failed") { say(`The set failed: ${j.set.error ?? "unknown error"}`); refreshAccount(); }
         } catch { /* next tick */ }
       }
@@ -326,7 +328,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
         )}
         {s.status === "failed" && !cancelled && <p className="err">{s.error}. The slides went back to your balance.</p>}
         {s.status === "done" && s.caption && <p className="caption"><span className="k">Caption</span><span>{s.caption}</span></p>}
-        {s.status === "done" && <CleanSeal clean={(s.compliance_json as { clean?: React.ComponentProps<typeof CleanSeal>["clean"] } | null)?.clean} slides={s.slides ?? undefined} />}
+        {s.status === "done" && <CleanSeal clean={(s.compliance_json as { clean?: React.ComponentProps<typeof CleanSeal>["clean"] } | null)?.clean} slides={s.slides ?? undefined} fresh={justLanded.has(s.id)} />}
         {(open || (s.status === "done" && s.urls?.length)) && (
           <div className="strip" data-ratio={({ native: "9:16", mascot: "9:16", bedrock: "4:5", clinical: "4:5", editorial: "4:5", document: "4:5", pastel: "4:5", poster: "4:5", rail: "4:5" } as Record<string, string>)[s.style] ?? "3:4"}>
             {s.status === "done" && s.urls?.length
@@ -375,7 +377,14 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           <button className="btn quiet burger" onClick={() => setMenu(true)} aria-label="Menu">{I.menu}</button>
           <h1>{TITLES[page]}</h1>
           <span className="grow" />
-          {paid ? (
+          {demoN ? (
+            // the demo does not spend the org's allowance and the visitor cannot move it,
+            // so the header says what the demo gives instead of a meter (Product, 2026-09-19).
+            // The three-a-day cap lives in the rate limiter; R16 asks for the live count.
+            <div className="meter demo">
+              <div className="row"><span>Demo</span><b className="num">{demoN} slides a carousel, up to 3 a day</b></div>
+            </div>
+          ) : paid ? (
             <div className="meter" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
               <div className="row"><span>Slides left</span><b className="num">{account.left.batch}{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}{canPriority ? <span className="prio">, {account.left.priority} priority</span> : null}</b></div>
               <div className="bar"><i style={{ width: `${100 - usedPct}%` }} /></div>
@@ -391,10 +400,10 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 {!viewer.engine && paid && !engineGone && (
                   <div className="notice warn"><span>Rendering on this host is switched off. Anything you queue is kept and starts as soon as it is on.</span><button className="x" onClick={() => setEngineGone(true)} aria-label="Dismiss">×</button></div>
                 )}
-                {!paid && (
-                  <div className="notice"><span>Choose a plan to start making slideshows. Clipper is $16 a month for 200 slides; Pro adds priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
+                {!paid && !demoN && (
+                  <div className="notice"><span>Choose a plan to start making slideshows. Every plan opens all the campaigns and styles; Pro and Studio add priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
                 )}
-                {paid && left === 0 && (
+                {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
                 )}
                 <section className="composer" aria-label="Make a slideshow">
@@ -469,7 +478,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                           : need > 1
                             ? `${rangeWord} at HD, up to ${nMax * need} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`
                             : `Uses up to ${nMax} of your ${left} ${lane === "priority" ? "priority " : ""}slides.`}</span>
-                    <button className="btn primary lg" disabled={!active || !paid || busy || !ask.trim()} onClick={run}>{busy ? "Starting" : "Make the slideshow"}</button>
+                    <button className="btn primary lg" disabled={!active || !paid || busy || !ask.trim()} onClick={run}>{busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}</button>
                   </div>
                   {err && <p className="err" role="alert">{err}</p>}
                 </section>

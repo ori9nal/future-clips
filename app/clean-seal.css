@@ -64,6 +64,12 @@
 @keyframes fc-seal-draw { to { stroke-dashoffset: 0; } }
 @keyframes fc-seal-rise { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
 
+/* settled: every card that did not just land — the seal is closed and quiet and
+   the tags are not re-told. The words and the detail table are unchanged. */
+.fc-seal.settled .fc-seal-tags { display: none; }
+.fc-seal.settled .fc-seal-shield { opacity: 1; }
+.fc-seal.settled .fc-seal-tick { stroke-dashoffset: 0; }
+
 /* no motion: the tags are simply struck out and the seal is already closed */
 @media (prefers-reduced-motion: reduce) {
   .fc-seal.in .fc-seal-tag,
