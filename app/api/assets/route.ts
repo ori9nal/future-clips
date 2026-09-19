@@ -3,7 +3,7 @@ import { viewerForRequest } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { sameOrigin } from "@/lib/login";
 import { allow, clientIp, TOO_MANY } from "@/lib/ratelimit";
-import { checkImage, isKind, readOrgAssets, cleanHandle, uploadPath, KINDS, MAX_BYTES, type OrgAssets } from "@/lib/uploads";
+import { checkImage, isKind, readOrgAssets, cleanHandle, stripUpload, uploadPath, KINDS, MAX_BYTES, type OrgAssets } from "@/lib/uploads";
 
 export const maxDuration = 30;
 
@@ -76,8 +76,10 @@ export async function POST(req: NextRequest) {
   const checked = checkImage(new Uint8Array(await file.arrayBuffer()));
   if (!checked.ok) return NextResponse.json({ error: checked.error, code: "FC_BAD_IMAGE" }, { status: 400 });
 
-  const path = uploadPath(viewer.org.id, kind, checked.ext);
-  const { error: up } = await sb.storage.from("uploads").upload(path, checked.bytes, { contentType: checked.type, upsert: true });
+  // pixels only: a phone photo carries EXIF, and EXIF carries GPS
+  const clean = await stripUpload(checked.bytes);
+  const path = uploadPath(viewer.org.id, kind, clean.ext);
+  const { error: up } = await sb.storage.from("uploads").upload(path, clean.bytes, { contentType: clean.type, upsert: true });
   if (up) return NextResponse.json({ error: up.message, code: "FC_UPLOAD" }, { status: 400 });
 
   const old = kind === "logo" ? current.logo_path : current.avatar_path;

@@ -68,3 +68,29 @@ export function readInstructions(raw: unknown, assets: OrgAssets): Instructions 
   const out: Instructions = { logo_path, avatar_path, handle, note };
   return Object.values(out).some(Boolean) ? out : null;
 }
+
+/**
+ * Re-encode an upload so it carries pixels and nothing else.
+ *
+ * A logo or avatar arrives from someone's phone or laptop, and a phone photo
+ * carries EXIF — which carries GPS. We promise customers that what leaves this
+ * engine is pixels only, and until now that promise covered the rendered
+ * slides (engine/clean.mjs) but not the file we stored on their behalf: the
+ * original sat in the bucket with its camera, its timestamps and possibly the
+ * coordinates of the room it was taken in.
+ *
+ * sharp drops every metadata block unless asked to keep it, so re-encoding is
+ * the strip. PNG stays PNG (transparency matters for a logo); JPEG and WebP
+ * become PNG for the same reason. Nothing is resized: a logo is drawn at the
+ * size the style asks for.
+ */
+export async function stripUpload(bytes: Uint8Array): Promise<{ bytes: Uint8Array; type: string; ext: string }> {
+  const sharp = (await import("sharp")).default;
+  const { stripPng } = await import("@/engine/clean.mjs");
+  const png = await sharp(Buffer.from(bytes)).png({ compressionLevel: 9 }).toBuffer();
+  // sharp still writes pHYs (the DPI). It identifies nobody, but the engine's
+  // gate calls any non-pixel chunk dirty and the promise we make is "pixels",
+  // so the stored file goes through the same strip the slides do.
+  const out = stripPng(png) as Buffer;
+  return { bytes: new Uint8Array(out), type: "image/png", ext: "png" };
+}

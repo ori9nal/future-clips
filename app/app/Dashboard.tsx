@@ -377,7 +377,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           </div>
         )}
         {s.status === "failed" && !cancelled && <p className="err">{s.error}. The slides went back to your balance.</p>}
-        {s.status === "done" && s.caption && <p className="caption"><span className="k">Caption</span><span>{s.caption}</span></p>}
+        {s.status === "done" && s.caption && <Post s={s} />}
         {s.status === "done" && <CleanSeal clean={(s.compliance_json as { clean?: React.ComponentProps<typeof CleanSeal>["clean"] } | null)?.clean} slides={s.slides ?? undefined} fresh={justLanded.has(s.id)} />}
         {(open || (s.status === "done" && s.urls?.length)) && (
           <div className="strip" data-ratio={({ native: "9:16", mascot: "9:16", bedrock: "4:5", clinical: "4:5", editorial: "4:5", document: "4:5", pastel: "4:5", poster: "4:5", rail: "4:5" } as Record<string, string>)[s.style] ?? "3:4"}>
@@ -450,6 +450,47 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           </div>
         )}
       </details>
+    );
+  };
+
+  /**
+   * The words that go with the slides. The engine has always written a
+   * caption, five hashtags and a bio line; only the caption ever reached the
+   * screen, so customers were paying for two thirds of it and never seeing it.
+   */
+  const Post = ({ s }: { s: SetView }) => {
+    const tags: string[] = Array.isArray(s.content_json?.hashtags) ? s.content_json.hashtags : [];
+    const bio: string | null = typeof s.content_json?.bio === "string" ? s.content_json.bio : null;
+    const caption = s.caption ?? "";
+    const both = tags.length ? `${caption}\n\n${tags.join(" ")}` : caption;
+    const copy = async (text: string, what: string) => {
+      try { await navigator.clipboard.writeText(text); say(`${what} copied`); }
+      catch { say("Your browser would not let us copy. Select it and copy by hand."); }
+    };
+    return (
+      <div className="post">
+        <div className="pline">
+          <span className="k">Caption</span>
+          <span className="v">{caption}</span>
+          <button className="btn quiet sm" onClick={() => copy(both, tags.length ? "Caption and hashtags" : "Caption")}>
+            {tags.length ? "Copy both" : "Copy"}
+          </button>
+        </div>
+        {tags.length > 0 && (
+          <div className="pline">
+            <span className="k">Hashtags</span>
+            <span className="v tags">{tags.map((t) => <span key={t} className="pill">{t}</span>)}</span>
+            <button className="btn quiet sm" onClick={() => copy(tags.join(" "), "Hashtags")}>Copy</button>
+          </div>
+        )}
+        {bio && (
+          <div className="pline">
+            <span className="k">Bio</span>
+            <span className="v">{bio}</span>
+            <button className="btn quiet sm" onClick={() => copy(bio, "Bio")}>Copy</button>
+          </div>
+        )}
+      </div>
     );
   };
 

@@ -473,3 +473,16 @@ html[data-theme="dark"] {
 /* a campaign's three public sample slides */
 .sample { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; border-radius: 9px; overflow: hidden; }
 .sample img { width: 100%; aspect-ratio: 4 / 5; object-fit: cover; object-position: top center; display: block; background: var(--hover); }
+
+/* ── the words that go with the slides ────────────────────────────────────── */
+.post { display: flex; flex-direction: column; gap: 8px; }
+.pline { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; align-items: baseline; gap: 10px; font-size: 13.5px; }
+.pline .k { font-family: var(--font-mono); font-size: 10.5px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-3); }
+.pline .v { color: var(--text-2); line-height: 1.5; overflow-wrap: anywhere; }
+.pline .v.tags { display: flex; flex-wrap: wrap; gap: 5px; }
+.pline .v.tags .pill { font-weight: 400; font-size: 12px; }
+.pline .btn { align-self: center; }
+@media (max-width: 860px) {
+  .pline { grid-template-columns: minmax(0, 1fr) auto; }
+  .pline .k { grid-column: 1 / -1; }
+}
