@@ -95,7 +95,7 @@ export async function POST(req: Request) {
     id = await reserveSet(sb, { orgId: viewer.org.id, campaignId: campaign, ask, style, min, max, lane, hd, instructions });
   } catch (e: any) {
     if (e instanceof ReserveError) {
-      const status = e.code === "FC_QUOTA" || e.code === "FC_SPEND_CAP" || e.code === "FC_NO_PLAN" || e.code === "FC_NO_HD" ? 402 : e.code === "FC_NOT_MEMBER" ? 403 : 400;
+      const status = e.code === "FC_QUOTA" || e.code === "FC_SPEND_CAP" || e.code === "FC_NO_PLAN" || e.code === "FC_NO_HD" || e.code === "FC_DEMO_BUDGET" ? 402 : e.code === "FC_NOT_MEMBER" ? 403 : 400;
       return Response.json({ error: e.message, code: e.code, detail: e.detail }, { status });
     }
     return Response.json({ error: e?.message ?? "could not create the set", code: "FC_UNKNOWN" }, { status: 500 });

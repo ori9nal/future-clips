@@ -22,6 +22,7 @@ import type { Account } from "@/lib/account";
 import type { SetRow } from "@/lib/sets";
 import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
 import type { Viewer } from "@/lib/auth";
+import type { SupabaseClient } from "@supabase/supabase-js";
 import type { Spec } from "@/lib/specs";
 import manifest from "./demo-manifest";
 
@@ -197,6 +198,25 @@ export const isDemoHost = (host: string | null | undefined) => {
   return !!want && (host ?? "").split(":")[0].toLowerCase() === want;
 };
 export const demoGenerationOn = () => process.env.FC_DEMO_GENERATE === "1";
+
+/**
+ * How many carousels the demo has left, all visitors together.
+ *
+ * The daily limits cap how fast the demo can spend; this caps how much. The
+ * number and the moment it counts from live in `app_settings.demo_budget`
+ * (migration 0026), so the owner can raise it or restart the clock with one
+ * update. `fc_reserve_set` enforces the same figure under the org lock — this
+ * is only so the page can say what is left before anyone presses Make.
+ *
+ * null when no budget is set: then the daily limits and the spend cap are the
+ * only gates, which is how the demo behaved before 0026.
+ */
+export type DemoBudget = { allowed: number; used: number; left: number; since: string };
+export async function demoBudget(sb: SupabaseClient, orgId: string): Promise<DemoBudget | null> {
+  const { data, error } = await sb.rpc("fc_demo_budget", { p_org: orgId });
+  if (error || !data) return null;
+  return data as DemoBudget;
+}
 
 /**
  * One brief with every field filled in, for `/design-preview?view=brief`.

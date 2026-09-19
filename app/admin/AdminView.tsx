@@ -18,6 +18,8 @@ export type Fund = {
 export type DemoActivity = {
   madeToday: number; perDay: number; perVisitor: number;
   spentThisMonth: number; budget: number;
+  /** the fixed number of carousels the demo has left at all (0026); null when no budget is set */
+  left: number | null; allowed: number | null; since: string | null;
   recent: { id: string; campaign: string; ask: string; status: string; slides: number | null; cost: number | null; at: string }[];
 };
 export type AdminSession = { id: string; agent: string | null; ip: string | null; created_at: string; expires_at: string };
@@ -171,12 +173,24 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
 
       {demo && (
         <section className="fc-card">
-          <h2>The demo <span className="fc-tag" data-tone={demo.madeToday >= demo.perDay ? "warn" : undefined}>{demo.madeToday} of {demo.perDay} today</span></h2>
+          <h2>The demo{" "}
+            {demo.left !== null && (
+              <span className="fc-tag" data-tone={demo.left === 0 ? "warn" : demo.left <= 2 ? "warn" : undefined}>
+                {demo.left === 0 ? "no carousels left" : `${demo.left} of ${demo.allowed} left`}
+              </span>
+            )}
+            <span className="fc-tag" data-tone={demo.madeToday >= demo.perDay ? "warn" : undefined}>{demo.madeToday} of {demo.perDay} today</span>
+          </h2>
           <p className="fc-note">
             Everyone you send the link to shares one workspace, so this is every carousel strangers have made
             with it. Each visitor may make {demo.perVisitor} a day and the workspace {demo.perDay}; between them they
-            have spent {usd(demo.spentThisMonth)} of the {usd(demo.budget)} this month allows. When either runs out the
-            demo stops making anything until the cap resets — the examples stay on screen.
+            have spent {usd(demo.spentThisMonth)} of the {usd(demo.budget)} this month allows.
+            {demo.left !== null && demo.allowed !== null && (
+              <> On top of that the demo has a fixed budget of {demo.allowed} carousels
+                {demo.since ? ` from ${new Date(demo.since).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}` : ""},
+                and {demo.left === 0 ? "it is spent" : `${demo.left} of those are left`}. Raise it, or start the count again,
+                with the <code>demo_budget</code> row in <code>app_settings</code>.</>
+            )} When anything runs out the demo stops making anything — the examples stay on screen.
           </p>
           {demo.recent.length > 0 ? (
             <table className="fc-table" style={{ marginTop: 12 }}>

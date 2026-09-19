@@ -59,6 +59,7 @@ const REASONS: Record<string, string> = {
   FC_SPEND_CAP: "This workspace has reached its spend cap for the period. Email team@thefutureclips.com to raise it.",
   FC_DEMO: "This is the demo workspace: everything here was made with The Future Clips. Pick a plan to make your own.",
   FC_DEMO_LIMIT: "The demo makes up to three carousels a day per visitor. Pick a plan to make as many as you like.",
+  FC_DEMO_BUDGET: "The demo has made all the carousels it is going to make. The examples here are real; pick a plan to make your own.",
 };
 
 export class ReserveError extends Error {

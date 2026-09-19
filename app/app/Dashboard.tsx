@@ -37,7 +37,7 @@ type Spec = {
   deliverables?: { platforms?: string[]; due?: string | null; cta_url?: string | null; audience?: string | null };
   references?: { url?: string | null; note?: string | null }[];
 };
-type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number; /** carousels this visitor has left today, and the daily allowance (R16); undefined when there is no limiter */ demoLeft?: number; demoPerVisitor?: number };
+type ViewerLite = { email: string; orgName: string; plan: string; billing: string; checkout: boolean; isPlatformOwner: boolean; engine: boolean; /** the demo workspace makes sets of exactly this many slides (D-045); the API forces it too */ demoSlides?: number; /** carousels this visitor has left today, and the daily allowance (R16); undefined when there is no limiter */ demoLeft?: number; demoPerVisitor?: number; /** the demo has made every carousel its budget allows (0026) */ demoOver?: boolean };
 type Page = "create" | "library" | "campaigns" | "styles" | "insights" | "partners" | "settings";
 type Partners = { summary: AgencySummary; referred: ReferredOrg[]; commissions: Commission[] };
 type SetView = SetRow & { label?: string; urls?: string[] };
@@ -533,7 +533,11 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
           {demoN ? (
             // the demo does not spend the org's allowance and the visitor cannot move it,
             // so the header says what the demo gives instead of a meter (Product, 2026-09-19).
-            <span className="cred">{I.bolt}<b>{demoN}</b> slides a carousel, 3 a day</span>
+            <span className="cred" title={viewer.demoOver ? "The demo has made every carousel it is going to make" : `${demoN} slides a carousel`}>
+              {I.bolt}{viewer.demoOver
+                ? <b>No carousels left</b>
+                : <><b>{viewer.demoLeft ?? viewer.demoPerVisitor ?? 3}</b> left · {demoN} slides each</>}
+            </span>
           ) : paid ? (
             <>
               <span className="cred" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
@@ -559,9 +563,14 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
                 )}
+                {viewer.demoOver && (
+                  // the demo's budget is spent (0026). The examples stay — they
+                  // were made by this engine — but nothing new is drawn.
+                  <div className="notice warn"><span>The demo has made every carousel it is going to make. Everything on this screen is real work from this engine; a plan makes your own.</span><a className="btn sm" href="https://www.thefutureclips.com/#pricing">See the plans</a></div>
+                )}
                 <section className="hero" aria-label="Make a slideshow">
                   <div className="ghost" aria-hidden="true">futureclips</div>
-                  <h1>{demoN ? "Try it on a real campaign" : "What are we posting today?"}</h1>
+                  <h1>{viewer.demoOver ? "Look through what it made" : demoN ? "Try it on a real campaign" : "What are we posting today?"}</h1>
                   <p className="sub">
                     Pick a campaign, choose an angle, and get a post-ready carousel.
                     <span className="kbd">↵</span>makes it
@@ -603,9 +612,9 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                           el.style.height = `${Math.min(el.scrollHeight, 140)}px`;
                         }}
                         onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); run(); } }} />
-                      <button className="send" disabled={!active || !paid || busy || !ask.trim()} onClick={run}
-                        aria-label={busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}
-                        title={busy ? "Starting" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}>
+                      <button className="send" disabled={!active || !paid || busy || !ask.trim() || !!viewer.demoOver} onClick={run}
+                        aria-label={busy ? "Starting" : viewer.demoOver ? "The demo has finished making carousels" : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}
+                        title={busy ? "Starting" : viewer.demoOver ? "The demo has made every carousel it is going to make. The ones here are real — pick a plan to make your own." : demoN ? `Make my ${demoN} slides` : "Make the slideshow"}>
                         {busy ? <span className="spin" /> : I.send}
                       </button>
                     </div>

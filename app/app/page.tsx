@@ -7,7 +7,7 @@ import { engineAvailable } from "@/lib/engine";
 import { hasServiceRole } from "@/lib/supabase/admin";
 import { getAgencySummary, listReferred, listCommissions } from "@/lib/referrals";
 import { dodoEnabled } from "@/lib/billing/dodo";
-import { demo, demoAccount, demoPartners, demoSets, isDemo, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, demoGenerationOn, DEMO_SLIDES } from "@/lib/demo";
+import { demo, demoAccount, demoPartners, demoSets, isDemo, demoWorkspaceAccount, demoWorkspaceSets, demoWorkspaceSpecs, demoGenerationOn, demoBudget, DEMO_SLIDES } from "@/lib/demo";
 import { headers } from "next/headers";
 import { remaining, DEMO_LIMITS } from "@/lib/ratelimit";
 import Dashboard from "./Dashboard";
@@ -25,14 +25,19 @@ export default async function AppHome() {
   // the demo workspace (0013): shipped fixtures, nothing read from the database, nothing generated
   if (isDemo(viewer)) {
     // the examples ship with the app; anything this visitor made in the demo is a real row
-    const mine = demoGenerationOn() ? await listSets(await createClient(), viewer.org.id, { userId: viewer.user.id }) : [];
-    // how many this visitor has left today, read without spending one (R16)
+    const sbDemo = await createClient();
+    const mine = demoGenerationOn() ? await listSets(sbDemo, viewer.org.id, { userId: viewer.user.id }) : [];
+    // how many this visitor has left today, read without spending one (R16),
+    // and how many the whole demo has left at all (0026). The header shows the
+    // smaller of the two, because that is the one that will stop them.
     const h = await headers();
     const ip = h.get("x-forwarded-for")?.split(",")[0].trim() || h.get("x-real-ip") || "unknown";
-    const demoLeft = demoGenerationOn() ? await remaining(`demo:sets:ip:${ip}`, DEMO_LIMITS.perVisitor, DEMO_LIMITS.windowSeconds) : null;
+    const today = demoGenerationOn() ? await remaining(`demo:sets:ip:${ip}`, DEMO_LIMITS.perVisitor, DEMO_LIMITS.windowSeconds) : null;
+    const budget = demoGenerationOn() ? await demoBudget(sbDemo, viewer.org.id) : null;
+    const demoLeft = today == null ? null : Math.min(today, budget?.left ?? Infinity);
     return (
       <Dashboard
-        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true, demoSlides: demoGenerationOn() ? DEMO_SLIDES : undefined, demoLeft: demoLeft ?? undefined, demoPerVisitor: DEMO_LIMITS.perVisitor }}
+        viewer={{ email: viewer.user.email, orgName: viewer.org.name, plan: "solo", billing: "none", checkout: false, isPlatformOwner: viewer.isPlatformOwner, engine: true, demoSlides: demoGenerationOn() ? DEMO_SLIDES : undefined, demoLeft: demoLeft ?? undefined, demoPerVisitor: DEMO_LIMITS.perVisitor, demoOver: budget ? budget.left <= 0 : false }}
         specs={demoWorkspaceSpecs()}
         account={demoWorkspaceAccount()}
         sets={[...mine, ...demoWorkspaceSets(viewer.org.id)]}

@@ -62,6 +62,7 @@ export default async function DesignPreview({ searchParams }: { searchParams: Pr
         }}
         demo={{
           madeToday: 4, perDay: 15, perVisitor: 3, spentThisMonth: 1.48, budget: 15,
+          left: 3, allowed: 5, since: new Date(Date.now() - 3 * 3600000).toISOString(),
           recent: [
             { id: "d1", campaign: "apex-strength", ask: "the 3 gym habits that finally stuck for me", status: "done", slides: 5, cost: 0.3482, at: new Date(Date.now() - 42 * 60000).toISOString() },
             { id: "d2", campaign: "northbound-trail", ask: "one thing i wish i packed", status: "done", slides: 6, cost: 0.27, at: new Date(Date.now() - 96 * 60000).toISOString() },

@@ -4,6 +4,7 @@ import { engineAvailable } from "@/lib/engine";
 import { listCampaigns, listSpecs } from "@/lib/db/campaigns";
 import AdminView, { type AdminCampaign, type AdminSession, type AdminSpec, type DemoActivity, type Fund } from "./AdminView";
 import { DEMO_LIMITS } from "@/lib/ratelimit";
+import { demoBudget } from "@/lib/demo";
 import { UNLOCK_HOURS, describeAgent } from "@/lib/adminGate";
 
 export const dynamic = "force-dynamic";
@@ -48,16 +49,20 @@ export default async function AdminHome() {
     const { data: org } = await sb.from("orgs").select("id, spend_cap_usd").eq("is_demo", true).maybeSingle();
     if (org) {
       const dayAgo = new Date(Date.now() - 24 * 3600_000).toISOString();
-      const [{ data: recent }, { count }, { data: use }] = await Promise.all([
+      const [{ data: recent }, { count }, { data: use }, budget] = await Promise.all([
         sb.from("sets").select("id, campaign_id, ask, status, slides, cost_usd, created_at")
           .eq("org_id", org.id).order("created_at", { ascending: false }).limit(8),
         sb.from("sets").select("id", { count: "exact", head: true }).eq("org_id", org.id).gt("created_at", dayAgo),
         sb.from("usage").select("cogs_usd").eq("org_id", org.id).order("period_start", { ascending: false }).limit(1).maybeSingle(),
+        demoBudget(sb, org.id),
       ]);
       demo = {
         madeToday: count ?? 0,
         perDay: DEMO_LIMITS.perDay,
         perVisitor: DEMO_LIMITS.perVisitor,
+        left: budget?.left ?? null,
+        allowed: budget?.allowed ?? null,
+        since: budget?.since ?? null,
         spentThisMonth: Number(use?.cogs_usd ?? 0),
         budget: Number(org.spend_cap_usd ?? 0),
         recent: (recent ?? []).map((r) => ({
