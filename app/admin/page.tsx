@@ -44,9 +44,10 @@ export default async function AdminHome() {
 
   // what the demo has been doing. Every visitor shares one workspace, so this
   // is the whole picture: what strangers made, what it cost, what is left.
+  const { data: demoOrg } = await sb.from("orgs").select("id, spend_cap_usd").eq("is_demo", true).maybeSingle();
   let demo: DemoActivity | null = null;
   {
-    const { data: org } = await sb.from("orgs").select("id, spend_cap_usd").eq("is_demo", true).maybeSingle();
+    const org = demoOrg;
     if (org) {
       const dayAgo = new Date(Date.now() - 24 * 3600_000).toISOString();
       const [{ data: recent }, { count }, { data: use }, budget] = await Promise.all([
@@ -77,6 +78,7 @@ export default async function AdminHome() {
     <AdminView
       viewer={viewer}
       specs={specs as unknown as AdminSpec[]}
+      demoOrgId={demoOrg?.id ?? null}
       campaigns={campaigns as unknown as AdminCampaign[]}
       fund={fund}
       engineOn={engineAvailable()}

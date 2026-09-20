@@ -23,12 +23,12 @@ export type DemoActivity = {
   recent: { id: string; campaign: string; ask: string; status: string; slides: number | null; cost: number | null; at: string }[];
 };
 export type AdminSession = { id: string; agent: string | null; ip: string | null; created_at: string; expires_at: string };
-export type AdminSpec = { id: string; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number }; sample?: { urls?: string[] } | null };
+export type AdminSpec = { id: string; org_id?: string | null; brand: string; niche: string; status: string; content?: { style?: string }; requirements?: { min_slides?: number; max_slides?: number }; sample?: { urls?: string[] } | null };
 export type AdminCampaign = { id: string; name: string; niche: string; brand: { handle?: string; colors: { ink: string; accents: Record<string, string> } }; rules: { min_slides: number; max_slides: number; zero_gen_mode?: boolean }; agency?: { code?: string } | null };
 
 const usd = (v: number) => `$${v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 
-export default function AdminView({ viewer, specs, campaigns, fund, engineOn, sessions = [], demo = null, unlockHours = 8, readOnly = false }: {
+export default function AdminView({ viewer, specs, campaigns, fund, engineOn, sessions = [], demo = null, demoOrgId = null, unlockHours = 8, readOnly = false }: {
   viewer: Viewer;
   specs: AdminSpec[];
   campaigns: AdminCampaign[];
@@ -38,6 +38,8 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
   sessions?: AdminSession[];
   /** what strangers have made in the shared demo workspace */
   demo?: DemoActivity | null;
+  /** the demo workspace, whose briefs are fixtures nobody else sees (0029) */
+  demoOrgId?: string | null;
   /** how long one code keeps admin open */
   unlockHours?: number;
   /** the preview renders the same markup with the forms disabled */
@@ -213,12 +215,18 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
 
       <section className="fc-card">
         <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>
+        <p className="fc-note" style={{ marginTop: -6 }}>
+          Customers see the briefs you add here. Ones tagged <span className="fc-tag">demo</span> belong to the demo workspace and are shown to its visitors only.
+        </p>
         <table className="fc-table">
           <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Sample</th><th>Status</th><th /></tr></thead>
           <tbody>
             {specs.map((s) => (
               <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
-                <td><b>{s.brand}</b> <span className="fc-note">{s.id}</span></td>
+                <td>
+                  <b>{s.brand}</b> <span className="fc-note">{s.id}</span>
+                  {demoOrgId && s.org_id === demoOrgId ? <> <span className="fc-tag" title="A fixture in the demo workspace. Customers never see it.">demo</span></> : null}
+                </td>
                 <td>{s.niche}</td>
                 <td>{s.content?.style ?? "—"}</td>
                 <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>

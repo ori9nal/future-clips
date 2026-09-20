@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-19, after 0019)
+## Migration state (2026-09-20, after 0029)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -26,6 +26,17 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0017_rate_limit_peek.sql` | `rate_limit_peek` (2026-09-19) | yes | `fc_rate_limit_peek(key, limit, window_s)` reads a limiter without spending a slot (R16); service role only |
 | `0018_allowances_at_margin.sql` | `allowances_at_margin` (2026-09-19) | yes | D-044 applied: Clipper 200, Pro 400 + 50, Studio 1,000 + 100, `cogs_allowance_usd` recomputed |
 | `0019_monthly_and_yearly_prices.sql` | `monthly_and_yearly_prices` (2026-09-19) | yes | `plans.price_usd_year`; monthly 19.99/49.99/99.99, yearly 192/384/948 (D-048) |
+| `0016_demo_slides_floor.sql` | `demo_slides_floor` (2026-09-19) | yes | `sets.slides_min/max` checks accept 4 for the demo's short sets |
+| `0020_creator_assets.sql` | `creator_assets` (2026-09-19) | yes | `sets.instructions`, the private `uploads` bucket, `fc_reserve_set(... p_instructions)` |
+| `0021_provider_split.sql` | `provider_split` (2026-09-19) | yes | the provider fund split between Anthropic and OpenAI by measured burn; `app_settings.provider_float` |
+| `0022_admin_devices.sql` | `admin_devices` (2026-09-19) | yes | `admin_unlocks` (superseded by 0025's code gate; the sessions table stays) |
+| `0023_campaign_samples.sql` | `campaign_samples` (2026-09-19) | yes | `sets.is_sample`, `campaigns.sample`, `fc_queue_sample` (platform owner), the public `samples` bucket |
+| `0024_invite_carries_a_plan.sql` | `invite_carries_a_plan` (2026-09-19) | yes | `allowed_emails.personal_plan`; **its `handle_new_user` referenced 0008's unapplied columns and broke every sign-up until 0028** |
+| `0025_admin_totp.sql` | `admin_totp`, `admin_totp_reset` (2026-09-19) | yes | the admin code gate: `admin_totp`, `fc_totp_reset` |
+| `0026_demo_budget.sql` | `demo_budget`, `demo_budget_gate`, `reserve_set_one_signature` (2026-09-19) | yes | `app_settings.demo_budget` (a fixed number of carousels from a moment), `fc_demo_budget(org)`, the gate in `fc_reserve_set` under the org lock; the ambiguous ten-argument `fc_reserve_set` overload dropped |
+| `0027_slide_text_is_editable.sql` | `slide_text_is_editable` (2026-09-19) | yes | `sets.layout_json` (the renderer's text blocks, the baseline), `sets.edits_json` (the member's moves and rewrites), `sets.edited_at` |
+| `0028_bootstrap_without_partner_columns.sql` | `bootstrap_without_partner_columns` (2026-09-20) | yes | `handle_new_user` names only columns that exist; `app_settings.signup` set to `open` (D-011 superseded) |
+| `0029_fixture_briefs_belong_to_the_demo.sql` | `fixture_briefs_belong_to_the_demo` (2026-09-20) | yes | the 16 fixture briefs moved to the demo workspace, the 5 legacy `campaign`-kind fixtures deleted; platform owners read and write every brief (`campaigns_read`, `campaigns_platform_write`) (D-050) |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 

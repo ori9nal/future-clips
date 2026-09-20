@@ -616,7 +616,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                               <span><b>{s.brand}</b><small>{s.product}, {styleWord(s.content?.style ?? "native")}</small></span>
                             </button>
                           ))}
-                          {!specs.length && <div className="mi">No live campaigns yet.</div>}
+                          {!specs.length && <div className="mi">No campaigns yet. Briefs appear here as agencies send them.</div>}
                           {specs.length > 0 && pickQ.trim() && !specs.some((s) => `${s.brand} ${s.product} ${s.niche}`.toLowerCase().includes(pickQ.trim().toLowerCase())) && <div className="mi">No campaign matches &ldquo;{pickQ.trim()}&rdquo;.</div>}
                         </div>
                       )}

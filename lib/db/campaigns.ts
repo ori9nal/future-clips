@@ -65,11 +65,17 @@ export async function getCampaign(sb: SupabaseClient, id: string): Promise<Campa
 
 const slug = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
 
-/** Upsert a spec as a platform campaign (org_id null). RLS: platform owners only. */
+/**
+ * Upsert a spec. A new brief is a platform campaign (org_id null), which every
+ * customer sees; an existing one keeps whichever workspace holds it. The
+ * demo's briefs live in the demo workspace (0029), and an admin editing one
+ * must not hand it back to everyone by saving it. RLS: platform owners only.
+ */
 export async function saveSpec(sb: SupabaseClient, spec: Spec): Promise<Spec> {
   const id = slug(spec.id);
   if (!id) throw new Error("campaign id is required");
-  const row = { id, org_id: null, kind: "spec", data: { ...spec, id }, updated_at: new Date().toISOString() };
+  const { data: existing } = await sb.from("campaigns").select("org_id").eq("id", id).maybeSingle();
+  const row = { id, org_id: existing?.org_id ?? null, kind: "spec", data: { ...spec, id }, updated_at: new Date().toISOString() };
   const { error } = await sb.from("campaigns").upsert(row, { onConflict: "id" });
   if (error) throw new Error(error.message);
   return { ...spec, id };
