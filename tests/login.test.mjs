@@ -27,7 +27,12 @@ test('safeNext only ever lands on this host', () => {
 });
 
 test('loginError maps the invite gate and the mailer limit to sentences and statuses', () => {
-  assert.equal(loginError('Database error saving new user').status, 403);
+  // a failing sign-up trigger is our fault and says so — it is never dressed
+  // up as an invite refusal again (0028)
+  const db = loginError('Database error saving new user');
+  assert.equal(db.status, 500);
+  assert.match(db.error, /could not create your account/);
+  assert.doesNotMatch(db.error, /invite/i);
   assert.equal(loginError('FC_INVITE_ONLY: not invited').status, 403);
   assert.equal(loginError('email rate limit exceeded').status, 429);
   assert.deepEqual(loginError('Something else'), { error: 'Something else', status: 400 });

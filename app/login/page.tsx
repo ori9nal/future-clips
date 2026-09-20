@@ -30,7 +30,7 @@ export default async function LoginPage({
         </a>
         <h1>Sign in</h1>
         <p className="fc-sub">
-          We email you a link. No password. Access is by invite while we are in private beta.
+          We email you a link. No password, and no invite needed — any email works.
         </p>
         <LoginForm next={land} initialError={error ?? null} googleEnabled={process.env.NEXT_PUBLIC_GOOGLE_AUTH === "1"} />
         {process.env.NODE_ENV !== "production" && process.env.FC_DEV_LOGIN === "1" && <DevLogin next={land} />}

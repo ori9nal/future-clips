@@ -49,8 +49,15 @@ export function rememberNext(res: NextResponse, next: string, secure: boolean): 
 
 /** Supabase's messages, turned into sentences the form shows. */
 export function loginError(message: string): { error: string; status: number } {
-  if (/database error saving new user|FC_INVITE_ONLY/i.test(message)) {
+  if (/FC_INVITE_ONLY/i.test(message)) {
     return { error: "That email is not on the invite list. Ask whoever runs your workspace to add it.", status: 403 };
+  }
+  // GoTrue reports any failure in the sign-up triggers as this one sentence,
+  // with the real cause hidden. It used to be shown as an invite refusal, and
+  // a broken trigger (0028) then read as "not on the list" for a day. It is a
+  // fault of ours, and is said so.
+  if (/database error saving new user/i.test(message)) {
+    return { error: "We could not create your account just now. Try again in a minute, and if it keeps happening email team@thefutureclips.com.", status: 500 };
   }
   if (/rate limit/i.test(message)) {
     return { error: "Too many sign-in emails in the last hour. Use the link already in your inbox, or try again in a little while.", status: 429 };
