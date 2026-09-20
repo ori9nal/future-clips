@@ -45,6 +45,40 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
   /** the preview renders the same markup with the forms disabled */
   readOnly?: boolean;
 }) {
+  // The demo's briefs are fixtures nobody but its visitors sees (0029). They
+  // are listed under the demo, not among the briefs customers get.
+  const demoSpecs = demoOrgId ? specs.filter((s) => s.org_id === demoOrgId) : [];
+  const platformSpecs = demoOrgId ? specs.filter((s) => s.org_id !== demoOrgId) : specs;
+  const briefRows = (rows: AdminSpec[]) => rows.map((s) => (
+              <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
+                <td><b>{s.brand}</b> <span className="fc-note">{s.id}</span></td>
+                <td>{s.niche}</td>
+                <td>{s.content?.style ?? "—"}</td>
+                <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  {s.sample?.urls?.length
+                    ? <span className="fc-tag">{s.sample.urls.length} slides</span>
+                    : <span className="fc-note">none</span>}{" "}
+                  <form action={makeSample.bind(null, s.id)} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly || s.status !== "live"}
+                      title={s.status === "live" ? "Render three public slides for this brief" : "Only a live brief gets a sample"}>
+                      {s.sample?.urls?.length ? "Remake" : "Make"}
+                    </button>
+                  </form>
+                </td>
+                <td>{s.status}</td>
+                <td style={{ whiteSpace: "nowrap" }}>
+                  <Link className="fc-btn" data-variant="ghost" data-size="sm" href={`/admin/briefs/${s.id}`}>Edit</Link>{" "}
+                  <form action={setBriefStatus.bind(null, s.id, s.status === "live" ? "paused" : "live")} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>{s.status === "live" ? "Pause" : "Go live"}</button>
+                  </form>{" "}
+                  <form action={removeBrief.bind(null, s.id)} style={{ display: "inline" }}>
+                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>Delete</button>
+                  </form>
+                </td>
+              </tr>
+  ));
+
   return (
     <AppShell active="admin" viewer={viewer}>
       <header className="fc-head">
@@ -210,49 +244,27 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
               </tbody>
             </table>
           ) : <p className="fc-note" style={{ marginTop: 10 }}>Nobody has made anything with the demo yet.</p>}
+          {demoSpecs.length > 0 && (
+            <>
+              <h3 style={{ marginTop: 22 }}>Demo briefs <span className="fc-tag">{demoSpecs.length}</span></h3>
+              <p className="fc-note">What the demo&rsquo;s visitors pick from. Fixtures in the demo workspace; customers never see them.</p>
+              <table className="fc-table" style={{ marginTop: 12 }}>
+                <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Sample</th><th>Status</th><th /></tr></thead>
+                <tbody>{briefRows(demoSpecs)}</tbody>
+              </table>
+            </>
+          )}
         </section>
       )}
 
       <section className="fc-card">
-        <h2>Briefs <span className="fc-tag">{specs.length}</span></h2>
-        <p className="fc-note" style={{ marginTop: -6 }}>
-          Customers see the briefs you add here. Ones tagged <span className="fc-tag">demo</span> belong to the demo workspace and are shown to its visitors only.
-        </p>
+        <h2>Briefs <span className="fc-tag">{platformSpecs.length}</span></h2>
+        <p className="fc-note" style={{ marginTop: -6 }}>Every workspace sees the briefs added here. The demo&rsquo;s own briefs are under <b>The demo</b>.</p>
+        {!platformSpecs.length && <p className="fc-note" style={{ marginTop: 10 }}>No briefs yet. Customers see an empty picker until one is added.</p>}
         <table className="fc-table">
           <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Sample</th><th>Status</th><th /></tr></thead>
           <tbody>
-            {specs.map((s) => (
-              <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
-                <td>
-                  <b>{s.brand}</b> <span className="fc-note">{s.id}</span>
-                  {demoOrgId && s.org_id === demoOrgId ? <> <span className="fc-tag" title="A fixture in the demo workspace. Customers never see it.">demo</span></> : null}
-                </td>
-                <td>{s.niche}</td>
-                <td>{s.content?.style ?? "—"}</td>
-                <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
-                <td style={{ whiteSpace: "nowrap" }}>
-                  {s.sample?.urls?.length
-                    ? <span className="fc-tag">{s.sample.urls.length} slides</span>
-                    : <span className="fc-note">none</span>}{" "}
-                  <form action={makeSample.bind(null, s.id)} style={{ display: "inline" }}>
-                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly || s.status !== "live"}
-                      title={s.status === "live" ? "Render three public slides for this brief" : "Only a live brief gets a sample"}>
-                      {s.sample?.urls?.length ? "Remake" : "Make"}
-                    </button>
-                  </form>
-                </td>
-                <td>{s.status}</td>
-                <td style={{ whiteSpace: "nowrap" }}>
-                  <Link className="fc-btn" data-variant="ghost" data-size="sm" href={`/admin/briefs/${s.id}`}>Edit</Link>{" "}
-                  <form action={setBriefStatus.bind(null, s.id, s.status === "live" ? "paused" : "live")} style={{ display: "inline" }}>
-                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>{s.status === "live" ? "Pause" : "Go live"}</button>
-                  </form>{" "}
-                  <form action={removeBrief.bind(null, s.id)} style={{ display: "inline" }}>
-                    <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>Delete</button>
-                  </form>
-                </td>
-              </tr>
-            ))}
+            {briefRows(platformSpecs)}
           </tbody>
         </table>
       </section>

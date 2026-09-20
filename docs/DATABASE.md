@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-20, after 0029)
+## Migration state (2026-09-20, after 0030)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -37,6 +37,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0027_slide_text_is_editable.sql` | `slide_text_is_editable` (2026-09-19) | yes | `sets.layout_json` (the renderer's text blocks, the baseline), `sets.edits_json` (the member's moves and rewrites), `sets.edited_at` |
 | `0028_bootstrap_without_partner_columns.sql` | `bootstrap_without_partner_columns` (2026-09-20) | yes | `handle_new_user` names only columns that exist; `app_settings.signup` set to `open` (D-011 superseded) |
 | `0029_fixture_briefs_belong_to_the_demo.sql` | `fixture_briefs_belong_to_the_demo` (2026-09-20) | yes | the 16 fixture briefs moved to the demo workspace, the 5 legacy `campaign`-kind fixtures deleted; platform owners read and write every brief (`campaigns_read`, `campaigns_platform_write`) (D-050) |
+| `0030_one_allowance_no_priority.sql` | `one_allowance_no_priority` (2026-09-20) | yes | no priority tier (D-051): `plans.priority_slides_per_month = 0`, `cogs_allowance_usd = slides × 0.06`; `fc_reserve_set`, `fc_commit_set`, `fc_release_set` use one allowance whatever the lane |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 

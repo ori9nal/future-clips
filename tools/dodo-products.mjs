@@ -5,6 +5,7 @@
 //
 //   DODO_API_KEY=… DODO_ENV=test node tools/dodo-products.mjs
 //   DODO_API_KEY=… DODO_ENV=test node tools/dodo-products.mjs webhook=https://host/api/webhooks/dodo
+//   DODO_API_KEY=… DODO_ENV=live node tools/dodo-products.mjs update      rewrite the live descriptions from WANTED, by DODO_PRODUCTS sku
 //
 // The key is read from the environment or .env.local and never printed.
 import fs from 'node:fs';
@@ -33,12 +34,27 @@ const monthly = (cents) => ({ type: 'recurring_price', currency: 'USD', price: c
 const once = (cents) => ({ type: 'one_time_price', currency: 'USD', price: cents, tax_inclusive: false, purchasing_power_parity: false });
 const WANTED = [
   { sku: 'solo',   name: 'Clipper',    price: monthly(1600), description: '200 slides a month. One saved character style, the hook library, no AI watermark. Batch delivery within the day.' },
-  { sku: 'grind',  name: 'Pro',        price: monthly(3200), description: '500 slides a month plus 50 priority slides. Unlimited character styles, HD export, priority render queue, view tracking.' },
-  { sku: 'agency', name: 'Studio',     price: monthly(7900), description: '1,500 slides a month plus 150 priority slides. Up to 5 seats, multi-account tracking, bulk generation, priority support.' },
+  { sku: 'grind',  name: 'Pro',        price: monthly(3200), description: '400 slides a month. Unlimited character styles, HD export, view tracking.' },
+  { sku: 'agency', name: 'Studio',     price: monthly(7900), description: '1,000 slides a month. Up to 5 seats, multi-account tracking, bulk generation, dedicated support.' },
   { sku: 'p100',   name: '100 slides', price: once(800),     description: 'A pack of 100 extra slides for your workspace. Spent after the monthly allowance; never expires.' },
   { sku: 'p250',   name: '250 slides', price: once(1800),    description: 'A pack of 250 extra slides for your workspace. Spent after the monthly allowance; never expires.' },
   { sku: 'p600',   name: '600 slides', price: once(4000),    description: 'A pack of 600 extra slides for your workspace. Spent after the monthly allowance; never expires.' },
 ];
+
+// `update`: the descriptions the customer reads at checkout, rewritten on the
+// live products (monthly and yearly alike) from WANTED. Nothing is created.
+if (args.update) {
+  const ids = Object.fromEntries((env.DODO_PRODUCTS ?? '').split(',').filter(Boolean).map((kv) => kv.split('=')));
+  for (const w of WANTED) {
+    for (const sku of [w.sku, `${w.sku}_year`]) {
+      const id = ids[sku];
+      if (!id) continue;
+      await api(`/products/${id}`, { method: 'PATCH', body: JSON.stringify({ description: w.description }) });
+      console.error(`updated  ${sku.padEnd(12)} ${id}  "${w.description.slice(0, 60)}…"`);
+    }
+  }
+  process.exit(0);
+}
 
 const existing = (await api('/products?page_size=100')).items ?? [];
 const out = [];

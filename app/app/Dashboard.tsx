@@ -19,7 +19,7 @@ import { STYLE_CARDS, STYLE_IDS } from "@/lib/styles-manifest";
 import Link from "next/link";
 import type { Account } from "@/lib/account";
 import { planLabel, PLAN_LABELS } from "@/lib/plans";
-import type { SetRow, Lane } from "@/lib/sets";
+import type { SetRow } from "@/lib/sets";
 import SlideEditor, { type SlideEdits } from "./SlideEditor";
 import type { AgencySummary, ReferredOrg, Commission } from "@/lib/referrals";
 
@@ -131,9 +131,8 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const [ask, setAsk] = useState("");
   const [nMin, setNMin] = useState(6);
   const [nMax, setNMax] = useState(8);
-  const [lane, setLane] = useState<Lane>("batch");
   const [hd, setHd] = useState(false);
-  const [pop, setPop] = useState<"camp" | "slides" | "lane" | null>(null);
+  const [pop, setPop] = useState<"camp" | "slides" | null>(null);
   const [busy, setBusy] = useState(false);
   const [err, setErr] = useState<string | null>(null);
   const [toast, setToastText] = useState<string | null>(null);
@@ -197,7 +196,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
 
   const go = (p: Page) => { setPage(p); setPop(null); setMenu(false); if (viewRef.current) viewRef.current.scrollTop = 0; };
 
-  // the demo (D-045): one length, priority, never HD — the API forces the same
+  // the demo (D-045): one length, never HD — the API forces the same
   // The demo makes the selected brief's own minimum, not a constant: a set
   // under it cannot pass compliance (P-22). `viewer.demoSlides` is the
   // default the server would use when no campaign is chosen yet.
@@ -205,7 +204,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const demoN = demoOn ? Math.max(viewer.demoSlides ?? 5, active?.requirements?.min_slides ?? 0) : 0;
   useEffect(() => {
     if (!demoN) return;
-    setNMin(demoN); setNMax(demoN); setLane("priority"); setHd(false);
+    setNMin(demoN); setNMax(demoN); setHd(false);
   }, [demoN]);
   // why the demo cannot make another one, if it cannot: the fixed budget is
   // spent for everybody (0026), or this visitor has used their three today
@@ -213,11 +212,11 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   const demoStop: "over" | "today" | null = !demoN ? null
     : viewer.demoOver ? "over"
     : (viewer.demoLeft ?? 1) <= 0 ? "today" : null;
-  const canPriority = account.cap.priority > 0 || !!demoN;
   const canHd = account.plan.hd_per_slide_usd != null;
   const hdIncluded = account.plan.hd_per_slide_usd === 0;
   const need = hd && hdIncluded ? 3 : 1;
-  const left = lane === "priority" ? account.left.priority : account.left.batch;
+  // one allowance, and every set renders now (0030)
+  const left = account.left.batch;
   // a plan or a pack balance; there is no free tier (DECISIONS D-108)
   const paid = account.plan.slides_per_month > 0 || account.balance > 0;
   // the cheapest plan on sale, named from the database rather than from a
@@ -239,7 +238,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   useEffect(() => {
     const open = sets.filter((s) => s.status === "queued" || s.status === "rendering");
     if (!open.length) return;
-    const every = open.some((s) => s.lane === "priority") ? 4000 : 20000;
+    const every = 4000;
     const t = window.setInterval(async () => {
       for (const s of open) {
         try {
@@ -282,16 +281,16 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
     if (!active) { say("Pick a campaign first"); setPop("camp"); return; }
     const topic = ask.trim();
     if (!topic) { say("Say what the slideshow is about"); taRef.current?.focus(); return; }
-    if (!demoN && left < nMax * need) { setErr(`Not enough slides left: ${left} on the ${lane === "priority" ? "priority" : "monthly"} allowance, and this set needs up to ${nMax * need}${need > 1 ? " (HD uses 3 per slide)" : ""}.`); return; }
+    if (!demoN && left < nMax * need) { setErr(`Not enough slides left: ${left} on your allowance, and this set needs up to ${nMax * need}${need > 1 ? " (HD uses 3 per slide)" : ""}.`); return; }
     setBusy(true); setErr(null);
     try {
       const r = await fetch("/api/sets", { method: "POST", headers: { "content-type": "application/json" },
-        body: JSON.stringify({ campaign: active.id, ask: topic, style: chosenStyle, slides: nMin === nMax ? nMin : { min: nMin, max: nMax }, lane, hd }) });
+        body: JSON.stringify({ campaign: active.id, ask: topic, style: chosenStyle, slides: nMin === nMax ? nMin : { min: nMin, max: nMax }, hd }) });
       const j = await r.json();
       if (!r.ok) { setErr(sentence(j, "Could not start the slideshow. Try again in a moment.")); return; }
       const row: SetView = {
         id: j.id, org_id: "", campaign_id: active.id, style: chosenStyle, ask: topic, slides: null, slides_min: nMin, slides_max: nMax,
-        reserved_slides: nMax, quality: hd ? "high" : "medium", lane, hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
+        reserved_slides: nMax, quality: hd ? "high" : "medium", lane: "priority", hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
         files_json: null, content_json: null, compliance_json: null, error: null, cancel_requested: false, created_at: new Date().toISOString(),
         started_at: null, finished_at: null, updated_at: new Date().toISOString(), label: j.started ? "Starting" : "In the queue",
       };
@@ -299,7 +298,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       setAsk("");
       refreshAccount();
       const n = nMin === nMax ? `${nMin}` : `${nMin} to ${nMax}`;
-      say(j.started ? "Making it now. A minute or two." : lane === "priority" ? `Kept: ${n} slides, starts as soon as rendering is switched on` : `Queued: ${n} slides, back within the day`);
+      say(j.started ? "Making it now. A minute or two." : `Kept: ${n} slides, starts as soon as rendering is switched on`);
     } catch (e: any) {
       setErr("Could not reach the server. Check your connection and try again.");
     } finally {
@@ -371,7 +370,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
         <div className="head">
           <div className="t">
             <h3 title={s.ask}>{s.ask}</h3>
-            <p className="meta">{spec?.brand ?? s.campaign_id}, {count} slides, {s.lane === "priority" ? "priority" : "within the day"}{s.hd ? ", HD" : ""}, {when(s.created_at)}</p>
+            <p className="meta">{spec?.brand ?? s.campaign_id}, {count} slides{s.hd ? ", HD" : ""}, {when(s.created_at)}</p>
           </div>
           <div className="actions">
             {s.status === "done" && <span className="pill ok">Ready</span>}
@@ -559,7 +558,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
             <>
               <span className="cred" title={account.cap.batch ? `${account.usage.slides_used} of ${account.cap.batch} used this period${account.balance ? `, plus ${account.balance} purchased` : ""}` : `${account.balance} purchased slides`}>
                 {I.bolt}<b>{account.left.batch}</b>{account.cap.batch ? ` of ${account.cap.batch + account.balance}` : ""}
-                {canPriority ? <span className="prio">· {account.left.priority} priority</span> : null}
               </span>
               <button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Add slides</button>
             </>
@@ -575,7 +573,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                   <div className="notice warn"><span>Rendering on this host is switched off. Anything you queue is kept and starts as soon as it is on.</span><button className="x" onClick={() => setEngineGone(true)} aria-label="Dismiss">×</button></div>
                 )}
                 {!paid && !demoN && (
-                  <div className="notice"><span>Choose a plan to start making slideshows. {cheapest ? `${cheapest.label ?? PLAN_LABELS[cheapest.id] ?? cheapest.id} is $${cheapest.price_usd_month} a month for ${cheapest.slides_per_month} slides. ` : ""}Every plan opens all the campaigns and styles; Pro and Studio add priority delivery and HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
+                  <div className="notice"><span>Choose a plan to start making slideshows. {cheapest ? `${cheapest.label ?? PLAN_LABELS[cheapest.id] ?? cheapest.id} is $${cheapest.price_usd_month} a month for ${cheapest.slides_per_month} slides. ` : ""}Every plan opens all the campaigns and styles; Pro and Studio add HD.</span><button className="btn primary sm" onClick={() => { go("settings"); setTab("plan"); }}>Choose a plan</button></div>
                 )}
                 {paid && left === 0 && !demoN && (
                   <div className="notice warn"><span>You have 0 slides left on this allowance{renews ? `. It renews on ${renews}` : ""}. A pack tops it up now.</span><button className="btn sm" onClick={() => { go("settings"); setTab("plan"); }}>Add a pack</button></div>
@@ -682,21 +680,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                         )}
                       </div>
 
-                      <div style={{ position: "relative" }}>
-                        <button className="mini" disabled={!!demoN} onClick={() => setPop(pop === "lane" ? null : "lane")} aria-haspopup="listbox" aria-expanded={pop === "lane"}>
-                          <b>{demoN ? "Now" : lane === "priority" ? "Priority" : "Within the day"}</b>{!demoN && I.chev}
-                        </button>
-                        {pop === "lane" && !demoN && (
-                          <div className="pop" role="listbox">
-                            <button className={`mi${lane === "batch" ? " sel" : ""}`} role="option" aria-selected={lane === "batch"} onClick={() => { setLane("batch"); setPop(null); }}>
-                              <span><b>Within the day</b><small>From your monthly allowance</small></span>
-                            </button>
-                            <button className={`mi${lane === "priority" ? " sel" : ""}`} role="option" aria-selected={lane === "priority"} disabled={!canPriority} onClick={() => { setLane("priority"); setPop(null); }}>
-                              <span><b>Priority</b><small>{canPriority ? "A minute or two, from your priority allowance" : "Comes with Pro and Studio"}</small></span>
-                            </button>
-                          </div>
-                        )}
-                      </div>
 
                       <button className="mini" onClick={() => go("styles")} title="Pick the look on the Styles page">
                         <b>{styleCard ? styleCard.name : "Look"}</b>{look ? "yours" : "from the brief"}
@@ -830,7 +813,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 <div className="stats">
                   <div className="stat"><span className="k">Slideshows made</span><span className="v">{madeThisPeriod}</span><span className="d">finished this period</span></div>
                   <div className="stat"><span className="k">Slides used</span><span className="v">{account.usage.slides_used}</span><span className="d">of {account.cap.batch} in the month</span></div>
-                  {canPriority && <div className="stat"><span className="k">Priority used</span><span className="v">{account.usage.priority_slides_used}</span><span className="d">of {account.cap.priority}</span></div>}
                   <div className="stat"><span className="k">Slides per slideshow</span><span className="v">{avg}</span><span className="d">average of finished ones</span></div>
                   {canHd && <div className="stat"><span className="k">HD slides</span><span className="v">{account.usage.hd_slides_used}</span><span className="d">{hdIncluded ? "3 slides each" : `$${account.plan.hd_per_slide_usd} each`}</span></div>}
                 </div>
@@ -909,7 +891,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                 )}
                 {tab === "plan" && (
                   <div className="card rows">
-                    <div className="rowi"><div className="l"><b>{label} plan</b><small>{account.plan.slides_per_month ? `${account.plan.slides_per_month} slides a month` : "No plan yet"}{account.plan.priority_slides_per_month ? `, ${account.plan.priority_slides_per_month} priority` : ""}{hdIncluded ? ", HD included" : ""}{account.periodEnd ? `, renews ${new Date(account.periodEnd).toLocaleDateString()}` : ""}</small></div>
+                    <div className="rowi"><div className="l"><b>{label} plan</b><small>{account.plan.slides_per_month ? `${account.plan.slides_per_month} slides a month` : "No plan yet"}{hdIncluded ? ", HD included" : ""}{account.periodEnd ? `, renews ${new Date(account.periodEnd).toLocaleDateString()}` : ""}</small></div>
                       <div className="r">
                         {(["solo", "grind", "agency"] as const).filter((p) => p !== account.plan.id).map((p) => (
                           <button key={p} className={`btn sm${want === p ? " go" : ""}`} disabled={busy} onClick={() => buy({ plan: p })}>{want === p ? "Continue to" : !paid ? "Choose" : ["solo", "grind", "agency"].indexOf(p) > ["solo", "grind", "agency"].indexOf(account.plan.id) ? "Upgrade to" : "Switch to"} {PLAN_LABELS[p]}</button>
@@ -917,7 +899,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                         <a className="btn quiet sm" href="https://www.thefutureclips.com/#pricing">Compare plans</a>
                       </div></div>
                     <div className="rowi"><div className="l"><b>Slides left</b><small>{account.cap.batch ? "This period's allowance, it resets on your billing date" : "Purchased slides, they never expire"}{account.cap.batch && account.balance ? `, plus ${account.balance} purchased slides that never expire` : ""}</small></div><div className="r"><span className="num" style={{ fontSize: 24, fontWeight: 600 }}>{account.left.batch}</span></div></div>
-                    {canPriority && <div className="rowi"><div className="l"><b>Priority left</b><small>Made in minutes instead of within the day</small></div><div className="r"><span className="num" style={{ fontSize: 24, fontWeight: 600 }}>{account.left.priority}</span></div></div>}
                     <div className="rowi"><div className="l"><b>Slide packs</b><small>{paid ? "Extra slides on top of any plan. They never expire and are used after the month's allowance." : "Packs top up a plan. Choose a plan first."}{viewer.checkout ? "" : " Checkout is being connected, so the buttons email us for now."}</small></div>
                       <div className="r">{(account.packs.length ? account.packs : [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }]).map((k) => <button key={k.id} className="btn sm" disabled={busy || !paid} onClick={() => buy({ pack: k.id })}>{k.slides} for ${k.price_usd}</button>)}</div></div>
                     <div className="rowi"><div className="l"><b>Billing</b><small>{viewer.billing === "none" ? "No subscription on file yet." : `Subscription ${viewer.billing.replace("_", " ")}. You keep access until the end of your billing period.`}</small></div><div className="r">{viewer.checkout && viewer.billing !== "none" ? <button className="btn sm" onClick={portal}>Manage billing</button> : <a className="btn sm" href="mailto:team@thefutureclips.com?subject=Subscription">Email us</a>}</div></div>
@@ -937,7 +918,6 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                         {PRESETS.map(([l, a, b]) => <option key={l} value={`${a},${b}`}>{l}, {a} to {b}</option>)}
                         {[5, 6, 7, 8, 9, 10].map((n) => <option key={n} value={`${n},${n}`}>Exactly {n}</option>)}
                       </select></div></div>
-                    <div className="rowi"><div className="l"><b>Priority delivery</b><small>{canPriority ? "Made in minutes, from the priority allowance" : "Comes with Pro and Studio"}</small></div><div className="r"><button className={`sw${lane === "priority" ? " on" : ""}`} role="switch" aria-checked={lane === "priority"} disabled={!canPriority} onClick={() => setLane(lane === "priority" ? "batch" : "priority")} aria-label="Priority delivery" /></div></div>
                     <div className="rowi"><div className="l"><b>HD</b><small>{canHd ? (hdIncluded ? "Sharper frames. An HD slide uses 3 slides of your allowance." : `Sharper frames, +$${account.plan.hd_per_slide_usd} a slide.`) : "Comes with Pro and Studio"}</small></div><div className="r"><button className={`sw${hd ? " on" : ""}`} role="switch" aria-checked={hd} disabled={!canHd} onClick={() => setHd(!hd)} aria-label="HD" /></div></div>
                     <div className="rowi"><div className="l"><b>Dark theme</b><small>Remembered on this device</small></div><div className="r"><button className={`sw${theme === "dark" ? " on" : ""}`} role="switch" aria-checked={theme === "dark"} onClick={() => applyTheme(theme === "dark" ? "light" : "dark")} aria-label="Dark theme" /></div></div>
                   </div>

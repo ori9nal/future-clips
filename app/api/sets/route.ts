@@ -11,7 +11,6 @@ import { readInstructions, readOrgAssets } from "@/lib/uploads";
 
 export const maxDuration = 300;
 
-const LANES: Lane[] = ["batch", "priority"];
 // what a customer may ask for. "editorial", "mascot" and "clinical" were
 // retired (owner, 2026-09-19); their renderers stay in the engine so older
 // sets still open.
@@ -32,10 +31,15 @@ export async function GET() {
 
 /**
  * Create a set. The database reserves the slides (or refuses) in one call;
- * a priority set then starts rendering in the background of this request
- * and the client polls GET /api/sets/:id. A batch set waits for the poller.
+ * the set then starts rendering in the background of this request and the
+ * client polls GET /api/sets/:id.
  *
- * Body: { campaign, ask, style?, slides: number | {min,max}, lane, hd? }
+ * There is no priority tier (0030): every set takes the fast path — the
+ * engine's "priority" lane, which is the only one the product has ever shown
+ * anyone — and draws from the one monthly allowance. A `lane` in the body is
+ * ignored rather than refused, so older clients keep working.
+ *
+ * Body: { campaign, ask, style?, slides: number | {min,max}, hd? }
  */
 export async function POST(req: Request) {
   const viewer = await viewerForRequest();
@@ -64,19 +68,19 @@ export async function POST(req: Request) {
   const sl = body?.slides;
   let min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
   let max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
-  // the demo: the brief's own shortest set, on the priority lane, never HD,
-  // whatever the form sent. The count comes from the campaign rather than a
-  // constant because a set under the brief's minimum cannot pass compliance
-  // (P-22); the brief is read below, once the campaign id is known.
-  let lane = String(body?.lane ?? "batch") as Lane;
+  // the fast path, for everyone (0030)
+  const lane: Lane = "priority";
+  // the demo: the brief's own shortest set, never HD, whatever the form sent.
+  // The count comes from the campaign rather than a constant because a set
+  // under the brief's minimum cannot pass compliance (P-22); the brief is read
+  // below, once the campaign id is known.
   let hd = !!body?.hd;
-  if (demo) { lane = "priority"; hd = false; }
+  if (demo) hd = false;
 
   if (!campaign) return Response.json({ error: "pick a campaign", code: "FC_NO_CAMPAIGN_PICKED" }, { status: 400 });
   if (ask.length < 3) return Response.json({ error: "say what the set is about", code: "FC_NO_ASK" }, { status: 400 });
   if (ask.length > 400) return Response.json({ error: "keep the ask under 400 characters", code: "FC_ASK_LONG" }, { status: 400 });
   if (!STYLES.has(style)) return Response.json({ error: `unknown style "${style}"`, code: "FC_BAD_STYLE" }, { status: 400 });
-  if (!LANES.includes(lane)) return Response.json({ error: "lane must be batch or priority", code: "FC_BAD_LANE" }, { status: 400 });
   if (!Number.isInteger(min) || !Number.isInteger(max) || (!demo && min < 5) || max > 10 || min > max) {
     return Response.json({ error: "slides must be a count or range between 5 and 10", code: "FC_BAD_RANGE" }, { status: 400 });
   }
@@ -101,16 +105,16 @@ export async function POST(req: Request) {
     return Response.json({ error: e?.message ?? "could not create the set", code: "FC_UNKNOWN" }, { status: 500 });
   }
 
-  // A priority set is rendered now, in the background of this request; the
-  // response returns at once with the id to poll. Without the engine or the
-  // service role on this host the row still exists and the poller (or the
-  // next host that has them) picks it up.
+  // Rendered now, in the background of this request; the response returns
+  // at once with the id to poll. Without the engine or the service role on
+  // this host the row still exists and the poller (or the next host that has
+  // them) picks it up.
   const canRunHere = engineAvailable() && hasServiceRole();
-  if (lane === "priority" && canRunHere) {
+  if (canRunHere) {
     after(async () => {
       const { runWorker } = await import("@/lib/worker");
       await runWorker({ ids: [id] });
     });
   }
-  return Response.json({ id, lane, slides: max, started: lane === "priority" && canRunHere }, { status: 201 });
+  return Response.json({ id, slides: max, started: canRunHere }, { status: 201 });
 }

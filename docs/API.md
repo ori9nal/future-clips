@@ -10,7 +10,7 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/api/keepalive` | GET | public (bearer `CRON_SECRET` if set) | one anon read to keep the Free project awake; stamps `app_settings.keepalive` with the service role | – |
 | `/api/me` | GET | member | `{ account: { plan, usage, periodEnd, left, cap, balance, packs }, org: { id, name, plan } }` | – |
 | `/api/sets` | GET | member | `{ sets: SetRow[] }`, the org's newest 50 | – |
-| `/api/sets` | POST | member (30 per user per 10 min) | body `{ campaign, ask, style?, slides: n | {min,max}, lane: "batch"|"priority", hd? }`; validates, calls `fc_reserve_set`, starts the priority worker in `after()`; `201 { id, lane, started }`; refusals `402` (`FC_QUOTA`, `FC_SPEND_CAP`, `FC_NO_PLAN`, `FC_NO_HD`), `403` (`FC_NOT_MEMBER`), `400` otherwise | engine + service role to start |
+| `/api/sets` | POST | member (30 per user per 10 min) | body `{ campaign, ask, style?, slides: n | {min,max}, hd? }` (a `lane` is ignored — every set takes the fast path from the one allowance, 0030); validates, calls `fc_reserve_set`, starts the worker in `after()`; `201 { id, slides, started }`; refusals `402` (`FC_QUOTA`, `FC_SPEND_CAP`, `FC_NO_PLAN`, `FC_NO_HD`), `403` (`FC_NOT_MEMBER`), `400` otherwise | engine + service role to start |
 | `/api/sets/[id]` | GET | member (RLS) | `{ set: SetRow, label, slides: signedUrl[] }`; the row includes `content_json` and `compliance_json.clean = { frames, slides, stripped: [{ chunk, what, count }], verified }` (what the metadata gate removed from the provider frames and that the shipped slides are pixels only); signed URLs last one hour | – |
 | `/api/sets/[id]` | DELETE | member (RLS) | cancel a `queued` set: `{ cancelled, released }`; `409 { cancelled: false }` once it started; released immediately when the host has the service role | service role optional |
 | `/api/sets/[id]/download` | GET | member (storage policy) | a store-only zip of `slide-N.png` plus `post.txt`; `409` until done | – |
@@ -35,7 +35,7 @@ Engineering owns this file. Every route runs behind `middleware.ts` unless liste
 | `/auth/callback` | GET | public | `?code=` (the PKCE code from the emailed link or Google; the verifier cookie was written by `/api/auth/*`) or `?token_hash=&type=` (a server-verified token: Supabase's server-side template shape, and what `tools/dev-login.mjs` mints) → session cookie, referral claim, redirect to `next` (same-host paths only) | – |
 | `/auth/signout` | POST | public | signs out, 303 to `/login` | – |
 
-**Demo workspace (0013, 0015)**: when `viewer.org.is_demo`, `/app`, `/api/me`, `/api/specs` and the `demo-*` ids answer from `lib/demo-manifest.ts` and `public/demo/**`. With `FC_DEMO_GENERATE=1` a demo member may POST `/api/sets`: the body's slides, lane and HD are replaced by exactly 4 slides on the priority lane, limited to 3 per visitor address per day and 40 a day overall (`FC_DEMO_LIMIT`, 429), and the resulting rows are real sets (Storage, signed URLs, download) listed before the examples for that user. Without the flag, POST answers `FC_DEMO` (402).
+**Demo workspace (0013, 0015)**: when `viewer.org.is_demo`, `/app`, `/api/me`, `/api/specs` and the `demo-*` ids answer from `lib/demo-manifest.ts` and `public/demo/**`. With `FC_DEMO_GENERATE=1` a demo member may POST `/api/sets`: the body's slides and HD are replaced by the brief's shortest set, limited to 3 per visitor address per day and 40 a day overall (`FC_DEMO_LIMIT`, 429), and the resulting rows are real sets (Storage, signed URLs, download) listed before the examples for that user. Without the flag, POST answers `FC_DEMO` (402).
 
 Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each action, then RLS): brand-kit create/update/delete/logo, invites add/remove (access `customer`, `platform_owner` or `demo`), sign-up mode, brief pause/resume/delete, and the dormant referral settlement actions.
 
@@ -44,7 +44,7 @@ Server actions in `app/admin/actions.ts` (platform owner, re-checked inside each
 | Code | Raised by | Meaning | HTTP |
 |---|---|---|---|
 | `FC_NOT_MEMBER` | `fc_reserve_set` | caller is not a member of `p_org` | 403 |
-| `FC_BAD_LANE`, `FC_BAD_RANGE` | `fc_reserve_set` | lane not batch/priority; range outside 5–10 (4–10 for the demo org) | 400 |
+| `FC_BAD_RANGE` | `fc_reserve_set` | range outside 5–10 (4–10 for the demo org) | 400 |
 | `FC_NO_CAMPAIGN` | `fc_reserve_set` | campaign not live or not visible | 400 |
 | `FC_NO_PLAN` | `fc_reserve_set` | the workspace has no plan (there is no free tier) | 402 |
 | `FC_NO_HD` | `fc_reserve_set` | HD not on this plan | 402 |

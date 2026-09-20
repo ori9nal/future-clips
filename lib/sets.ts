@@ -21,6 +21,7 @@ export type SlideBlock = {
 };
 export type SlideLayout = { slide: number; canvas: { w: number; h: number }; art: number; blocks: SlideBlock[] };
 
+/** the engine's provider path — realtime or the batch API. The product uses the fast one for every set (0030); the type stays because rows and the engine carry it */
 export type Lane = "batch" | "priority";
 
 export type SetRow = {
@@ -170,15 +171,13 @@ export function stageLabel(s: Pick<SetRow, "status" | "stage" | "lane">): string
   if (s.status === "done") return "Ready";
   if (s.status === "failed") return "Failed";
   // fc_reserve_set seeds stage = 'copy:submit'; the worker flips status to 'rendering' before it does anything
-  if (s.status === "queued") return s.lane === "priority" ? "Starting" : "In the queue";
+  if (s.status === "queued") return "Starting";
   const st = s.stage ?? "";
   const word = st.startsWith("copy") ? "Writing the slides"
     : st.startsWith("art:anchor") ? "Drawing the first frame"
     : st.startsWith("art:frames") ? "Drawing the frames"
     : st === "render" ? "Composing" : null;
-  if (word) return st.endsWith(":wait") && s.lane === "batch" ? `${word}, in the batch queue` : word;
-  return s.lane === "priority" ? "Starting" : "In the queue";
+  if (word) return word;
+  return "Starting";
 }
 
-/** The pricing-table words for a lane. */
-export const LANE_LABEL: Record<Lane, string> = { batch: "Included", priority: "Priority" };

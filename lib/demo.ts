@@ -42,8 +42,8 @@ const PLANS: Record<string, Partial<Account["plan"]> & { balance?: number }> = {
   // the shipped prices and allowances (D-048): the `plans` row is the truth,
   // this table only mirrors it so a preview shows what a customer would pay
   solo:   { id: "solo",   label: "Clipper", price_usd_month: 19.99, slides_per_month: 200,  priority_slides_per_month: 0,   hd_per_slide_usd: null, seats: 1 },
-  grind:  { id: "grind",  label: "Pro",     price_usd_month: 49.99, slides_per_month: 400,  priority_slides_per_month: 50,  hd_per_slide_usd: 0,    seats: 1 },
-  agency: { id: "agency", label: "Studio",  price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 100, hd_per_slide_usd: 0,    seats: 5 },
+  grind:  { id: "grind",  label: "Pro",     price_usd_month: 49.99, slides_per_month: 400,  priority_slides_per_month: 0,  hd_per_slide_usd: 0,    seats: 1 },
+  agency: { id: "agency", label: "Studio",  price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 0, hd_per_slide_usd: 0,    seats: 5 },
 };
 
 export function demoAccount(account: Account, plan: string): Account {
@@ -168,8 +168,8 @@ export function demoWorkspaceAccount(): Account {
     packs: [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }],
     sale: [
       { id: "solo", label: "Clipper", price_usd_month: 19.99, slides_per_month: 200, priority_slides_per_month: 0, hd_per_slide_usd: null, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
-      { id: "grind", label: "Pro", price_usd_month: 49.99, slides_per_month: 400, priority_slides_per_month: 50, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
-      { id: "agency", label: "Studio", price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 100, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "grind", label: "Pro", price_usd_month: 49.99, slides_per_month: 400, priority_slides_per_month: 0, hd_per_slide_usd: 0, seats: 1, can_pin_style: true, can_lock_brand: false, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
+      { id: "agency", label: "Studio", price_usd_month: 99.99, slides_per_month: 1000, priority_slides_per_month: 0, hd_per_slide_usd: 0, seats: 5, can_pin_style: true, can_lock_brand: true, own_creator: true, extra_slide_usd: null, extra_priority_slide_usd: null },
     ],
   };
 }

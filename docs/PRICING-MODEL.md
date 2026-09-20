@@ -49,6 +49,18 @@ At the new cost every plan clears 50% on the monthly price even if a customer us
 
 Two cautions. The saving is measured on one set; the 18-set average is what to plan with until more land. And the batch figure above is scaled from the priority measurement, because the batch lane has still rendered exactly one set ever — that single $0.0272 underwrites about 80% of everything sold, and is the largest unverified number in this document.
 
+## There is no priority tier (owner, 2026-09-20; migration 0030)
+
+Every set now renders on the fast path, from one allowance. Pro and Studio lose their 50 and 100 priority slides; allowances stay 200 / 400 / 1,000; spend caps are resized to $12 / $24 / $60 so the whole allowance can be used at the fast path's reserve rate. The arithmetic above assumed most slides were drawn on the slow lane at $0.027. They are not any more, and the 50% rule no longer holds at full use on any plan:
+
+| Plan | Yearly rate | Cost at full use ($0.0446 / $0.058 a slide) | Margin at 100% use | Margin at 60% use | Monthly rate, margin at 100% |
+|---|---|---|---|---|---|
+| Clipper | $16 | $8.92 / $11.60 | 24% / 8% | 47% / 37% | 35% / 22% |
+| Pro | $32 | $17.84 / $23.20 | 24% / 8% | 47% / 37% | 44% / 34% |
+| Studio | $79 | $44.60 / $58.00 | 24% / 7% | 46% / 36% | 35% / 22% |
+
+(after the 15% agency commission and 5% fees; $0.0446 is the P-23 single-set measurement, $0.058 the 18-set average.) Read: at the measured utilisation the plans keep roughly 37–47%; a customer who uses every slide leaves 8–24%. The levers are the same as before — the cost per slide, or the allowances — and both are the owner's to move. `node tools/pricing.mjs` now costs the whole allowance at `priority=`.
+
 ## Applied (D-044 and D-048, 2026-09-19)
 
 Two prices per plan (D-048): monthly **$19.99 / $49.99 / $99.99**, or **$16 / $32 / $79 a month** paid yearly. Allowances are sized against the yearly rate because that is the least a customer can pay in a month, so the rule holds on either billing.
