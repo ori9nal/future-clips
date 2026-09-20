@@ -9,7 +9,7 @@ export async function GET() {
   const viewer = await viewerForRequest();
   if (viewer && isDemo(viewer)) return Response.json({ campaigns: demoWorkspaceSpecs() });
   const sb = await createClient();
-  return Response.json({ campaigns: await listSpecs(sb) });
+  return Response.json({ campaigns: await listSpecs(sb, { liveOnly: true, forOrgs: viewer?.memberships.map((m) => m.org.id) }) });
 }
 
 export async function POST(req: Request) {

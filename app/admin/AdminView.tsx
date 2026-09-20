@@ -51,7 +51,10 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
   const platformSpecs = demoOrgId ? specs.filter((s) => s.org_id !== demoOrgId) : specs;
   const briefRows = (rows: AdminSpec[]) => rows.map((s) => (
               <tr key={s.id} data-bad={s.status === "paused" ? "1" : undefined}>
-                <td><b>{s.brand}</b> <span className="fc-note">{s.id}</span></td>
+                <td>
+                  <b>{s.brand}</b> <span className="fc-note">{s.id}</span>
+                  {s.org_id && s.org_id !== demoOrgId ? <> <span className="fc-tag" title="Owned by the admins' workspace: the three of you see it, customers do not.">admins only</span></> : null}
+                </td>
                 <td>{s.niche}</td>
                 <td>{s.content?.style ?? "—"}</td>
                 <td>{s.requirements?.min_slides ?? "?"}–{s.requirements?.max_slides ?? "?"}</td>
@@ -269,7 +272,7 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
           <span style={{ flex: 1 }} />
           <Link className="fc-btn" data-size="sm" href="/admin/campaigns">Add a campaign</Link>
         </h2>
-        <p className="fc-note" style={{ marginTop: -6 }}>Every workspace sees the briefs added here. The demo&rsquo;s own briefs are under <b>The demo</b>.</p>
+        <p className="fc-note" style={{ marginTop: -6 }}>Every workspace sees a brief added here unless it is tagged <span className="fc-tag">admins only</span>. The demo&rsquo;s own briefs are under <b>The demo</b>.</p>
         {!platformSpecs.length && <p className="fc-note" style={{ marginTop: 10 }}>No briefs yet. Customers see an empty picker until one is added.</p>}
         <table className="fc-table">
           <thead><tr><th>Brand</th><th>Niche</th><th>Style</th><th>Slides</th><th>Sample</th><th>Status</th><th /></tr></thead>

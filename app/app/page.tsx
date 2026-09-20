@@ -47,7 +47,7 @@ export default async function AppHome() {
   }
   const sb = await createClient();
   const [specs, account0, sets0, summary, referred, commissions] = await Promise.all([
-    listSpecs(sb, { liveOnly: true }),
+    listSpecs(sb, { liveOnly: true, forOrgs: viewer.memberships.map((m) => m.org.id) }),
     getAccount(sb, viewer),
     listSets(sb, viewer.org.id),
     getAgencySummary(sb, viewer.org.id),

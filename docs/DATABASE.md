@@ -2,7 +2,7 @@
 
 Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkhdz`, us-east-1, Free tier, Postgres 17). Every table has RLS on. Money and quota move only through `SECURITY DEFINER` functions the service role calls. Files under `supabase/migrations/` are the record; the "applied" column below is the truth about the live database.
 
-## Migration state (2026-09-20, after 0031)
+## Migration state (2026-09-20, after 0032)
 
 | File | Remote migration name(s) | Applied | Notes |
 |---|---|---|---|
@@ -39,6 +39,7 @@ Engineering owns this file. Supabase project `clipcarousel` (`waipwmyncpsgoglmkh
 | `0029_fixture_briefs_belong_to_the_demo.sql` | `fixture_briefs_belong_to_the_demo` (2026-09-20) | yes | the 16 fixture briefs moved to the demo workspace, the 5 legacy `campaign`-kind fixtures deleted; platform owners read and write every brief (`campaigns_read`, `campaigns_platform_write`) (D-050) |
 | `0030_one_allowance_no_priority.sql` | `one_allowance_no_priority` (2026-09-20) | yes | no priority tier (D-051): `plans.priority_slides_per_month = 0`; `fc_reserve_set`, `fc_commit_set`, `fc_release_set` use one allowance whatever the lane (caps re-sized by 0031) |
 | `0031_batch_for_customers_and_a_poller.sql` | `pg_cron_and_pg_net` + by hand (2026-09-20) | yes | batch lane for customers (D-052): `pg_cron`, `pg_net`, Vault secret `cron_bearer`, job `fc-lanes-poller` every 5 min, `fc_cron_bearer()` (service role), `cogs_allowance_usd = slides × 0.03` |
+| `0032_briefs_of_any_workspace_you_belong_to.sql` | `briefs_of_any_workspace_you_belong_to`, `reserve_set_uses_campaign_usable` (2026-09-20) | yes | `fc_campaign_usable(id)`; `fc_reserve_set` accepts a brief of any workspace the caller belongs to (D-054) |
 
 File numbers are not the apply order. Apply through the Supabase MCP `apply_migration` (or the CLI once logged in), then run `get_advisors` (security and performance), then update this table.
 

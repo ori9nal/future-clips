@@ -32,9 +32,17 @@ export type CampaignRow = {
 
 const COLS = "id, org_id, kind, data, status, art_mode, photo_dir_available, sample, updated_at";
 
-export async function listSpecs(sb: SupabaseClient, { liveOnly = false } = {}): Promise<(Spec & { org_id: string | null; status: string })[]> {
+/**
+ * The briefs a member may pick from: platform briefs (org_id null), and the
+ * briefs owned by any workspace they belong to. Pass `forOrgs` from the
+ * viewer's memberships. Without it the list is everything RLS lets through —
+ * which for a platform owner is every brief in the system, including the
+ * demo's fixtures, and that is the admin page's view, not a picker's (0032).
+ */
+export async function listSpecs(sb: SupabaseClient, { liveOnly = false, forOrgs }: { liveOnly?: boolean; forOrgs?: string[] } = {}): Promise<(Spec & { org_id: string | null; status: string })[]> {
   let q = sb.from("campaigns").select(COLS).eq("kind", "spec");
   if (liveOnly) q = q.eq("status", "live");
+  if (forOrgs) q = q.or(`org_id.is.null,org_id.in.(${forOrgs.map((o) => `"${o}"`).join(",")})`);
   const { data, error } = await q;
   if (error) throw error;
   return (data as CampaignRow[])
