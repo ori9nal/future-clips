@@ -509,7 +509,7 @@ export async function createBlankBrief(fd: FormData) {
     niche: str(fd.get("niche"), 40) || "general",
     payout: { rate_usd: 0, min_payout_usd: 0, max_payout_usd: 0, budget_total_usd: 0, budget_remaining_usd: 0, review_days: 0, platforms: ["instagram", "tiktok"] },
     requirements: { min_slides: 5, max_slides: 10, aspect: "9:16", required_mention: "" },
-    rules: {},
+    rules: { banned_claims: [] },
     assets: { palette: ["#0B0B0C", "#FF5A1F", "#F2F0EB"], mascot: null, photos: { dir: "", credit: "" } },
     content: { style: "native", hook: { photo: 0, lines: [] }, ranked: [], closer: { lines: [], cta: "" } },
   } as Spec;
