@@ -238,7 +238,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
   useEffect(() => {
     const open = sets.filter((s) => s.status === "queued" || s.status === "rendering");
     if (!open.length) return;
-    const every = 4000;
+    const every = open.some((s) => s.lane === "priority") ? 4000 : 20000;
     const t = window.setInterval(async () => {
       for (const s of open) {
         try {
@@ -290,7 +290,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       if (!r.ok) { setErr(sentence(j, "Could not start the slideshow. Try again in a moment.")); return; }
       const row: SetView = {
         id: j.id, org_id: "", campaign_id: active.id, style: chosenStyle, ask: topic, slides: null, slides_min: nMin, slides_max: nMax,
-        reserved_slides: nMax, quality: hd ? "high" : "medium", lane: "priority", hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
+        reserved_slides: nMax, quality: hd ? "high" : "medium", lane: demoN ? "priority" : "batch", hd, status: "queued", stage: "copy:submit", caption: null, cost_usd: null,
         files_json: null, content_json: null, compliance_json: null, error: null, cancel_requested: false, created_at: new Date().toISOString(),
         started_at: null, finished_at: null, updated_at: new Date().toISOString(), label: j.started ? "Starting" : "In the queue",
       };
@@ -298,7 +298,7 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
       setAsk("");
       refreshAccount();
       const n = nMin === nMax ? `${nMin}` : `${nMin} to ${nMax}`;
-      say(j.started ? "Making it now. A minute or two." : `Kept: ${n} slides, starts as soon as rendering is switched on`);
+      say(j.queued ? `Queued: ${n} slides. Back within the day, usually much sooner.` : j.started ? "Making it now. A minute or two." : `Kept: ${n} slides, starts as soon as rendering is switched on`);
     } catch (e: any) {
       setErr("Could not reach the server. Check your connection and try again.");
     } finally {

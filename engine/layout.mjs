@@ -131,8 +131,16 @@ function tryFace(root, file) {
   return f;
 }
 
-/** Re-emit one block's runs with new words, wrapped and fitted to its column. */
-function reflow(block, lines, { root, canvasW }) {
+/**
+ * Re-emit one block's runs with new words, wrapped and fitted to its column.
+ *
+ * Four lines at most, and the block may not run past the bottom of the slide:
+ * the type shrinks (never below 55% of what it was) until both hold. A slide
+ * is read at thumbnail size, and a block that swallows half of it is not a
+ * slide any more (owner, 2026-09-20).
+ */
+const MAX_LINES = 4;
+function reflow(block, lines, { root, canvasW, canvasH }) {
   const face = tryFace(root, block.face);
   const first = block.runs?.[0];
   const attrs = { ...(first?.attrs ?? {}) };
@@ -140,21 +148,36 @@ function reflow(block, lines, { root, canvasW }) {
   const column = Math.max(block.box.w, Math.round(canvasW * 0.72));
   const wrapTo = Math.min(column, Math.round(canvasW * 0.92));
   let size = block.size;
-  let out = lines.flatMap((l) => (face ? breakToFit(face, l, wrapTo, size, { max: 8 }) : [l])).filter((l) => l.trim());
+  const wrap = (sz) => lines.flatMap((l) => (face ? breakToFit(face, l, wrapTo, sz, { max: MAX_LINES }) : [l])).filter((l) => l.trim()).slice(0, MAX_LINES);
+  let out = wrap(size);
   if (!out.length) return '';
-  // nothing may run off the canvas: if a word cannot be broken small enough,
-  // the block shrinks rather than bleeding over the edge
+  // nothing may run off the canvas — sideways or below: if a word cannot be
+  // broken small enough, or the lines stack past the bottom edge, the block
+  // shrinks rather than bleeding over
+  const top = block.runs[0].y - block.size * 0.82;
+  const floor = (canvasH ?? Infinity) - Math.round(canvasW * 0.03);
   if (face) {
     for (let guard = 0; guard < 12; guard++) {
       const widest = Math.max(...out.map((l) => layoutWidth(face, l, size)));
-      if (widest <= wrapTo || size <= block.size * 0.55) break;
-      size = Math.max(Math.round(block.size * 0.55), Math.round(size * Math.min(0.94, wrapTo / widest)));
-      out = lines.flatMap((l) => breakToFit(face, l, wrapTo, size, { max: 8 })).filter((l) => l.trim());
+      const tall = out.length * block.lineHeight * (size / block.size);
+      const fits = widest <= wrapTo && top + tall <= floor;
+      if (fits || size <= block.size * 0.55) break;
+      const by = Math.min(0.94, widest > wrapTo ? wrapTo / widest : 1, top + tall > floor ? Math.max(0.5, (floor - top) / tall) : 1);
+      size = Math.max(Math.round(block.size * 0.55), Math.round(size * by));
+      out = wrap(size);
     }
   }
   const lh = Math.round(block.lineHeight * (size / block.size));
   const baseX = block.runs[0].x;
   let y = block.runs[0].y;
+  // Shrinking stops at 55% so the words stay readable; if the block still
+  // reaches past the bottom edge at that size, it is lifted until it fits —
+  // what a person laying it out by hand would do — never past the top margin.
+  if (Number.isFinite(floor)) {
+    const topNow = y - size * 0.82;
+    const over = topNow + out.length * lh - floor;
+    if (over > 0) y -= Math.min(over, Math.max(0, topNow - Math.round(canvasW * 0.03)));
+  }
   let svg = '';
   for (const l of out) {
     const a = { ...attrs, x: String(baseX), y: String(Math.round(y)), 'font-size': String(size) };
@@ -173,7 +196,7 @@ function reflow(block, lines, { root, canvasW }) {
  * that encloses it is carried along, so a moved label does not leave its
  * background behind.
  */
-export function applyEdits(body, edits, { root, canvasW = 1080 } = {}) {
+export function applyEdits(body, edits, { root, canvasW = 1080, canvasH } = {}) {
   if (!edits || !Object.keys(edits).length) return body;
   const blocks = readBlocks(body, { root });
   let out = String(body);
@@ -185,7 +208,7 @@ export function applyEdits(body, edits, { root, canvasW = 1080 } = {}) {
     const dx = Number(e.dx ?? 0), dy = Number(e.dy ?? 0);
     const lines = Array.isArray(e.lines) ? e.lines.map((l) => String(l ?? '')) : null;
     let start = b.start, end = b.end;
-    let inner = lines ? reflow(b, lines, { root, canvasW }) : out.slice(start, end);
+    let inner = lines ? reflow(b, lines, { root, canvasW, canvasH }) : out.slice(start, end);
     if (!inner) { out = out.slice(0, start) + out.slice(end); continue; }
     if (dx || dy) {
       // carry the pill or card the block sits on, when there is one

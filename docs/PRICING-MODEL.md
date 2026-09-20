@@ -49,7 +49,19 @@ At the new cost every plan clears 50% on the monthly price even if a customer us
 
 Two cautions. The saving is measured on one set; the 18-set average is what to plan with until more land. And the batch figure above is scaled from the priority measurement, because the batch lane has still rendered exactly one set ever — that single $0.0272 underwrites about 80% of everything sold, and is the largest unverified number in this document.
 
-## There is no priority tier (owner, 2026-09-20; migration 0030)
+## Batch for every customer (owner, 2026-09-20; migration 0031)
+
+The owner's rule is 50% at full use, and the realtime path (below) could not reach it. Every customer's set now goes through the providers' batch APIs — the same words and frames at half the price, back within the day and usually much sooner — and only the demo renders in two minutes. So the whole allowance is costed at the batch rate again, and the caps are $6 / $12 / $30 (0.03 a slide reserve).
+
+| Plan | Yearly rate | Cost at full use ($0.027 / $0.019 a slide) | Margin at 100% use | Margin at 60% use | Monthly rate, margin at 100% |
+|---|---|---|---|---|---|
+| Clipper | $16 | $5.40 / $3.80 | 46% / 56% | 60% / 66% | 53% / 61% |
+| Pro | $32 | $10.80 / $7.60 | 46% / 56% | 60% / 66% | 58% / 65% |
+| Studio | $79 | $27.00 / $19.00 | 46% / 56% | 60% / 66% | 53% / 61% |
+
+(after the 15% agency commission and 5% fees. $0.027 is the one batch set ever measured, before P-23; $0.019 is that figure with P-23's 30% saving, which applies to the batch lane too.) Read: on the monthly price the rule holds at full use at either cost. On the yearly rate it holds only at the P-23 cost — the pre-P-23 figure misses by four points — and the one number that decides it is the batch cost per slide, which has been measured exactly once. A real batch set was queued on the test workspace on 2026-09-20 to measure it; `node tools/pricing.mjs batch=<measured>` gives the table.
+
+## There was no priority tier for a day (owner, 2026-09-20; migration 0030 — superseded by 0031 above)
 
 Every set now renders on the fast path, from one allowance. Pro and Studio lose their 50 and 100 priority slides; allowances stay 200 / 400 / 1,000; spend caps are resized to $12 / $24 / $60 so the whole allowance can be used at the fast path's reserve rate. The arithmetic above assumed most slides were drawn on the slow lane at $0.027. They are not any more, and the 50% rule no longer holds at full use on any plan:
 

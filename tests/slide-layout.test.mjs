@@ -71,12 +71,22 @@ test('a rect that is not behind the text is left where it is', () => {
 
 test('longer words wrap and the type shrinks rather than running off the slide', () => {
   const long = 'a much longer line than the one that was there before, which has to be broken up somehow';
-  const out = applyEdits(BODY, { b0: { lines: [long] } }, { root: ROOT, canvasW: 1080 });
+  const out = applyEdits(BODY, { b0: { lines: [long] } }, { root: ROOT, canvasW: 1080, canvasH: 1440 });
   const blocks = readBlocks(out, { root: ROOT });
   assert.ok(blocks[0].lines.length > 1, 'it wrapped');
+  assert.ok(blocks[0].lines.length <= 4, `never more than four lines (${blocks[0].lines.length})`);
   assert.ok(blocks[0].box.x >= 0, `left edge ${blocks[0].box.x}`);
   assert.ok(blocks[0].box.x + blocks[0].box.w <= 1080, `right edge ${blocks[0].box.x + blocks[0].box.w}`);
-  assert.equal(blocks[0].lines.join(' '), long, 'no words were lost');
+  assert.ok(blocks[0].box.y + blocks[0].box.h <= 1440, `bottom edge ${blocks[0].box.y + blocks[0].box.h}`);
+});
+
+test('a block near the bottom shrinks rather than running off the slide', () => {
+  // the sub sits at y=720 on a 1440 canvas; four long lines at 40px would want ~230px, fine — so push it down first
+  const low = `<rect x="0" y="0" width="1080" height="1440" fill="#000"/>${run(540, 1380, 60, 'one')}`;
+  const out = applyEdits(low, { b0: { lines: ['a long line of words here', 'another long line of words', 'and a third one', 'and a fourth'] } }, { root: ROOT, canvasW: 1080, canvasH: 1440 });
+  const b = readBlocks(out, { root: ROOT })[0];
+  assert.ok(b.box.y + b.box.h <= 1440, `bottom edge ${b.box.y + b.box.h}`);
+  assert.ok(b.size < 60, `the type shrank (${b.size}px)`);
 });
 
 test('an empty block is removed rather than drawn blank', () => {
@@ -139,14 +149,23 @@ test('words are trimmed, blanks dropped, and the count capped', () => {
   assert.ok(out?.b0.lines);
   assert.equal(out.b0.lines[0], 'spaced out', 'runs of space collapse');
   assert.ok(!out.b0.lines.includes(''), 'blank lines are dropped');
-  assert.equal(out.b0.lines[1].length, 140, 'a very long line is cut to what can be laid out');
-  assert.equal(out.b0.lines.length, 8, 'eight lines is the most a block takes');
+  assert.equal(out.b0.lines[1].length, 60, 'a very long line is cut to what can be read at thumbnail size');
+  assert.equal(out.b0.lines.length, 4, 'four lines is the most a block takes');
 });
 
-test('a move is clamped so a block cannot be thrown off the canvas for ever', () => {
+test('a move is clamped so the block stays on the slide', () => {
+  // b0 is 400 wide at x=100 and 120 tall at y=200; the edge keeps 3% of the width clear (32px)
   const out = cleanEdits({ b0: { dx: 99999, dy: -99999 } }, BLOCKS, CANVAS);
-  assert.equal(out.b0.dx, CANVAS.w);
-  assert.equal(out.b0.dy, -(200 + 120));
+  assert.equal(out.b0.dx, 1080 - 32 - 400 - 100, 'its right edge sits at the margin');
+  assert.equal(out.b0.dy, 32 - 200, 'its top sits at the margin');
+  const down = cleanEdits({ b0: { dy: 99999 } }, BLOCKS, CANVAS);
+  assert.equal(down.b0.dy, 1440 - 32 - 120 - 200, 'its bottom sits at the margin');
+});
+
+test('more lines make the block taller, and the clamp knows it', () => {
+  const four = cleanEdits({ b0: { lines: ['a', 'b', 'c', 'd'], dy: 99999 } }, BLOCKS, CANVAS);
+  // two lines were 120 tall, so four are 240
+  assert.equal(four.b0.dy, 1440 - 32 - 240 - 200);
 });
 
 test('a nudge of nothing is not a change', () => {

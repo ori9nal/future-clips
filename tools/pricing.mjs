@@ -16,11 +16,11 @@ const cPrio = args.priority ?? 0.058;    // $/slide, measured over 18 priority s
 const margin = args.margin ?? 0.50, agency = args.agency ?? 0.15, fees = args.fees ?? 0.05, use = args.use ?? 0.6;
 const share = 1 - margin - agency - fees;
 const plans = [
-  // there is no priority tier (0030): every slide is drawn on the fast path, so
-  // the whole allowance is costed at c_priority and `batch` is 0
-  { id: 'solo',   label: 'Clipper', price: 16, batch: 0, priority: 200 },
-  { id: 'grind',  label: 'Pro',     price: 32, batch: 0, priority: 400 },
-  { id: 'agency', label: 'Studio',  price: 79, batch: 0, priority: 1000 },
+  // there is no priority tier (0030) and every customer's slide goes through
+  // the batch API (0031): the whole allowance is costed at c_batch
+  { id: 'solo',   label: 'Clipper', price: 16, batch: 200,  priority: 0 },
+  { id: 'grind',  label: 'Pro',     price: 32, batch: 400,  priority: 0 },
+  { id: 'agency', label: 'Studio',  price: 79, batch: 1000, priority: 0 },
 ];
 const packs = [{ id: 'p100', slides: 100, price: 8 }, { id: 'p250', slides: 250, price: 18 }, { id: 'p600', slides: 600, price: 40 }];
 console.log(`cost/slide batch $${cBatch} priority $${cPrio} · margin ${margin * 100}% · agency ${agency * 100}% · fees ${fees * 100}% → ${Math.round(share * 100)}% of price may go to providers · expected use ${use * 100}%\n`);

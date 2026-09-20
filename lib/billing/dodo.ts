@@ -148,3 +148,36 @@ export type DodoEvent = {
     currency?: string;
   };
 };
+
+/* ── what a buyer reads at checkout ──────────────────────────────────────────
+ * The description on each Dodo product is written from the plans table, so
+ * the words at the till never drift from what the plan is. Run from the admin
+ * page on demand and by the poller once a day (0031). */
+const PERKS: Record<string, string> = {
+  solo: "One saved character style, the hook library, no AI watermark.",
+  grind: "Unlimited character styles, HD export, view tracking.",
+  agency: "Up to 5 seats, multi-account tracking, bulk generation, dedicated support.",
+};
+
+export function planDescription(p: { id: string; slides_per_month: number }): string | null {
+  const perks = PERKS[p.id];
+  if (!perks) return null;
+  return `${p.slides_per_month.toLocaleString("en-US")} slides a month. ${perks}`;
+}
+
+/** PATCH every sold product (monthly and yearly) with its plan's description. */
+export async function syncProductDescriptions(plans: { id: string; slides_per_month: number }[]): Promise<{ updated: string[] }> {
+  const ids = productMap();
+  const updated: string[] = [];
+  for (const p of plans) {
+    const description = planDescription(p);
+    if (!description) continue;
+    for (const sku of [p.id, `${p.id}_year`]) {
+      const id = ids[sku];
+      if (!id) continue;
+      await api(`/products/${id}`, { method: "PATCH", json: { description } });
+      updated.push(sku);
+    }
+  }
+  return { updated };
+}

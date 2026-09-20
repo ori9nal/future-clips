@@ -25,9 +25,10 @@ export type { SlideBlock as Block, SlideLayout } from "@/lib/sets";
 export type BlockEdit = { lines?: string[]; dx?: number; dy?: number };
 export type SlideEdits = Record<string, BlockEdit>;
 
-/** Words may be changed and blocks moved; nothing else, and not by much. */
-export const MAX_LINES = 8;
-export const MAX_LINE = 140;
+// the limits and the clamp live in lib/slideText.ts, which the browser can
+// load too, so the editor and this route enforce exactly the same rule
+import { clampMove, MAX_LINE, MAX_LINES } from "@/lib/slideText";
+export { clampMove, MAX_LINE, MAX_LINES, EDGE } from "@/lib/slideText";
 
 /**
  * Trim an edit to what the renderer will honour.
@@ -52,12 +53,13 @@ export function cleanEdits(raw: unknown, blocks: Block[], canvas: { w: number; h
       // the same words in the same order is not an edit
       if (lines.join("\n") !== block.lines.join("\n")) edit.lines = lines;
     }
-    // a block may be dragged anywhere on the slide, and no further
+    // a block may be dragged anywhere on the slide — and stays on it
     const dx = Math.round(Number(e.dx ?? 0)) || 0;
     const dy = Math.round(Number(e.dy ?? 0)) || 0;
     if (dx || dy) {
-      edit.dx = Math.max(-block.box.x - block.box.w, Math.min(canvas.w, dx));
-      edit.dy = Math.max(-block.box.y - block.box.h, Math.min(canvas.h, dy));
+      const c = clampMove(block, edit.lines ?? block.lines, dx, dy, canvas);
+      if (c.dx) edit.dx = c.dx;
+      if (c.dy) edit.dy = c.dy;
     }
     if (Object.keys(edit).length) out[id] = edit;
   }

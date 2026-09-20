@@ -487,3 +487,47 @@ export async function endAdminSessions() {
   (await cookies()).set(UNLOCK_COOKIE, "", { path: "/", maxAge: 0 });
   redirect("/admin/unlock");
 }
+
+/* ── a brief from nothing but a name ──────────────────────────────────────── */
+
+/**
+ * Start a blank brief and open the editor on it. The editor needs a row to
+ * write to, so the minimum that renders is written first — paused, so nothing
+ * reaches a customer until the admin has filled it in and pressed Go live.
+ */
+export async function createBlankBrief(fd: FormData) {
+  await requirePlatformOwner();
+  const brand = str(fd.get("brand"), 80);
+  if (!brand) throw new Error("the brief needs a brand");
+  const id = brand.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 64);
+  if (!id) throw new Error("could not make an id from that name");
+  const sb = await createClient();
+  if (await getSpec(sb, id)) redirect(`/admin/briefs/${id}`);
+  const spec: Spec = {
+    id, brand, status: "paused",
+    product: str(fd.get("product"), 200) || brand,
+    niche: str(fd.get("niche"), 40) || "general",
+    payout: { rate_usd: 0, min_payout_usd: 0, max_payout_usd: 0, budget_total_usd: 0, budget_remaining_usd: 0, review_days: 0, platforms: ["instagram", "tiktok"] },
+    requirements: { min_slides: 5, max_slides: 10, aspect: "9:16", required_mention: "" },
+    rules: {},
+    assets: { palette: ["#0B0B0C", "#FF5A1F", "#F2F0EB"], mascot: null, photos: { dir: "", credit: "" } },
+    content: { style: "native", hook: { photo: 0, lines: [] }, ranked: [], closer: { lines: [], cta: "" } },
+  } as Spec;
+  await saveSpec(sb, spec, { status: "paused" });
+  revalidatePath("/admin");
+  redirect(`/admin/briefs/${id}`);
+}
+
+/* ── the words at the till (0031) ─────────────────────────────────────────── */
+
+/** Rewrite the Dodo product descriptions from the plans table, now. */
+export async function syncCheckoutDescriptions() {
+  await requirePlatformOwner();
+  const { syncProductDescriptions } = await import("@/lib/billing/dodo");
+  const sb = await createClient();
+  const { data: plans } = await sb.from("plans").select("id, slides_per_month").in("id", ["solo", "grind", "agency"]);
+  const r = await syncProductDescriptions(plans ?? []);
+  const at = new Date().toISOString();
+  await sb.from("app_settings").upsert({ key: "dodo_descriptions", value: { at, updated: r.updated }, updated_at: at }, { onConflict: "key" });
+  revalidatePath("/admin");
+}

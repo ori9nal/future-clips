@@ -109,7 +109,6 @@ nav.mob.open{display:flex}
 .pill b{background:var(--lime);color:var(--ink);border-radius:999px;padding:4px 10px;font-size:10.5px;font-weight:500}
 .pill .t{font-variant-numeric:tabular-nums;font-weight:600;color:var(--ink);letter-spacing:.04em}
 .pill.done b{background:var(--ink);color:var(--lime)}
-@media (max-width:560px){.pill .cd-tail{display:none}}
 h1{font-stretch:112%;font-weight:700;font-size:clamp(2.2rem,5.6vw,4.2rem);line-height:1.04;max-width:17ch;margin-inline:auto;text-wrap:balance}
 .mark{background:var(--lime);padding:0 .1em;border-radius:6px;box-decoration-break:clone;-webkit-box-decoration-break:clone}
 .sub{margin:24px auto 0;max-width:52ch;font-size:18.5px;line-height:1.55}
@@ -455,7 +454,6 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
 
 <section class="hero">
   <div class="wrap">
-    <span class="pill rise cd" id="cd" data-at="2026-09-19T12:00:00Z"><b>Launch</b> <span id="cdt"><time datetime="2026-09-19T12:00:00Z">today, 12:00 UTC</time></span><span class="cd-tail"> · founding prices locked</span></span>
     <h1 class="rise">Turn one idea into a <span class="mark">viral carousel</span> in two minutes</h1>
     <p class="sub rise">Enter a topic. Pick your style. Get a ready-to-post carousel with the same character on every slide, a hook that stops the scroll, and no AI watermark anywhere.</p>
     <div class="hbtns rise">
@@ -874,51 +872,6 @@ transform:translateY(110%);transition:transform .32s cubic-bezier(.2,.9,.3,1)}
   });
 })();
 
-// launch countdown — the pill ticks down to the moment in its data-at, then
-// flips to "live". Everything is computed from Date.now(), so a visitor in any
-// timezone sees the same remaining time; the no-JS markup already names the
-// moment in UTC, which is what a reader needs if this never runs.
-(function(){
-  var el=document.getElementById('cd'), out=document.getElementById('cdt');
-  if(!el||!out) return;
-  var at=Date.parse(el.getAttribute('data-at'));
-  if(isNaN(at)) return;
-  var pad=function(n){ return n<10?'0'+n:''+n; };
-  var t=new Date(at);
-  // the numbers alone do not say WHEN: a reader planning around it needs the
-  // moment as well as the distance to it
-  var when=pad(t.getUTCHours())+':'+pad(t.getUTCMinutes())+' UTC';
-  // The markup is built once and only the digits are written after that. An
-  // innerHTML every second re-parses the pill and re-lays out the hero around
-  // it, which is work a phone does not need to do 60 times a minute.
-  out.textContent='in ';
-  var num=document.createElement('span');
-  num.className='t';
-  out.appendChild(num);
-  out.appendChild(document.createTextNode(' · '+when));
-  var timer;
-  function tick(){
-    var left=at-Date.now();
-    if(left<=0){
-      el.classList.add('done');
-      el.querySelector('b').textContent='Live';
-      out.textContent='now';
-      var tail=el.querySelector('.cd-tail');
-      if(tail) tail.textContent=' · founding prices still locked';
-      clearInterval(timer);
-      timer=null;
-      return;
-    }
-    var s=Math.floor(left/1000), d=Math.floor(s/86400);
-    var h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60), sec=s%60;
-    num.textContent=(d?d+'d ':'')+pad(h)+':'+pad(m)+':'+pad(sec);
-  }
-  function run(){ if(!timer&&!el.classList.contains('done')){ tick(); timer=setInterval(tick,1000); } }
-  function stop(){ if(timer){ clearInterval(timer); timer=null; } }
-  // nothing to count while the tab is in the background
-  document.addEventListener('visibilitychange',function(){ document.hidden?stop():run(); });
-  run();
-})();
 
 // casual image protection
 (function(){

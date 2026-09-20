@@ -32,8 +32,10 @@ export async function POST(req: Request) {
   try {
     const { spec, usd } = await ingestBrief({ root, brief });
     if (body?.save) {
+      // paused: the admin reads what was extracted in the editor and presses
+      // "Go live"; nothing reaches a customer's picker unreviewed
       const sb = await createClient();
-      await saveSpec(sb, spec);
+      await saveSpec(sb, spec, { status: "paused" });
     }
     return Response.json({ spec, usd: +usd.toFixed(4), saved: !!body?.save });
   } catch (e: any) {

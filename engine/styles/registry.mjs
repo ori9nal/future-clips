@@ -114,7 +114,7 @@ const publicBlock = (b) => ({ id: b.id, lines: b.lines, box: b.box, size: b.size
  */
 export function rerenderSlide({ body, art = [], edits, canvas, root }) {
   const { w, h } = canvas;
-  const edited = applyEdits(body, edits, { root, canvasW: w });
+  const edited = applyEdits(body, edits, { root, canvasW: w, canvasH: h });
   const missing = artMissing(edited).filter((k) => !art.some((a) => a.k === k));
   if (missing.length) throw new Error(`slide is missing its picture${missing.length > 1 ? 's' : ''} (${missing.join(', ')})`);
   const png = rasterise(wrap(joinArt(edited, art), w, h), w, fontFiles(root));
@@ -167,7 +167,7 @@ export async function render({ spec, root, styleId, outDir, cacheDir, edits }) {
   const layout = [];
   for (let i = 0; i < bodies.length; i++) {
     const n = i + 1;
-    const edited = applyEdits(bodies[i], edits?.[n] ?? edits?.[String(n)], { root, canvasW: w });
+    const edited = applyEdits(bodies[i], edits?.[n] ?? edits?.[String(n)], { root, canvasW: w, canvasH: h });
     const file = path.join(outDir, `slide-${n}.png`);
     fs.writeFileSync(file, rasterise(wrap(edited, w, h), w, fonts));
     files.push(file);

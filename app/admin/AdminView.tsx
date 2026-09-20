@@ -1,6 +1,6 @@
 import Link from "next/link";
 import AppShell from "@/components/AppShell";
-import { createCampaign, setBriefStatus, removeBrief, makeSample, endAdminSessions, resetAuthenticator } from "./actions";
+import { setBriefStatus, removeBrief, makeSample, endAdminSessions, resetAuthenticator, syncCheckoutDescriptions } from "./actions";
 import type { Viewer } from "@/lib/auth";
 
 /**
@@ -85,8 +85,8 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
         <p className="fc-eyebrow">Admin</p>
         <h1>Everything a brand hands over, once.</h1>
         <p className="fc-sub">
-          Two kinds of campaign live here: <b>briefs</b> (ingested from an agency brief, what clippers generate against)
-          and <b>brand kits</b> (the older admin-authored shape). They are stored apart and never overwrite each other.
+          A <b>brief</b> is what an agency sends and what clippers generate against. Add one by pasting it — the rules that
+          get a post rejected are read out of it and enforced before every render — then check it in the editor and go live.
         </p>
         <p className="fc-note" style={{ marginTop: 10 }}>
           <Link href="/admin/invites">Invites &amp; access</Link> · <Link href="/admin/partners">Partners</Link>
@@ -112,6 +112,12 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
                 </tr>
               </tbody>
             </table>
+            <p className="fc-note" style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <span>The descriptions a buyer reads at Dodo&rsquo;s checkout are written from the plans table — by the poller once a day, or now:</span>
+              <form action={syncCheckoutDescriptions} style={{ display: "inline" }}>
+                <button className="fc-btn" data-variant="ghost" data-size="sm" type="submit" disabled={readOnly}>Rewrite the checkout copy</button>
+              </form>
+            </p>
             {(() => {
               // A day of burn across both providers turns the balance into the
               // only number that answers "when do I have to act": days of
@@ -258,7 +264,11 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
       )}
 
       <section className="fc-card">
-        <h2>Briefs <span className="fc-tag">{platformSpecs.length}</span></h2>
+        <h2 style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          Briefs <span className="fc-tag">{platformSpecs.length}</span>
+          <span style={{ flex: 1 }} />
+          <Link className="fc-btn" data-size="sm" href="/admin/campaigns">Add a campaign</Link>
+        </h2>
         <p className="fc-note" style={{ marginTop: -6 }}>Every workspace sees the briefs added here. The demo&rsquo;s own briefs are under <b>The demo</b>.</p>
         {!platformSpecs.length && <p className="fc-note" style={{ marginTop: 10 }}>No briefs yet. Customers see an empty picker until one is added.</p>}
         <table className="fc-table">
@@ -269,48 +279,17 @@ export default function AdminView({ viewer, specs, campaigns, fund, engineOn, se
         </table>
       </section>
 
-      <section className="fc-grid" style={{ marginBottom: 26 }}>
-        {campaigns.map((c) => {
-          const accent = Object.values(c.brand.colors.accents)[0] as string;
-          return (
+      {campaigns.length > 0 && (
+        // the older admin-authored "brand kit" shape: none are made any more
+        // (0029 deleted the fixtures), but one that exists is still reachable
+        <section className="fc-grid" style={{ marginBottom: 26 }}>
+          {campaigns.map((c) => (
             <Link key={c.id} href={`/admin/campaigns/${c.id}`} className="fc-tile">
-              <div className="fc-tile-top">
-                <span className="fc-sw" style={{ background: c.brand.colors.ink, width: 34, height: 34 }} />
-                <span className="fc-sw" style={{ background: accent, width: 34, height: 34 }} />
-                <div>
-                  <h3>{c.name}</h3>
-                  <p className="fc-handle">{c.brand.handle || "no handle set"}</p>
-                </div>
-              </div>
-              <div className="fc-meta">
-                <div><span>Niche</span><b>{c.niche}</b></div>
-                <div><span>Slides</span><b>{c.rules.min_slides}–{c.rules.max_slides}</b></div>
-                <div><span>Zero-gen</span><b>{c.rules.zero_gen_mode ? "on" : "off"}</b></div>
-              </div>
-              {c.agency ? <p className="fc-tag" style={{ marginTop: 14, display: "inline-block" }}>{c.agency.code}</p> : null}
+              <div className="fc-tile-top"><div><h3>{c.name}</h3><p className="fc-handle">{c.brand.handle || "brand kit"}</p></div></div>
             </Link>
-          );
-        })}
-        {!campaigns.length ? <p className="fc-note">No brand kits yet. Create the first one below.</p> : null}
-      </section>
-
-      <section className="fc-card">
-        <h2>New brand kit</h2>
-        <form action={createCampaign} className="fc-form">
-          <div className="fc-row">
-            <label><span>Campaign name</span><input name="name" required placeholder="Meridian Endurance" /></label>
-            <label><span>Handle</span><input name="handle" required placeholder="@meridian.endurance" /></label>
-          </div>
-          <div className="fc-row">
-            <label><span>Niche</span><input name="niche" defaultValue="fitness" required /></label>
-            <label>
-              <span>Agency ref code <em>(optional)</em></span>
-              <input name="agency_code" placeholder="MERIDIAN25" />
-            </label>
-          </div>
-          <button type="submit" className="fc-btn" disabled={readOnly}>Create campaign</button>
-        </form>
-      </section>
+          ))}
+        </section>
+      )}
     </AppShell>
   );
 }

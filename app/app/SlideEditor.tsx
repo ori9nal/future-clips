@@ -12,6 +12,7 @@
  */
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { SlideBlock, SlideLayout } from "@/lib/sets";
+import { clampMove, MAX_LINE, MAX_LINES } from "@/lib/slideText";
 
 export type BlockEdit = { lines?: string[]; dx?: number; dy?: number };
 export type SlideEdits = Record<string, BlockEdit>;
@@ -69,8 +70,10 @@ export default function SlideEditor({ setId, slide, url, layout, saved, onSaved,
     const d = drag.current;
     if (!d || !scale) return;
     e.preventDefault();
-    const dx = Math.round(d.dx + (e.clientX - d.x) / scale);
-    const dy = Math.round(d.dy + (e.clientY - d.y) / scale);
+    const block = blocks.find((x) => x.id === d.id);
+    if (!block) return;
+    // the block stays on the slide, whatever the pointer does
+    const { dx, dy } = clampMove(block, linesOf(block), d.dx + (e.clientX - d.x) / scale, d.dy + (e.clientY - d.y) / scale, canvas);
     setEdits((prev) => ({ ...prev, [d.id]: { ...prev[d.id], dx, dy } }));
   };
   const onUp = () => { drag.current = null; };
@@ -84,14 +87,16 @@ export default function SlideEditor({ setId, slide, url, layout, saved, onSaved,
       const by = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
       if (!by || (e.target as HTMLElement)?.tagName === "TEXTAREA") return;
       e.preventDefault();
-      setEdits((prev) => ({
-        ...prev,
-        [picked]: { ...prev[picked], dx: (prev[picked]?.dx ?? 0) + by[0], dy: (prev[picked]?.dy ?? 0) + by[1] },
-      }));
+      const block = blocks.find((x) => x.id === picked);
+      if (!block) return;
+      setEdits((prev) => {
+        const c = clampMove(block, prev[picked]?.lines ?? block.lines, (prev[picked]?.dx ?? 0) + by[0], (prev[picked]?.dy ?? 0) + by[1], canvas);
+        return { ...prev, [picked]: { ...prev[picked], dx: c.dx, dy: c.dy } };
+      });
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [picked]);
+  }, [picked, blocks, canvas]);
 
   /* ── saving ───────────────────────────────────────────────────────────── */
   const save = async () => {
@@ -164,16 +169,23 @@ export default function SlideEditor({ setId, slide, url, layout, saved, onSaved,
             </div>
             <textarea
               className="textarea sed-txt"
-              rows={Math.min(8, Math.max(2, linesOf(pickedBlock).length + 1))}
+              rows={Math.min(MAX_LINES, Math.max(2, linesOf(pickedBlock).length + 1))}
               value={linesOf(pickedBlock).join("\n")}
               onChange={(e) => {
-                const lines = e.target.value.split("\n").slice(0, 8);
-                setEdits((p) => ({ ...p, [pickedBlock.id]: { ...p[pickedBlock.id], lines } }));
+                // never too much text on a slide: four lines, sixty characters each
+                const lines = e.target.value.split("\n").slice(0, MAX_LINES).map((l) => l.slice(0, MAX_LINE));
+                setEdits((p) => {
+                  const next = { ...p[pickedBlock.id], lines };
+                  // fewer or more lines change the block's height: keep it on the slide
+                  const c = clampMove(pickedBlock, lines, next.dx ?? 0, next.dy ?? 0, canvas);
+                  return { ...p, [pickedBlock.id]: { ...next, dx: c.dx, dy: c.dy } };
+                });
               }}
               aria-label="The words on this block"
             />
             <p className="sed-note">
-              One line each. Drag the block on the slide, or nudge it with the arrow keys — hold shift to go further.
+              One line each, {MAX_LINES} at most and {MAX_LINE} letters a line — a slide is read at thumbnail size.
+              Drag the block on the slide, or nudge it with the arrow keys (shift for bigger steps); it stays on the slide.
               Longer words wrap and the type shrinks to fit rather than running off the edge.
             </p>
           </>

@@ -686,9 +686,34 @@ export function judgeCopy({ spec, data, range, styleId }) {
       verdict.failures.push(`only ${withNum.length} of ${body.length} items carry a number (sets x reps, kg, minutes, $, %, a time); at least half must`);
     }
   }
+  // Never too much text on a slide (owner, 2026-09-20; D-053). The prompt
+  // already asks for short lines; this is the check that makes it so. A body
+  // with more than three notes is trimmed — the shape says three and the
+  // fourth is never the good one. A line over nine words, or a hook over
+  // twelve across its lines, is a line-level failure: the fix loop rewrites
+  // that line for a fraction of a regeneration. The quoted text is normalised
+  // the way offendingLines normalises a line, so the fix lands on the right one.
+  const words = (t) => String(t ?? '').trim().split(/\s+/).filter(Boolean).length;
+  const quote = (t) => String(t ?? '').toLowerCase().replace(/[^a-z0-9\s]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60).trim();
+  for (const r of data.ranked ?? []) {
+    if ((r.lines ?? []).length > 3) { r.lines = r.lines.slice(0, 3); notes.push('a body carried more than three notes; trimmed to three'); }
+  }
+  for (const l of linesOf(data)) {
+    if (/\.name$|\.cta$/.test(l.at)) continue; // names and CTAs are short by shape
+    const w = words(l.text);
+    if (w > MAX_LINE_WORDS) verdict.failures.push(`a line runs to ${w} words ("${quote(l.text)}") — ${MAX_LINE_WORDS} at most; a slide is read at thumbnail size`);
+  }
+  const hookWords = words([...(data.hook?.lines ?? []), ...(data.hook?.sub ?? [])].join(' '));
+  if (hookWords > MAX_HOOK_WORDS) {
+    verdict.failures.push(`the hook runs to ${hookWords} words ("${quote(data.hook?.lines?.[0])}") — ${MAX_HOOK_WORDS} at most across its lines and sub`);
+  }
   verdict.pass = verdict.failures.length === 0;
   return { data, verdict, slides: repaired.slides, count: n };
 }
+
+/** the most words a slide line, and a whole hook, may carry (D-053) */
+export const MAX_LINE_WORDS = 9;
+export const MAX_HOOK_WORDS = 12;
 
 /**
  * The rules that a single line can break, and that a rewrite of THAT LINE fixes.
@@ -701,7 +726,7 @@ export function judgeCopy({ spec, data, range, styleId }) {
  * not. So a verdict whose failures are ALL line-level asks the model to redo
  * just those lines, which is a ~200-token call instead of a ~2,500-token one.
  */
-const LINE_LEVEL = /repeats a reference post word for word|repeats the heading|a brand word no real post uses/;
+const LINE_LEVEL = /repeats a reference post word for word|repeats the heading|a brand word no real post uses|words \("/;
 
 /** Can this verdict be fixed by rewriting single lines? */
 export const lineFixable = (verdict) =>

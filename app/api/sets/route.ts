@@ -31,13 +31,15 @@ export async function GET() {
 
 /**
  * Create a set. The database reserves the slides (or refuses) in one call;
- * the set then starts rendering in the background of this request and the
- * client polls GET /api/sets/:id.
+ * the worker then takes the first step in the background of this request
+ * and the client polls GET /api/sets/:id.
  *
- * There is no priority tier (0030): every set takes the fast path — the
- * engine's "priority" lane, which is the only one the product has ever shown
- * anyone — and draws from the one monthly allowance. A `lane` in the body is
- * ignored rather than refused, so older clients keep working.
+ * There is no priority tier (0030). Every customer's set goes through the
+ * providers' batch APIs (0031) — the same words and frames at half the price,
+ * back within the day and usually much sooner; the pg_cron poller collects
+ * them every five minutes. Only the demo renders on the realtime path, so a
+ * visitor sees a result in two minutes. A `lane` in the body is ignored rather
+ * than refused, so older clients keep working.
  *
  * Body: { campaign, ask, style?, slides: number | {min,max}, hd? }
  */
@@ -68,8 +70,9 @@ export async function POST(req: Request) {
   const sl = body?.slides;
   let min = typeof sl === "number" ? sl : Number(sl?.min ?? 7);
   let max = typeof sl === "number" ? sl : Number(sl?.max ?? min);
-  // the fast path, for everyone (0030)
-  const lane: Lane = "priority";
+  // customers: the batch lane, half the price (0031); the demo: realtime,
+  // because it is the shop window and capped at a handful of carousels
+  const lane: Lane = demo ? "priority" : "batch";
   // the demo: the brief's own shortest set, never HD, whatever the form sent.
   // The count comes from the campaign rather than a constant because a set
   // under the brief's minimum cannot pass compliance (P-22); the brief is read
@@ -105,10 +108,11 @@ export async function POST(req: Request) {
     return Response.json({ error: e?.message ?? "could not create the set", code: "FC_UNKNOWN" }, { status: 500 });
   }
 
-  // Rendered now, in the background of this request; the response returns
-  // at once with the id to poll. Without the engine or the service role on
-  // this host the row still exists and the poller (or the next host that has
-  // them) picks it up.
+  // The first step runs now, in the background of this request: a batch set
+  // is submitted to the providers at once rather than waiting for the poller,
+  // a demo set renders to the end. The response returns at once with the id
+  // to poll. Without the engine or the service role on this host the row
+  // still exists and the poller picks it up.
   const canRunHere = engineAvailable() && hasServiceRole();
   if (canRunHere) {
     after(async () => {
@@ -116,5 +120,5 @@ export async function POST(req: Request) {
       await runWorker({ ids: [id] });
     });
   }
-  return Response.json({ id, slides: max, started: canRunHere }, { status: 201 });
+  return Response.json({ id, slides: max, started: canRunHere, queued: lane === "batch" }, { status: 201 });
 }

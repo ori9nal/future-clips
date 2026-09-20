@@ -71,11 +71,14 @@ const slug = (s: string) => s.trim().toLowerCase().replace(/[^a-z0-9-]+/g, "-").
  * demo's briefs live in the demo workspace (0029), and an admin editing one
  * must not hand it back to everyone by saving it. RLS: platform owners only.
  */
-export async function saveSpec(sb: SupabaseClient, spec: Spec): Promise<Spec> {
+export async function saveSpec(sb: SupabaseClient, spec: Spec, o: { status?: "live" | "paused" } = {}): Promise<Spec> {
   const id = slug(spec.id);
   if (!id) throw new Error("campaign id is required");
-  const { data: existing } = await sb.from("campaigns").select("org_id").eq("id", id).maybeSingle();
-  const row = { id, org_id: existing?.org_id ?? null, kind: "spec", data: { ...spec, id }, updated_at: new Date().toISOString() };
+  const { data: existing } = await sb.from("campaigns").select("org_id, status").eq("id", id).maybeSingle();
+  // a new brief starts paused when asked to — read through, then "Go live" —
+  // and an existing one keeps its status unless told otherwise
+  const status = o.status ?? existing?.status ?? "live";
+  const row = { id, org_id: existing?.org_id ?? null, kind: "spec", status, data: { ...spec, id, status }, updated_at: new Date().toISOString() };
   const { error } = await sb.from("campaigns").upsert(row, { onConflict: "id" });
   if (error) throw new Error(error.message);
   return { ...spec, id };
