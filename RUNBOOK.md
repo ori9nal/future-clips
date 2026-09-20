@@ -109,9 +109,13 @@ rendering at a time.
 - On the host: a failed set has already released its slides; the member creates it again. Frames already generated are cache hits (bucket `cache`, content-addressed), so a copy-only retry costs the copy.
 - Stuck (`rendering` for > 10 min): the next poller tick takes it (lock expiry). To force: `update sets set state_json = state_json || '{"lock":0}' where id = ...` as the service role.
 
-## Refund a set
+## Give slides back for a set
 
-`fc_release_set(set_id, 'refund: <reason>', cost)` as the service role returns the reserved slides and records the note in `spend_ledger`; the customer's balance shows it on the next poll. For a set that already committed, add the slides back with `update usage set slides_used = slides_used - N where org_id = ... and period_start = ...` and a `spend_ledger` row of type `release` so the month reconciles. Money refunds are the payment provider's dashboard (phase 5).
+Slides, not money: we do not refund money (`legal/refunds.md`, all sales final), and this is how you put right a set that failed us rather than the customer.
+
+`fc_release_set(set_id, 'goodwill: <reason>', cost)` as the service role returns the reserved slides and records the note in `spend_ledger`; the customer's balance shows it on the next poll. For a set that already committed, add the slides back with `update usage set slides_used = slides_used - N where org_id = ... and period_start = ...` and a `spend_ledger` row of type `release` so the month reconciles.
+
+Money only goes back for a billing error, an unauthorised charge or a chargeback — those are done in the payment provider's dashboard, and the `refund.succeeded` webhook gives the provider fund's earmarked share back automatically (`lib/billing/apply.ts`).
 
 ## Keys preflight / spend safety
 

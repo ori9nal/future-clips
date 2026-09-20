@@ -1,6 +1,6 @@
 # Terms of Service
 
-**Effective date: 12 September 2026**
+**Effective date: 20 September 2026**
 
 Welcome to the futureclips. Thank you for using our platform and the products, services and features we make available as part of it (together, the "Services").
 
@@ -87,7 +87,11 @@ We may use automated and manual systems to review inputs and Output to detect vi
 
 **6.7 Taxes.** Where a merchant of record is used, applicable sales tax, VAT or GST is collected and remitted by that provider. You are responsible for any other taxes arising from your use of the Services.
 
-**6.8 Free trials.** Free trials must be used within the stated period. We may modify or withdraw free trial offers at any time.
+**6.8 No refunds.** All sales are final. Subscriptions, renewals, annual plans and Slide packs are non-refundable. Cancelling stops the next charge and does not reverse charges already made; you keep access until the end of the period you have paid for. Our Refund Policy sets out the only exceptions: billing errors, unauthorised charges, and the automatic return of Slides reserved by a generation that failed through a fault of ours.
+
+**6.9 Immediate access to digital content.** The Services are digital content supplied immediately. By completing a purchase you ask us to make them available to you at once and, where you would otherwise have a statutory right to withdraw from the purchase within a cooling-off period, you agree that you lose that right once we do. Nothing in this Agreement removes a right you have by law and cannot give up.
+
+**6.10 Free trials.** We do not offer a free trial. The demo is available without payment details so you can see what the Services produce before you buy. Where any trial or promotional offer is made, it must be used within the stated period, and we may modify or withdraw it at any time.
 
 ## 7. Suspension and termination
 

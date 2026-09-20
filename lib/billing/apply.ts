@@ -100,7 +100,10 @@ export async function applyEvent(db: BillingDb, ev: DodoEvent): Promise<string> 
     return `credited ${pack}`;
   }
   if (ev.type === "refund.succeeded") {
-    // the provider fund gives the earmarked share back
+    // We do not offer refunds (legal/refunds.md), and this still has to work:
+    // a billing error, an unauthorised charge, a chargeback, or the merchant
+    // of record acting on its own obligations all arrive here. When money
+    // goes back, the share earmarked for the providers goes back with it.
     const amount = (d.amount ?? d.total_amount ?? 0) / 100;
     const refundId = d.refund_id ?? (d.payment_id ? `refund:${d.payment_id}` : null);
     if (amount > 0 && refundId) {

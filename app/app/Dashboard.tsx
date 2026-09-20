@@ -921,6 +921,13 @@ export default function Dashboard({ viewer, specs, account: account0, sets: sets
                     <div className="rowi"><div className="l"><b>Slide packs</b><small>{paid ? "Extra slides on top of any plan. They never expire and are used after the month's allowance." : "Packs top up a plan. Choose a plan first."}{viewer.checkout ? "" : " Checkout is being connected, so the buttons email us for now."}</small></div>
                       <div className="r">{(account.packs.length ? account.packs : [{ id: "p100", slides: 100, price_usd: 8 }, { id: "p250", slides: 250, price_usd: 18 }, { id: "p600", slides: 600, price_usd: 40 }]).map((k) => <button key={k.id} className="btn sm" disabled={busy || !paid} onClick={() => buy({ pack: k.id })}>{k.slides} for ${k.price_usd}</button>)}</div></div>
                     <div className="rowi"><div className="l"><b>Billing</b><small>{viewer.billing === "none" ? "No subscription on file yet." : `Subscription ${viewer.billing.replace("_", " ")}. You keep access until the end of your billing period.`}</small></div><div className="r">{viewer.checkout && viewer.billing !== "none" ? <button className="btn sm" onClick={portal}>Manage billing</button> : <a className="btn sm" href="mailto:team@thefutureclips.com?subject=Subscription">Email us</a>}</div></div>
+                    {/* A policy of no refunds has to be read before the money
+                        moves, not found in a footer afterwards. */}
+                    <p className="terms">
+                      <b>All sales are final.</b> Plans, renewals and packs are not refunded. Cancel any time to stop
+                      the next charge — you keep what you have paid for until the period ends. The{" "}
+                      <Link href="/refunds">Refund Policy</Link> covers billing errors and failed slideshows.
+                    </p>
                   </div>
                 )}
                 {tab === "gen" && (

@@ -525,3 +525,9 @@ html[data-theme="dark"] {
 .sed-empty { padding: 14px; border-radius: var(--r-control); background: var(--surface); border: 1px solid var(--line); }
 .sed-err { margin: 0; }
 .sed-row { display: flex; gap: 8px; align-items: center; margin-top: 2px; }
+
+/* The refund policy, where the buying happens. A policy of no refunds is only
+ * fair if it is read before the money moves, not found in a footer after. */
+.card.rows .terms { margin: 0; padding: 14px 16px 16px; border-top: 1px solid var(--line); font-size: 12.5px; line-height: 1.6; color: var(--text-3); }
+.card.rows .terms b { color: var(--text-2); font-weight: 600; }
+.card.rows .terms a { color: var(--link); text-decoration: underline; text-underline-offset: 2px; }
